@@ -1,0 +1,11 @@
+# OASIS_START
+# DO NOT EDIT (digest: bbcf79d2385018e93607282726650217)
+version = "1.0.0"
+description = "OCaml interface for generating Dockerfiles"
+archive(byte) = "dockerfile.cma"
+archive(byte, plugin) = "dockerfile.cma"
+archive(native) = "dockerfile.cmxa"
+archive(native, plugin) = "dockerfile.cmxs"
+exists_if = "dockerfile.cma"
+# OASIS_STOP
+

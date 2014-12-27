@@ -1,0 +1,12 @@
+OASISFormat: 0.4
+Name:        dockerfile
+Version:     1.0.0
+Synopsis:    OCaml interface for generating Dockerfiles
+Authors:     Anil Madhavapeddy
+License:     ISC
+Plugins:     META (0.3), DevFiles (0.3)
+BuildTools:  ocamlbuild
+
+Library dockerfile
+  Path: lib
+  Modules: Dockerfile
