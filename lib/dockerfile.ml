@@ -88,9 +88,9 @@ let from ?tag img : t =
 
 let comment c : t = `Comment c
 let maintainer m : t = `Maintainer m
-let run cmd : t = `Run (`Shell cmd)
+let run fmt = ksprintf (fun b -> `Run (`Shell b)) fmt
 let run_exec cmds : t = `Run (`Exec cmds)
-let cmd cmd : t = `Cmd (`Shell cmd)
+let cmd fmt = ksprintf (fun b -> `Cmd (`Shell b)) fmt
 let cmd_exec cmds : t = `Cmd (`Exec cmds)
 let expose_port p : t = `Expose [p]
 let expose_ports p : t = `Expose p
@@ -106,5 +106,6 @@ let entrypoint_exec e : t = `Entrypoint (`Exec e)
 let workdir wd : t = `Workdir wd
 
 type file = t list
+type fmt = (string, unit, string, string) format4
 let string_of_file tl =
   String.concat "\n" (List.map string_of_t tl)

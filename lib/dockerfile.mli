@@ -24,9 +24,9 @@ val string_of_file : file -> string
 val comment : string -> t
 val from : ?tag:string -> string -> t
 val maintainer : string -> t
-val run : string -> t
+val run : ('a, unit, string, t) format4 -> 'a
 val run_exec : string list -> t
-val cmd : string -> t
+val cmd : ('a, unit, string, t) format4 -> 'a
 val cmd_exec : string list -> t
 val expose_port : int -> t
 val expose_ports : int list -> t
@@ -40,3 +40,4 @@ val volumes : string list -> t
 val entrypoint : string -> t
 val entrypoint_exec : string list -> t
 val workdir : string -> t
+
