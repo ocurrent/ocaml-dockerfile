@@ -86,8 +86,8 @@ let from ?tag img : t =
   | None -> `From (`Image img)
   | Some tag -> `From (`Image_tag (img, tag))
 
-let comment c : t = `Comment c
-let maintainer m : t = `Maintainer m
+let comment fmt = ksprintf (fun c -> `Comment c) fmt
+let maintainer fmt = ksprintf (fun m -> `Maintainer m) fmt
 let run fmt = ksprintf (fun b -> `Run (`Shell b)) fmt
 let run_exec cmds : t = `Run (`Exec cmds)
 let cmd fmt = ksprintf (fun b -> `Cmd (`Shell b)) fmt
@@ -97,13 +97,13 @@ let expose_ports p : t = `Expose p
 let env e : t = `Env e
 let add ~src ~dst : t = `Add (`Src src, `Dst dst)
 let copy ~src ~dst : t = `Copy (`Src src, `Dst dst)
-let user u : t = `User u
+let user fmt = ksprintf (fun u -> `User u) fmt
 let onbuild t : t = `Onbuild t
-let volume v : t = `Volume [v]
+let volume fmt = ksprintf (fun v -> `Volume [v]) fmt
 let volumes v : t = `Volume v
-let entrypoint e : t = `Entrypoint (`Shell e)
+let entrypoint fmt = ksprintf (fun e -> `Entrypoint (`Shell e)) fmt
 let entrypoint_exec e : t = `Entrypoint (`Exec e)
-let workdir wd : t = `Workdir wd
+let workdir fmt = ksprintf (fun wd -> `Workdir wd) fmt
 
 type file = t list
 type fmt = (string, unit, string, string) format4

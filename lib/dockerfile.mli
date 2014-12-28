@@ -21,9 +21,9 @@ type file = t list
 val string_of_t : t -> string
 val string_of_file : file -> string
 
-val comment : string -> t
+val comment : ('a, unit, string, t) format4 -> 'a
 val from : ?tag:string -> string -> t
-val maintainer : string -> t
+val maintainer :  ('a, unit, string, t) format4 -> 'a
 val run : ('a, unit, string, t) format4 -> 'a
 val run_exec : string list -> t
 val cmd : ('a, unit, string, t) format4 -> 'a
@@ -33,11 +33,11 @@ val expose_ports : int list -> t
 val env : (string * string) list -> t
 val add : src:string list -> dst:string -> t
 val copy : src:string list -> dst:string -> t
-val user : string -> t
+val user : ('a, unit, string, t) format4 -> 'a
 val onbuild : t -> t
-val volume : string -> t
+val volume :  ('a, unit, string, t) format4 -> 'a
 val volumes : string list -> t
-val entrypoint : string -> t
+val entrypoint :  ('a, unit, string, t) format4 -> 'a
 val entrypoint_exec : string list -> t
-val workdir : string -> t
+val workdir :  ('a, unit, string, t) format4 -> 'a
 
