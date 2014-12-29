@@ -105,7 +105,53 @@ let entrypoint fmt = ksprintf (fun e -> `Entrypoint (`Shell e)) fmt
 let entrypoint_exec e : t = `Entrypoint (`Exec e)
 let workdir fmt = ksprintf (fun wd -> `Workdir wd) fmt
 
-type file = t list
-type fmt = (string, unit, string, string) format4
-let string_of_file tl =
-  String.concat "\n" (List.map string_of_t tl)
+let string_of_t_list tl = String.concat "\n" (List.map string_of_t tl)
+
+let run_as_user user fmt = ksprintf (run "sudo -u %s sh -c %S" user) fmt
+let run_sh fmt = ksprintf (run "sh -c %S") fmt
+
+let git_config = [
+  run "git config --global user.email %S" "docker@example.com";
+  run "git config --global user.name %S" "Docker CI"
+]
+
+let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
+
+(** RPM rules *)
+module RPM = struct
+  let install = run "yum install -y %s"
+  let groupinstall = run "yum groupinstall -y %s"
+
+  let add_user username =
+    let home = "/home/"^username in
+    let sudofile = "/etc/sudoers.d/"^username in [
+    run "useradd -d %s -m -s /bin/bash %s" home username;
+    run "passwd -l %s" username;
+    run "echo '%s %s' > %s" username sudo_nopasswd sudofile;
+    run "chmod 440 %s" sudofile;
+    run "chown root:root %s" sudofile;
+    run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers";
+    run "chown -R %s:%s %s" username username home;
+    user "%s" username;
+    env ["HOME", home];
+    workdir "%s" home ]
+    @ git_config
+
+  let dev_packages = [
+    install "sudo passwd git";
+    groupinstall "Development Tools"
+  ]
+end
+
+(** Debian rules *)
+module Apt = struct
+  let update = run "apt-get -y update"
+  let install fmt = ksprintf (run "apt-get -y install %s") fmt
+
+  let dev_packages = [
+    update;
+    install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev";
+  ]
+end
+
+
