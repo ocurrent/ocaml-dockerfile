@@ -19,6 +19,8 @@
 
 (** Generate [Dockerfile] scripts for use with the Docker container manager *)
 
+(** {2 Core types and conversion functions} *)
+
 type t
 (** [t] is a single Dockerfile line *)
 
@@ -27,6 +29,8 @@ val string_of_t : t -> string
 
 val string_of_t_list : t list -> string
 (** [string_of_t_list ts] will convert [ts] into a string that can be used as a [Dockerfile] *)
+
+(** {2 Dockerfile commands} *)
 
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
