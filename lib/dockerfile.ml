@@ -23,7 +23,7 @@ type shell_or_exec = [
 type sources_to_dest =
  [ `Src of string list ] * [ `Dst of string ]
 
-type t = [
+type line = [
   | `Comment of string
   | `From of [ `Image of string | `Image_tag of string * string ]
   | `Maintainer of string
@@ -37,8 +37,10 @@ type t = [
   | `Volume of string list
   | `User of string
   | `Workdir of string
-  | `Onbuild of t
+  | `Onbuild of line
 ]
+
+type t = line list
 
 open Printf
 let nl fmt = ksprintf (fun b -> b ^ "\n") fmt
@@ -62,7 +64,7 @@ let string_of_sources_to_dest (t:sources_to_dest) =
   match t with
   | `Src sl, `Dst d -> String.concat " " (sl @ [d])
 
-let rec string_of_t (t:t) = 
+let rec string_of_line (t:line) = 
   match t with
   | `Comment c -> cmd "#"  c
   | `From (`Image i) -> cmd "FROM" i
@@ -75,37 +77,37 @@ let rec string_of_t (t:t) =
   | `Add c -> cmd "ADD" (string_of_sources_to_dest c)
   | `Copy c -> cmd "COPY" (string_of_sources_to_dest c)
   | `User u -> cmd "USER" u
-  | `Onbuild t -> cmd "ONBUILD" (string_of_t t)
   | `Volume vl -> cmd "VOLUME" (json_array_of_list vl)
   | `Entrypoint el -> cmd "ENTRYPOINT" (string_of_shell_or_exec el)
   | `Workdir wd -> cmd "WORKDIR" wd
+  | `Onbuild t -> cmd "ONBUILD" (string_of_line t)
 
 (* Function interface *)
-let from ?tag img : t =
+let from ?tag img =
   match tag with
-  | None -> `From (`Image img)
-  | Some tag -> `From (`Image_tag (img, tag))
+  | None -> [ `From (`Image img) ]
+  | Some tag -> [ `From (`Image_tag (img, tag)) ]
 
-let comment fmt = ksprintf (fun c -> `Comment c) fmt
-let maintainer fmt = ksprintf (fun m -> `Maintainer m) fmt
-let run fmt = ksprintf (fun b -> `Run (`Shell b)) fmt
-let run_exec cmds : t = `Run (`Exec cmds)
-let cmd fmt = ksprintf (fun b -> `Cmd (`Shell b)) fmt
-let cmd_exec cmds : t = `Cmd (`Exec cmds)
-let expose_port p : t = `Expose [p]
-let expose_ports p : t = `Expose p
-let env e : t = `Env e
-let add ~src ~dst : t = `Add (`Src src, `Dst dst)
-let copy ~src ~dst : t = `Copy (`Src src, `Dst dst)
-let user fmt = ksprintf (fun u -> `User u) fmt
-let onbuild t : t = `Onbuild t
-let volume fmt = ksprintf (fun v -> `Volume [v]) fmt
-let volumes v : t = `Volume v
-let entrypoint fmt = ksprintf (fun e -> `Entrypoint (`Shell e)) fmt
-let entrypoint_exec e : t = `Entrypoint (`Exec e)
-let workdir fmt = ksprintf (fun wd -> `Workdir wd) fmt
+let comment fmt = ksprintf (fun c -> [ `Comment c ]) fmt
+let maintainer fmt = ksprintf (fun m -> [ `Maintainer m ]) fmt
+let run fmt = ksprintf (fun b -> [ `Run (`Shell b) ]) fmt
+let run_exec cmds : t = [ `Run (`Exec cmds) ]
+let cmd fmt = ksprintf (fun b -> [ `Cmd (`Shell b) ]) fmt
+let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
+let expose_port p : t = [ `Expose [p] ]
+let expose_ports p : t = [ `Expose p ]
+let env e : t = [ `Env e ]
+let add ~src ~dst : t = [ `Add (`Src src, `Dst dst) ]
+let copy ~src ~dst : t = [ `Copy (`Src src, `Dst dst) ]
+let user fmt = ksprintf (fun u -> [ `User u ]) fmt
+let onbuild t = List.map (fun l -> `Onbuild l) t
+let volume fmt = ksprintf (fun v -> [ `Volume [v] ]) fmt
+let volumes v : t = [ `Volume v ]
+let entrypoint fmt = ksprintf (fun e -> [ `Entrypoint (`Shell e) ]) fmt
+let entrypoint_exec e : t = [ `Entrypoint (`Exec e) ]
+let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
 
-let string_of_t_list tl = String.concat "\n" (List.map string_of_t tl)
+let string_of_t tl = String.concat "\n" (List.map string_of_line tl)
 
 let run_as_user user fmt = ksprintf (run "sudo -u %s sh -c %S" user) fmt
 let run_sh fmt = ksprintf (run "sh -c %S") fmt

@@ -22,13 +22,10 @@
 (** {2 Core types and conversion functions} *)
 
 type t
-(** [t] is a single Dockerfile line *)
+(** [t] is a list of Dockerfile lines *)
 
 val string_of_t : t -> string
 (** [string_of_t t] converts a {!t} into a Dockerfile format entry *)
-
-val string_of_t_list : t list -> string
-(** [string_of_t_list ts] will convert [ts] into a string that can be used as a [Dockerfile] *)
 
 (** {2 Dockerfile commands} *)
 
