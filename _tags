@@ -17,3 +17,4 @@ true: annot, bin_annot
 # Library dockerfile
 "lib/dockerfile.cmxs": use_dockerfile
 # OASIS_STOP
+true: debug, principal, short_paths
