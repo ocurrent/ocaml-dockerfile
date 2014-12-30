@@ -19,13 +19,16 @@
 
 (** Generate [Dockerfile] scripts for use with the Docker container manager *)
 
-(** {2 Core types and conversion functions} *)
+(** {2 Core combinators and serializers} *)
 
 type t
 (** [t] is a list of Dockerfile lines *)
 
 val string_of_t : t -> string
 (** [string_of_t t] converts a {!t} into a Dockerfile format entry *)
+
+val (@@) : t -> t -> t
+(** [a @@ b] concatenates two Dockerfile fragments into one. *)
 
 (** {2 Dockerfile commands} *)
 

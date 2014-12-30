@@ -41,6 +41,7 @@ type line = [
 ]
 
 type t = line list
+let (@@) = (@)
 
 open Printf
 let nl fmt = ksprintf (fun b -> b ^ "\n") fmt
