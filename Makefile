@@ -46,6 +46,7 @@ gh-pages: doc
 	git -C .gh-pages reset
 	git -C .gh-pages clean -dxf
 	cp -r api.docdir/* .gh-pages
+	cp nice-style.css .gh-pages
 	git -C .gh-pages add .
 	git -C .gh-pages commit -m "Update Pages"
 	git -C .gh-pages push origin gh-pages -f
