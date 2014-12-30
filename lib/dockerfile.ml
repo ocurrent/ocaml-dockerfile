@@ -119,8 +119,8 @@ let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
 
 (** RPM rules *)
 module RPM = struct
-  let install = run "yum install -y %s"
-  let groupinstall = run "yum groupinstall -y %s"
+  let install fmt = ksprintf (run "yum install -y %s") fmt
+  let groupinstall fmt = ksprintf (run "yum groupinstall -y %s") fmt
 
   let add_user username =
     let home = "/home/"^username in

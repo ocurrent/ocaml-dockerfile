@@ -26,7 +26,7 @@ val string_of_t : t -> string
 (** [string_of_t t] converts a {!t} into a Dockerfile format entry *)
 
 val string_of_t_list : t list -> string
-(** [string_of_t_list ts] will convert {!ts} into a string that can be used as a [Dockerfile] *)
+(** [string_of_t_list ts] will convert [ts] into a string that can be used as a [Dockerfile] *)
 
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
@@ -176,3 +176,20 @@ val onbuild : t -> t
   This is useful if you are building an image which will be used as a
   base to build other images, for example an application build environment
   or a daemon which may be customized with user-specific configuration. *)
+
+(** {2 Distribution-specific utility functions} *)
+
+(** Rules for RPM-based distributions *)
+module RPM : sig
+  val install : ('a, unit, string, t) format4 -> 'a
+  val groupinstall : ('a, unit, string, t) format4 -> 'a
+  val add_user : string -> t list
+  val dev_packages : t list
+end
+
+(** Rules for Apt-based distributions *)
+module Apt : sig
+  val update : t
+  val install : ('a, unit, string, t) format4 -> 'a
+  val dev_packages : t list
+end
