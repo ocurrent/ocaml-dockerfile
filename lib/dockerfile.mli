@@ -33,6 +33,10 @@ val (@@) : t -> t -> t
 val empty : t
 (** An empty set of instruction lines. *)
 
+val maybe : ('a -> t) -> 'a option -> t
+(** [maybe f v] returns {!empty} if the optional value [v] is [None], and
+    otherwise applies [f] to the [Some] value in [v]. *)
+
 (** {2 Dockerfile commands} *)
 
 val comment : ('a, unit, string, t) format4 -> 'a

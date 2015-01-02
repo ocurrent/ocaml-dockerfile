@@ -43,6 +43,7 @@ type line = [
 type t = line list
 let (@@) = (@)
 let empty = []
+let maybe f = function None -> empty | Some v -> f v
 
 open Printf
 let nl fmt = ksprintf (fun b -> b ^ "\n") fmt
@@ -154,7 +155,7 @@ module Linux = struct
 
   (** Debian rules *)
   module Apt = struct
-    let update = run "apt-get -y update" @@ "apt-get -y upgrade"
+    let update = run "apt-get -y update" @@ run "apt-get -y upgrade"
     let install fmt = ksprintf (run "apt-get -y install %s") fmt
 
     let dev_packages ?extra () =
