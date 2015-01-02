@@ -7,3 +7,5 @@ setup.bin
 *.docdir
 *.native
 *.byte
+html/
+
