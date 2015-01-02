@@ -154,7 +154,7 @@ module Linux = struct
 
   (** Debian rules *)
   module Apt = struct
-    let update = run "apt-get -y update"
+    let update = run "apt-get -y update" @@ "apt-get -y upgrade"
     let install fmt = ksprintf (run "apt-get -y install %s") fmt
 
     let dev_packages ?extra () =

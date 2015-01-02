@@ -217,7 +217,7 @@ module Linux : sig
   (** Rules for Apt-based distributions *)
   module Apt : sig
     val update : t
-    (** [update] will run [apt-get update] non-interactivly. *)
+    (** [update] will run [apt-get update && apt-get upgrade] non-interactively. *)
 
     val install : ('a, unit, string, t) format4 -> 'a
     (** [install fmt] will [apt-get install] the packages specified by the [fmt] format string. *)
