@@ -149,7 +149,7 @@ module Linux = struct
 
     let dev_packages ?extra () =
       install "sudo passwd git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
-      groupinstall "Development Tools"
+      groupinstall "\"Development Tools\""
   end
 
   (** Debian rules *)
