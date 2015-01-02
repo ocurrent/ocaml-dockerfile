@@ -30,6 +30,9 @@ val string_of_t : t -> string
 val (@@) : t -> t -> t
 (** [a @@ b] concatenates two Dockerfile fragments into one. *)
 
+val empty : t
+(** An empty set of instruction lines. *)
+
 (** {2 Dockerfile commands} *)
 
 val comment : ('a, unit, string, t) format4 -> 'a
@@ -183,17 +186,55 @@ val onbuild : t -> t
 
 (** {2 Distribution-specific utility functions} *)
 
-(** Rules for RPM-based distributions *)
-module RPM : sig
-  val install : ('a, unit, string, t) format4 -> 'a
-  val groupinstall : ('a, unit, string, t) format4 -> 'a
-  val add_user : string -> t list
-  val dev_packages : t list
-end
+(** Linux-specific shell commands that are of general use. *)
+module Linux : sig
 
-(** Rules for Apt-based distributions *)
-module Apt : sig
-  val update : t
-  val install : ('a, unit, string, t) format4 -> 'a
-  val dev_packages : t list
+  val run_sh : ('a, unit, string, t) format4 -> 'a
+  (** [run_sh fmt] will execute [/bin/sh -c "fmt"] after quoting [fmt]. *)
+
+  val run_as_user : string -> ('a, unit, string, t) format4 -> 'a
+  (** [run_as_user user fmt] will execute [sudo -u user /bin/sh -c "fmt"] after
+      quoting [fmt]. *)
+
+  (** Rules for RPM-based distributions *)
+  module RPM : sig
+    val install : ('a, unit, string, t) format4 -> 'a
+    (** [install fmt] will run [yum install] on the supplied package list. *)
+
+    val groupinstall : ('a, unit, string, t) format4 -> 'a
+    (** [groupinstall fmt] will run [yum groupinstall] on the supplied package list. *)
+
+    val add_user : ?sudo:bool -> string -> t
+    (** [add_user username] will install a new user with name [username] and a locked
+        password.  If [sudo] is true then root access with no password will also be
+        configured.  The default value for [sudo] is [false]. *)
+
+    val dev_packages : ?extra:string -> unit -> t
+    (** [dev_packages ?extra ()] will install the base development tools and [sudo],
+        [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+  end
+
+  (** Rules for Apt-based distributions *)
+  module Apt : sig
+    val update : t
+    (** [update] will run [apt-get update] non-interactivly. *)
+
+    val install : ('a, unit, string, t) format4 -> 'a
+    (** [install fmt] will [apt-get install] the packages specified by the [fmt] format string. *)
+
+    val add_user : ?sudo:bool -> string -> t
+    (** [add_user username] will install a new user with name [username] and a locked
+        password.  If [sudo] is true then root access with no password will also be
+        configured.  The default value for [sudo] is [false]. *)
+
+    val dev_packages : ?extra:string -> unit -> t
+    (** [dev_packages ?extra ()] will install the base development tools and [sudo],
+        [passwd] and [git] and X11.  Extra packages may also be optionally supplied via [extra]. *)
+  end
+
+  (** Rules for Git *)
+  module Git : sig
+    val init : ?name:string -> ?email:string -> unit -> t
+    (** Configure the git name and email variables to sensible defaults *)
+  end
 end

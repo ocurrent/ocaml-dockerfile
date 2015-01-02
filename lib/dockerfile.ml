@@ -21,7 +21,7 @@ type shell_or_exec = [
 ]
 
 type sources_to_dest =
- [ `Src of string list ] * [ `Dst of string ]
+  [ `Src of string list ] * [ `Dst of string ]
 
 type line = [
   | `Comment of string
@@ -42,6 +42,7 @@ type line = [
 
 type t = line list
 let (@@) = (@)
+let empty = []
 
 open Printf
 let nl fmt = ksprintf (fun b -> b ^ "\n") fmt
@@ -110,51 +111,73 @@ let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
 
 let string_of_t tl = String.concat "\n" (List.map string_of_line tl)
 
-let run_as_user user fmt = ksprintf (run "sudo -u %s sh -c %S" user) fmt
-let run_sh fmt = ksprintf (run "sh -c %S") fmt
 
-let git_config = [
-  run "git config --global user.email %S" "docker@example.com";
-  run "git config --global user.name %S" "Docker CI"
-]
+module Linux = struct
 
-let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
+  let run_sh fmt = ksprintf (run "sh -c %S") fmt
+  let run_as_user user fmt = ksprintf (run "sudo -u %s sh -c %S" user) fmt
 
-(** RPM rules *)
-module RPM = struct
-  let install fmt = ksprintf (run "yum install -y %s") fmt
-  let groupinstall fmt = ksprintf (run "yum groupinstall -y %s") fmt
+  module Git = struct
+    let init ?(name="Docker") ?(email="docker@example.com") () =
+      run "git config --global user.email %S" "docker@example.com" @@
+      run "git config --global user.name %S" "Docker CI"
+  end
 
-  let add_user username =
-    let home = "/home/"^username in
-    let sudofile = "/etc/sudoers.d/"^username in [
-    run "useradd -d %s -m -s /bin/bash %s" home username;
-    run "passwd -l %s" username;
-    run "echo '%s %s' > %s" username sudo_nopasswd sudofile;
-    run "chmod 440 %s" sudofile;
-    run "chown root:root %s" sudofile;
-    run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers";
-    run "chown -R %s:%s %s" username username home;
-    user "%s" username;
-    env ["HOME", home];
-    workdir "%s" home ]
-    @ git_config
+  let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
 
-  let dev_packages = [
-    install "sudo passwd git";
-    groupinstall "Development Tools"
-  ]
+  (** RPM rules *)
+  module RPM = struct
+    let install fmt = ksprintf (run "yum install -y %s") fmt
+    let groupinstall fmt = ksprintf (run "yum groupinstall -y %s") fmt
+
+    let add_user ?(sudo=false) username =
+      let home = "/home/"^username in
+      (match sudo with
+       | false -> empty
+       | true ->
+         let sudofile = "/etc/sudoers.d/"^username in
+         run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+         run "chmod 440 %s" sudofile @@
+         run "chown root:root %s" sudofile @@
+         run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
+      run "useradd -d %s -m -s /bin/bash %s" home username @@
+      run "passwd -l %s" username @@
+      run "chown -R %s:%s %s" username username home @@
+      user "%s" username @@
+      env ["HOME", home] @@
+      workdir "%s" home
+
+    let dev_packages ?extra () =
+      install "sudo passwd git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
+      groupinstall "Development Tools"
+  end
+
+  (** Debian rules *)
+  module Apt = struct
+    let update = run "apt-get -y update"
+    let install fmt = ksprintf (run "apt-get -y install %s") fmt
+
+    let dev_packages ?extra () =
+      update @@
+      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev%s"
+       (match extra with None -> "" | Some x -> " " ^ x)
+
+    let add_user ?(sudo=false) username =
+      let home = "/home/"^username in
+      (match sudo with
+       | false -> empty
+       | true ->
+         let sudofile = "/etc/sudoers.d/"^username in
+         run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+         run "chmod 440 %s" sudofile @@
+         run "chown root:root %s" sudofile) @@
+      run "adduser --disabled-password --gecos '' %s" username @@
+      run "passwd -l %s" username @@
+      run "chown -R %s:%s %s" username username home @@
+      user "%s" username @@
+      env ["HOME", home] @@
+      workdir "%s" home
+
+  end
+
 end
-
-(** Debian rules *)
-module Apt = struct
-  let update = run "apt-get -y update"
-  let install fmt = ksprintf (run "apt-get -y install %s") fmt
-
-  let dev_packages = [
-    update;
-    install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev";
-  ]
-end
-
-
