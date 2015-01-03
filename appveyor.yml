@@ -24,7 +24,9 @@ install:
     - '%CYG_ROOT%/bin/bash -lc "cygcheck -dc cygwin"'
 
 build_script:
-    - '%CYG_ROOT%/bin/bash -lc "cd \"$OLDPWD\" && git clone -b 1.2 git://github.com/ocaml/opam && cd opam && env DJDIR="workaround" ./configure && make lib-ext && make && make install"'
+    - '%CYG_ROOT%/bin/bash -lc "env"'
+    - '%CYG_ROOT%/bin/bash -lc "cd \"$OLDPWD\" && ls -la"'
+    - '%CYG_ROOT%/bin/bash -lc "git clone -b 1.2 git://github.com/ocaml/opam opam-build && cd opam-build && env DJDIR="workaround" ./configure && make lib-ext && make && make install"'
     - '%CYG_ROOT%/bin/bash -lc "opam init -y -a"'
     - '%CYG_ROOT%/bin/bash -lc "opam install -y -v ocamlfind"'
     - '%CYG_ROOT%/bin/bash -lc "./configure && make"'
