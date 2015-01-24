@@ -54,32 +54,33 @@ module Apt : sig
         Service repository for OCaml *)
   end
 
-val run_as_opam : ('a, unit, bytes, Dockerfile.t) format4 -> 'a
+val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 (** [run_as_opam fmt] runs the command specified by the [fmt]
     format string as the [opam] user. *)
 
-val opamhome : bytes
+val opamhome : string
 (** The location of the [opam] user home directory *)
 
 val opam_init :
-  ?repo:bytes -> ?compiler_version:bytes -> unit -> Dockerfile.t
+  ?repo:string -> ?compiler_version:string -> unit -> Dockerfile.t
 (** [opam_init ?repo ?compiler_version] initialises the OPAM
-   repository.  The [repo] is the central [git://github.com/ocaml/opam-repositry] by default.  If [compiler-version] is specified, an [opam switch]
+    repository.  The [repo] is [git://github.com/ocaml/opam-repository]
+    by default.  If [compiler-version] is specified, an [opam switch]
     is executed to that version.  If unspecified, then the [system]
     switch is default. *)
 
-val install_opam_from_source : ?branch:bytes -> unit -> Dockerfile.t
+val install_opam_from_source : ?branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] defaults to the [1.2] stable branch. *)
 
 val install_ext_plugin : Dockerfile.t
 (** Installs the external dependency plugin shell script. *)
 
-val header: bytes -> bytes -> Dockerfile.t
+val header: string -> string -> Dockerfile.t
 (** [header image tag] initalises a fresh Dockerfile using the [image:tag]
     as its base. *)
 
-val generate_dockerfiles : bytes -> (bytes * Dockerfile.t) list -> unit
+val generate_dockerfiles : string -> (string * Dockerfile.t) list -> unit
 (** [generate_dockerfiles output_dir (name * docker)] will
     output a list of Dockerfiles inside the [output_dir/name] subdirectory,
     with each directory containing the Dockerfile specified by [docker]. *)

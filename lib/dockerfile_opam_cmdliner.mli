@@ -18,12 +18,12 @@
 (** Command-line helper functions for scripts using [Dockerfile_opam] *)
 
 val cmd :
-  name:bytes ->
-  version:bytes ->
-  summary:bytes ->
-  manual:bytes ->
-  default_dir:bytes ->
-  generate:(bytes -> 'a) -> 'a Cmdliner.Term.t * Cmdliner.Term.info
+  name:string ->
+  version:string ->
+  summary:string ->
+  manual:string ->
+  default_dir:string ->
+  generate:(string -> 'a) -> 'a Cmdliner.Term.t * Cmdliner.Term.info
 (** This generate a Cmdliner term with various defaults filled in for
     the manual page, and a default term that specifies an output
     directory. *)
