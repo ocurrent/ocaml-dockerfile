@@ -1,7 +1,7 @@
 .PHONY: gh-pages iocamljs
 
 iocamljs-depends:
-	opam pin iocamljs git://github.com/andrewray/iocamlserver#static-site
+	opam pin add iocamljs-kernel git://github.com/andrewray/iocamlserver#static-site
 	opam install iocaml
 
 gh-pages: doc iocamljs-site
