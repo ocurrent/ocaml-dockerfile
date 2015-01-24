@@ -33,4 +33,4 @@ Document "api"
 
   XOCamlbuildPath:      .
   XOCamlbuildExtraArgs: "-docflags '-colorize-code -short-functors -charset utf-8'"
-  XOCamlbuildLibraries: dockerfile
+  XOCamlbuildLibraries: dockerfile,dockerfile.opam,dockerfile.opam-cmdliner

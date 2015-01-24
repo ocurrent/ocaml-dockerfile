@@ -1,4 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: e90cdf80532beb4cd84a1e34d4b59f7b)
+# DO NOT EDIT (digest: 6b77e32f658b6f5de5111e0210411571)
 lib/Dockerfile
+lib/Dockerfile_opam
+lib/Dockerfile_opam_cmdliner
 # OASIS_STOP
