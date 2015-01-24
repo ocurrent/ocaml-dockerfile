@@ -1,15 +1,29 @@
 OASISFormat: 0.4
 Name:        dockerfile
-Version:     1.0.0
+Version:     1.1.0
 Synopsis:    OCaml interface for generating Dockerfiles
 Authors:     Anil Madhavapeddy
 License:     ISC
-Plugins:     META (0.3), DevFiles (0.3)
+Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
 
 Library dockerfile
   Path: lib
   Modules: Dockerfile
+
+Library opam
+  Path: lib
+  Modules: Dockerfile_opam
+  Findlibname: opam
+  Findlibparent: dockerfile
+  BuildDepends: dockerfile
+
+Library "opam-cmdliner"
+  Path: lib
+  Modules: Dockerfile_opam_cmdliner
+  Findlibname: opam-cmdliner
+  Findlibparent: dockerfile
+  BuildDepends: dockerfile, dockerfile.opam, cmdliner
 
 AlphaFeatures: ocamlbuild_more_args
 Document "api"
