@@ -1,6 +1,6 @@
 opam-version: "1.2"
 name: "dockerfile"
-version: "1.1.0"
+version: "1.1.1"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 authors: "Anil Madhavapeddy <anil@recoil.org>"
 homepage: "https://github.com/avsm/ocaml-dockerfile"
