@@ -69,9 +69,10 @@ val opam_init :
     is executed to that version.  If unspecified, then the [system]
     switch is default. *)
 
-val install_opam_from_source : ?branch:string -> unit -> Dockerfile.t
+val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
-    The [branch] defaults to the [1.2] stable branch. *)
+    The [branch] defaults to the [1.2] stable branch.
+    The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
 
 val install_ext_plugin : Dockerfile.t
 (** Installs the external dependency plugin shell script. *)
