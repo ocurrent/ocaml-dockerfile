@@ -61,7 +61,7 @@ module Apt = struct
     let url = "http://download.opensuse.org/repositories/home:/ocaml/" in
     match distro with
     | `Ubuntu v ->
-        let version = match v with `V14_04 -> "14.04" | `V14_10 -> "14.10" in
+        let version = match v with `V14_04 -> "14.04" | `V14_10 -> "14.10" | `V15_04 -> "15.04" in
         let repo = sprintf "deb %s/xUbuntu_%s/ /" url version in
         run "echo %S > /etc/apt/sources.list.d/opam.list" repo @@
         run "curl -OL %s/xUbuntu_%s/Release.key" url version @@
@@ -109,11 +109,34 @@ let header img tag =
   from ~tag img @@
   maintainer "Anil Madhavapeddy <anil@recoil.org>"
 
+let run_command fmt =
+  ksprintf (fun cmd -> 
+    eprintf "Exec: %s\n%!" cmd;
+    match Sys.command cmd with
+    | 0 -> ()
+    | _ -> raise (Failure cmd)
+  ) fmt
+
+let write_to_file file dfile =
+  eprintf "Open: %s\n%!" file;
+  let fout = open_out file in
+  output_string fout (string_of_t dfile);
+  close_out fout
+
 let generate_dockerfiles output_dir =
   List.iter (fun (name, docker) ->
     printf "Generating: %s/%s/Dockerfile\n" output_dir name;
-    (match Sys.command (sprintf "mkdir -p %s/%s" output_dir name) with
-    | 0 -> () | _ -> raise (Failure (sprintf "mkdir -p %s/%s" output_dir name)));
-    let fout = open_out (output_dir^"/"^name^"/Dockerfile") in
-    output_string fout (string_of_t docker))
+    run_command "mkdir -p %s/%s" output_dir name;
+    write_to_file (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
+  )
 
+let generate_dockerfiles_in_git_branches output_dir d =
+  List.iter (fun (name, docker) ->
+    printf "Switching to branch %s in %s\n" name output_dir;
+    run_command "git -C \"%s\" checkout -q -B %s master" output_dir name;
+    let file = output_dir ^ "/Dockerfile" in
+    write_to_file file docker;
+    run_command "git -C \"%s\" add Dockerfile" output_dir;
+    run_command "git -C \"%s\" commit -q -m \"update %s Dockerfile\" -a" output_dir name
+  ) d;
+  run_command "git -C \"%s\" checkout -q master" output_dir
