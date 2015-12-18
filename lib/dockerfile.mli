@@ -188,6 +188,20 @@ val onbuild : t -> t
   base to build other images, for example an application build environment
   or a daemon which may be customized with user-specific configuration. *)
 
+val label : (string * string) list -> t
+(** [label l] adds metadata to an image via a list of key-value pairs.
+  To include spaces within a label value, use quotes and backslashes as
+  you would in command-line parsing. An image can have more than one label.
+  To specify multiple labels, Docker recommends combining labels into a
+  single label instruction where possible. Each label instruction produces
+  a new layer which can result in an inefficient image if you use many labels.
+
+  Labels are additive including [LABEL]s in [FROM] images. If Docker
+  encounters a label/key that already exists, the new value overrides any
+  previous labels with identical keys.
+
+  To view an image’s labels, use the [docker inspect] command. *)
+
 (** {2 Distribution-specific utility functions} *)
 
 (** Linux-specific shell commands that are of general use. *)

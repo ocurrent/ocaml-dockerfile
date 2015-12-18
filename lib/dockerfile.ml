@@ -38,6 +38,7 @@ type line = [
   | `User of string
   | `Workdir of string
   | `Onbuild of line
+  | `Label of (string * string) list
 ]
 
 type t = line list
@@ -67,6 +68,12 @@ let string_of_sources_to_dest (t:sources_to_dest) =
   match t with
   | `Src sl, `Dst d -> String.concat " " (sl @ [d])
 
+let string_of_label_list ls =
+  let ls = List.map (fun (k,v) -> sprintf "%s=%S" k v) ls in
+  match ls with
+  | [] -> ""
+  | ls -> sprintf "LABEL %s" (String.concat " " ls)
+
 let rec string_of_line (t:line) = 
   match t with
   | `Comment c -> cmd "#"  c
@@ -84,6 +91,7 @@ let rec string_of_line (t:line) =
   | `Entrypoint el -> cmd "ENTRYPOINT" (string_of_shell_or_exec el)
   | `Workdir wd -> cmd "WORKDIR" wd
   | `Onbuild t -> cmd "ONBUILD" (string_of_line t)
+  | `Label ls -> cmd "LABEL" (string_of_label_list ls)
 
 (* Function interface *)
 let from ?tag img =
@@ -106,6 +114,7 @@ let user fmt = ksprintf (fun u -> [ `User u ]) fmt
 let onbuild t = List.map (fun l -> `Onbuild l) t
 let volume fmt = ksprintf (fun v -> [ `Volume [v] ]) fmt
 let volumes v : t = [ `Volume v ]
+let label ls = [ `Label ls ]
 let entrypoint fmt = ksprintf (fun e -> [ `Entrypoint (`Shell e) ]) fmt
 let entrypoint_exec e : t = [ `Entrypoint (`Exec e) ]
 let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
