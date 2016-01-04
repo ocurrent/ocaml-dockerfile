@@ -7,6 +7,7 @@
 * Run `yum clean` after a Yum installation.
 * Add support for Alpine Linux.
 * Cleanup OPAM build directory to save container space after building from source.
+* Remove support for OpenSUSE remotes, as it is no longer maintained.
 
 1.1.1 (2015-03-11):
 * Add a `?prefix` argument to `install_opam_from_source`
