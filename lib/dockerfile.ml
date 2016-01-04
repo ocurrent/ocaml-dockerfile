@@ -15,13 +15,15 @@
  *
  *)
 
+open Sexplib.Conv
+
 type shell_or_exec = [
   | `Shell of string
   | `Exec of string list
-]
+] with sexp
 
 type sources_to_dest =
-  [ `Src of string list ] * [ `Dst of string ]
+  [ `Src of string list ] * [ `Dst of string ] with sexp
 
 type line = [
   | `Comment of string
@@ -39,9 +41,9 @@ type line = [
   | `Workdir of string
   | `Onbuild of line
   | `Label of (string * string) list
-]
+] with sexp
 
-type t = line list
+type t = line list with sexp
 let (@@) = (@)
 let empty = []
 let maybe f = function None -> empty | Some v -> f v

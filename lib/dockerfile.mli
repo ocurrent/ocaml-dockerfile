@@ -21,7 +21,7 @@
 
 (** {2 Core combinators and serializers} *)
 
-type t
+type t with sexp
 (** [t] is a list of Dockerfile lines *)
 
 val string_of_t : t -> string
