@@ -68,6 +68,10 @@ let tag_of_distro = function
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
 
+let opam_tag_of_distro distro ocaml_version =
+  Printf.sprintf "%s_ocaml-%s"
+    (tag_of_distro distro) ocaml_version
+
 (* Build the OPAM distributions from the OCaml base *)
 let add_comment ?compiler_version tag =
   comment "OPAM for %s with %s" tag
@@ -131,18 +135,54 @@ let dockerfile_matrix =
   List.map (fun opam_version ->
     List.map (fun ocaml_version ->
       List.map (fun distro ->
-        let tag = tag_of_distro distro in
         distro,
-        Printf.sprintf "%s_ocaml-%s" tag ocaml_version,
+        ocaml_version,
         to_dockerfile ~ocaml_version ~distro
       ) distros
     ) ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten
 
 let map_tag fn =
-  List.map (fun (distro,tag,_) -> fn distro tag) dockerfile_matrix
+  List.map (fun (distro,ocaml_version,_) ->
+   fn ~distro ~ocaml_version) dockerfile_matrix
 
 let map ?(org="ocaml/opam") fn =
-  map_tag (fun distro tag ->
+  map_tag (fun ~distro ~ocaml_version ->
+   let tag = opam_tag_of_distro distro ocaml_version in
    let base = from org ~tag in
-   fn distro base)
+   fn ~distro ~ocaml_version base)
+
+open Printf
+
+let run_command fmt =
+  ksprintf (fun cmd ->
+    eprintf "Exec: %s\n%!" cmd;
+    match Sys.command cmd with
+    | 0 -> ()
+    | _ -> raise (Failure cmd)
+  ) fmt
+
+let write_to_file file dfile =
+  eprintf "Open: %s\n%!" file;
+  let fout = open_out file in
+  output_string fout (string_of_t dfile);
+  close_out fout
+
+let generate_dockerfiles d output_dir =
+  List.iter (fun (name, docker) ->
+    printf "Generating: %s/%s/Dockerfile\n" output_dir name;
+    run_command "mkdir -p %s/%s" output_dir name;
+    write_to_file (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
+  ) d
+
+let generate_dockerfiles_in_git_branches d output_dir =
+  List.iter (fun (name, docker) ->
+    printf "Switching to branch %s in %s\n" name output_dir;
+    run_command "git -C \"%s\" checkout -q -B %s master" output_dir name;
+    let file = output_dir ^ "/Dockerfile" in
+    write_to_file file docker;
+    run_command "git -C \"%s\" add Dockerfile" output_dir;
+    run_command "git -C \"%s\" commit -q -m \"update %s Dockerfile\" -a" output_dir name
+  ) d;
+  run_command "git -C \"%s\" checkout -q master" output_dir
+

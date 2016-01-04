@@ -64,20 +64,6 @@ val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Docke
     The [branch] defaults to the [1.2] stable branch.
     The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
 
-val header: string -> string -> Dockerfile.t
+val header: ?maintainer:string -> string -> string -> Dockerfile.t
 (** [header image tag] initalises a fresh Dockerfile using the [image:tag]
     as its base. *)
-
-val generate_dockerfiles : string -> (string * Dockerfile.t) list -> unit
-(** [generate_dockerfiles output_dir (name * docker)] will
-    output a list of Dockerfiles inside the [output_dir/name] subdirectory,
-    with each directory containing the Dockerfile specified by [docker]. *)
-
-
-val generate_dockerfiles_in_git_branches : string -> (string * Dockerfile.t) list -> unit
-(** [generate_dockerfiles_in_git_branches output_dir (name * docker)] will
-    output a set of git branches in the [output_dir] Git repository.
-    Each branch will be named [name] and contain a single [docker] file.
-    The contents of these branches will be reset, so this should be
-    only be used on an [output_dir] that is a dedicated Git repository
-    for this purpose. *)
