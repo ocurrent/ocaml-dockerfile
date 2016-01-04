@@ -13,10 +13,10 @@ Library dockerfile
 
 Library opam
   Path: lib
-  Modules: Dockerfile_opam
+  Modules: Dockerfile_opam, Dockerfile_distro
   Findlibname: opam
   Findlibparent: dockerfile
-  BuildDepends: dockerfile
+  BuildDepends: dockerfile, sexplib.syntax
 
 Library "opam-cmdliner"
   Path: lib

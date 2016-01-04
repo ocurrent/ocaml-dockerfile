@@ -1,4 +1,6 @@
 1.2.0:
+* Add sexplib convertors for `Dockerfile.t`.
+* Add `Dockerfile_distro` module to handle supported online distributions.
 * Add `Dockerfile.label` to support Docker 1.6 metadata labels.
 * Add `generate_dockerfiles_in_git_branches` to make it easier
   to use Docker Hub dynamic branch support to build all permutations.
