@@ -48,7 +48,7 @@ let maybe f = function None -> empty | Some v -> f v
 
 open Printf
 let nl fmt = ksprintf (fun b -> b ^ "\n") fmt
-let quote s = String.escaped s
+let quote s = sprintf "%S" s
 let cmd c r = c ^ " " ^ r
 
 let json_array_of_list sl =
