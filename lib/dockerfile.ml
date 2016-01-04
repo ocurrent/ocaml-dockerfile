@@ -137,8 +137,8 @@ module Linux = struct
 
   (** RPM rules *)
   module RPM = struct
-    let install fmt = ksprintf (run "yum install -y %s") fmt
-    let groupinstall fmt = ksprintf (run "yum groupinstall -y %s") fmt
+    let install fmt = ksprintf (run "yum install -y %s && yum clean all") fmt
+    let groupinstall fmt = ksprintf (run "yum groupinstall -y %s && yum clean all") fmt
 
     let add_user ?(sudo=false) username =
       let home = "/home/"^username in
