@@ -97,8 +97,8 @@ let opam_init
     onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
 
 let install_opam_from_source ?prefix ?(branch="1.2") () =
-  run "git clone -b %s git://github.com/ocaml/opam" branch @@
-  Linux.run_sh "cd opam && make cold && make%s install"
+  run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
+  Linux.run_sh "cd /tmp/opam && make cold && make%s install && rm -rf /tmp/opam"
     (match prefix with None -> "" |Some p -> " prefix=\""^p^"\"")
 
 let install_ext_plugin =
