@@ -250,6 +250,24 @@ module Linux : sig
         [passwd] and [git] and X11.  Extra packages may also be optionally supplied via [extra]. *)
   end
 
+  (** Rules for Apk-based distributions such as Alpine Linux *)
+  module Apk : sig
+    val update : t
+    (** [update] will run [apk update && apk upgrade] non-interactively. *)
+
+    val install : ('a, unit, string, t) format4 -> 'a
+    (** [install fmt] will [apk add] the packages specified by the [fmt] format string. *)
+
+    val dev_packages : ?extra:string -> unit -> t
+    (** [dev_packages ?extra ()] will install the base alpine-sdk.
+        Extra packages may also be optionally supplied via [extra]. *)
+
+    val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
+    (** [add_user username] will install a new user with name [username] and a locked
+        password.  If [sudo] is true then root access with no password will also be
+        configured.  The default value for [sudo] is [false]. *)
+  end
+
   (** Rules for Git *)
   module Git : sig
     val init : ?name:string -> ?email:string -> unit -> t

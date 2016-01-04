@@ -187,7 +187,33 @@ module Linux = struct
       user "%s" username @@
       env ["HOME", home] @@
       workdir "%s" home
+  end
 
+  (** Alpine rules *)
+  module Apk = struct
+    let update = run "apk update && apk upgrade"
+    let install fmt = ksprintf (run "apk add %s") fmt
+
+    let dev_packages ?extra () =
+      update @@
+      install "alpine-sdk openssh %s" (match extra with None -> "" | Some x -> " " ^ x)
+
+    let add_user ?uid ?gid ?(sudo=false) username =
+      let home = "/home/"^username in
+      run "adduser -S %s%s%s"
+        (match uid with None -> "" | Some d -> sprintf "-u %d " d)
+        (match gid with None -> "" | Some g -> sprintf "-g %d " g)
+        username @@
+      (match sudo with
+       | false -> empty
+       | true ->
+         let sudofile = "/etc/sudoers.d/"^username in
+         run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+         run "chmod 440 %s" sudofile @@
+         run "chown root:root %s" sudofile @@
+         run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
+      user "%s" username @@
+      workdir "%s" home
   end
 
 end

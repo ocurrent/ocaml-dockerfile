@@ -5,6 +5,7 @@
 * Correctly escape the `run_exec`, `entrypoint_exec` and `cmd_exec`
   JSON arrays so that the strings are quoted.
 * Run `yum clean` after a Yum installation.
+* Add support for Alpine Linux.
 
 1.1.1 (2015-03-11):
 * Add a `?prefix` argument to `install_opam_from_source`
