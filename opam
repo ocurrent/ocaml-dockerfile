@@ -19,4 +19,5 @@ depends: [
   "sexplib"
   "camlp4"
   "type_conv"
+  "base-bytes"
 ]
