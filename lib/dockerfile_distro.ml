@@ -58,7 +58,7 @@ let tag_of_distro = function
   |`Ubuntu `V15_04 -> "ubuntu-15.04"
   |`Ubuntu `V15_10 -> "ubuntu-15.10"
   |`Debian `Stable -> "debian-stable"
-  |`Debian `Unstable -> "debian-stable"
+  |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
   |`CentOS `V6 -> "centos-6"
   |`CentOS `V7 -> "centos-7"
