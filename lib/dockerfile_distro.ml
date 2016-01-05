@@ -34,7 +34,7 @@ let distros = [ (`Ubuntu `V14_04); (`Ubuntu `V15_10);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7);
                 (`Alpine `V3_3) ]
-let ocaml_versions = [ "4.01.0"; "4.02.3"; "4.03.0+trunk" ]
+let ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0+trunk" ]
 let opam_versions = [ "1.2.2" ]
 
 (* The distro-supplied version of OCaml *)
