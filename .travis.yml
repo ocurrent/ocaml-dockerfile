@@ -4,13 +4,16 @@ services:
   - docker
 script: ./.travis.sh
 env:
-  - DISTRO=debian-unstable PACKAGE="dockerfile" OCAML_VERSION=4.03.0+trunk
-  - DISTRO=debian-stable PACKAGE="dockerfile" OCAML_VERSION=4.01.0
-  - DISTRO=debian-stable PACKAGE="dockerfile" OCAML_VERSION=4.02.3
-  - DISTRO=debian-testing PACKAGE="dockerfile" OCAML_VERSION=4.02.3
-  - DISTRO=ubuntu-15.10 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
-  - DISTRO=ubuntu-14.10 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
-  - DISTRO=centos-6 PACKAGE="dockerfile" OCAML_VERSION=4.01.0
-  - DISTRO=centos-7 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
-  - DISTRO=fedora-23 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
-  - DISTRO=alpine PACKAGE="dockerfile" OCAML_VERSION=4.02.3
+ global:
+   - PACKAGE="dockerfile"
+ matrix:
+   - DISTRO=debian-unstable OCAML_VERSION=4.03.0+trunk
+   - DISTRO=debian-stable OCAML_VERSION=4.01.0
+   - DISTRO=debian-stable OCAML_VERSION=4.02.3
+   - DISTRO=debian-testing OCAML_VERSION=4.02.3
+   - DISTRO=ubuntu-15.10 OCAML_VERSION=4.02.3
+   - DISTRO=ubuntu-14.10 OCAML_VERSION=4.02.3
+   - DISTRO=centos-6 OCAML_VERSION=4.01.0
+   - DISTRO=centos-7 OCAML_VERSION=4.02.3
+   - DISTRO=fedora-23 OCAML_VERSION=4.02.3
+   - DISTRO=alpine OCAML_VERSION=4.02.3

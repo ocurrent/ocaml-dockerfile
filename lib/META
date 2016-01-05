@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 9c76c36e9ffcb083231c3e3cc1980a7b)
+# DO NOT EDIT (digest: bb648a03185f38636ebe8eee9bf4faab)
 version = "1.2.0"
 description = "OCaml interface for generating Dockerfiles"
 requires = "sexplib"
@@ -22,7 +22,7 @@ package "opam-cmdliner" (
 package "opam" (
  version = "1.2.0"
  description = "OCaml interface for generating Dockerfiles"
- requires = "dockerfile sexplib"
+ requires = "dockerfile sexplib str"
  archive(byte) = "opam.cma"
  archive(byte, plugin) = "opam.cma"
  archive(native) = "opam.cmxa"

@@ -18,8 +18,8 @@ Library opam
   Modules: Dockerfile_opam, Dockerfile_distro
   Findlibname: opam
   Findlibparent: dockerfile
-  BuildDepends: dockerfile, sexplib, sexplib.syntax
-  XMETARequires: dockerfile, sexplib
+  BuildDepends: dockerfile, sexplib, sexplib.syntax, str
+  XMETARequires: dockerfile, sexplib, str
 
 Library "opam-cmdliner"
   Path: lib

@@ -69,6 +69,8 @@ let tag_of_distro = function
   |`Alpine `V3_3 -> "alpine-3.3"
 
 let opam_tag_of_distro distro ocaml_version =
+  (* Docker rewrites + to _ in tags *)
+  let ocaml_version = Str.(global_replace (regexp_string "+") "_" ocaml_version) in
   Printf.sprintf "%s_ocaml-%s"
     (tag_of_distro distro) ocaml_version
 
@@ -89,7 +91,7 @@ let apt_opam ?compiler_version distro tag =
     Linux.Git.init () @@
     onbuild (run "sudo apt-get update && sudo apt-get -y upgrade") @@
     opam_init ?compiler_version () @@
-    run_as_opam "opam install -y depext" @@
+    run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"]
 
 (* Yum RPM based Dockerfile *)
@@ -102,7 +104,7 @@ let yum_opam ?compiler_version distro tag =
     Linux.RPM.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
-    run_as_opam "opam install -y depext" @@
+    run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"]
 
 (* Apk (alpine) Dockerfile *)
@@ -113,7 +115,7 @@ let apk_opam ?compiler_version tag =
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
-    run_as_opam "opam install -y depext" @@
+    run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"]
 
 (* Construct a Dockerfile for a distro/ocaml combo, using the
