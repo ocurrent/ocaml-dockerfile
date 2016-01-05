@@ -1,6 +1,14 @@
 language: c
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-opam.sh
-script: bash -ex .travis-opam.sh
+sudo: required
+services:
+  - docker
+script: ./.travis.sh
 env:
-  - OCAML_VERSION=4.01
-  - OCAML_VERSION=latest
+  - DISTRO=debian-unstable PACKAGE="dockerfile" OCAML_VERSION=4.03.0+trunk
+  - DISTRO=debian-stable PACKAGE="dockerfile" OCAML_VERSION=4.01.0
+  - DISTRO=debian-testing PACKAGE="dockerfile" OCAML_VERSION=4.02.3
+  - DISTRO=ubuntu-15.10 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
+  - DISTRO=ubuntu-14.10 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
+  - DISTRO=centos-7 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
+  - DISTRO=fedora-23 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
+  - DISTRO=alpine PACKAGE="dockerfile" OCAML_VERSION=4.02.3
