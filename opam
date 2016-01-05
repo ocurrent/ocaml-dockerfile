@@ -18,4 +18,5 @@ depends: [
   "cmdliner"
   "sexplib"
   "camlp4"
+  "type_conv"
 ]
