@@ -6,6 +6,7 @@ script: ./.travis.sh
 env:
   - DISTRO=debian-unstable PACKAGE="dockerfile" OCAML_VERSION=4.03.0+trunk
   - DISTRO=debian-stable PACKAGE="dockerfile" OCAML_VERSION=4.01.0
+  - DISTRO=debian-stable PACKAGE="dockerfile" OCAML_VERSION=4.02.3
   - DISTRO=debian-testing PACKAGE="dockerfile" OCAML_VERSION=4.02.3
   - DISTRO=ubuntu-15.10 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
   - DISTRO=ubuntu-14.10 PACKAGE="dockerfile" OCAML_VERSION=4.02.3
