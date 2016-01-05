@@ -160,7 +160,7 @@ module Linux = struct
       workdir "%s" home
 
     let dev_packages ?extra () =
-      install "sudo passwd git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
+      install "sudo passwd bzip2 patch git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
       groupinstall "\"Development Tools\""
   end
 
