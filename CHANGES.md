@@ -1,4 +1,6 @@
 1.2.0:
+* Add `Dockerfile.crunch` to reduce the number of layers by combining
+  repeated `RUN` commands.
 * Set Debian `apt-get` commands to `noninteractive`.
 * Add support for Ubuntu 12.04 LTS and also bleeding edge 16.04.
 * Add sexplib convertors for `Dockerfile.t`.

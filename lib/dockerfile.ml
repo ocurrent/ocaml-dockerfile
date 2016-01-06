@@ -19,6 +19,7 @@ open Sexplib.Conv
 
 type shell_or_exec = [
   | `Shell of string
+  | `Shells of string list
   | `Exec of string list
 ] with sexp
 
@@ -49,6 +50,26 @@ let empty = []
 let maybe f = function None -> empty | Some v -> f v
 
 open Printf
+
+(* Multiple RUN lines will be compressed into a single one in
+   order to reduce the number of layers used *)
+let crunch l =
+  let pack l =
+    let rec aux acc = function
+      | [] -> acc
+      | (`Run (`Shell a)) :: (`Run (`Shell b)) :: tl ->
+         aux ((`Run (`Shells [a;b]))::acc) tl
+      | (`Run (`Shells a)) :: (`Run (`Shell b)) :: tl ->
+         aux ((`Run (`Shells (a @ [b])))::acc) tl
+      | (`Run (`Shells a)) :: (`Run (`Shells b)) :: tl ->
+         aux ((`Run (`Shells (a @ b)))::acc) tl
+      | hd :: tl -> aux (hd::acc) tl in
+    List.rev (aux [] l) in
+  let rec fixp fn l =
+    let a = fn l in
+    if a = l then l else fixp fn a in
+  fixp pack l
+  
 let nl fmt = ksprintf (fun b -> b ^ "\n") fmt
 let quote s = sprintf "%S" s
 let cmd c r = c ^ " " ^ r
@@ -59,6 +80,9 @@ let json_array_of_list sl =
 let string_of_shell_or_exec (t:shell_or_exec) =
   match t with
   | `Shell s -> s
+  | `Shells [] -> ""
+  | `Shells [s] -> s
+  | `Shells l -> String.concat " && \\\n  " l
   | `Exec sl -> json_array_of_list sl
 
 let string_of_env_list =

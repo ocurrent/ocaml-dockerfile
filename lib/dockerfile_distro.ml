@@ -168,25 +168,26 @@ let run_command fmt =
     | _ -> raise (Failure cmd)
   ) fmt
 
-let write_to_file file dfile =
+let write_to_file ~crunch file dfile =
+  let dfile = if crunch then Dockerfile.crunch dfile else dfile in
   eprintf "Open: %s\n%!" file;
   let fout = open_out file in
   output_string fout (string_of_t dfile);
   close_out fout
 
-let generate_dockerfiles d output_dir =
+let generate_dockerfiles ?(crunch=true) d output_dir =
   List.iter (fun (name, docker) ->
     printf "Generating: %s/%s/Dockerfile\n" output_dir name;
     run_command "mkdir -p %s/%s" output_dir name;
-    write_to_file (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
+    write_to_file ~crunch (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
   ) d
 
-let generate_dockerfiles_in_git_branches d output_dir =
+let generate_dockerfiles_in_git_branches ?(crunch=true) d output_dir =
   List.iter (fun (name, docker) ->
     printf "Switching to branch %s in %s\n" name output_dir;
     run_command "git -C \"%s\" checkout -q -B %s master" output_dir name;
     let file = output_dir ^ "/Dockerfile" in
-    write_to_file file docker;
+    write_to_file ~crunch file docker;
     run_command "git -C \"%s\" add Dockerfile" output_dir;
     run_command "git -C \"%s\" commit -q -m \"update %s Dockerfile\" -a" output_dir name
   ) d;

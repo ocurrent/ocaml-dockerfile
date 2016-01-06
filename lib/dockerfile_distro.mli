@@ -83,17 +83,25 @@ val map_tag :
 (** [map_tag fn] executes [fn distro ocaml_version] with a tag suitable for use
    against the [ocaml/opam:TAG] Docker Hub. *)
 
-val generate_dockerfiles :
+val generate_dockerfiles : ?crunch:bool ->
   (Bytes.t * Dockerfile.t) list -> string -> unit
 (** [generate_dockerfiles (name * docker) output_dir] will
     output a list of Dockerfiles inside the [output_dir/name] subdirectory,
-    with each directory containing the Dockerfile specified by [docker]. *)
+    with each directory containing the Dockerfile specified by [docker].
 
-val generate_dockerfiles_in_git_branches :
+    The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
+    optimisation to reduce the number of layers; disable it if you really want
+    more layers. *)
+
+val generate_dockerfiles_in_git_branches : ?crunch:bool ->
   (Bytes.t * Dockerfile.t) list -> string -> unit
 (** [generate_dockerfiles_in_git_branches (name * docker) output_dir] will
     output a set of git branches in the [output_dir] Git repository.
     Each branch will be named [name] and contain a single [docker] file.
     The contents of these branches will be reset, so this should be
     only be used on an [output_dir] that is a dedicated Git repository
-    for this purpose. *)
+    for this purpose.
+
+    The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
+    optimisation to reduce the number of layers; disable it if you really want
+    more layers. *)
