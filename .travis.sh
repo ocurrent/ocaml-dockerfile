@@ -12,9 +12,13 @@ echo EXTRA_DEPS="$EXTRA_DEPS" >> env.list
 echo PRE_INSTALL_HOOK="$PRE_INSTALL_HOOK" >> env.list
 echo POST_INSTALL_HOOK="$POST_INSTALL_HOOK" >> env.list
 
+# build a local image to trigger any ONBUILDs
+echo FROM ocaml/opam:${DISTRO}_ocaml-${OCAML_VERSION} > Dockerfile
+echo VOLUME /repo >> Dockerfile
+echo WORKDIR /repo >> Dockerfile
+docker build -t local-build .
+
+# run travis-opam with the local repo volume mounted
 OS=~/build/$TRAVIS_REPO_SLUG
 chmod -R a+w $OS
-docker run --env-file=env.list -v \
-  $OS:/repo \
-  ocaml/opam:${DISTRO}_ocaml-${OCAML_VERSION} \
-  sh -c "cd /repo && travis-opam"
+docker run --env-file=env.list -v ${OS}:/repo local-build travis-opam
