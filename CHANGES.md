@@ -1,4 +1,5 @@
 1.2.0:
+* Set Debian `apt-get` commands to `noninteractive`.
 * Add support for Ubuntu 12.04 LTS and also bleeding edge 16.04.
 * Add sexplib convertors for `Dockerfile.t`.
 * Add `Dockerfile_distro` module to handle supported online distributions.
