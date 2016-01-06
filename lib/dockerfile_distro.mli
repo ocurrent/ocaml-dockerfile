@@ -35,17 +35,17 @@ type t = [
 val distros : t list
 (** Enumeration of the supported Docker container distributions *)
 
-val ocaml_versions : bytes list
+val ocaml_versions : Bytes.t list
 (** Enumeration of supported OCaml compiler versions. *)
 
-val opam_versions : bytes list
+val opam_versions : Bytes.t list
 (** Enumeration of supported OPAM package manager versions. *)
 
-val tag_of_distro : t -> bytes
+val tag_of_distro : t -> Bytes.t
 (** Convert a distribution to a Docker Hub tag.  The full
   form of this is [ocaml/TAG] on the Docker Hub. *)
 
-val opam_tag_of_distro : t -> bytes -> bytes
+val opam_tag_of_distro : t -> Bytes.t -> Bytes.t
 (** [opam_tag_of_distro distro ocaml_version] will generate
   a Docker Hub tag that maps to the container that matches
   the OS/OCaml combination.  They can be found by default in
@@ -54,13 +54,13 @@ val opam_tag_of_distro : t -> bytes -> bytes
 (** {2 Dockerfile generation} *)
 
 val to_dockerfile :
-  ocaml_version:bytes ->
+  ocaml_version:Bytes.t ->
   distro:t -> Dockerfile.t
 (** [to_dockerfile ~ocaml_version ~distro] generates
    a Dockerfile for [distro], with OPAM installed and the
    current switch pointing to [ocaml_version]. *)
 
-val dockerfile_matrix : (t * bytes * Dockerfile.t) list
+val dockerfile_matrix : (t * Bytes.t * Dockerfile.t) list
 (** [dockerfile_matrix] contains the list of Docker tags
    and their associated Dockerfiles for all distributions.
    The user of the container can assume that OPAM is installed
@@ -70,8 +70,8 @@ val dockerfile_matrix : (t * bytes * Dockerfile.t) list
 (** {2 Dockerfile generators and iterators } *)
 
 val map :
-  ?org:bytes ->
-  (distro:t -> ocaml_version:bytes -> Dockerfile.t -> 'a) ->
+  ?org:Bytes.t ->
+  (distro:t -> ocaml_version:Bytes.t -> Dockerfile.t -> 'a) ->
   'a list
 (* [map ?org fn] will map all the supported Docker containers across [fn].
    [fn] will be passed the {!distro}, OCaml compiler version and a base
@@ -79,18 +79,18 @@ val map :
    (by default, this is [ocaml/opam]. *)
 
 val map_tag :
-  (distro:t -> ocaml_version:bytes -> 'a) -> 'a list
+  (distro:t -> ocaml_version:Bytes.t -> 'a) -> 'a list
 (** [map_tag fn] executes [fn distro ocaml_version] with a tag suitable for use
    against the [ocaml/opam:TAG] Docker Hub. *)
 
 val generate_dockerfiles :
-  (bytes * Dockerfile.t) list -> string -> unit
+  (Bytes.t * Dockerfile.t) list -> string -> unit
 (** [generate_dockerfiles (name * docker) output_dir] will
     output a list of Dockerfiles inside the [output_dir/name] subdirectory,
     with each directory containing the Dockerfile specified by [docker]. *)
 
 val generate_dockerfiles_in_git_branches :
-  (bytes * Dockerfile.t) list -> string -> unit
+  (Bytes.t * Dockerfile.t) list -> string -> unit
 (** [generate_dockerfiles_in_git_branches (name * docker) output_dir] will
     output a set of git branches in the [output_dir] Git repository.
     Each branch will be named [name] and contain a single [docker] file.
