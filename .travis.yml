@@ -7,7 +7,7 @@ env:
  global:
    - PACKAGE="dockerfile"
  matrix:
-   - DISTRO=debian-unstable OCAML_VERSION=4.03.0+trunk
+   - DISTRO=debian-unstable OCAML_VERSION=4.03.0_trunk
    - DISTRO=debian-stable OCAML_VERSION=4.01.0
    - DISTRO=debian-stable OCAML_VERSION=4.02.3
    - DISTRO=debian-testing OCAML_VERSION=4.02.3

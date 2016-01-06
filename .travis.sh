@@ -1,9 +1,8 @@
 #!/bin/sh -ex
 
 OS=~/build/$TRAVIS_REPO_SLUG
-git clone git://github.com/ocaml/ocaml-travisci-skeleton $OS/__test
 chmod -R a+w $OS
 docker run -v \
   $OS:/repo \
   ocaml/opam:${DISTRO}_ocaml-${OCAML_VERSION} \
-  /repo/.travis-build.sh
+  sh -c "cd /repo && travis-opam"
