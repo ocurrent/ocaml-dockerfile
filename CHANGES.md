@@ -1,4 +1,5 @@
 1.2.0:
+* Add support for Ubuntu 12.04 LTS and also bleeding edge 16.04.
 * Add sexplib convertors for `Dockerfile.t`.
 * Add `Dockerfile_distro` module to handle supported online distributions.
 * Add `Dockerfile.label` to support Docker 1.6 metadata labels.

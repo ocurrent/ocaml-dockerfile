@@ -25,10 +25,10 @@ type t = [
   | `Debian of [ `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
-  | `Ubuntu of [ `V14_04 | `V15_04 | `V15_10 ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
 ] with sexp
  
-let distros = [ (`Ubuntu `V14_04); (`Ubuntu `V15_10);
+let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
@@ -42,9 +42,11 @@ let builtin_ocaml_of_distro = function
   |`Debian `Stable -> Some "4.01.0"
   |`Debian `Testing -> Some "4.02.3"
   |`Debian `Unstable -> Some "4.02.3"
+  |`Ubuntu `V12_04 -> Some "3.12.1"
   |`Ubuntu `V14_04 -> Some "4.01.0"
   |`Ubuntu `V15_04 -> Some "4.01.0"
   |`Ubuntu `V15_10 -> Some "4.01.0"
+  |`Ubuntu `V16_04 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Fedora `V21 -> None (* TODO check *)
   |`Fedora `V22 -> Some "4.02.0"
@@ -54,9 +56,11 @@ let builtin_ocaml_of_distro = function
 
 (* The Docker tag for this distro *)
 let tag_of_distro = function
+  |`Ubuntu `V12_04 -> "ubuntu-12.04"
   |`Ubuntu `V14_04 -> "ubuntu-14.04"
   |`Ubuntu `V15_04 -> "ubuntu-15.04"
   |`Ubuntu `V15_10 -> "ubuntu-15.10"
+  |`Ubuntu `V16_04 -> "ubuntu-16.04"
   |`Debian `Stable -> "debian-stable"
   |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
