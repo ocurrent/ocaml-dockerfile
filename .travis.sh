@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh -e
 
 echo -en 'travis_fold:start:script.1\\r'
 # create env file
