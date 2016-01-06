@@ -1,5 +1,6 @@
 #!/bin/sh -ex
 
+echo -en 'travis_fold:start:script.1\\r'
 # create env file
 echo PACKAGE="$PACKAGE" > env.list
 echo EXTRA_REMOTES="$EXTRA_REMOTES" >> env.list
@@ -17,6 +18,7 @@ echo FROM ocaml/opam:${DISTRO}_ocaml-${OCAML_VERSION} > Dockerfile
 echo VOLUME /repo >> Dockerfile
 echo WORKDIR /repo >> Dockerfile
 docker build -t local-build .
+echo -en 'travis_fold:end:script.1\\r'
 
 # run travis-opam with the local repo volume mounted
 OS=~/build/$TRAVIS_REPO_SLUG
