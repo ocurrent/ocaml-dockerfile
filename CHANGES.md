@@ -1,4 +1,5 @@
 1.2.0:
+* Include specific Debian versions (v7,8,9) in addition to the stable/unstable streams.
 * Add `Dockerfile.crunch` to reduce the number of layers by combining
   repeated `RUN` commands.
 * Set Debian `apt-get` commands to `noninteractive`.

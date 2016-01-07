@@ -22,7 +22,7 @@ open Dockerfile_opam
 type t = [ 
   | `Alpine of [ `V3_3 ]
   | `CentOS of [ `V6 | `V7 ]
-  | `Debian of [ `Stable | `Testing | `Unstable ]
+  | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
@@ -30,6 +30,7 @@ type t = [
 
 let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
+                (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7);
@@ -46,19 +47,21 @@ let opam_versions = [ "1.2.2" ]
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro = function
-  |`Debian `Stable -> Some "4.01.0"
+  |`Debian (`Stable |`V8) -> Some "4.01.0"
   |`Debian `Testing -> Some "4.02.3"
-  |`Debian `Unstable -> Some "4.02.3"
+  |`Debian (`Unstable | `V9) -> Some "4.02.3"
+  |`Debian `V7 -> Some "3.12.1"
   |`Ubuntu `V12_04 -> Some "3.12.1"
   |`Ubuntu `V14_04 -> Some "4.01.0"
   |`Ubuntu `V15_04 -> Some "4.01.0"
   |`Ubuntu `V15_10 -> Some "4.01.0"
   |`Ubuntu `V16_04 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
-  |`Fedora `V21 -> None (* TODO check *)
+  |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
-  |`CentOS `V6 | `CentOS `V7 -> None (* TODO check *)
+  |`CentOS `V6 -> Some "3.11.2"
+  |`CentOS `V7 -> Some "4.01.0"
   |`OracleLinux `V7 -> None
 
 (* The Docker tag for this distro *)
@@ -71,6 +74,9 @@ let tag_of_distro = function
   |`Debian `Stable -> "debian-stable"
   |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
+  |`Debian `V9 -> "debian-9"
+  |`Debian `V8 -> "debian-8"
+  |`Debian `V7 -> "debian-7"
   |`CentOS `V6 -> "centos-6"
   |`CentOS `V7 -> "centos-7"
   |`Fedora `V21 -> "fedora-21"
@@ -88,6 +94,9 @@ let human_readable_string_of_distro = function
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
+  |`Debian `V9 -> "Debian 9 (Stretch)"
+  |`Debian `V8 -> "Debian 8 (Jessie)"
+  |`Debian `V7 -> "Debian 7 (Wheezy)"
   |`CentOS `V6 -> "CentOS 6"
   |`CentOS `V7 -> "CentOS 7"
   |`Fedora `V21 -> "Fedora 21"
