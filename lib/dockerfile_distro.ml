@@ -44,6 +44,7 @@ let master_distro = `Debian `Stable
 let ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0+trunk" ]
 let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
+let latest_opam_version = "1.2.2"
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro = function
@@ -141,9 +142,10 @@ let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
  
 (* Apt based Dockerfile *)
-let apt_opam ?compiler_version distro tag =
+let apt_opam ?compiler_version labels distro tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
+    label (("distro_style", "apt")::labels) @@
     Linux.Apt.install "aspcud" @@
     install_opam_from_source () @@
     Linux.Apt.add_user ~sudo:true "opam" @@
@@ -154,9 +156,10 @@ let apt_opam ?compiler_version distro tag =
     entrypoint_exec ["opam";"config";"exec";"--"]
 
 (* Yum RPM based Dockerfile *)
-let yum_opam ?compiler_version distro tag =
+let yum_opam ?compiler_version labels distro tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
+    label (("distro_style", "yum")::labels) @@
     Linux.RPM.dev_packages ~extra:"which tar" () @@
     install_opam_from_source ~prefix:"/usr" () @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
@@ -167,9 +170,10 @@ let yum_opam ?compiler_version distro tag =
     entrypoint_exec ["opam";"config";"exec";"--"]
 
 (* Apk (alpine) Dockerfile *)
-let apk_opam ?compiler_version tag =
+let apk_opam ?compiler_version labels tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
+    label (("distro_style", "apk")::labels) @@
     Linux.Apk.install "opam aspcud rsync" @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
@@ -180,6 +184,13 @@ let apk_opam ?compiler_version tag =
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
 let to_dockerfile ~ocaml_version ~distro =
+  let labels = [
+      "distro", (latest_tag_of_distro distro);
+      "distro_long", (tag_of_distro distro);
+      "arch", "x86_64";
+      "ocaml_version", ocaml_version;
+      "opam_version", latest_opam_version;
+  ] in
   let tag = tag_of_distro distro in
   let compiler_version =
     match builtin_ocaml_of_distro distro with
@@ -187,9 +198,9 @@ let to_dockerfile ~ocaml_version ~distro =
     | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
   in
   match distro with
-  | `Ubuntu _ | `Debian _ -> apt_opam ?compiler_version distro tag
-  | `CentOS _ | `Fedora _ | `OracleLinux _ -> yum_opam ?compiler_version distro tag
-  | `Alpine _ -> apk_opam ?compiler_version tag
+  | `Ubuntu _ | `Debian _ -> apt_opam ?compiler_version labels distro tag
+  | `CentOS _ | `Fedora _ | `OracleLinux _ -> yum_opam ?compiler_version labels distro tag
+  | `Alpine _ -> apk_opam ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
 let dockerfile_matrix =

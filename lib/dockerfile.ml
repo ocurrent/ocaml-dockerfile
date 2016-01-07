@@ -95,10 +95,7 @@ let string_of_sources_to_dest (t:sources_to_dest) =
   | `Src sl, `Dst d -> String.concat " " (sl @ [d])
 
 let string_of_label_list ls =
-  let ls = List.map (fun (k,v) -> sprintf "%s=%S" k v) ls in
-  match ls with
-  | [] -> ""
-  | ls -> sprintf "LABEL %s" (String.concat " " ls)
+  List.map (fun (k,v) -> sprintf "%s=%S" k v) ls |> String.concat " "
 
 let rec string_of_line (t:line) = 
   match t with
