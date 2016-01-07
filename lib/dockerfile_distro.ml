@@ -27,7 +27,7 @@ type t = [
   | `OracleLinux of [ `V7 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
 ] with sexp
- 
+
 let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Fedora `V22); (`Fedora `V23);
@@ -128,6 +128,9 @@ let add_comment ?compiler_version tag =
       | None -> "system OCaml compiler"
       | Some v -> "local switch of OCaml " ^ v)
 
+let compare a b =
+  String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
+ 
 (* Apt based Dockerfile *)
 let apt_opam ?compiler_version distro tag =
     add_comment ?compiler_version tag @@
@@ -189,13 +192,15 @@ let dockerfile_matrix =
         to_dockerfile ~ocaml_version ~distro
       ) distros
     ) ocaml_versions
-  ) opam_versions |> List.flatten |> List.flatten
+  ) opam_versions |> List.flatten |> List.flatten |>
+  (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 
 let latest_dockerfile_matrix =
   List.map (fun distro ->
     distro,
     to_dockerfile ~ocaml_version:latest_ocaml_version ~distro
-  ) latest_stable_distros
+  ) latest_stable_distros |> 
+  List.sort (fun (a,_) (b,_) -> compare a b)
 
 let map_tag fn =
   List.map (fun (distro,ocaml_version,_) ->

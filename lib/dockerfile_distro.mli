@@ -81,6 +81,9 @@ val human_readable_short_string_of_distro : t -> Bytes.t
 (** [human_readable_short_string_of_distro t] returns a human readable
   short version of the distribution tag, excluding version information. *)
 
+val compare : t -> t -> int
+(** [compare a b] is a lexical comparison function for {!t}. *)
+
 (** {2 Dockerfile generation} *)
 
 val to_dockerfile :
