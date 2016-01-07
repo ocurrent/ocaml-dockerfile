@@ -34,7 +34,14 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubunt
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7);
                 (`Alpine `V3_3) ]
+
+let latest_stable_distros = [
+  (`Ubuntu `V14_04); (`Debian `Stable); (`Fedora `V23);
+  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_3) ]
+
+let master_distro = `Debian `Stable
 let ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0+trunk" ]
+let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
 
 (* The distro-supplied version of OCaml *)
@@ -71,6 +78,42 @@ let tag_of_distro = function
   |`Fedora `V23 -> "fedora-23"
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
+
+let human_readable_string_of_distro = function
+  |`Ubuntu `V12_04 -> "Ubuntu 12.04"
+  |`Ubuntu `V14_04 -> "Ubuntu 14.04"
+  |`Ubuntu `V15_04 -> "Ubuntu 15.04"
+  |`Ubuntu `V15_10 -> "Ubuntu 15.10"
+  |`Ubuntu `V16_04 -> "Ubuntu 16.04"
+  |`Debian `Stable -> "Debian Stable"
+  |`Debian `Unstable -> "Debian Unstable"
+  |`Debian `Testing -> "Debian Testing"
+  |`CentOS `V6 -> "CentOS 6"
+  |`CentOS `V7 -> "CentOS 7"
+  |`Fedora `V21 -> "Fedora 21"
+  |`Fedora `V22 -> "Fedora 22"
+  |`Fedora `V23 -> "Fedora 23"
+  |`OracleLinux `V7 -> "OracleLinux 7"
+  |`Alpine `V3_3 -> "Alpine 3.3"
+
+let human_readable_short_string_of_distro (t:t) =
+  match t with
+  |`Ubuntu _ ->  "Ubuntu"
+  |`Debian _ -> "Debian"
+  |`CentOS _ -> "CentOS"
+  |`Fedora _ -> "Fedora"
+  |`OracleLinux _ -> "OracleLinux"
+  |`Alpine _ -> "Alpine"
+
+(* The alias tag for the latest stable version of this distro *)
+let latest_tag_of_distro (t:t) =
+  match t with
+  |`Ubuntu _ ->  "ubuntu"
+  |`Debian _ -> "debian"
+  |`CentOS _ -> "centos"
+  |`Fedora _ -> "fedora"
+  |`OracleLinux _ -> "oraclelinux"
+  |`Alpine _ -> "alpine"
 
 let opam_tag_of_distro distro ocaml_version =
   (* Docker rewrites + to _ in tags *)
@@ -148,6 +191,12 @@ let dockerfile_matrix =
     ) ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten
 
+let latest_dockerfile_matrix =
+  List.map (fun distro ->
+    distro,
+    to_dockerfile ~ocaml_version:latest_ocaml_version ~distro
+  ) latest_stable_distros
+
 let map_tag fn =
   List.map (fun (distro,ocaml_version,_) ->
    fn ~distro ~ocaml_version) dockerfile_matrix
@@ -168,28 +217,37 @@ let run_command fmt =
     | _ -> raise (Failure cmd)
   ) fmt
 
-let write_to_file ~crunch file dfile =
-  let dfile = if crunch then Dockerfile.crunch dfile else dfile in
+let write_to_file file s =
   eprintf "Open: %s\n%!" file;
   let fout = open_out file in
-  output_string fout (string_of_t dfile);
+  output_string fout s;
   close_out fout
 
-let generate_dockerfiles ?(crunch=true) d output_dir =
+let write_dockerfile ~crunch file dfile =
+  let dfile = if crunch then Dockerfile.crunch dfile else dfile in
+  write_to_file file (string_of_t dfile)
+
+let generate_dockerfiles ?(crunch=true) output_dir d =
   List.iter (fun (name, docker) ->
     printf "Generating: %s/%s/Dockerfile\n" output_dir name;
     run_command "mkdir -p %s/%s" output_dir name;
-    write_to_file ~crunch (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
+    write_dockerfile ~crunch (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
   ) d
 
-let generate_dockerfiles_in_git_branches ?(crunch=true) d output_dir =
+let generate_dockerfiles_in_git_branches ?readme ?(crunch=true) output_dir d =
   List.iter (fun (name, docker) ->
-    printf "Switching to branch %s in %s\n" name output_dir;
-    run_command "git -C \"%s\" checkout -q -B %s master" output_dir name;
+    printf "Switching to branch %s in %s\n%!" name output_dir;
+    (match name with
+     |"master" -> run_command "git -C \"%s\" checkout master" output_dir
+     |name -> run_command "git -C \"%s\" checkout -q -B %s master" output_dir name);
     let file = output_dir ^ "/Dockerfile" in
-    write_to_file ~crunch file docker;
+    write_dockerfile ~crunch file docker;
+    (match readme with
+     | None -> ()
+     | Some r ->
+        write_to_file (sprintf "%s/README.md" output_dir) r;
+        run_command "git -C \"%s\" add README.md" output_dir);
     run_command "git -C \"%s\" add Dockerfile" output_dir;
-    run_command "git -C \"%s\" commit -q -m \"update %s Dockerfile\" -a" output_dir name
+    run_command "git -C \"%s\" commit -q -m \"update %s Dockerfile\" -a || true" output_dir name
   ) d;
   run_command "git -C \"%s\" checkout -q master" output_dir
-
