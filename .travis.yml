@@ -2,7 +2,7 @@ language: c
 sudo: required
 services:
   - docker
-install: wget https://github.com/ocaml/ocaml-travisci-skeleton/blob/master/.travis-docker.sh
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
 script: bash ./.travis-docker.sh
 env:
  global:
