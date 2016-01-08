@@ -190,6 +190,7 @@ let to_dockerfile ~ocaml_version ~distro =
       "arch", "x86_64";
       "ocaml_version", ocaml_version;
       "opam_version", latest_opam_version;
+      "operatingsystem", "linux";
   ] in
   let tag = tag_of_distro distro in
   let compiler_version =
