@@ -46,6 +46,7 @@ type line = [
 
 type t = line list with sexp
 let (@@) = (@)
+let (@@@) = List.fold_left (fun a b -> a @@ b)
 let empty = []
 let maybe f = function None -> empty | Some v -> f v
 

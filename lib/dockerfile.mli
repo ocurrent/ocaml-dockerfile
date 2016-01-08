@@ -30,6 +30,9 @@ val string_of_t : t -> string
 val (@@) : t -> t -> t
 (** [a @@ b] concatenates two Dockerfile fragments into one. *)
 
+val (@@@) : t -> t list -> t
+(** [a @@@ b] concatenates the [b] list of Dockerfile fragments onto [a]. *)
+
 val empty : t
 (** An empty set of instruction lines. *)
 

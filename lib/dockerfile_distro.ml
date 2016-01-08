@@ -223,12 +223,16 @@ let latest_dockerfile_matrix =
   ) latest_stable_distros |> 
   List.sort (fun (a,_) (b,_) -> compare a b)
 
-let map_tag fn =
-  List.map (fun (distro,ocaml_version,_) ->
-   fn ~distro ~ocaml_version) dockerfile_matrix
+let map_tag ?filter fn =
+  List.filter
+    (match filter with
+      | None -> (fun _ -> true)
+      | Some fn -> fn) dockerfile_matrix
+  |>
+  List.map (fun (distro,ocaml_version,_) -> fn ~distro ~ocaml_version)
 
-let map ?(org="ocaml/opam") fn =
-  map_tag (fun ~distro ~ocaml_version ->
+let map ?filter ?(org="ocaml/opam") fn =
+  map_tag ?filter (fun ~distro ~ocaml_version ->
    let tag = opam_tag_of_distro distro ocaml_version in
    let base = from org ~tag in
    fn ~distro ~ocaml_version base)
