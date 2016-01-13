@@ -57,14 +57,10 @@ let opam_init
     let compiler = match compiler_version with
       | None -> ""
       | Some v -> "--comp " ^ v ^ " " in
-    env ["OPAMYES","1"] @@
     run_as_opam "git clone %s" repo @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome @@
-    maybe (fun _ -> run_as_opam "opam install camlp4") compiler_version @@
-    workdir "%s/opam-repository" opamhome @@
-    run_as_opam "opam config exec -- ocaml -version" @@
-    run_as_opam "opam --version" @@
-    onbuild (run_as_opam "cd %s/opam-repository && git pull && opam update -u -y" opamhome)
+    maybe (fun _ -> run_as_opam "opam install -y camlp4") compiler_version @@
+    workdir "%s/opam-repository" opamhome
 
 let install_opam_from_source ?prefix ?(branch="1.2") () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@

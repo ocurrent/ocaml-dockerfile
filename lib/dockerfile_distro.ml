@@ -150,7 +150,6 @@ let apt_opam ?compiler_version labels distro tag =
     install_opam_from_source () @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
-    onbuild (run "sudo apt-get update && sudo apt-get -y upgrade") @@
     opam_init ?compiler_version () @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"]
