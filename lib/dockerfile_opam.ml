@@ -60,7 +60,7 @@ let opam_init
     run_as_opam "git clone %s" repo @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome @@
     maybe (fun _ -> run_as_opam "opam install -y camlp4") compiler_version @@
-    workdir "%s/opam-repository" opamhome
+    workdir "%s" opamhome
 
 let install_opam_from_source ?prefix ?(branch="1.2") () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
