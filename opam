@@ -16,7 +16,7 @@ remove: ["ocamlfind" "remove" "dockerfile"]
 depends: [
   "ocamlfind" {build} 
   "cmdliner"
-  "sexplib"
+  "sexplib" {<"113.24.0"}
   "camlp4"
   "type_conv"
   "base-bytes"
