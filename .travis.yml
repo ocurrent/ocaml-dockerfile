@@ -1,8 +1,8 @@
 language: c
-sudo: required
+sudo: false
 services:
   - docker
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+install: wget https://raw.githubusercontent.com/avsm/ocaml-travisci-skeleton/master/.travis-docker.sh
 script: bash ./.travis-docker.sh
 env:
  global:
