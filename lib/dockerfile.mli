@@ -246,7 +246,7 @@ module Linux : sig
     (** [update] will run [apt-get update && apt-get upgrade] non-interactively. *)
 
     val install : ('a, unit, string, t) format4 -> 'a
-    (** [install fmt] will [apt-get install] the packages specified by the [fmt] format string. *)
+    (** [install fmt] will [apt-get update && apt-get install] the packages specified by the [fmt] format string. *)
 
     val add_user : ?sudo:bool -> string -> t
     (** [add_user username] will install a new user with name [username] and a locked

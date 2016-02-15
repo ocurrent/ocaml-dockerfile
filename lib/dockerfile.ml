@@ -189,7 +189,7 @@ module Linux = struct
   (** Debian rules *)
   module Apt = struct
     let update = run "apt-get -y update" @@ run "apt-get -y upgrade"
-    let install fmt = ksprintf (run "DEBIAN_FRONTEND=noninterative apt-get -y install %s") fmt
+    let install fmt = ksprintf (fun s -> update @@ run "DEBIAN_FRONTEND=noninterative apt-get -y install %s" s) fmt
 
     let dev_packages ?extra () =
       update @@
@@ -216,7 +216,7 @@ module Linux = struct
   (** Alpine rules *)
   module Apk = struct
     let update = run "apk update && apk upgrade"
-    let install fmt = ksprintf (run "apk add %s") fmt
+    let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
     let dev_packages ?extra () =
       update @@
