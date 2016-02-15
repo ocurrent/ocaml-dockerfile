@@ -1,3 +1,6 @@
+1.2.1:
+* Add `dev-repo` metadata to OPAM file.
+
 1.2.0:
 * Remove `onbuild` triggers from OPAM containers as it inhibits caching (suggestion via @talex5)
 * Include specific Debian versions (v7,8,9) in addition to the stable/unstable streams.
