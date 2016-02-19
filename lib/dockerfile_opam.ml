@@ -20,6 +20,11 @@
 open Dockerfile
 open Printf
 
+(** Rules to get the cloud solver if no aspcud available *)
+let install_cloud_solver =
+  run "curl -o /usr/bin/aspcud 'http://cvsweb.openbsd.org/cgi-bin/cvsweb/~checkout~/ports/sysutils/opam/files/aspcud?rev=1.1&content-type=text/plain'" @@
+  run "chmod 755 /usr/bin/aspcud"
+
 (** RPM rules *)
 module RPM = struct
 
@@ -31,7 +36,7 @@ module RPM = struct
 
   let install_system_opam = function
   | `CentOS7 -> Linux.RPM.install "opam aspcud"
-  | `CentOS6 -> Linux.RPM.install "opam"
+  | `CentOS6 -> Linux.RPM.install "opam" @@ install_cloud_solver
 end
 
 (** Debian rules *)
@@ -59,8 +64,7 @@ let opam_init
       | Some v -> "--comp " ^ v ^ " " in
     run_as_opam "git clone %s" repo @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome @@
-    maybe (fun _ -> run_as_opam "opam install -y camlp4") compiler_version @@
-    workdir "%s" opamhome
+    maybe (fun _ -> run_as_opam "opam install -y camlp4") compiler_version
 
 let install_opam_from_source ?prefix ?(branch="1.2") () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@

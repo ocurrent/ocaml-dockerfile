@@ -64,6 +64,10 @@ val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Docke
     The [branch] defaults to the [1.2] stable branch.
     The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
 
+val install_cloud_solver : Dockerfile.t
+(** [install_cloud_solver] will use the hosted OPAM aspcud service from IRILL.  It will
+    install a fake [/usr/bin/aspcud] script that requires online connectivity. *)
+
 val header: ?maintainer:string -> string -> string -> Dockerfile.t
 (** [header image tag] initalises a fresh Dockerfile using the [image:tag]
     as its base. *)

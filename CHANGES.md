@@ -1,5 +1,7 @@
 1.2.1:
 * Add `dev-repo` metadata to OPAM file.
+* Add support for installing the cloud solver for platforms where aspcud is not available.
+* Add CMD entrypoints for containers.
 
 1.2.0:
 * Remove `onbuild` triggers from OPAM containers as it inhibits caching (suggestion via @talex5)

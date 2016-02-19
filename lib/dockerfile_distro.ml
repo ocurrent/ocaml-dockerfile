@@ -162,6 +162,7 @@ let yum_opam ?compiler_version labels distro tag =
     label (("distro_style", "yum")::labels) @@
     Linux.RPM.dev_packages ~extra:"which tar" () @@
     install_opam_from_source ~prefix:"/usr" () @@
+    Dockerfile_opam.install_cloud_solver @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
@@ -175,7 +176,8 @@ let apk_opam ?compiler_version labels tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
-    Linux.Apk.install "opam aspcud rsync" @@
+    Linux.Apk.install "opam rsync" @@
+    Dockerfile_opam.install_cloud_solver @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
