@@ -152,7 +152,8 @@ let apt_opam ?compiler_version labels distro tag =
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
     run_as_opam "opam install -y depext travis-opam" @@
-    entrypoint_exec ["opam";"config";"exec";"--"]
+    entrypoint_exec ["opam";"config";"exec";"--"] @@
+    cmd_exec ["bash"]
 
 (* Yum RPM based Dockerfile *)
 let yum_opam ?compiler_version labels distro tag =
@@ -166,7 +167,8 @@ let yum_opam ?compiler_version labels distro tag =
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
     run_as_opam "opam install -y depext travis-opam" @@
-    entrypoint_exec ["opam";"config";"exec";"--"]
+    entrypoint_exec ["opam";"config";"exec";"--"] @@
+    cmd_exec ["bash"]
 
 (* Apk (alpine) Dockerfile *)
 let apk_opam ?compiler_version labels tag =
@@ -178,7 +180,8 @@ let apk_opam ?compiler_version labels tag =
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
     run_as_opam "opam install -y depext travis-opam" @@
-    entrypoint_exec ["opam";"config";"exec";"--"]
+    entrypoint_exec ["opam";"config";"exec";"--"] @@
+    cmd_exec ["sh"]
 
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
