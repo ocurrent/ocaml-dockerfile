@@ -188,12 +188,12 @@ module Linux = struct
 
   (** Debian rules *)
   module Apt = struct
-    let update = run "apt-get -y update" @@ run "apt-get -y upgrade"
-    let install fmt = ksprintf (fun s -> update @@ run "DEBIAN_FRONTEND=noninterative apt-get -y install %s" s) fmt
+    let update = run "apt-get -y update" @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
+    let install fmt = ksprintf (fun s -> update @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y install %s" s) fmt
 
     let dev_packages ?extra () =
       update @@
-      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl libx11-dev%s"
+      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl dialog libx11-dev%s"
        (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?(sudo=false) username =
@@ -220,7 +220,7 @@ module Linux = struct
 
     let dev_packages ?extra () =
       update @@
-      install "alpine-sdk openssh %s" (match extra with None -> "" | Some x -> " " ^ x)
+      install "alpine-sdk openssh bash %s" (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?uid ?gid ?(sudo=false) username =
       let home = "/home/"^username in
