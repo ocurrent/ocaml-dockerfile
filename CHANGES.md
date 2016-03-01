@@ -2,8 +2,8 @@
 * Add `dev-repo` metadata to OPAM file.
 * Add support for installing the cloud solver for platforms where aspcud is not available.
 * Add CMD entrypoints for containers.
-
-1.2.0:
+* Alpine: add `bash` in container (requested by @justincormack)
+* Debian: correct non-interactive typos and add `dialog` in container
 * Remove `onbuild` triggers from OPAM containers as it inhibits caching (suggestion via @talex5)
 * Include specific Debian versions (v7,8,9) in addition to the stable/unstable streams.
 * Add `Dockerfile.crunch` to reduce the number of layers by combining
