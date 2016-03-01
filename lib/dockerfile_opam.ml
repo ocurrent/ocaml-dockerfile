@@ -43,7 +43,7 @@ end
 module Apt = struct
 
   let install_base_packages =
-    Linux.Apt.update @@
+    run "echo 'Acquire::Retries \"5\";' > /etc/apt/apt.conf.d/mirror-retry" @@
     Linux.Apt.install "sudo pkg-config git build-essential m4 software-properties-common unzip curl libx11-dev"
 
   let install_system_ocaml =
