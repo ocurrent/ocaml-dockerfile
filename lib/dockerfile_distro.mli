@@ -114,7 +114,7 @@ val latest_dockerfile_matrix : (t * Dockerfile.t) list
 (** {2 Dockerfile generators and iterators } *)
 
 val map :
-  ?filter:(t * bytes * Dockerfile.t -> bool)  ->
+  ?filter:(t * Bytes.t * Dockerfile.t -> bool)  ->
   ?org:Bytes.t ->
   (distro:t -> ocaml_version:Bytes.t -> Dockerfile.t -> 'a) ->
   'a list
@@ -124,7 +124,7 @@ val map :
    (by default, this is [ocaml/opam]. *)
 
 val map_tag :
-  ?filter:(t * bytes * Dockerfile.t -> bool) ->
+  ?filter:(t * Bytes.t * Dockerfile.t -> bool) ->
   (distro:t -> ocaml_version:Bytes.t -> 'a) -> 'a list
 (** [map_tag fn] executes [fn distro ocaml_version] with a tag suitable for use
    against the [ocaml/opam:TAG] Docker Hub. *)
