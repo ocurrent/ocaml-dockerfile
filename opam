@@ -22,3 +22,4 @@ depends: [
   "type_conv"
   "base-bytes"
 ]
+available: [ ocaml-version >= "4.01.0" ]
