@@ -1,8 +1,5 @@
 sut:
   build: .
-  volumes_from:
-    - debian-8_ocaml-4.02.3
-    - debian-7_ocaml-4.02.3
 debian-7_ocaml-4.02.3:
   build: release-debian-7_ocaml-4.02.3
 debian-8_ocaml-4.02.3:
