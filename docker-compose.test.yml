@@ -1,3 +1,13 @@
 sut:
   build: .
-  command: sh -c "opam source --dir=/tmp/dockerfile dockerfile && cd /tmp/dockerfile && opam config exec -- make test doc"
+  volumes_from:
+    - debian-8_ocaml-4.02.3
+    - debian-7_ocaml-4.02.3
+debian-7_ocaml-4.02.3:
+  build: release-debian-7_ocaml-4.02.3
+debian-8_ocaml-4.02.3:
+  build: release-debian-8_ocaml-4.02.3
+alpine-3_ocaml-4.02.3:
+  build: release-alpine-3.3_ocaml-4.02.3
+alpine-3_ocaml-4.03.0_trunk:
+  build: release-alpine-3.3_ocaml-4.03.0_trunk
