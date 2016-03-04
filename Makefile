@@ -40,4 +40,7 @@ configure:
 
 # OASIS_STOP
 
+docker:
+	dockerfile-gen -g --ocaml-dev -p dockerfile dockerfile
+
 include mk/Makefile.github

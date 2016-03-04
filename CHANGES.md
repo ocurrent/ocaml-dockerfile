@@ -1,3 +1,9 @@
+1.2.1:
+* Remove redundant `apk update` from Alpine definition.
+* Switch default cloud solver to one dedicated to these images so
+  they can updated in sync (the default cloud one is getting hit
+  by many bulk build hits in parallel and cannot cope with the load).
+
 1.2.0:
 * Add `dev-repo` metadata to OPAM file.
 * Add support for installing the cloud solver for platforms where aspcud is not available.
