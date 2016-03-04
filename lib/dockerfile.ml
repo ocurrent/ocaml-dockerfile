@@ -219,8 +219,8 @@ module Linux = struct
     let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
     let dev_packages ?extra () =
-      update @@
-      install "alpine-sdk openssh bash %s" (match extra with None -> "" | Some x -> " " ^ x)
+      install "alpine-sdk openssh bash %s"
+        (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?uid ?gid ?(sudo=false) username =
       let home = "/home/"^username in
