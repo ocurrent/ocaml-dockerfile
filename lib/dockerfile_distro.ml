@@ -86,6 +86,27 @@ let tag_of_distro = function
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
 
+let distro_of_tag = function
+  |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
+  |"ubuntu-14.04" -> Some (`Ubuntu `V14_04)
+  |"ubuntu-15.04" -> Some (`Ubuntu `V15_04)
+  |"ubuntu-15.10" -> Some (`Ubuntu `V15_10)
+  |"ubuntu-16.04" -> Some (`Ubuntu `V16_04)
+  |"debian-stable" -> Some (`Debian `Stable)
+  |"debian-unstable" -> Some (`Debian `Unstable)
+  |"debian-testing" -> Some (`Debian `Testing)
+  |"debian-9" -> Some (`Debian `V9)
+  |"debian-8" -> Some (`Debian `V8)
+  |"debian-7" -> Some (`Debian `V7)
+  |"centos-6" -> Some (`CentOS `V6)
+  |"centos-7" -> Some (`CentOS `V7)
+  |"fedora-21" -> Some (`Fedora `V21)
+  |"fedora-22" -> Some (`Fedora `V22)
+  |"fedora-23" -> Some (`Fedora `V23)
+  |"oraclelinux-7" -> Some (`OracleLinux `V7)
+  |"alpine-3.3" -> Some (`Alpine `V3_3)
+  |_ -> None
+
 let human_readable_string_of_distro = function
   |`Ubuntu `V12_04 -> "Ubuntu 12.04"
   |`Ubuntu `V14_04 -> "Ubuntu 14.04"
@@ -260,6 +281,11 @@ let write_to_file file s =
 let write_dockerfile ~crunch file dfile =
   let dfile = if crunch then Dockerfile.crunch dfile else dfile in
   write_to_file file (string_of_t dfile)
+
+let generate_dockerfile ?(crunch=true) output_dir d =
+  printf "Generating: %s/Dockerfile\n" output_dir;
+  run_command "mkdir -p %s" output_dir;
+  write_dockerfile ~crunch (output_dir ^ "/Dockerfile") d
 
 let generate_dockerfiles ?(crunch=true) output_dir d =
   List.iter (fun (name, docker) ->

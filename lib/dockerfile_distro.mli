@@ -60,6 +60,10 @@ val tag_of_distro : t -> Bytes.t
 (** Convert a distribution to a Docker Hub tag.  The full
   form of this is [ocaml/TAG] on the Docker Hub. *)
 
+val distro_of_tag : Bytes.t -> t option
+(** [distro_of_tag s] parses [s] into a {!t} distribution, and
+    [None] otherwise. *)
+
 val opam_tag_of_distro : t -> Bytes.t -> Bytes.t
 (** [opam_tag_of_distro distro ocaml_version] will generate
   a Docker Hub tag that maps to the container that matches
@@ -128,6 +132,14 @@ val map_tag :
   (distro:t -> ocaml_version:Bytes.t -> 'a) -> 'a list
 (** [map_tag fn] executes [fn distro ocaml_version] with a tag suitable for use
    against the [ocaml/opam:TAG] Docker Hub. *)
+
+val generate_dockerfile : ?crunch:bool -> string -> Dockerfile.t -> unit
+(** [generate_dockerfile output_dir docker] will output Dockerfile inside
+    the [output_dir] subdirectory.
+
+    The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
+    optimisation to reduce the number of layers; disable it if you really want
+    more layers. *)
 
 val generate_dockerfiles : ?crunch:bool -> string ->
   (Bytes.t * Dockerfile.t) list -> unit
