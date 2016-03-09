@@ -182,7 +182,7 @@ module Linux = struct
       workdir "%s" home
 
     let dev_packages ?extra () =
-      install "sudo passwd bzip2 patch git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
+      install "sudo passwd bzip2 patch nano git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
       groupinstall "\"Development Tools\""
   end
 
@@ -193,7 +193,7 @@ module Linux = struct
 
     let dev_packages ?extra () =
       update @@
-      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl dialog libx11-dev%s"
+      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl dialog nano libx11-dev%s"
        (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?(sudo=false) username =
@@ -219,7 +219,7 @@ module Linux = struct
     let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
     let dev_packages ?extra () =
-      install "alpine-sdk openssh bash %s"
+      install "alpine-sdk openssh bash nano %s"
         (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?uid ?gid ?(sudo=false) username =
