@@ -4,6 +4,7 @@
   they can updated in sync (the default cloud one is getting hit
   by many bulk build hits in parallel and cannot cope with the load).
 * Add `distro_of_tag` and `generate_dockerfile` to `Dockerfile_distro`.
+* Add `nano` to images to satisfy `opam pin` going interactive.
 
 1.2.0:
 * Add `dev-repo` metadata to OPAM file.
