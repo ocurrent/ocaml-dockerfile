@@ -1,36 +1,13 @@
 platform:
-    - x64
+  - x86
 
 environment:
-    global:
-        CYG_MIRROR: http://cygwin.uib.no
-        CYG_CACHE: C:/cygwin/var/cache/setup
-    matrix:
-        -   CYG_ARCH: x86
-            CYG_ROOT: C:/cygwin
-            WODI_ARCH: 32
-            MINGW_ARCH: i686
-        -   CYG_ARCH: x86_64
-            CYG_ROOT: C:/cygwin64
-            WODI_ARCH: 64
-            MINGW_ARCH: x86_64
-
-init:
-    - 'echo System architecture: %PLATFORM%'
+  CYG_ROOT: "C:\\cygwin"
+  CYG_BASH: "%CYG_ROOT%\\bin\\bash -lc"
 
 install:
-    - 'appveyor DownloadFile http://cygwin.com/setup-%CYG_ARCH%.exe -FileName setup.exe'
-    - 'setup.exe -qnNdO -R "%CYG_ROOT%" -s "%CYG_MIRROR%" -l "%CYG_CACHE%" -P make -P git -P gcc-core -P ocaml -P ocaml-camlp4 -P ocaml-compiler-libs -P curl -P libncurses-devel -P m4 -P unzip -P make -P patch >NUL'
-    - '%CYG_ROOT%/bin/bash -lc "cygcheck -dc cygwin"'
+  - appveyor DownloadFile https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/appveyor-opam.sh
+  - "%CYG_ROOT%\\setup-x86.exe -qnNdO -R %CYG_ROOT% -s http://cygwin.mirror.constant.com -l C:/cygwin/var/cache/setup -P rsync -P patch -P diffutils -P curl -P make -P unzip -P git -P m4 -P perl -P mingw64-x86_64-gcc-core"
 
 build_script:
-    - '%CYG_ROOT%/bin/bash -lc "env"'
-    - '%CYG_ROOT%/bin/bash -lc "cd \"$OLDPWD\" && ls -la"'
-    - '%CYG_ROOT%/bin/bash -lc "git clone -b 1.2 git://github.com/ocaml/opam opam-build && cd opam-build && env DJDIR="workaround" ./configure && make lib-ext && make && make install"'
-    - '%CYG_ROOT%/bin/bash -lc "opam init -y -a"'
-    - '%CYG_ROOT%/bin/bash -lc "opam install -y -v ocamlfind"'
-    - '%CYG_ROOT%/bin/bash -lc "./configure && make"'
-
-artifacts:
-  - path: test.log
-    name: test-logs
+  - "%CYG_BASH% '${APPVEYOR_BUILD_FOLDER}/appveyor-opam.sh'"
