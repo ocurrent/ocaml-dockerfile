@@ -41,7 +41,7 @@ let latest_stable_distros = [
   (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_3) ]
 
 let master_distro = `Debian `Stable
-let ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0+beta1"; "4.03.0+trunk" ]
+let ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0+trunk"; "4.03.0+trunk+flambda" ]
 let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
