@@ -23,6 +23,7 @@ type t = [
   | `Alpine of [ `V3_3 ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Raspbian of [ `V8 | `V7 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
@@ -31,6 +32,7 @@ type t = [
 let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
+                (`Raspbian `V8); (`Raspbian `V7);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7);
@@ -48,10 +50,10 @@ let latest_opam_version = "1.2.2"
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro = function
-  |`Debian (`Stable |`V8) -> Some "4.01.0"
+  |`Debian (`Stable |`V8) | `Raspbian `V8 -> Some "4.01.0"
   |`Debian `Testing -> Some "4.02.3"
   |`Debian (`Unstable | `V9) -> Some "4.02.3"
-  |`Debian `V7 -> Some "3.12.1"
+  |`Debian `V7 | `Raspbian `V7-> Some "3.12.1"
   |`Ubuntu `V12_04 -> Some "3.12.1"
   |`Ubuntu `V14_04 -> Some "4.01.0"
   |`Ubuntu `V15_04 -> Some "4.01.0"
@@ -78,6 +80,8 @@ let tag_of_distro = function
   |`Debian `V9 -> "debian-9"
   |`Debian `V8 -> "debian-8"
   |`Debian `V7 -> "debian-7"
+  |`Raspbian `V7 -> "raspbian-7"
+  |`Raspbian `V8 -> "raspbian-8"
   |`CentOS `V6 -> "centos-6"
   |`CentOS `V7 -> "centos-7"
   |`Fedora `V21 -> "fedora-21"
@@ -98,6 +102,8 @@ let distro_of_tag = function
   |"debian-9" -> Some (`Debian `V9)
   |"debian-8" -> Some (`Debian `V8)
   |"debian-7" -> Some (`Debian `V7)
+  |"raspbian-8" -> Some (`Raspbian `V8)
+  |"raspbian-7" -> Some (`Raspbian `V7)
   |"centos-6" -> Some (`CentOS `V6)
   |"centos-7" -> Some (`CentOS `V7)
   |"fedora-21" -> Some (`Fedora `V21)
@@ -119,6 +125,8 @@ let human_readable_string_of_distro = function
   |`Debian `V9 -> "Debian 9 (Stretch)"
   |`Debian `V8 -> "Debian 8 (Jessie)"
   |`Debian `V7 -> "Debian 7 (Wheezy)"
+  |`Raspbian `V8 -> "Raspbian 8 (Jessie)"
+  |`Raspbian `V7 -> "Raspbian 7 (Wheezy)"
   |`CentOS `V6 -> "CentOS 6"
   |`CentOS `V7 -> "CentOS 7"
   |`Fedora `V21 -> "Fedora 21"
@@ -131,6 +139,7 @@ let human_readable_short_string_of_distro (t:t) =
   match t with
   |`Ubuntu _ ->  "Ubuntu"
   |`Debian _ -> "Debian"
+  |`Raspbian _ -> "Raspbian"
   |`CentOS _ -> "CentOS"
   |`Fedora _ -> "Fedora"
   |`OracleLinux _ -> "OracleLinux"
@@ -141,6 +150,7 @@ let latest_tag_of_distro (t:t) =
   match t with
   |`Ubuntu _ ->  "ubuntu"
   |`Debian _ -> "debian"
+  |`Raspbian _ -> "raspbian"
   |`CentOS _ -> "centos"
   |`Fedora _ -> "fedora"
   |`OracleLinux _ -> "oraclelinux"
@@ -224,7 +234,7 @@ let to_dockerfile ~ocaml_version ~distro =
     | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
   in
   match distro with
-  | `Ubuntu _ | `Debian _ -> apt_opam ?compiler_version labels distro tag
+  | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?compiler_version labels distro tag
   | `CentOS _ | `Fedora _ | `OracleLinux _ -> yum_opam ?compiler_version labels distro tag
   | `Alpine _ -> apk_opam ?compiler_version labels tag
 

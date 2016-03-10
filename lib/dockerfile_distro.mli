@@ -26,6 +26,7 @@ type t = [
   | `Alpine of [ `V3_3 ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Raspbian of [ `V8 | `V7 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
