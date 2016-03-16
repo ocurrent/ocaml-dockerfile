@@ -1,4 +1,6 @@
-1.2.2:
+1.3.0:
+* Rearrange OCaml installation commands to be in `Dockerfile` instead
+  of in `Dockerfile_opam` (which is now purely OPAM installation).
 * Create a `~/.ssh` folder with the right permissions in all distros.
 * Ensure rsync is installed in all the Debian-based containers.
 * Correctly label the ARMv7 containers with the `arch=armv7` label.
