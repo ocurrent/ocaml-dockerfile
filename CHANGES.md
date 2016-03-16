@@ -1,5 +1,7 @@
 1.2.2:
 * Create a `~/.ssh` folder with the right permissions in all distros.
+* Ensure rsync is installed in all the Debian-based containers.
+* Correctly label the ARMv7 containers with the `arch=armv7` label.
 
 1.2.1:
 * Remove redundant `apk update` from Alpine definition.

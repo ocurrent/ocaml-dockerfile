@@ -222,7 +222,7 @@ let to_dockerfile ~ocaml_version ~distro =
   let labels = [
       "distro", (latest_tag_of_distro distro);
       "distro_long", (tag_of_distro distro);
-      "arch", "x86_64";
+      "arch", (match distro with |`Raspbian _ -> "armv7" |_ -> "x86_64");
       "ocaml_version", ocaml_version;
       "opam_version", latest_opam_version;
       "operatingsystem", "linux";
