@@ -145,7 +145,6 @@ let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
 
 let string_of_t tl = String.concat "\n" (List.map string_of_line tl)
 
-
 module Linux = struct
 
   let run_sh fmt = ksprintf (run "sh -c %S") fmt
@@ -181,11 +180,14 @@ module Linux = struct
       env ["HOME", home] @@
       workdir "%s" home @@
       run "mkdir .ssh" @@
-      run "chmod 700"
+      run "chmod 700 .ssh"
 
     let dev_packages ?extra () =
       install "sudo passwd bzip2 patch nano git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
       groupinstall "\"Development Tools\""
+
+    let install_system_ocaml =
+      install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"
   end
 
   (** Debian rules *)
@@ -195,7 +197,8 @@ module Linux = struct
 
     let dev_packages ?extra () =
       update @@
-      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip curl dialog nano libx11-dev%s"
+      run "echo 'Acquire::Retries \"5\";' > /etc/apt/apt.conf.d/mirror-retry" @@
+      install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip rsync curl dialog nano libx11-dev%s"
        (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?(sudo=false) username =
@@ -214,7 +217,11 @@ module Linux = struct
       env ["HOME", home] @@
       workdir "%s" home @@
       run "mkdir .ssh" @@
-      run "chmod 700 .ssh" 
+      run "chmod 700 .ssh"
+
+   let install_system_ocaml =
+     install "ocaml ocaml-native-compilers camlp4-extra rsync"
+
   end
 
   (** Alpine rules *)
@@ -243,7 +250,11 @@ module Linux = struct
       user "%s" username @@
       workdir "%s" home @@
       run "mkdir .ssh" @@
-      run "chmod 700 .ssh" 
-  end
+      run "chmod 700 .ssh"
 
+    let install_system_ocaml =
+      run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
+      run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/ >> /etc/apk/repositories" @@
+      install "ocaml camlp4"
+  end
 end

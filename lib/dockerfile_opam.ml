@@ -28,12 +28,6 @@ let install_cloud_solver =
 (** RPM rules *)
 module RPM = struct
 
-  let install_base_packages =
-    Linux.RPM.dev_packages ()
-
-  let install_system_ocaml =
-    Linux.RPM.install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"
-
   let install_system_opam = function
   | `CentOS7 -> Linux.RPM.install "opam aspcud"
   | `CentOS6 -> Linux.RPM.install "opam" @@ install_cloud_solver
@@ -41,13 +35,6 @@ end
 
 (** Debian rules *)
 module Apt = struct
-
-  let install_base_packages =
-    run "echo 'Acquire::Retries \"5\";' > /etc/apt/apt.conf.d/mirror-retry" @@
-    Linux.Apt.install "sudo pkg-config git build-essential m4 software-properties-common unzip curl libx11-dev rsync"
-
-  let install_system_ocaml =
-    Linux.Apt.install "ocaml ocaml-native-compilers camlp4-extra rsync"
 
   let install_system_opam =
     Linux.Apt.install "opam aspcud"

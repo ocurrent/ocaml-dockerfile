@@ -238,6 +238,9 @@ module Linux : sig
     val dev_packages : ?extra:string -> unit -> t
     (** [dev_packages ?extra ()] will install the base development tools and [sudo],
         [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+
+    val install_system_ocaml : t
+    (** Install the system OCaml packages via Yum *)
   end
 
   (** Rules for Apt-based distributions *)
@@ -256,6 +259,9 @@ module Linux : sig
     val dev_packages : ?extra:string -> unit -> t
     (** [dev_packages ?extra ()] will install the base development tools and [sudo],
         [passwd] and [git] and X11.  Extra packages may also be optionally supplied via [extra]. *)
+
+    val install_system_ocaml : t
+    (** Install the system OCaml packages via [apt-get] *)
   end
 
   (** Rules for Apk-based distributions such as Alpine Linux *)
@@ -274,6 +280,10 @@ module Linux : sig
     (** [add_user username] will install a new user with name [username] and a locked
         password.  If [sudo] is true then root access with no password will also be
         configured.  The default value for [sudo] is [false]. *)
+
+    val install_system_ocaml : t
+    (** Install the system OCaml packages via Apk *)
+
   end
 
   (** Rules for Git *)

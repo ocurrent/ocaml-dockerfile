@@ -20,12 +20,6 @@
 (** RPM distribution specific rules involving OPAM and OCaml *)
 module RPM : sig
 
-  val install_base_packages : Dockerfile.t
-  (** Install the base development packages *)
-
-  val install_system_ocaml : Dockerfile.t
-  (** Install the system OCaml packages via Yum *)
-
   val install_system_opam : [< `CentOS6 | `CentOS7 ] -> Dockerfile.t
   (** Install the system OPAM packages via Yum *)
 end
@@ -33,15 +27,8 @@ end
 (** Apt distribution specific rules involving OPAM and OCaml *)
 module Apt : sig
 
-    val install_base_packages : Dockerfile.t
-    (** Install the base packages required by OPAM, such as [unzip],
-        [curl] and so on. *)
-
-    val install_system_ocaml : Dockerfile.t
-    (** Install the system OCaml packages via [apt-get] *)
-
-    val install_system_opam : Dockerfile.t
-    (** Install the system OPAM packages via [apt-get] *)
+  val install_system_opam : Dockerfile.t
+  (** Install the system OPAM packages via [apt-get] *)
 end
 
 val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
