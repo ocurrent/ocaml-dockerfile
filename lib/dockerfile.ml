@@ -179,7 +179,9 @@ module Linux = struct
       run "chown -R %s:%s %s" username username home @@
       user "%s" username @@
       env ["HOME", home] @@
-      workdir "%s" home
+      workdir "%s" home @@
+      run "mkdir .ssh" @@
+      run "chmod 700"
 
     let dev_packages ?extra () =
       install "sudo passwd bzip2 patch nano git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
@@ -210,7 +212,9 @@ module Linux = struct
       run "chown -R %s:%s %s" username username home @@
       user "%s" username @@
       env ["HOME", home] @@
-      workdir "%s" home
+      workdir "%s" home @@
+      run "mkdir .ssh" @@
+      run "chmod 700 .ssh" 
   end
 
   (** Alpine rules *)
@@ -237,7 +241,9 @@ module Linux = struct
          run "chown root:root %s" sudofile @@
          run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
       user "%s" username @@
-      workdir "%s" home
+      workdir "%s" home @@
+      run "mkdir .ssh" @@
+      run "chmod 700 .ssh" 
   end
 
 end

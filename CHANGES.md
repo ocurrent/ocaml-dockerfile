@@ -1,3 +1,6 @@
+1.2.2:
+* Create a `~/.ssh` folder with the right permissions in all distros.
+
 1.2.1:
 * Remove redundant `apk update` from Alpine definition.
 * Switch default cloud solver to one dedicated to these images so
