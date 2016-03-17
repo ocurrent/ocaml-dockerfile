@@ -21,10 +21,10 @@ type shell_or_exec = [
   | `Shell of string
   | `Shells of string list
   | `Exec of string list
-] with sexp
+] [@@deriving sexp]
 
 type sources_to_dest =
-  [ `Src of string list ] * [ `Dst of string ] with sexp
+  [ `Src of string list ] * [ `Dst of string ] [@@deriving sexp]
 
 type line = [
   | `Comment of string
@@ -42,9 +42,9 @@ type line = [
   | `Workdir of string
   | `Onbuild of line
   | `Label of (string * string) list
-] with sexp
+] [@@deriving sexp]
 
-type t = line list with sexp
+type t = line list [@@deriving sexp]
 let (@@) = (@)
 let (@@@) = List.fold_left (fun a b -> a @@ b)
 let empty = []

@@ -2,7 +2,7 @@ FROM ocaml/opam
 RUN opam depext -u iocaml
 ENV OPAMYES=1
 RUN opam install -j 2 iocaml
-RUN opam pin add dockerfile --dev
+RUN opam pin add dockerfile https://github.com/avsm/ocaml-dockerfile.git
 RUN opam source dockerfile --dir=/tmp/dockerfile
 RUN mkdir -p /tmp/dockerfile/html/ocaml-dockerfile
 WORKDIR /tmp/dockerfile

@@ -10,7 +10,7 @@ BuildTools:  ocamlbuild
 Library dockerfile
   Path: lib
   Modules: Dockerfile
-  BuildDepends: sexplib, sexplib.syntax
+  BuildDepends: sexplib, ppx_sexp_conv
   XMETARequires: sexplib
 
 Library opam
@@ -18,7 +18,7 @@ Library opam
   Modules: Dockerfile_opam, Dockerfile_distro
   Findlibname: opam
   Findlibparent: dockerfile
-  BuildDepends: dockerfile, sexplib, sexplib.syntax, str, bytes
+  BuildDepends: dockerfile, sexplib, ppx_sexp_conv, str, bytes
   XMETARequires: dockerfile, sexplib, str, bytes
 
 Library "opam-cmdliner"

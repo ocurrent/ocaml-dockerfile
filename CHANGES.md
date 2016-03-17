@@ -4,6 +4,7 @@
 * Create a `~/.ssh` folder with the right permissions in all distros.
 * Ensure rsync is installed in all the Debian-based containers.
 * Correctly label the ARMv7 containers with the `arch=armv7` label.
+* Use ppx to build instead of camlp4. Now depends on OCaml 4.02+.
 
 1.2.1:
 * Remove redundant `apk update` from Alpine definition.

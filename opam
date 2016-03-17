@@ -17,9 +17,7 @@ remove: ["ocamlfind" "remove" "dockerfile"]
 depends: [
   "ocamlfind" {build} 
   "cmdliner"
-  "sexplib" {<"113.24.0"}
-  "camlp4"
-  "type_conv"
+  "ppx_sexp_conv"
   "base-bytes"
 ]
-available: [ ocaml-version >= "4.01.0" ]
+available: [ ocaml-version >= "4.02.0" ]

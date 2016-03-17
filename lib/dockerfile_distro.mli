@@ -30,7 +30,7 @@ type t = [
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
-] with sexp 
+] [@@deriving sexp] 
 (** Supported Docker container distributions *)
 
 val distros : t list
