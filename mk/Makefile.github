@@ -1,10 +1,12 @@
 .PHONY: gh-pages iocamljs
 
+URL ?= $(shell git config --get remote.origin.url)
+
 iocamljs-depends:
 	opam install iocaml
 
 gh-pages: doc iocamljs-site
-	git clone `git config --get remote.origin.url` .gh-pages --reference .
+	git clone $(URL) .gh-pages --reference .
 	git -C .gh-pages checkout --orphan gh-pages
 	git -C .gh-pages reset
 	git -C .gh-pages clean -dxf
