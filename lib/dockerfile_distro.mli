@@ -145,6 +145,16 @@ val generate_dockerfile : ?crunch:bool -> string -> Dockerfile.t -> unit
 val generate_dockerfiles : ?crunch:bool -> string ->
   (Bytes.t * Dockerfile.t) list -> unit
 (** [generate_dockerfiles output_dir (name * docker)] will
+    output a list of Dockerfiles inside the [output_dir/] subdirectory,
+    with each Dockerfile named as [Dockerfile.<release>].
+
+    The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
+    optimisation to reduce the number of layers; disable it if you really want
+    more layers. *)
+
+val generate_dockerfiles_in_directories : ?crunch:bool -> string ->
+  (Bytes.t * Dockerfile.t) list -> unit
+(** [generate_dockerfiles_in_directories output_dir (name * docker)] will
     output a list of Dockerfiles inside the [output_dir/name] subdirectory,
     with each directory containing the Dockerfile specified by [docker].
 

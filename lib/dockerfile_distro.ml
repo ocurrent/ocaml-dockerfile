@@ -297,11 +297,17 @@ let generate_dockerfile ?(crunch=true) output_dir d =
   run_command "mkdir -p %s" output_dir;
   write_dockerfile ~crunch (output_dir ^ "/Dockerfile") d
 
-let generate_dockerfiles ?(crunch=true) output_dir d =
+let generate_dockerfiles_in_directories ?(crunch=true) output_dir d =
   List.iter (fun (name, docker) ->
     printf "Generating: %s/%s/Dockerfile\n" output_dir name;
     run_command "mkdir -p %s/%s" output_dir name;
     write_dockerfile ~crunch (output_dir ^ "/" ^ name ^ "/Dockerfile") docker
+  ) d
+
+let generate_dockerfiles ?(crunch=true) output_dir d =
+  List.iter (fun (name, docker) ->
+     printf "Generating: %s/Dockerfile.%s\n" output_dir name;
+     write_dockerfile ~crunch (output_dir ^ "/Dockerfile." ^ name) docker
   ) d
 
 let generate_dockerfiles_in_git_branches ?readme ?(crunch=true) output_dir d =

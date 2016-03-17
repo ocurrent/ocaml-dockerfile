@@ -1,3 +1,9 @@
+1.3.1:
+* `Dockerfile_distro.generate_dockerfiles` goes into the current
+  directory instead with each Dockerfile suffixed with the release
+  name.  There is a new `generate_dockerfiles_in_directories`
+  for the old behaviour.
+
 1.3.0:
 * Rearrange OCaml installation commands to be in `Dockerfile` instead
   of in `Dockerfile_opam` (which is now purely OPAM installation).
