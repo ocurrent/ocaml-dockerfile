@@ -3,6 +3,8 @@
   directory instead with each Dockerfile suffixed with the release
   name.  There is a new `generate_dockerfiles_in_directories`
   for the old behaviour.
+* Move slow ARM distribution out of the default distro list into
+  `Dockerfile_distro.slow_distros`.
 
 1.3.0:
 * Rearrange OCaml installation commands to be in `Dockerfile` instead

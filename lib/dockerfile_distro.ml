@@ -32,11 +32,14 @@ type t = [
 let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
-                (`Raspbian `V8); (`Raspbian `V7);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7);
                 (`Alpine `V3_3) ]
+
+let slow_distros = [
+                (`Raspbian `V8); (`Raspbian `V7);
+]
 
 let latest_stable_distros = [
   (`Ubuntu `V14_04); (`Debian `Stable); (`Fedora `V23);

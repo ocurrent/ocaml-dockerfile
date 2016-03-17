@@ -36,6 +36,9 @@ type t = [
 val distros : t list
 (** Enumeration of the supported Docker container distributions *)
 
+val slow_distros : t list
+(** Enumerations of slower non-x86 distributions like ARM Raspbian *)
+
 val latest_stable_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
 
