@@ -1,7 +1,7 @@
 ocaml-dockerfile
 ================
 
-[Docker](http://docker.com) is a Linux container manager that can build images
+[Docker](http://docker.com) is a container manager that can build images
 automatically by reading the instructions from a `Dockerfile`. A Dockerfile is
 a text document that contains all the commands you would normally execute
 manually in order to build a Docker image. By calling `docker build` from your
@@ -15,4 +15,4 @@ awk/sed-style assembly.
 - **HTML Documentation**: https://avsm.github.io/ocaml-dockerfile
 - **Source:**: https://github.com/avsm/ocaml-dockerfile
 - **Issues**: https://github.com/avsm/ocaml-dockerfile/issues
-- **Email**: <mirageos-devel@lists.xenproject.org>
+- **Email**: <anil@recoil.org>
