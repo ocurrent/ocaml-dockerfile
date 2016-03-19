@@ -176,7 +176,7 @@ let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
  
 (* Apt based Dockerfile *)
-let apt_opam ?compiler_version labels distro tag =
+let apt_opam ?pin ?compiler_version labels distro tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apt")::labels) @@
@@ -185,12 +185,13 @@ let apt_opam ?compiler_version labels distro tag =
     Linux.Apt.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
+    (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
     cmd_exec ["bash"]
 
 (* Yum RPM based Dockerfile *)
-let yum_opam ?compiler_version labels distro tag =
+let yum_opam ?pin ?compiler_version labels distro tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
@@ -201,12 +202,13 @@ let yum_opam ?compiler_version labels distro tag =
     Linux.RPM.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
+    (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
     cmd_exec ["bash"]
 
 (* Apk (alpine) Dockerfile *)
-let apk_opam ?compiler_version labels tag =
+let apk_opam ?pin ?compiler_version labels tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
@@ -215,13 +217,14 @@ let apk_opam ?compiler_version labels tag =
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
+    (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
     cmd_exec ["sh"]
 
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
-let to_dockerfile ~ocaml_version ~distro =
+let to_dockerfile ?pin ~ocaml_version ~distro =
   let labels = [
       "distro", (latest_tag_of_distro distro);
       "distro_long", (tag_of_distro distro);
@@ -237,27 +240,27 @@ let to_dockerfile ~ocaml_version ~distro =
     | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
   in
   match distro with
-  | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?compiler_version labels distro tag
-  | `CentOS _ | `Fedora _ | `OracleLinux _ -> yum_opam ?compiler_version labels distro tag
-  | `Alpine _ -> apk_opam ?compiler_version labels tag
+  | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ?compiler_version labels distro tag
+  | `CentOS _ | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ?compiler_version labels distro tag
+  | `Alpine _ -> apk_opam ?pin ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
-let dockerfile_matrix =
+let dockerfile_matrix ?pin () =
   List.map (fun opam_version ->
     List.map (fun ocaml_version ->
       List.map (fun distro ->
         distro,
         ocaml_version,
-        to_dockerfile ~ocaml_version ~distro
+        to_dockerfile ?pin ~ocaml_version ~distro
       ) distros
     ) ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten |>
   (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 
-let latest_dockerfile_matrix =
+let latest_dockerfile_matrix ?pin () =
   List.map (fun distro ->
     distro,
-    to_dockerfile ~ocaml_version:latest_ocaml_version ~distro
+    to_dockerfile ?pin ~ocaml_version:latest_ocaml_version ~distro
   ) latest_stable_distros |> 
   List.sort (fun (a,_) (b,_) -> compare a b)
 
@@ -265,7 +268,7 @@ let map_tag ?filter fn =
   List.filter
     (match filter with
       | None -> (fun _ -> true)
-      | Some fn -> fn) dockerfile_matrix
+      | Some fn -> fn) (dockerfile_matrix ())
   |>
   List.map (fun (distro,ocaml_version,_) -> fn ~distro ~ocaml_version)
 

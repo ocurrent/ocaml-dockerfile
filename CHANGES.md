@@ -1,10 +1,12 @@
-1.3.1:
+1.4.0:
 * `Dockerfile_distro.generate_dockerfiles` goes into the current
   directory instead with each Dockerfile suffixed with the release
   name.  There is a new `generate_dockerfiles_in_directories`
   for the old behaviour.
 * Move slow ARM distribution out of the default distro list into
   `Dockerfile_distro.slow_distros`.
+* Add optional `?pin` argument to `dockerfile_distro` generation
+  to make it easier to customise version of packages installed.
 
 1.3.0:
 * Rearrange OCaml installation commands to be in `Dockerfile` instead
