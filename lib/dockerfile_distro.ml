@@ -224,7 +224,7 @@ let apk_opam ?pin ?compiler_version labels tag =
 
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
-let to_dockerfile ?pin ~ocaml_version ~distro =
+let to_dockerfile ?pin ~ocaml_version ~distro () =
   let labels = [
       "distro", (latest_tag_of_distro distro);
       "distro_long", (tag_of_distro distro);
@@ -251,7 +251,7 @@ let dockerfile_matrix ?pin () =
       List.map (fun distro ->
         distro,
         ocaml_version,
-        to_dockerfile ?pin ~ocaml_version ~distro
+        to_dockerfile ?pin ~ocaml_version ~distro ()
       ) distros
     ) ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten |>
@@ -260,7 +260,7 @@ let dockerfile_matrix ?pin () =
 let latest_dockerfile_matrix ?pin () =
   List.map (fun distro ->
     distro,
-    to_dockerfile ?pin ~ocaml_version:latest_ocaml_version ~distro
+    to_dockerfile ?pin ~ocaml_version:latest_ocaml_version ~distro ()
   ) latest_stable_distros |> 
   List.sort (fun (a,_) (b,_) -> compare a b)
 

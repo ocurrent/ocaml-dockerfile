@@ -97,14 +97,15 @@ val compare : t -> t -> int
 val to_dockerfile :
   ?pin:Bytes.t ->
   ocaml_version:Bytes.t ->
-  distro:t -> Dockerfile.t
+  distro:t -> unit -> Dockerfile.t
 (** [to_dockerfile ?pin ~ocaml_version ~distro] generates
    a Dockerfile for [distro], with OPAM installed and the
    current switch pointing to [ocaml_version]. If [pin]
    is specified then an [opam pin add <pin>] will be added
    to the initialisation. *)
 
-val dockerfile_matrix : ?pin:Bytes.t -> unit -> (t * Bytes.t * Dockerfile.t) list
+val dockerfile_matrix :
+  ?pin:Bytes.t -> unit -> (t * Bytes.t * Dockerfile.t) list
 (** [dockerfile_matrix ?pin ()] contains the list of Docker tags
    and their associated Dockerfiles for all distributions.
    The user of the container can assume that OPAM is installed
@@ -112,7 +113,8 @@ val dockerfile_matrix : ?pin:Bytes.t -> unit -> (t * Bytes.t * Dockerfile.t) lis
    is available on that container. If [pin] is specified then an
    [opam pin add <pin>] will be added to the initialisation. *)
 
-val latest_dockerfile_matrix : ?pin:Bytes.t -> unit -> (t * Dockerfile.t) list
+val latest_dockerfile_matrix :
+  ?pin:Bytes.t -> unit -> (t * Dockerfile.t) list
 (** [latest_dockerfile_matrix] contains the list of Docker tags
    and Dockerfiles for the latest releases of distributions.
    These contain the latest stable version of the distribution,
