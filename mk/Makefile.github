@@ -12,8 +12,8 @@ gh-pages: doc iocamljs-site
 	git -C .gh-pages clean -dxf
 	cp -r html/* .gh-pages/
 	mkdir -p .gh-pages/api
-#	cp -r api.docdir/* .gh-pages/api
-#	cp mk/nice-style.css .gh-pages/api/style.css
+	cp -r api.docdir/* .gh-pages/api
+	cp mk/nice-style.css .gh-pages/api/style.css
 	git -C .gh-pages add .
 	git -C .gh-pages commit -m "Update Pages"
 	git -C .gh-pages push origin gh-pages -f

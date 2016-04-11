@@ -20,7 +20,7 @@ NAME=dockerfile
 jsoo_mktop -dont-export-unit gc \
   -export-package dockerfile \
   -export-package iocamljs-kernel \
-  -jsopt +weak.js -jsopt +toplevel.js -o ${NAME}.byte
+  -jsopt +weak.js -jsopt +toplevel.js -jsopt +dynlink.js -o ${NAME}.byte
 
 cat *.cmis.js \
   `opam config var lib`/iocamljs-kernel/kernel.js ${NAME}.js > \
