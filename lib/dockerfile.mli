@@ -206,7 +206,7 @@ val label : (string * string) list -> t
   To view an image’s labels, use the [docker inspect] command. *)
 
 val crunch : t -> t
-(** [crunch t] will reduce coincident `RUN` commands into a single
+(** [crunch t] will reduce coincident {!run} commands into a single
   one that is chained using the shell [&&] operator. This reduces the
   number of layers required for a production image. *)
 
