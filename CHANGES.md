@@ -1,3 +1,8 @@
+1.5.0:
+* Add released OCaml 4.03.0 into the compiler list, and break up
+  the exposed variables into a more manageable set of
+  `stable_ocaml_versions` and `all_ocaml_versions`.
+
 1.4.0:
 * `Dockerfile_distro.generate_dockerfiles` goes into the current
   directory instead with each Dockerfile suffixed with the release
