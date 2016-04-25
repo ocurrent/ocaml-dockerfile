@@ -46,8 +46,14 @@ val master_distro : t
 (** The distribution that is the top-level alias for the [latest] tag
     in the [ocaml/opam] Docker Hub build. *)
 
-val ocaml_versions : Bytes.t list
-(** Enumeration of supported OCaml compiler versions. *)
+val stable_ocaml_versions : Bytes.t list
+(** Enumeration of released OCaml compiler versions. The latest patch
+    branch of each release is picked. *)
+
+val all_ocaml_versions : Bytes.t list
+(** Enumeration of released OCaml compiler versions. In addition to the
+    {!stable_ocaml_versions}, trunk builds for the latest releases may
+    also be included. *)
 
 val latest_ocaml_version : Bytes.t
 (** The latest stable OCaml release. *)

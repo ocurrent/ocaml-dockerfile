@@ -46,7 +46,8 @@ let latest_stable_distros = [
   (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_3) ]
 
 let master_distro = `Debian `Stable
-let ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0+trunk"; "4.03.0+trunk+flambda" ]
+let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
+let all_ocaml_versions = stable_ocaml_versions @ [ "4.03.0+trunk"; "4.03.0+trunk+flambda" ]
 let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
@@ -176,12 +177,13 @@ let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
  
 (* Apt based Dockerfile *)
-let apt_opam ?pin ?compiler_version labels distro tag =
+let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
+    let branch = opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apt")::labels) @@
     Linux.Apt.install "aspcud" @@
-    install_opam_from_source () @@
+    install_opam_from_source ?branch () @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version () @@
@@ -191,12 +193,13 @@ let apt_opam ?pin ?compiler_version labels distro tag =
     cmd_exec ["bash"]
 
 (* Yum RPM based Dockerfile *)
-let yum_opam ?pin ?compiler_version labels distro tag =
+let yum_opam ?pin ?opam_version ?compiler_version labels distro tag =
+    let branch = opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
     Linux.RPM.dev_packages ~extra:"which tar" () @@
-    install_opam_from_source ~prefix:"/usr" () @@
+    install_opam_from_source ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
@@ -253,7 +256,7 @@ let dockerfile_matrix ?pin () =
         ocaml_version,
         to_dockerfile ?pin ~ocaml_version ~distro ()
       ) distros
-    ) ocaml_versions
+    ) stable_ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten |>
   (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 

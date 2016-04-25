@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        dockerfile
-Version:     1.4.0
+Version:     1.5.0
 Synopsis:    OCaml interface for generating Dockerfiles
 Authors:     Anil Madhavapeddy
 License:     ISC
