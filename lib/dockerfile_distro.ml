@@ -47,7 +47,7 @@ let latest_stable_distros = [
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
-let all_ocaml_versions = stable_ocaml_versions @ [ "4.03.0+trunk"; "4.03.0+trunk+flambda" ]
+let all_ocaml_versions = stable_ocaml_versions @ [ "4.03.1+trunk"; "4.03.1+trunk+flambda" ]
 let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
