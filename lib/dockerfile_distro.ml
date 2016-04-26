@@ -193,12 +193,12 @@ let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
     cmd_exec ["bash"]
 
 (* Yum RPM based Dockerfile *)
-let yum_opam ?pin ?opam_version ?compiler_version labels distro tag =
+let yum_opam ?(extra=[]) ?pin ?opam_version ?compiler_version labels distro tag =
     let branch = opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
-    Linux.RPM.dev_packages ~extra:"which tar" () @@
+    Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::extra)) () @@
     install_opam_from_source ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
@@ -244,7 +244,8 @@ let to_dockerfile ?pin ~ocaml_version ~distro () =
   in
   match distro with
   | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ?compiler_version labels distro tag
-  | `CentOS _ | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ?compiler_version labels distro tag
+  | `CentOS _ -> yum_opam ?pin ?compiler_version ~extra:["centos-release-xen"] labels distro tag
+  | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ?compiler_version labels distro tag
   | `Alpine _ -> apk_opam ?pin ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
