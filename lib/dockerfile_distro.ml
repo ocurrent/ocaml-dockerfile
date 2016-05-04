@@ -228,12 +228,12 @@ let apk_opam ?pin ?compiler_version labels tag =
 
 (* Runes to upgrade Git in ancient CentOS6 to something that works with OPAM *)
 let centos6_modern_git =
-    run "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm" @@
+    run "curl -OL http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm" @@
     run "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt" @@
     run "rpm -K rpmforge-release-0.5.2-2.el6.rf.*.rpm" @@
     run "rpm -i rpmforge-release-0.5.2-2.el6.rf.*.rpm" @@
     run "rm -f rpmforge-release-0.5.2-2.el6.rf.*.rpm" @@
-    run "yum --disablerepo=base,updates --enablerepo=rpmforge-extras update git"
+    run "yum -y --disablerepo=base,updates --enablerepo=rpmforge-extras update git"
 
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
