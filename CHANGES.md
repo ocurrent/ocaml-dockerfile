@@ -1,3 +1,7 @@
+1.6.0:
+* Add a more modern Git in CentOS 6 to make it work with OPAM
+  remote refs.
+
 1.5.0:
 * Add released OCaml 4.03.0 into the compiler list, and break up
   the exposed variables into a more manageable set of

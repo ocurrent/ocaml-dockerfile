@@ -193,12 +193,13 @@ let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
     cmd_exec ["bash"]
 
 (* Yum RPM based Dockerfile *)
-let yum_opam ?(extra=[]) ?pin ?opam_version ?compiler_version labels distro tag =
+let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels distro tag =
     let branch = opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
-    Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::extra)) () @@
+    maybe (fun x -> x) extra_cmd @@
+    Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::"wget"::extra)) () @@
     install_opam_from_source ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
@@ -225,6 +226,15 @@ let apk_opam ?pin ?compiler_version labels tag =
     entrypoint_exec ["opam";"config";"exec";"--"] @@
     cmd_exec ["sh"]
 
+(* Runes to upgrade Git in ancient CentOS6 to something that works with OPAM *)
+let centos6_modern_git =
+    run "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm" @@
+    run "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt" @@
+    run "rpm -K rpmforge-release-0.5.2-2.el6.rf.*.rpm" @@
+    run "rpm -i rpmforge-release-0.5.2-2.el6.rf.*.rpm" @@
+    run "rm -f rpmforge-release-0.5.2-2.el6.rf.*.rpm" @@
+    run "yum --disablerepo=base,updates --enablerepo=rpmforge-extras update git"
+
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
 let to_dockerfile ?pin ~ocaml_version ~distro () =
@@ -244,6 +254,7 @@ let to_dockerfile ?pin ~ocaml_version ~distro () =
   in
   match distro with
   | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ?compiler_version labels distro tag
+  | `CentOS `V6 -> yum_opam ?pin ?compiler_version ~extra_cmd:centos6_modern_git ~extra:["centos-release-xen"] labels distro tag
   | `CentOS _ -> yum_opam ?pin ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ?compiler_version labels distro tag
   | `Alpine _ -> apk_opam ?pin ?compiler_version labels tag
