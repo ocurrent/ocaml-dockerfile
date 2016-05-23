@@ -111,7 +111,7 @@ val to_dockerfile :
    to the initialisation. *)
 
 val dockerfile_matrix :
-  ?pin:Bytes.t -> unit -> (t * Bytes.t * Dockerfile.t) list
+  ?extra:t list -> ?pin:Bytes.t -> unit -> (t * Bytes.t * Dockerfile.t) list
 (** [dockerfile_matrix ?pin ()] contains the list of Docker tags
    and their associated Dockerfiles for all distributions.
    The user of the container can assume that OPAM is installed
@@ -120,6 +120,7 @@ val dockerfile_matrix :
    [opam pin add <pin>] will be added to the initialisation. *)
 
 val latest_dockerfile_matrix :
+  ?extra:t list -> 
   ?pin:Bytes.t -> unit -> (t * Dockerfile.t) list
 (** [latest_dockerfile_matrix] contains the list of Docker tags
    and Dockerfiles for the latest releases of distributions.

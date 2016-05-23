@@ -260,23 +260,23 @@ let to_dockerfile ?pin ~ocaml_version ~distro () =
   | `Alpine _ -> apk_opam ?pin ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
-let dockerfile_matrix ?pin () =
+let dockerfile_matrix ?(extra=[]) ?pin () =
   List.map (fun opam_version ->
     List.map (fun ocaml_version ->
       List.map (fun distro ->
         distro,
         ocaml_version,
         to_dockerfile ?pin ~ocaml_version ~distro ()
-      ) distros
+      ) (distros @ extra)
     ) stable_ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten |>
   (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 
-let latest_dockerfile_matrix ?pin () =
+let latest_dockerfile_matrix ?(extra=[]) ?pin () =
   List.map (fun distro ->
     distro,
     to_dockerfile ?pin ~ocaml_version:latest_ocaml_version ~distro ()
-  ) latest_stable_distros |> 
+  ) (latest_stable_distros @ extra) |> 
   List.sort (fun (a,_) (b,_) -> compare a b)
 
 let map_tag ?filter fn =

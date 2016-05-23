@@ -1,3 +1,7 @@
+1.6.1:
+* Add an `extra` arg the Dockerfile_distro matrix targets to
+  add more distros to the mix, such as Raspbian.
+
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM
   remote refs.
