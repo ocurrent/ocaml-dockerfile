@@ -29,7 +29,7 @@ type t = [
   | `Raspbian of [ `V8 | `V7 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
-  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp] 
 (** Supported Docker container distributions *)
 
@@ -102,6 +102,7 @@ val compare : t -> t -> int
 
 val to_dockerfile :
   ?pin:Bytes.t ->
+  ?opam_version:bytes ->
   ocaml_version:Bytes.t ->
   distro:t -> unit -> Dockerfile.t
 (** [to_dockerfile ?pin ~ocaml_version ~distro] generates
@@ -111,7 +112,10 @@ val to_dockerfile :
    to the initialisation. *)
 
 val dockerfile_matrix :
-  ?extra:t list -> ?pin:Bytes.t -> unit -> (t * Bytes.t * Dockerfile.t) list
+  ?opam_version:bytes ->
+  ?extra:t list ->
+  ?pin:Bytes.t ->
+  unit -> (t * Bytes.t * Dockerfile.t) list
 (** [dockerfile_matrix ?pin ()] contains the list of Docker tags
    and their associated Dockerfiles for all distributions.
    The user of the container can assume that OPAM is installed
@@ -120,6 +124,7 @@ val dockerfile_matrix :
    [opam pin add <pin>] will be added to the initialisation. *)
 
 val latest_dockerfile_matrix :
+  ?opam_version:bytes ->
   ?extra:t list -> 
   ?pin:Bytes.t -> unit -> (t * Dockerfile.t) list
 (** [latest_dockerfile_matrix] contains the list of Docker tags

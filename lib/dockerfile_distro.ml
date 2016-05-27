@@ -26,10 +26,10 @@ type t = [
   | `Raspbian of [ `V8 | `V7 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
-  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp]
 
-let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04);
+let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubuntu `V16_04); (`Ubuntu `V16_10);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23);
@@ -63,6 +63,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V15_04 -> Some "4.01.0"
   |`Ubuntu `V15_10 -> Some "4.01.0"
   |`Ubuntu `V16_04 -> Some "4.02.3"
+  |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
@@ -78,6 +79,7 @@ let tag_of_distro = function
   |`Ubuntu `V15_04 -> "ubuntu-15.04"
   |`Ubuntu `V15_10 -> "ubuntu-15.10"
   |`Ubuntu `V16_04 -> "ubuntu-16.04"
+  |`Ubuntu `V16_10 -> "ubuntu-16.10"
   |`Debian `Stable -> "debian-stable"
   |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
@@ -100,6 +102,7 @@ let distro_of_tag = function
   |"ubuntu-15.04" -> Some (`Ubuntu `V15_04)
   |"ubuntu-15.10" -> Some (`Ubuntu `V15_10)
   |"ubuntu-16.04" -> Some (`Ubuntu `V16_04)
+  |"ubuntu-16.10" -> Some (`Ubuntu `V16_10)
   |"debian-stable" -> Some (`Debian `Stable)
   |"debian-unstable" -> Some (`Debian `Unstable)
   |"debian-testing" -> Some (`Debian `Testing)
@@ -123,6 +126,7 @@ let human_readable_string_of_distro = function
   |`Ubuntu `V15_04 -> "Ubuntu 15.04"
   |`Ubuntu `V15_10 -> "Ubuntu 15.10"
   |`Ubuntu `V16_04 -> "Ubuntu 16.04"
+  |`Ubuntu `V16_10 -> "Ubuntu 16.10"
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
@@ -212,11 +216,16 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
     cmd_exec ["bash"]
 
 (* Apk (alpine) Dockerfile *)
-let apk_opam ?pin ?compiler_version labels tag =
+let apk_opam ?pin ?opam_version ?compiler_version labels tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
-    Linux.Apk.install "opam rsync" @@
+    (match opam_version with
+     | None -> Linux.Apk.install "opam rsync"
+     | Some branch ->
+        Linux.Apk.install "rsync" @@
+        install_opam_from_source ~prefix:"/usr" ~branch () 
+    ) @@
     Dockerfile_opam.install_cloud_solver @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
@@ -237,13 +246,13 @@ let centos6_modern_git =
 
 (* Construct a Dockerfile for a distro/ocaml combo, using the
    system OCaml if possible, or a custom OPAM switch otherwise *)
-let to_dockerfile ?pin ~ocaml_version ~distro () =
+let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distro () =
   let labels = [
       "distro", (latest_tag_of_distro distro);
       "distro_long", (tag_of_distro distro);
       "arch", (match distro with |`Raspbian _ -> "armv7" |_ -> "x86_64");
       "ocaml_version", ocaml_version;
-      "opam_version", latest_opam_version;
+      "opam_version", opam_version;
       "operatingsystem", "linux";
   ] in
   let tag = tag_of_distro distro in
@@ -252,27 +261,34 @@ let to_dockerfile ?pin ~ocaml_version ~distro () =
     | Some v when v = ocaml_version -> None (* use builtin *)
     | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
   in
+  (* Turn a concrete OPAM version into a branch or tag.  As a special case, we grab
+     OPAM 1.2.2 from the 1.2 branch since there are packaging fixes for Docker in there. *)
+  let opam_version =
+    match opam_version with
+    | "1.2.2" -> "1.2"
+    | other -> other
+  in
   match distro with
-  | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ?compiler_version labels distro tag
-  | `CentOS `V6 -> yum_opam ?pin ?compiler_version ~extra_cmd:centos6_modern_git ~extra:["centos-release-xen"] labels distro tag
-  | `CentOS _ -> yum_opam ?pin ?compiler_version ~extra:["centos-release-xen"] labels distro tag
-  | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ?compiler_version labels distro tag
-  | `Alpine _ -> apk_opam ?pin ?compiler_version labels tag
+  | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ~opam_version ?compiler_version labels distro tag
+  | `CentOS `V6 -> yum_opam ?pin ~opam_version ?compiler_version ~extra_cmd:centos6_modern_git ~extra:["centos-release-xen"] labels distro tag
+  | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
+  | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
+  | `Alpine _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
-let dockerfile_matrix ?(extra=[]) ?pin () =
+let dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pin () =
   List.map (fun opam_version ->
     List.map (fun ocaml_version ->
       List.map (fun distro ->
         distro,
         ocaml_version,
-        to_dockerfile ?pin ~ocaml_version ~distro ()
+        to_dockerfile ?pin ~opam_version ~ocaml_version ~distro ()
       ) (distros @ extra)
     ) stable_ocaml_versions
   ) opam_versions |> List.flatten |> List.flatten |>
   (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 
-let latest_dockerfile_matrix ?(extra=[]) ?pin () =
+let latest_dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pin () =
   List.map (fun distro ->
     distro,
     to_dockerfile ?pin ~ocaml_version:latest_ocaml_version ~distro ()
