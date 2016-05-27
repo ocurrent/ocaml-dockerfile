@@ -277,21 +277,20 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
 
 (* Build up the matrix of Dockerfiles *)
 let dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pin () =
-  List.map (fun opam_version ->
-    List.map (fun ocaml_version ->
-      List.map (fun distro ->
-        distro,
-        ocaml_version,
-        to_dockerfile ?pin ~opam_version ~ocaml_version ~distro ()
-      ) (distros @ extra)
-    ) stable_ocaml_versions
-  ) opam_versions |> List.flatten |> List.flatten |>
+  List.map (fun ocaml_version ->
+    List.map (fun distro ->
+      distro,
+      ocaml_version,
+      to_dockerfile ?pin ~opam_version ~ocaml_version ~distro ()
+    ) (distros @ extra)
+  ) stable_ocaml_versions
+  |> List.flatten |>
   (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 
 let latest_dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pin () =
   List.map (fun distro ->
     distro,
-    to_dockerfile ?pin ~ocaml_version:latest_ocaml_version ~distro ()
+    to_dockerfile ?pin ~opam_version ~ocaml_version:latest_ocaml_version ~distro ()
   ) (latest_stable_distros @ extra) |> 
   List.sort (fun (a,_) (b,_) -> compare a b)
 
