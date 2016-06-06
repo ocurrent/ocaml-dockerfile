@@ -44,12 +44,13 @@ let run_as_opam fmt = Linux.run_as_user "opam" fmt
 let opamhome = "/home/opam"
 
 let opam_init
+  ?(branch="master")
   ?(repo="git://github.com/ocaml/opam-repository")
   ?compiler_version () =
     let compiler = match compiler_version with
       | None -> ""
       | Some v -> "--comp " ^ v ^ " " in
-    run_as_opam "git clone %s" repo @@
+    run_as_opam "git clone -b %s %s" branch repo @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome @@
     maybe (fun _ -> run_as_opam "opam install -y camlp4") compiler_version
 

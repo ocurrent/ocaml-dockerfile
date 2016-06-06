@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2015 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2015-2016 Anil Madhavapeddy <anil@recoil.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -39,12 +39,12 @@ val opamhome : string
 (** The location of the [opam] user home directory *)
 
 val opam_init :
-  ?repo:string -> ?compiler_version:string -> unit -> Dockerfile.t
-(** [opam_init ?repo ?compiler_version] initialises the OPAM
+  ?branch:string -> ?repo:string -> ?compiler_version:string -> unit -> Dockerfile.t
+(** [opam_init ?branch ?repo ?compiler_version] initialises the OPAM
     repository.  The [repo] is [git://github.com/ocaml/opam-repository]
-    by default.  If [compiler-version] is specified, an [opam switch]
-    is executed to that version.  If unspecified, then the [system]
-    switch is default. *)
+    by default and [branch] is [master] by default.
+    If [compiler-version] is specified, an [opam switch] is executed to that
+    version.  If unspecified, then the [system] switch is default. *)
 
 val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
