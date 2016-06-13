@@ -4,6 +4,8 @@
 * Support multiple OPAM versions in the matrix generation, 
   to make testing OPAM master easier.
 * Add Ubuntu 16.10 to the distro list.
+* Always do an `rpm --rebuilddb` before a Yum invocation to
+  deal with possible OverlayFS brokenness.
 
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM
