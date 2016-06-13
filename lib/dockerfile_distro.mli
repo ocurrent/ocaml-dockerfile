@@ -61,6 +61,9 @@ val latest_ocaml_version : Bytes.t
 val opam_versions : Bytes.t list
 (** Enumeration of supported OPAM package manager versions. *)
 
+val latest_opam_version : Bytes.t
+(** The latest stable OPAM release. *)
+
 val builtin_ocaml_of_distro : t -> Bytes.t option
 (** [builtin_ocaml_of_distro t] will return the OCaml version
   supplied with the distribution packaging, and [None] if there

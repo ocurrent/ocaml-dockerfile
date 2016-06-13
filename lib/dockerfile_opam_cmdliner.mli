@@ -23,7 +23,7 @@ val cmd :
   summary:string ->
   manual:string ->
   default_dir:string ->
-  generate:(string -> 'a) -> 'a Cmdliner.Term.t * Cmdliner.Term.info
+  generate:(opam_version:string -> output_dir:string -> 'a) -> 'a Cmdliner.Term.t * Cmdliner.Term.info
 (** This generate a Cmdliner term with various defaults filled in for
     the manual page, and a default term that specifies an output
     directory. *)

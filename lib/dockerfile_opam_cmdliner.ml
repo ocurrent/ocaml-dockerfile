@@ -21,7 +21,13 @@ let output_dir default =
   let doc = "Output directory for the Dockerfile to be written into." in
   Arg.(value & opt string default & info ["o"] ~docv:"DIR" ~doc)
 
+let opam_version =
+  let doc = "OPAM version to install." in
+  Arg.(value & opt string Dockerfile_distro.latest_opam_version &
+       info ["opam-version"] ~docv:"OPAM_VERSION" ~doc)
+
 let cmd ~name ~version ~summary ~manual ~default_dir ~generate =
+  let generate opam_version output_dir = generate ~opam_version ~output_dir in
   let doc = "Generate Dockerfiles for " ^ summary in
   let man = [
     `S "DESCRIPTION";
@@ -34,7 +40,7 @@ let cmd ~name ~version ~summary ~manual ~default_dir ~generate =
     `S "SEE ALSO";
     `P "$(b,opam)(1), $(b,ocaml)(1)" ]
   in
-  Term.(pure generate $ output_dir default_dir),
+  Term.(pure generate $ opam_version $ output_dir default_dir),
   Term.info name ~version ~doc ~man
 
 let run cmd =

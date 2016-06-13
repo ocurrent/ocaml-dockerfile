@@ -50,7 +50,11 @@ let opam_init
     let compiler = match compiler_version with
       | None -> ""
       | Some v -> "--comp " ^ v ^ " " in
+    let master_cmds = match branch with
+      | "master" -> run_as_opam "cd %s/opam-repository && opam admin upgrade-format && git checkout -b v2 && git add . && git commit -a -m 'opam admin upgrade-format'" opamhome
+      | _ -> empty in
     run_as_opam "git clone -b %s %s" branch repo @@
+    master_cmds @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome @@
     maybe (fun _ -> run_as_opam "opam install -y camlp4") compiler_version
 

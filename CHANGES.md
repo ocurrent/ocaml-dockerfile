@@ -6,6 +6,8 @@
 * Add Ubuntu 16.10 to the distro list.
 * Always do an `rpm --rebuilddb` before a Yum invocation to
   deal with possible OverlayFS brokenness.
+* Support `opam_version` to distro calls to build and install
+  the latest version of OPAM2-dev.
 
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM

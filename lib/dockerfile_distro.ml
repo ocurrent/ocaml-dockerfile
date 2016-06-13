@@ -257,9 +257,14 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   ] in
   let tag = tag_of_distro distro in
   let compiler_version =
-    match builtin_ocaml_of_distro distro with
-    | Some v when v = ocaml_version -> None (* use builtin *)
-    | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
+    (* Opam master doesnt support system compiler yet *)
+    match opam_version with
+    |"master" -> Some ocaml_version
+    | _ -> begin
+      match builtin_ocaml_of_distro distro with
+      | Some v when v = ocaml_version -> None (* use builtin *)
+      | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
+    end
   in
   (* Turn a concrete OPAM version into a branch or tag.  As a special case, we grab
      OPAM 1.2.2 from the 1.2 branch since there are packaging fixes for Docker in there. *)
