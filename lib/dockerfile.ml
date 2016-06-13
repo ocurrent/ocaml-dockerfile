@@ -160,8 +160,8 @@ module Linux = struct
 
   (** RPM rules *)
   module RPM = struct
-    let install fmt = ksprintf (run "yum install -y %s && yum clean all") fmt
-    let groupinstall fmt = ksprintf (run "yum groupinstall -y %s && yum clean all") fmt
+    let install fmt = ksprintf (run "rpm --rebuilddb && yum install -y %s && yum clean all") fmt
+    let groupinstall fmt = ksprintf (run "rpm --rebuilddb && yum groupinstall -y %s && yum clean all") fmt
 
     let add_user ?(sudo=false) username =
       let home = "/home/"^username in
@@ -254,7 +254,7 @@ module Linux = struct
 
     let install_system_ocaml =
       run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
-      run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/ >> /etc/apk/repositories" @@
+      run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml >> /etc/apk/repositories" @@
       install "ocaml camlp4"
   end
 end
