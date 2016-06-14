@@ -190,7 +190,7 @@ let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
     install_opam_from_source ?branch () @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
-    opam_init ?compiler_version () @@
+    opam_init ?compiler_version ?branch () @@
     (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
@@ -209,7 +209,7 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
-    opam_init ?compiler_version () @@
+    opam_init ?compiler_version ?branch () @@
     (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
@@ -217,6 +217,7 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
 
 (* Apk (alpine) Dockerfile *)
 let apk_opam ?pin ?opam_version ?compiler_version labels tag =
+    let branch = opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
@@ -229,7 +230,7 @@ let apk_opam ?pin ?opam_version ?compiler_version labels tag =
     Dockerfile_opam.install_cloud_solver @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
-    opam_init ?compiler_version () @@
+    opam_init ?compiler_version ?branch () @@
     (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
     run_as_opam "opam install -y depext travis-opam" @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
