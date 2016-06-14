@@ -8,6 +8,7 @@
   deal with possible OverlayFS brokenness.
 * Support `opam_version` to distro calls to build and install
   the latest version of OPAM2-dev.
+* Add Alpine 3.4 and deprecate Raspbian 7.
 
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM

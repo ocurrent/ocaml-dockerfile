@@ -20,10 +20,10 @@ open Dockerfile
 open Dockerfile_opam
 
 type t = [ 
-  | `Alpine of [ `V3_3 ]
+  | `Alpine of [ `V3_3 | `V3_4 ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
-  | `Raspbian of [ `V8 | `V7 ]
+  | `Raspbian of [ `V8 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
@@ -38,12 +38,12 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V15_10); (`Ubunt
                 (`Alpine `V3_3) ]
 
 let slow_distros = [
-                (`Raspbian `V8); (`Raspbian `V7);
+                (`Raspbian `V8);
 ]
 
 let latest_stable_distros = [
-  (`Ubuntu `V14_04); (`Debian `Stable); (`Fedora `V23);
-  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_3) ]
+  (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V23);
+  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4) ]
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
@@ -57,7 +57,7 @@ let builtin_ocaml_of_distro = function
   |`Debian (`Stable |`V8) | `Raspbian `V8 -> Some "4.01.0"
   |`Debian `Testing -> Some "4.02.3"
   |`Debian (`Unstable | `V9) -> Some "4.02.3"
-  |`Debian `V7 | `Raspbian `V7-> Some "3.12.1"
+  |`Debian `V7 -> Some "3.12.1"
   |`Ubuntu `V12_04 -> Some "3.12.1"
   |`Ubuntu `V14_04 -> Some "4.01.0"
   |`Ubuntu `V15_04 -> Some "4.01.0"
@@ -65,6 +65,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V16_04 -> Some "4.02.3"
   |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
+  |`Alpine `V3_4 -> Some "4.02.3"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -86,7 +87,6 @@ let tag_of_distro = function
   |`Debian `V9 -> "debian-9"
   |`Debian `V8 -> "debian-8"
   |`Debian `V7 -> "debian-7"
-  |`Raspbian `V7 -> "raspbian-7"
   |`Raspbian `V8 -> "raspbian-8"
   |`CentOS `V6 -> "centos-6"
   |`CentOS `V7 -> "centos-7"
@@ -95,8 +95,9 @@ let tag_of_distro = function
   |`Fedora `V23 -> "fedora-23"
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
+  |`Alpine `V3_4 -> "alpine-3.4"
 
-let distro_of_tag = function
+let distro_of_tag x : t option = match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
   |"ubuntu-14.04" -> Some (`Ubuntu `V14_04)
   |"ubuntu-15.04" -> Some (`Ubuntu `V15_04)
@@ -110,7 +111,6 @@ let distro_of_tag = function
   |"debian-8" -> Some (`Debian `V8)
   |"debian-7" -> Some (`Debian `V7)
   |"raspbian-8" -> Some (`Raspbian `V8)
-  |"raspbian-7" -> Some (`Raspbian `V7)
   |"centos-6" -> Some (`CentOS `V6)
   |"centos-7" -> Some (`CentOS `V7)
   |"fedora-21" -> Some (`Fedora `V21)
@@ -118,6 +118,7 @@ let distro_of_tag = function
   |"fedora-23" -> Some (`Fedora `V23)
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
+  |"alpine-3.4" -> Some (`Alpine `V3_4)
   |_ -> None
 
 let human_readable_string_of_distro = function
@@ -134,7 +135,6 @@ let human_readable_string_of_distro = function
   |`Debian `V8 -> "Debian 8 (Jessie)"
   |`Debian `V7 -> "Debian 7 (Wheezy)"
   |`Raspbian `V8 -> "Raspbian 8 (Jessie)"
-  |`Raspbian `V7 -> "Raspbian 7 (Wheezy)"
   |`CentOS `V6 -> "CentOS 6"
   |`CentOS `V7 -> "CentOS 7"
   |`Fedora `V21 -> "Fedora 21"
@@ -142,6 +142,7 @@ let human_readable_string_of_distro = function
   |`Fedora `V23 -> "Fedora 23"
   |`OracleLinux `V7 -> "OracleLinux 7"
   |`Alpine `V3_3 -> "Alpine 3.3"
+  |`Alpine `V3_4 -> "Alpine 3.4"
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
