@@ -46,13 +46,14 @@ let opamhome = "/home/opam"
 let opam_init
   ?(branch="master")
   ?(repo="git://github.com/ocaml/opam-repository")
+  ?(need_upgrade=false)
   ?compiler_version () =
     let compiler = match compiler_version with
       | None -> ""
       | Some v -> "--comp " ^ v ^ " " in
-    let master_cmds = match branch with
-      | "master" -> run_as_opam "cd %s/opam-repository && opam admin upgrade-format && git checkout -b v2 && git add . && git commit -a -m 'opam admin upgrade-format'" opamhome
-      | _ -> empty in
+    let master_cmds = match need_upgrade with
+      | true -> run_as_opam "cd %s/opam-repository && opam admin upgrade-format && git checkout -b v2 && git add . && git commit -a -m 'opam admin upgrade-format'" opamhome
+      | false -> empty in
     run_as_opam "git clone -b %s %s" branch repo @@
     master_cmds @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome @@

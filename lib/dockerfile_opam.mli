@@ -39,12 +39,14 @@ val opamhome : string
 (** The location of the [opam] user home directory *)
 
 val opam_init :
-  ?branch:string -> ?repo:string -> ?compiler_version:string -> unit -> Dockerfile.t
-(** [opam_init ?branch ?repo ?compiler_version] initialises the OPAM
+  ?branch:string -> ?repo:string -> ?need_upgrade:bool -> ?compiler_version:string -> unit -> Dockerfile.t
+(** [opam_init ?branch ?repo ?need_upgrade ?compiler_version] initialises the OPAM
     repository.  The [repo] is [git://github.com/ocaml/opam-repository]
     by default and [branch] is [master] by default.
     If [compiler-version] is specified, an [opam switch] is executed to that
-    version.  If unspecified, then the [system] switch is default. *)
+    version.  If unspecified, then the [system] switch is default.
+    [need_upgrade] will run the [opam admin upgrade-format] on the repository
+    for the latest OPAM2 metadata format.  *)
 
 val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
