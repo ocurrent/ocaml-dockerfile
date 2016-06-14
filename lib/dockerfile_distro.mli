@@ -23,7 +23,7 @@
 (** {2 Known distributions and OCaml variants} *)
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 ]
+  | `Alpine of [ `V3_3 | `V3_4 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]

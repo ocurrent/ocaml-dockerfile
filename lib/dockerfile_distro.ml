@@ -20,7 +20,7 @@ open Dockerfile
 open Dockerfile_opam
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 ]
+  | `Alpine of [ `V3_3 | `V3_4 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]
@@ -35,7 +35,7 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7);
-                (`Alpine `V3_3) ]
+                (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `Latest)]
 
 let slow_distros = [
                 (`Raspbian `V8);
@@ -65,7 +65,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V16_04 -> Some "4.02.3"
   |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
-  |`Alpine `V3_4 -> Some "4.02.3"
+  |`Alpine (`V3_4 | `Latest) -> Some "4.02.3"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -96,6 +96,7 @@ let tag_of_distro = function
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
+  |`Alpine `Latest -> "alpine"
 
 let distro_of_tag x : t option = match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
@@ -119,6 +120,7 @@ let distro_of_tag x : t option = match x with
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
+  |"alpine" -> Some (`Alpine `Latest)
   |_ -> None
 
 let human_readable_string_of_distro = function
@@ -143,6 +145,7 @@ let human_readable_string_of_distro = function
   |`OracleLinux `V7 -> "OracleLinux 7"
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
+  |`Alpine `Latest -> "Alpine Stable (3.4)"
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
