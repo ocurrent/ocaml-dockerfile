@@ -1,4 +1,6 @@
 1.7.0:
+* Add OpenSUSE/Zypper support and add OpenSUSE 42.1 to the
+  default distro build list.
 * Add an `extra` arg the Dockerfile_distro matrix targets to
   add more distros to the mix, such as Raspbian.
 * Support multiple OPAM versions in the matrix generation, 

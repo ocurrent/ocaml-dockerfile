@@ -286,6 +286,27 @@ module Linux : sig
 
   end
 
+  (** Rules for Zypper-based distributions such as OpenSUSE *)
+  module Zypper : sig
+    val update : t
+    (** [update] will run [zypper update] non-interactively. *)
+
+    val install : ('a, unit, string, t) format4 -> 'a
+    (** [install fmt] will [zypper update && zypper install] the packages specified by the [fmt] format string. *)
+
+    val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
+    (** [add_user username] will install a new user with name [username] and a locked
+        password.  If [sudo] is true then root access with no password will also be
+        configured.  The default value for [sudo] is [false]. *)
+
+    val dev_packages : ?extra:string -> unit -> t
+    (** [dev_packages ?extra ()] will install the base development tools and [sudo],
+        [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+
+    val install_system_ocaml : t
+    (** Install the system OCaml packages via [zypper] *)
+  end
+
   (** Rules for Git *)
   module Git : sig
     val init : ?name:string -> ?email:string -> unit -> t

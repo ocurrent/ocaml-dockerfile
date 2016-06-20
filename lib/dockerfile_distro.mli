@@ -29,6 +29,7 @@ type t = [
   | `Raspbian of [ `V8 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
+  | `OpenSUSE of [ `V42_1 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp] 
 (** Supported Docker container distributions *)

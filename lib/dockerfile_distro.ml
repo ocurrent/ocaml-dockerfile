@@ -26,6 +26,7 @@ type t = [
   | `Raspbian of [ `V8 ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
+  | `OpenSUSE of [ `V42_1 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp]
 
@@ -34,7 +35,7 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
-                (`OracleLinux `V7);
+                (`OracleLinux `V7); (`OpenSUSE `V42_1);
                 (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `Latest)]
 
 let slow_distros = [
@@ -43,7 +44,7 @@ let slow_distros = [
 
 let latest_stable_distros = [
   (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V23);
-  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4) ]
+  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4); (`OpenSUSE `V42_1)]
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
@@ -71,6 +72,7 @@ let builtin_ocaml_of_distro = function
   |`Fedora `V23 -> Some "4.02.2"
   |`CentOS `V6 -> Some "3.11.2"
   |`CentOS `V7 -> Some "4.01.0"
+  |`OpenSUSE `V42_1 -> Some "4.02.3"
   |`OracleLinux `V7 -> None
 
 (* The Docker tag for this distro *)
@@ -97,6 +99,7 @@ let tag_of_distro = function
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
   |`Alpine `Latest -> "alpine"
+  |`OpenSUSE `V42_1 -> "opensuse-42.1"
 
 let distro_of_tag x : t option = match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
@@ -121,6 +124,7 @@ let distro_of_tag x : t option = match x with
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
   |"alpine" -> Some (`Alpine `Latest)
+  |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
   |_ -> None
 
 let human_readable_string_of_distro = function
@@ -146,6 +150,7 @@ let human_readable_string_of_distro = function
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
   |`Alpine `Latest -> "Alpine Stable (3.4)"
+  |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
@@ -156,6 +161,7 @@ let human_readable_short_string_of_distro (t:t) =
   |`Fedora _ -> "Fedora"
   |`OracleLinux _ -> "OracleLinux"
   |`Alpine _ -> "Alpine"
+  |`OpenSUSE _ -> "OpenSUSE"
 
 (* The alias tag for the latest stable version of this distro *)
 let latest_tag_of_distro (t:t) =
@@ -167,6 +173,7 @@ let latest_tag_of_distro (t:t) =
   |`Fedora _ -> "fedora"
   |`OracleLinux _ -> "oraclelinux"
   |`Alpine _ -> "alpine"
+  |`OpenSUSE _ -> "opensuse"
 
 let opam_tag_of_distro distro ocaml_version =
   (* Docker rewrites + to _ in tags *)
@@ -247,6 +254,22 @@ let apk_opam ?pin ?opam_version ?compiler_version labels tag =
     entrypoint_exec ["opam";"config";"exec";"--"] @@
     cmd_exec ["sh"]
 
+(* Zypper (OpenSUSE) Dockerfile *)
+let zypper_opam ?pin ?opam_version ?compiler_version labels tag =
+  let branch, need_upgrade = opam2_test opam_version in 
+  add_comment ?compiler_version tag @@
+  header "ocaml/ocaml" tag @@
+  label (("distro_style", "zypper")::labels) @@
+  install_opam_from_source ~prefix:"/usr" ?branch () @@
+  Dockerfile_opam.install_cloud_solver @@
+  Linux.Zypper.add_user ~sudo:true "opam" @@
+  Linux.Git.init () @@
+  opam_init ?compiler_version ~need_upgrade () @@
+  (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
+  run_as_opam "opam install -y depext travis-opam" @@
+  entrypoint_exec ["opam";"config";"exec";"--"] @@
+  cmd_exec ["sh"]
+
 (* Runes to upgrade Git in ancient CentOS6 to something that works with OPAM *)
 let centos6_modern_git =
     run "curl -OL http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm" @@
@@ -291,6 +314,7 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
   | `Alpine _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
+  | `OpenSUSE _ -> zypper_opam ?pin ~opam_version ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
 let dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pin () =
