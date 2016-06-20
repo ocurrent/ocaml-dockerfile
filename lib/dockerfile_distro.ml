@@ -24,6 +24,7 @@ type t = [
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]
+  | `Alpine_armhf of [ `V3_4 | `Latest ]
   | `Fedora of [ `V21 | `V22 | `V23 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 ]
@@ -36,15 +37,16 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Fedora `V22); (`Fedora `V23);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7); (`OpenSUSE `V42_1);
+                (`Alpine_armhf `V3_4); (`Alpine_armhf `Latest);
                 (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `Latest)]
 
 let slow_distros = [
-                (`Raspbian `V8);
+                (`Raspbian `V8); (`Alpine_armhf `V3_4)
 ]
 
 let latest_stable_distros = [
   (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V23);
-  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4); (`OpenSUSE `V42_1)]
+  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4); (`OpenSUSE `V42_1); (`Alpine_armhf `V3_4) ]
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
@@ -67,6 +69,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine (`V3_4 | `Latest) -> Some "4.02.3"
+  |`Alpine_armhf (`V3_4 | `Latest) -> Some "4.02.3"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -98,7 +101,9 @@ let tag_of_distro = function
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
+  |`Alpine_armhf `V3_4 -> "alpine-armhf-3.4"
   |`Alpine `Latest -> "alpine"
+  |`Alpine_armhf `Latest -> "alpine-armhf"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
 
 let distro_of_tag x : t option = match x with
@@ -123,6 +128,8 @@ let distro_of_tag x : t option = match x with
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
+  |"alpine-armhf-3.4" -> Some (`Alpine_armhf `V3_4)
+  |"alpine-armhf" -> Some (`Alpine_armhf `V3_4)
   |"alpine" -> Some (`Alpine `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
   |_ -> None
@@ -149,7 +156,9 @@ let human_readable_string_of_distro = function
   |`OracleLinux `V7 -> "OracleLinux 7"
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
+  |`Alpine_armhf `V3_4 -> "Alpine armhf 3.4"
   |`Alpine `Latest -> "Alpine Stable (3.4)"
+  |`Alpine_armhf `Latest -> "Alpine armhf Stable (3.4)"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
 
 let human_readable_short_string_of_distro (t:t) =
@@ -161,6 +170,7 @@ let human_readable_short_string_of_distro (t:t) =
   |`Fedora _ -> "Fedora"
   |`OracleLinux _ -> "OracleLinux"
   |`Alpine _ -> "Alpine"
+  |`Alpine_armhf _ -> "Alpine armhf"
   |`OpenSUSE _ -> "OpenSUSE"
 
 (* The alias tag for the latest stable version of this distro *)
@@ -173,6 +183,7 @@ let latest_tag_of_distro (t:t) =
   |`Fedora _ -> "fedora"
   |`OracleLinux _ -> "oraclelinux"
   |`Alpine _ -> "alpine"
+  |`Alpine_armhf _ -> "alpine-armhf"
   |`OpenSUSE _ -> "opensuse"
 
 let opam_tag_of_distro distro ocaml_version =
@@ -286,7 +297,7 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   let labels = [
       "distro", (latest_tag_of_distro distro);
       "distro_long", (tag_of_distro distro);
-      "arch", (match distro with |`Raspbian _ -> "armv7" |_ -> "x86_64");
+      "arch", (match distro with |`Raspbian _ |`Alpine_armhf _ -> "armv7" |_ -> "x86_64");
       "ocaml_version", ocaml_version;
       "opam_version", opam_version;
       "operatingsystem", "linux";
@@ -315,6 +326,7 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
   | `Alpine _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
+  | `Alpine_armhf _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
   | `OpenSUSE _ -> zypper_opam ?pin ~opam_version ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)

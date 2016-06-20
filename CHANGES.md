@@ -1,18 +1,18 @@
 1.7.0:
+* *Multiarch:* Add Alpine 3.4 and Alpine/ARMHF 3.4 and
+  deprecate Raspbian 7.
 * Add OpenSUSE/Zypper support and add OpenSUSE 42.1 to the
   default distro build list.
+* Add Ubuntu 16.10 to the distro list, and remove Ubuntu 15.10
+  from default build list now that 16.10 LTS is available.
 * Add an `extra` arg the Dockerfile_distro matrix targets to
   add more distros to the mix, such as Raspbian.
 * Support multiple OPAM versions in the matrix generation, 
   to make testing OPAM master easier.
-* Add Ubuntu 16.10 to the distro list.
 * Always do an `rpm --rebuilddb` before a Yum invocation to
   deal with possible OverlayFS brokenness.
 * Support `opam_version` to distro calls to build and install
   the latest version of OPAM2-dev.
-* Add Alpine 3.4 and deprecate Raspbian 7.
-* Remove Ubuntu 15.10 from default build list now that 16.10 LTS
-  is available.
 
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM
