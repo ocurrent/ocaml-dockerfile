@@ -251,7 +251,7 @@ let apk_opam ?pin ?opam_version ?compiler_version labels tag =
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
     (match opam_version with
-     | None -> Linux.Apk.install "opam rsync"
+     | None | Some "1.2" | Some "1.2.2" -> Linux.Apk.install "opam rsync"
      | Some branch ->
         Linux.Apk.install "rsync" @@
         install_opam_from_source ~prefix:"/usr" ~branch () 
