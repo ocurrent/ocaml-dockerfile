@@ -28,7 +28,7 @@ type t = [
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]
-  | `Fedora of [ `V21 | `V22 | `V23 ]
+  | `Fedora of [ `V21 | `V22 | `V23 | `V24 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]

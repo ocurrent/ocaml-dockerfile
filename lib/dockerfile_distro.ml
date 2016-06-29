@@ -25,7 +25,7 @@ type t = [
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]
   | `Alpine_armhf of [ `V3_4 | `Latest ]
-  | `Fedora of [ `V21 | `V22 | `V23 ]
+  | `Fedora of [ `V21 | `V22 | `V23 | `V24 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
@@ -34,7 +34,7 @@ type t = [
 let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
-                (`Fedora `V22); (`Fedora `V23);
+                (`Fedora `V22); (`Fedora `V23); (`Fedora `V24);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7); (`OpenSUSE `V42_1);
                 (`Alpine_armhf `V3_4); (`Alpine_armhf `Latest);
@@ -45,7 +45,7 @@ let slow_distros = [
 ]
 
 let latest_stable_distros = [
-  (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V23);
+  (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V24);
   (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4); (`OpenSUSE `V42_1); (`Alpine_armhf `V3_4) ]
 
 let master_distro = `Debian `Stable
@@ -73,6 +73,7 @@ let builtin_ocaml_of_distro = function
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
+  |`Fedora `V24 -> Some "4.02.3"
   |`CentOS `V6 -> Some "3.11.2"
   |`CentOS `V7 -> Some "4.01.0"
   |`OpenSUSE `V42_1 -> Some "4.02.3"
@@ -98,6 +99,7 @@ let tag_of_distro = function
   |`Fedora `V21 -> "fedora-21"
   |`Fedora `V22 -> "fedora-22"
   |`Fedora `V23 -> "fedora-23"
+  |`Fedora `V24 -> "fedora-24"
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
@@ -125,6 +127,7 @@ let distro_of_tag x : t option = match x with
   |"fedora-21" -> Some (`Fedora `V21)
   |"fedora-22" -> Some (`Fedora `V22)
   |"fedora-23" -> Some (`Fedora `V23)
+  |"fedora-24" -> Some (`Fedora `V24)
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
@@ -153,6 +156,7 @@ let human_readable_string_of_distro = function
   |`Fedora `V21 -> "Fedora 21"
   |`Fedora `V22 -> "Fedora 22"
   |`Fedora `V23 -> "Fedora 23"
+  |`Fedora `V24 -> "Fedora 24"
   |`OracleLinux `V7 -> "OracleLinux 7"
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"

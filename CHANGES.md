@@ -5,6 +5,7 @@
   default distro build list.
 * Add Ubuntu 16.10 to the distro list, and remove Ubuntu 15.10
   from default build list now that 16.10 LTS is available.
+* Add Fedora 24 and make it the alias for Fedora stable.
 * Add an `extra` arg the Dockerfile_distro matrix targets to
   add more distros to the mix, such as Raspbian.
 * Support multiple OPAM versions in the matrix generation, 
