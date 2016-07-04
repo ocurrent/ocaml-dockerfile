@@ -230,7 +230,7 @@ module Linux = struct
     let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
     let dev_packages ?extra () =
-      install "alpine-sdk openssh bash nano %s"
+      install "alpine-sdk openssh bash nano ncurses-dev %s"
         (match extra with None -> "" | Some x -> " " ^ x)
 
     let add_user ?uid ?gid ?(sudo=false) username =
