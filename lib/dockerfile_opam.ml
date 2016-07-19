@@ -22,7 +22,7 @@ open Printf
 
 (** Rules to get the cloud solver if no aspcud available *)
 let install_cloud_solver =
-  run "curl -o /usr/bin/aspcud 'https://raw.githubusercontent.com/avsm/opam-solver-proxy/4343ab0eac7bdadf59ae8791a345080cf7f659b5/aspcud.docker'" @@
+  run "curl -o /usr/bin/aspcud 'https://raw.githubusercontent.com/avsm/opam-solver-proxy/8f162de1fe89b2e243d89961f376c80fde6de76d/aspcud.docker'" @@
   run "chmod 755 /usr/bin/aspcud"
 
 (** RPM rules *)
