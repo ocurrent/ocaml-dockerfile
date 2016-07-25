@@ -5,7 +5,8 @@
   default distro build list.
 * Add Ubuntu 16.10 to the distro list, and remove Ubuntu 15.10
   from default build list now that 16.10 LTS is available.
-* Add Fedora 24 and make it the alias for Fedora stable.
+* Add Fedora 24 and make it the alias for Fedora stable. Also
+  install `redhat-rpm-config` which is needed for pthreads.
 * Add an `extra` arg the Dockerfile_distro matrix targets to
   add more distros to the mix, such as Raspbian.
 * Support multiple OPAM versions in the matrix generation, 
@@ -14,6 +15,7 @@
   deal with possible OverlayFS brokenness.
 * Support `opam_version` to distro calls to build and install
   the latest version of OPAM2-dev.
+* Add `xz` into Alpine containers so that untar of those works.
 
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM

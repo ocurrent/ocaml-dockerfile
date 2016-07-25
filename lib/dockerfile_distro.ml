@@ -41,7 +41,7 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `Latest)]
 
 let slow_distros = [
-                (`Raspbian `V8); (`Alpine_armhf `V3_4)
+  (`Raspbian `V8); (`Alpine_armhf `V3_4)
 ]
 
 let latest_stable_distros = [
@@ -50,7 +50,7 @@ let latest_stable_distros = [
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
-let all_ocaml_versions = stable_ocaml_versions @ [ "4.03.1+trunk"; "4.03.1+trunk+flambda" ]
+let all_ocaml_versions = stable_ocaml_versions @ [ "4.04.0+trunk"; "4.04.0+trunk+flambda" ]
 let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
@@ -255,9 +255,9 @@ let apk_opam ?pin ?opam_version ?compiler_version labels tag =
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
     (match opam_version with
-     | None | Some "1.2" | Some "1.2.2" -> Linux.Apk.install "opam rsync"
+     | None | Some "1.2" | Some "1.2.2" -> Linux.Apk.install "opam rsync xz"
      | Some branch ->
-        Linux.Apk.install "rsync" @@
+        Linux.Apk.install "rsync xz" @@
         install_opam_from_source ~prefix:"/usr" ~branch () 
     ) @@
     Dockerfile_opam.install_cloud_solver @@
@@ -327,7 +327,8 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ~opam_version ?compiler_version labels distro tag
   | `CentOS `V6 -> yum_opam ?pin ~opam_version ?compiler_version ~extra_cmd:centos6_modern_git ~extra:["centos-release-xen"] labels distro tag
   | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
-  | `Fedora _ | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
+  | `Fedora _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["redhat-rpm-config"] labels distro tag
+  | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
   | `Alpine _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
   | `Alpine_armhf _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
   | `OpenSUSE _ -> zypper_opam ?pin ~opam_version ?compiler_version labels tag
