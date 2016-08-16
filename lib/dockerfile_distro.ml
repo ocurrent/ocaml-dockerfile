@@ -50,7 +50,8 @@ let latest_stable_distros = [
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda" ]
-let all_ocaml_versions = stable_ocaml_versions @ [ "4.04.0+trunk"; "4.04.0+trunk+flambda" ]
+let dev_ocaml_versions = [ "4.04.0"; "4.04.0+flambda" ]
+let all_ocaml_versions = stable_ocaml_versions @ dev_ocaml_versions
 let latest_ocaml_version = "4.02.3"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
@@ -311,6 +312,13 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
     match opam_version with
     |"master" -> Some ocaml_version
     | _ -> begin
+      (* Rewrite the dev version to add a +trunk tag. *)
+      let ocaml_version =
+        match ocaml_version with
+        |"4.04.0" -> "4.04.0+trunk"
+        |"4.04.0+flambda" -> "4.04.0+trunk+flambda"
+        |_ -> ocaml_version
+      in
       match builtin_ocaml_of_distro distro with
       | Some v when v = ocaml_version -> None (* use builtin *)
       | None | Some _ (* when v <> ocaml_version *) -> Some ocaml_version
@@ -325,7 +333,7 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   in
   match distro with
   | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ~opam_version ?compiler_version labels distro tag
-  | `CentOS `V6 -> yum_opam ?pin ~opam_version ?compiler_version ~extra_cmd:centos6_modern_git ~extra:["centos-release-xen"] labels distro tag
+  | `CentOS `V6 -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `Fedora _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["redhat-rpm-config"] labels distro tag
   | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
@@ -334,14 +342,14 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   | `OpenSUSE _ -> zypper_opam ?pin ~opam_version ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)
-let dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pin () =
+let dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?(extra_ocaml_versions=[]) ?pin () =
   List.map (fun ocaml_version ->
     List.map (fun distro ->
       distro,
       ocaml_version,
       to_dockerfile ?pin ~opam_version ~ocaml_version ~distro ()
     ) (distros @ extra)
-  ) stable_ocaml_versions
+  ) (stable_ocaml_versions @ extra_ocaml_versions)
   |> List.flatten |>
   (List.sort (fun (a,_,_) (b,_,_) -> compare a b))
 

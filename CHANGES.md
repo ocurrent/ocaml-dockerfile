@@ -16,6 +16,7 @@
 * Support `opam_version` to distro calls to build and install
   the latest version of OPAM2-dev.
 * Add `xz` into Alpine containers so that untar of those works.
+* Expose the development versions of OCaml compilers.
 
 1.6.0:
 * Add a more modern Git in CentOS 6 to make it work with OPAM

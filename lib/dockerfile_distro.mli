@@ -52,6 +52,9 @@ val stable_ocaml_versions : Bytes.t list
 (** Enumeration of released OCaml compiler versions. The latest patch
     branch of each release is picked. *)
 
+val dev_ocaml_versions : Bytes.t list
+(** Enumerations of development OCaml compiler versions. *)
+
 val all_ocaml_versions : Bytes.t list
 (** Enumeration of released OCaml compiler versions. In addition to the
     {!stable_ocaml_versions}, trunk builds for the latest releases may
@@ -117,8 +120,9 @@ val to_dockerfile :
    to the initialisation. *)
 
 val dockerfile_matrix :
-  ?opam_version:bytes ->
+  ?opam_version:bytes -> 
   ?extra:t list ->
+  ?extra_ocaml_versions:bytes list ->
   ?pin:Bytes.t ->
   unit -> (t * Bytes.t * Dockerfile.t) list
 (** [dockerfile_matrix ?pin ()] contains the list of Docker tags
