@@ -1,3 +1,6 @@
+1.7.1:
+* Correctly install ocamldoc in system OpenSUSE container.
+
 1.7.0:
 * *Multiarch:* Add Alpine 3.4 and Alpine/ARMHF 3.4 and
   deprecate Raspbian 7.

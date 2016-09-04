@@ -287,7 +287,7 @@ module Linux = struct
        run "chmod 700 .ssh"
 
      let install_system_ocaml =
-       install "ocaml camlp4"
+       install "ocaml camlp4 ocaml-ocamldoc"
   end
 
 end
