@@ -1,3 +1,6 @@
+1.7.2:
+* Support OPAM 2 better with explicit compiler selection.
+
 1.7.1:
 * Correctly install ocamldoc in system OpenSUSE container.
 
