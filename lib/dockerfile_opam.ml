@@ -48,9 +48,16 @@ let opam_init
   ?(repo="git://github.com/ocaml/opam-repository")
   ?(need_upgrade=false)
   ?compiler_version () =
-    let compiler = match compiler_version with
-      | None -> ""
-      | Some v -> "--comp " ^ v ^ " " in
+    let is_mainline = function (* only covers the compilers we use *)
+      |"4.03.0"|"4.02.3"|"4.01.0"|"4.00.1" -> true
+      |_ -> false in
+    let compiler =
+      match compiler_version, need_upgrade with
+      | None, _ -> ""
+      | Some v, false -> "--comp " ^ v ^ " "
+      | Some v, true when is_mainline v -> "--comp ocaml-base-compiler." ^ v ^ " "
+      | Some v, true -> "--comp ocaml-variants." ^ v ^ " "
+    in
     let master_cmds = match need_upgrade with
       | true -> run_as_opam "cd %s/opam-repository && opam admin upgrade-format && git checkout -b v2 && git add . && git commit -a -m 'opam admin upgrade-format'" opamhome
       | false -> empty in
