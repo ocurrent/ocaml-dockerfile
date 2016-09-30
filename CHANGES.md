@@ -1,3 +1,6 @@
+trunk:
+* Port to build using topkg and remove _oasis
+
 1.7.1:
 * Support OPAM 2 better with explicit compiler selection.
 * Correctly install ocamldoc in system OpenSUSE container.
