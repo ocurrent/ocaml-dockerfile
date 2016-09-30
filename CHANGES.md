@@ -1,5 +1,6 @@
 trunk:
-* Port to build using topkg and remove _oasis
+* Port to build using topkg and remove _oasis.
+* Support `-safe-string` mode.
 
 1.7.1:
 * Support OPAM 2 better with explicit compiler selection.
