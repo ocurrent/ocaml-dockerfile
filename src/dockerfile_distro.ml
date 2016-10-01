@@ -237,7 +237,7 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
     maybe (fun x -> x) extra_cmd @@
-    Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::"wget"::extra)) () @@
+    Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::"wget"::"xz"::extra)) () @@
     install_opam_from_source ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
