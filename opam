@@ -11,9 +11,10 @@ available: [ ocaml-version >= "4.02.3"]
 depends: [
   "ocamlfind" {build}
   "ocamlbuild" {build}
+  "ppx_sexp_conv" {build}
   "topkg" {build}
   "cmdliner"
-  "ppx_sexp_conv"
+  "sexplib"
   "base-bytes"
 ]
 build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]
