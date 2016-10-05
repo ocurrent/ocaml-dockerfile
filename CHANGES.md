@@ -2,6 +2,7 @@ trunk:
 * Port to build using topkg and remove _oasis.
 * Support `-safe-string` mode.
 * Install `xz` into base Fedora and other RPM distros.
+* Expose a `Linux.RPM.update` to force a Yum update.
 
 1.7.1:
 * Support OPAM 2 better with explicit compiler selection.

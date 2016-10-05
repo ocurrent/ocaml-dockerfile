@@ -224,6 +224,9 @@ module Linux : sig
 
   (** Rules for RPM-based distributions *)
   module RPM : sig
+    val update : t
+    (** [update] will run [yum update -y] *)
+
     val install : ('a, unit, string, t) format4 -> 'a
     (** [install fmt] will run [yum install] on the supplied package list. *)
 

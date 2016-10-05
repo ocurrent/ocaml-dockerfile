@@ -160,6 +160,7 @@ module Linux = struct
 
   (** RPM rules *)
   module RPM = struct
+    let update = run "yum update -y"
     let install fmt = ksprintf (run "rpm --rebuilddb && yum install -y %s && yum clean all") fmt
     let groupinstall fmt = ksprintf (run "rpm --rebuilddb && yum groupinstall -y %s && yum clean all") fmt
 
