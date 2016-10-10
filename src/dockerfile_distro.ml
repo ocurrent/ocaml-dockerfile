@@ -237,6 +237,8 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
     maybe (fun x -> x) extra_cmd @@
+    (* TODO FIXME opam2dev needs openssl as a dependency but review if this is still needed by release *)
+    let extra = match need_upgrade with false -> extra | true -> "openssl" :: extra in
     Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::"wget"::"xz"::extra)) () @@
     install_opam_from_source ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
