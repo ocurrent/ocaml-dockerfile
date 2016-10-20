@@ -1,4 +1,4 @@
-trunk:
+1.7.2:
 * Port to build using topkg and remove _oasis.
 * Support `-safe-string` mode.
 * Install `xz` into base Fedora and other RPM distros.
