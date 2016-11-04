@@ -19,6 +19,7 @@
 
 open Dockerfile
 open Printf
+module Linux = Dockerfile_linux
 
 (** Rules to get the cloud solver if no aspcud available *)
 let install_cloud_solver =
@@ -31,6 +32,7 @@ module RPM = struct
   let install_system_opam = function
   | `CentOS7 -> Linux.RPM.install "opam aspcud"
   | `CentOS6 -> Linux.RPM.install "opam" @@ install_cloud_solver
+
 end
 
 (** Debian rules *)

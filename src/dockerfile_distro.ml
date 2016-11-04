@@ -18,6 +18,7 @@
 (** Distro selection for various OPAM combinations *)
 open Dockerfile
 open Dockerfile_opam
+module Linux = Dockerfile_linux
 
 type t = [ 
   | `Alpine of [ `V3_3 | `V3_4 | `Latest ]
