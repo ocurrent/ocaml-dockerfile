@@ -35,7 +35,7 @@ val string_of_t : t -> string
 (** [string_of_t t] converts a {!t} into a Dockerfile format entry *)
 
 val pp : t Fmt.t
-(** [pp is a formatter that outputs a {!t} in Dockerfile format. *)
+(** [pp] is a formatter that outputs a {!t} in Dockerfile format. *)
 
 val (@@) : t -> t -> t
 (** [a @@ b] concatenates two Dockerfile fragments into one. *)
