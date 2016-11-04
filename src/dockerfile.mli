@@ -21,8 +21,15 @@
 
 (** {2 Core combinators and serializers} *)
 
-type t [@@deriving sexp]
+type t
 (** [t] is a list of Dockerfile lines *)
+
+val sexp_of_t : t -> Sexplib.Sexp.t
+(** [sexp_of_t t] converts a Dockerfile into a s-expression representation. *)
+
+val t_of_sexp : Sexplib.Sexp.t -> t
+(** [t_of_sexp s] converts the [s] s-expression representation into a {!t}.
+    The s-expression should have been generated using {!sexp_of_t}. *)
 
 val string_of_t : t -> string
 (** [string_of_t t] converts a {!t} into a Dockerfile format entry *)
@@ -209,4 +216,3 @@ val crunch : t -> t
 (** [crunch t] will reduce coincident {!run} commands into a single
   one that is chained using the shell [&&] operator. This reduces the
   number of layers required for a production image. *)
-
