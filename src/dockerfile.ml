@@ -144,3 +144,4 @@ let entrypoint_exec e : t = [ `Entrypoint (`Exec e) ]
 let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
 
 let string_of_t tl = String.concat "\n" (List.map string_of_line tl)
+let pp ppf tl = Fmt.pf ppf "%s" (string_of_t tl)
