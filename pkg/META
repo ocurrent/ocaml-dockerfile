@@ -1,6 +1,6 @@
 version = "%%VERSION%%"
 description = "OCaml interface for generating Dockerfiles"
-requires = "sexplib"
+requires = "sexplib fmt"
 archive(byte) = "dockerfile.cma"
 archive(native) = "dockerfile.cmxa"
 plugin(native) = "dockerfile.cmxs"

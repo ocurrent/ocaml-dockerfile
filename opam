@@ -16,5 +16,6 @@ depends: [
   "cmdliner"
   "sexplib"
   "base-bytes"
+  "fmt"
 ]
 build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]
