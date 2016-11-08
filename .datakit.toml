@@ -1,0 +1,10 @@
+[heads]
+  [heads.master]
+    compilers = [ "4.02.3", "4.03.0", "4.04.0" ]
+    flambda = true
+    distros = [ "alpine-3.4" ]
+[tags]
+  [tags.v2]
+    name = "v2.0.0"
+    compilers = [ "4.03.0" ]
+    distros = [ "debian-stable" ]
