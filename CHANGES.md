@@ -1,3 +1,12 @@
+v2.1.0 2016-11-07 Cambridge
+
+* Update for OCaml 4.04 release. Now the "latest version"
+  of the compiler is 4.03.0 since many packages do not yet
+  compile for 4.04.
+* Do not install `camlp4` in the base OPAM switch by default,
+  as the dependencies in upstream OPAM work well enough to
+  pull it in on-demand.
+
 v2.0.0 2016-11-04 Cambridge
 ---------------------------
 
