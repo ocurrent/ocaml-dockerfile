@@ -1,3 +1,6 @@
+* Always install OPAM from source on Alpine until upstreaming
+  is complete.
+
 v2.1.0 2016-11-07 Cambridge
 
 * Update for OCaml 4.04 release. Now the "latest version"

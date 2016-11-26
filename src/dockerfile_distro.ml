@@ -258,12 +258,8 @@ let apk_opam ?pin ?opam_version ?compiler_version labels tag =
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
-    (match opam_version with
-     | None | Some "1.2" | Some "1.2.2" -> Linux.Apk.install "opam rsync xz"
-     | Some branch ->
-        Linux.Apk.install "rsync xz" @@
-        install_opam_from_source ~prefix:"/usr" ~branch () 
-    ) @@
+    Linux.Apk.install "rsync xz" @@
+    install_opam_from_source ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
