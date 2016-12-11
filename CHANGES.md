@@ -1,5 +1,6 @@
 * Always install OPAM from source on Alpine until upstreaming
   is complete.
+* Register 4.04 as a mainline compiler as well (fixes OPAM2).
 
 v2.1.0 2016-11-07 Cambridge
 
