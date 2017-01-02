@@ -124,10 +124,13 @@ module Apk = struct
     run "mkdir .ssh" @@
     run "chmod 700 .ssh"
 
-  let install_system_ocaml ~version =
-    run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
-    run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/%s >> /etc/apk/repositories" version @@
-    install "ocaml camlp4"
+  let install_system_ocaml ?(add_custom_apk=false) version =
+    match add_custom_apk with
+    | false -> install "ocaml camlp4"
+    | true ->
+      run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
+      run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/%s >> /etc/apk/repositories" version @@
+      install "ocaml camlp4"
 end
 
 (* Zypper (opensuse) rules *)

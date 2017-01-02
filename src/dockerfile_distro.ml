@@ -21,14 +21,14 @@ open Dockerfile_opam
 module Linux = Dockerfile_linux
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]
   | `Alpine_armhf of [ `V3_4 | `Latest ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 ]
   | `OracleLinux of [ `V7 ]
-  | `OpenSUSE of [ `V42_1 ]
+  | `OpenSUSE of [ `V42_1 | `V42_2 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp]
 
@@ -37,9 +37,9 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23); (`Fedora `V24);
                 (`CentOS `V6); (`CentOS `V7);
-                (`OracleLinux `V7); (`OpenSUSE `V42_1);
+                (`OracleLinux `V7); (`OpenSUSE `V42_1); (`OpenSUSE `V42_2);
                 (`Alpine_armhf `V3_4); (`Alpine_armhf `Latest);
-                (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `Latest)]
+                (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `V3_5); (`Alpine `Latest)]
 
 let slow_distros = [
   (`Raspbian `V8); (`Alpine_armhf `V3_4)
@@ -71,6 +71,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine (`V3_4 | `Latest) -> Some "4.02.3"
+  |`Alpine `V3_5 -> Some "4.04.0"
   |`Alpine_armhf (`V3_4 | `Latest) -> Some "4.02.3"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
@@ -79,6 +80,7 @@ let builtin_ocaml_of_distro = function
   |`CentOS `V6 -> Some "3.11.2"
   |`CentOS `V7 -> Some "4.01.0"
   |`OpenSUSE `V42_1 -> Some "4.02.3"
+  |`OpenSUSE `V42_2 -> Some "4.03.0"
   |`OracleLinux `V7 -> None
 
 (* The Docker tag for this distro *)
@@ -105,10 +107,12 @@ let tag_of_distro = function
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
+  |`Alpine `V3_5 -> "alpine-3.5"
   |`Alpine_armhf `V3_4 -> "alpine-armhf-3.4"
   |`Alpine `Latest -> "alpine"
   |`Alpine_armhf `Latest -> "alpine-armhf"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
+  |`OpenSUSE `V42_2 -> "opensuse-42.2"
 
 let distro_of_tag x : t option = match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
@@ -133,10 +137,12 @@ let distro_of_tag x : t option = match x with
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
+  |"alpine-3.5" -> Some (`Alpine `V3_5)
   |"alpine-armhf-3.4" -> Some (`Alpine_armhf `V3_4)
   |"alpine-armhf" -> Some (`Alpine_armhf `V3_4)
   |"alpine" -> Some (`Alpine `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
+  |"opensuse-42.2" -> Some (`OpenSUSE `V42_2)
   |_ -> None
 
 let human_readable_string_of_distro = function
@@ -162,10 +168,12 @@ let human_readable_string_of_distro = function
   |`OracleLinux `V7 -> "OracleLinux 7"
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
+  |`Alpine `V3_5 -> "Alpine 3.5"
   |`Alpine_armhf `V3_4 -> "Alpine armhf 3.4"
   |`Alpine `Latest -> "Alpine Stable (3.4)"
   |`Alpine_armhf `Latest -> "Alpine armhf Stable (3.4)"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
+  |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
@@ -253,14 +261,18 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
     cmd_exec ["bash"]
 
 (* Apk (alpine) Dockerfile *)
-let apk_opam ?pin ?opam_version ?compiler_version labels tag =
+let apk_opam ?pin ?opam_version ?compiler_version ~os_version labels tag =
     let branch, need_upgrade = opam2_test opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
-    Linux.Apk.install "rsync xz" @@
-    install_opam_from_source ~prefix:"/usr" ?branch () @@
-    Dockerfile_opam.install_cloud_solver @@
+    (match opam_version, os_version with
+     |Some "1.2", `V3_5 -> Linux.Apk.install "rsync xz opam aspcud"
+     | _ -> 
+       Linux.Apk.install "rsync xz" @@
+       install_opam_from_source ~prefix:"/usr" ?branch () @@
+       Dockerfile_opam.install_cloud_solver
+    ) @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version ~need_upgrade () @@
@@ -331,8 +343,8 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `Fedora _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["redhat-rpm-config"] labels distro tag
   | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
-  | `Alpine _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
-  | `Alpine_armhf _ -> apk_opam ?pin ~opam_version ?compiler_version labels tag
+  | `Alpine os_version -> apk_opam ?pin ~opam_version ?compiler_version ~os_version labels tag
+  | `Alpine_armhf os_version -> apk_opam ?pin ~opam_version ?compiler_version ~os_version:`V3_4 labels tag
   | `OpenSUSE _ -> zypper_opam ?pin ~opam_version ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)

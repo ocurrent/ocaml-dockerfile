@@ -23,14 +23,14 @@
 (** {2 Known distributions and OCaml variants} *)
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `Latest ]
   | `Alpine_armhf of [ `V3_4 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Raspbian of [ `V8 ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 ]
   | `OracleLinux of [ `V7 ]
-  | `OpenSUSE of [ `V42_1 ]
+  | `OpenSUSE of [ `V42_1 | `V42_2 ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp] 
 (** Supported Docker container distributions *)
