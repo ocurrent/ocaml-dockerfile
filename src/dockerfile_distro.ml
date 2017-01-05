@@ -24,8 +24,6 @@ type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
-  | `Raspbian of [ `V8 ]
-  | `Alpine_armhf of [ `V3_4 | `Latest ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 | `V42_2 ]
@@ -38,12 +36,7 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
                 (`Fedora `V22); (`Fedora `V23); (`Fedora `V24);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7); (`OpenSUSE `V42_1); (`OpenSUSE `V42_2);
-                (`Alpine_armhf `V3_4); (`Alpine_armhf `Latest);
                 (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `V3_5); (`Alpine `Latest)]
-
-let slow_distros = [
-  (`Raspbian `V8); (`Alpine_armhf `V3_4)
-]
 
 let latest_stable_distros = [
   (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V24);
@@ -59,7 +52,7 @@ let latest_opam_version = "1.2.2"
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro = function
-  |`Debian (`Stable |`V8) | `Raspbian `V8 -> Some "4.01.0"
+  |`Debian (`Stable |`V8) -> Some "4.01.0"
   |`Debian `Testing -> Some "4.02.3"
   |`Debian (`Unstable | `V9) -> Some "4.02.3"
   |`Debian `V7 -> Some "3.12.1"
@@ -72,7 +65,6 @@ let builtin_ocaml_of_distro = function
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine (`V3_4 | `Latest) -> Some "4.02.3"
   |`Alpine `V3_5 -> None
-  |`Alpine_armhf (`V3_4 | `Latest) -> Some "4.02.3"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -97,7 +89,6 @@ let tag_of_distro = function
   |`Debian `V9 -> "debian-9"
   |`Debian `V8 -> "debian-8"
   |`Debian `V7 -> "debian-7"
-  |`Raspbian `V8 -> "raspbian-8"
   |`CentOS `V6 -> "centos-6"
   |`CentOS `V7 -> "centos-7"
   |`Fedora `V21 -> "fedora-21"
@@ -108,9 +99,7 @@ let tag_of_distro = function
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
   |`Alpine `V3_5 -> "alpine-3.5"
-  |`Alpine_armhf `V3_4 -> "alpine-armhf-3.4"
   |`Alpine `Latest -> "alpine"
-  |`Alpine_armhf `Latest -> "alpine-armhf"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
   |`OpenSUSE `V42_2 -> "opensuse-42.2"
 
@@ -127,7 +116,6 @@ let distro_of_tag x : t option = match x with
   |"debian-9" -> Some (`Debian `V9)
   |"debian-8" -> Some (`Debian `V8)
   |"debian-7" -> Some (`Debian `V7)
-  |"raspbian-8" -> Some (`Raspbian `V8)
   |"centos-6" -> Some (`CentOS `V6)
   |"centos-7" -> Some (`CentOS `V7)
   |"fedora-21" -> Some (`Fedora `V21)
@@ -138,8 +126,6 @@ let distro_of_tag x : t option = match x with
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
   |"alpine-3.5" -> Some (`Alpine `V3_5)
-  |"alpine-armhf-3.4" -> Some (`Alpine_armhf `V3_4)
-  |"alpine-armhf" -> Some (`Alpine_armhf `V3_4)
   |"alpine" -> Some (`Alpine `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
   |"opensuse-42.2" -> Some (`OpenSUSE `V42_2)
@@ -158,7 +144,6 @@ let human_readable_string_of_distro = function
   |`Debian `V9 -> "Debian 9 (Stretch)"
   |`Debian `V8 -> "Debian 8 (Jessie)"
   |`Debian `V7 -> "Debian 7 (Wheezy)"
-  |`Raspbian `V8 -> "Raspbian 8 (Jessie)"
   |`CentOS `V6 -> "CentOS 6"
   |`CentOS `V7 -> "CentOS 7"
   |`Fedora `V21 -> "Fedora 21"
@@ -169,9 +154,7 @@ let human_readable_string_of_distro = function
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
   |`Alpine `V3_5 -> "Alpine 3.5"
-  |`Alpine_armhf `V3_4 -> "Alpine armhf 3.4"
   |`Alpine `Latest -> "Alpine Stable (3.4)"
-  |`Alpine_armhf `Latest -> "Alpine armhf Stable (3.4)"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
   |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
 
@@ -179,12 +162,10 @@ let human_readable_short_string_of_distro (t:t) =
   match t with
   |`Ubuntu _ ->  "Ubuntu"
   |`Debian _ -> "Debian"
-  |`Raspbian _ -> "Raspbian"
   |`CentOS _ -> "CentOS"
   |`Fedora _ -> "Fedora"
   |`OracleLinux _ -> "OracleLinux"
   |`Alpine _ -> "Alpine"
-  |`Alpine_armhf _ -> "Alpine armhf"
   |`OpenSUSE _ -> "OpenSUSE"
 
 (* The alias tag for the latest stable version of this distro *)
@@ -192,12 +173,10 @@ let latest_tag_of_distro (t:t) =
   match t with
   |`Ubuntu _ ->  "ubuntu"
   |`Debian _ -> "debian"
-  |`Raspbian _ -> "raspbian"
   |`CentOS _ -> "centos"
   |`Fedora _ -> "fedora"
   |`OracleLinux _ -> "oraclelinux"
   |`Alpine _ -> "alpine"
-  |`Alpine_armhf _ -> "alpine-armhf"
   |`OpenSUSE _ -> "opensuse"
 
 let opam_tag_of_distro distro ocaml_version =
@@ -312,7 +291,7 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
   let labels = [
       "distro", (latest_tag_of_distro distro);
       "distro_long", (tag_of_distro distro);
-      "arch", (match distro with |`Raspbian _ |`Alpine_armhf _ -> "armv7" |_ -> "x86_64");
+      "arch", "x86_64";
       "ocaml_version", ocaml_version;
       "opam_version", opam_version;
       "operatingsystem", "linux";
@@ -338,13 +317,12 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
     | other -> other
   in
   match distro with
-  | `Ubuntu _ | `Debian _ | `Raspbian _ -> apt_opam ?pin ~opam_version ?compiler_version labels distro tag
+  | `Ubuntu _ | `Debian _ -> apt_opam ?pin ~opam_version ?compiler_version labels distro tag
   | `CentOS `V6 -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `CentOS _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["centos-release-xen"] labels distro tag
   | `Fedora _ -> yum_opam ?pin ~opam_version ?compiler_version ~extra:["redhat-rpm-config"] labels distro tag
   | `OracleLinux _ -> yum_opam ?pin ~opam_version ?compiler_version labels distro tag
   | `Alpine os_version -> apk_opam ?pin ~opam_version ?compiler_version ~os_version labels tag
-  | `Alpine_armhf os_version -> apk_opam ?pin ~opam_version ?compiler_version ~os_version:`V3_4 labels tag
   | `OpenSUSE _ -> zypper_opam ?pin ~opam_version ?compiler_version labels tag
 
 (* Build up the matrix of Dockerfiles *)

@@ -1,6 +1,12 @@
+* Remove support for ARM variants from the default distribution
+  list.  They will come back as explicitly supported multiarch
+  targets, instead of the current qemu builds that are mixed up
+  with x86_64 targets.
 * Always install OPAM from source on Alpine until upstreaming
   is complete.
 * Register 4.04 as a mainline compiler as well (fixes OPAM2).
+* Add support for Alpine 3.5 and OpenSUSE 42.2.
+* Do not install camlp4 by default in distributions.
 
 v2.1.0 2016-11-07 Cambridge
 
