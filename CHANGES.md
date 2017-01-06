@@ -7,6 +7,8 @@
 * Register 4.04 as a mainline compiler as well (fixes OPAM2).
 * Add support for Alpine 3.5 and OpenSUSE 42.2.
 * Do not install camlp4 by default in distributions.
+* Refresh `aspcud` remote proxy with url-escaping fixes
+  (via @OCamlPro-Henry in ocaml/opam#2809)
 
 v2.1.0 2016-11-07 Cambridge
 

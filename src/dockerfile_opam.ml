@@ -23,7 +23,7 @@ module Linux = Dockerfile_linux
 
 (** Rules to get the cloud solver if no aspcud available *)
 let install_cloud_solver =
-  run "curl -o /usr/bin/aspcud 'https://raw.githubusercontent.com/avsm/opam-solver-proxy/8f162de1fe89b2e243d89961f376c80fde6de76d/aspcud.docker'" @@
+  run "curl -o /usr/bin/aspcud 'https://raw.githubusercontent.com/avsm/opam-solver-proxy/38133c7f82bae3f1aa9f7505901f26d9fb0ed1ee/aspcud.docker'" @@
   run "chmod 755 /usr/bin/aspcud"
 
 (** RPM rules *)

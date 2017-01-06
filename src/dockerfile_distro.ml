@@ -249,9 +249,11 @@ let apk_opam ?pin ?opam_version ?compiler_version ~os_version labels tag =
      |Some "1.2", `V3_5 -> Linux.Apk.install "rsync xz opam aspcud"
      | _ -> 
        Linux.Apk.install "rsync xz" @@
-       install_opam_from_source ~prefix:"/usr" ?branch () @@
-       Dockerfile_opam.install_cloud_solver
+       install_opam_from_source ~prefix:"/usr" ?branch ()
     ) @@
+    (match os_version with
+     |`Latest|`V3_5 -> empty
+     |`V3_3|`V3_4 -> Dockerfile_opam.install_cloud_solver) @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version ~need_upgrade () @@
