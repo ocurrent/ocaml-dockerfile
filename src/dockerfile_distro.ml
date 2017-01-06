@@ -63,8 +63,8 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V16_04 -> Some "4.02.3"
   |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
-  |`Alpine (`V3_4 | `Latest) -> Some "4.02.3"
-  |`Alpine `V3_5 -> None
+  |`Alpine `V3_4 -> Some "4.02.3"
+  |`Alpine (`V3_5 | `Latest) -> None
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -154,7 +154,7 @@ let human_readable_string_of_distro = function
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
   |`Alpine `V3_5 -> "Alpine 3.5"
-  |`Alpine `Latest -> "Alpine Stable (3.4)"
+  |`Alpine `Latest -> "Alpine Stable (3.5)"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
   |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
 
