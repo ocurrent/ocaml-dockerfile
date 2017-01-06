@@ -64,7 +64,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V16_10 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine `V3_4 -> Some "4.02.3"
-  |`Alpine (`V3_5 | `Latest) -> None
+  |`Alpine (`V3_5 | `Latest) -> Some "4.04.0"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"

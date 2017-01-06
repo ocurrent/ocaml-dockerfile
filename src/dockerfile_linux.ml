@@ -126,7 +126,9 @@ module Apk = struct
 
   let install_system_ocaml ?(add_custom_apk=false) version =
     match add_custom_apk with
-    | false -> install "ocaml camlp4"
+    | false ->
+      (* temporary until fixed alpine edge packages are propagated back in 3.5 repo *)
+      run "apk add -X http://dl-3.alpinelinux.org/alpine/edge/community --update-cache ocamlbuild>0.10 camlp4>4.04"
     | true ->
       run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
       run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/%s >> /etc/apk/repositories" version @@
