@@ -1,3 +1,6 @@
+v2.2.0 2017-01-12 Cambridge
+---------------------------
+
 * Remove support for ARM variants from the default distribution
   list.  They will come back as explicitly supported multiarch
   targets, instead of the current qemu builds that are mixed up
@@ -10,8 +13,10 @@
 * Do not install camlp4 by default in distributions.
 * Refresh `aspcud` remote proxy with url-escaping fixes
   (via @OCamlPro-Henry in ocaml/opam#2809)
+* Add Ubuntu 16.10 to the built-distros list.
 
 v2.1.0 2016-11-07 Cambridge
+---------------------------
 
 * Update for OCaml 4.04 release. Now the "latest version"
   of the compiler is 4.03.0 since many packages do not yet

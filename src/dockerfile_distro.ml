@@ -30,7 +30,7 @@ type t = [
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
 ] [@@deriving sexp]
 
-let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04);
+let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubuntu `V16_10);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23); (`Fedora `V24);
