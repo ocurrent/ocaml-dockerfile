@@ -1,3 +1,10 @@
+v2.2.1 2017-02-22 Cambridge
+---------------------------
+
+* Bump latest stable OCaml to 4.04.0.
+* Add OCaml 4.06.0dev into the build matrix.
+* Support latest OPAM 2.0beta release.
+
 v2.2.0 2017-01-12 Cambridge
 ---------------------------
 
