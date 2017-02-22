@@ -40,7 +40,7 @@ let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubunt
 
 let latest_stable_distros = [
   (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V24);
-  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `V3_4); (`OpenSUSE `V42_1) ]
+  (`CentOS `V7); (`OracleLinux `V7); (`Alpine `Latest); (`OpenSUSE `V42_2) ]
 
 let master_distro = `Debian `Stable
 let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.0+flambda" ]
