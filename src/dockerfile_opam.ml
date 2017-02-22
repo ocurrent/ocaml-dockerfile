@@ -61,7 +61,7 @@ let opam_init
       | Some v, true -> "--comp ocaml-variants." ^ v ^ " "
     in
     let master_cmds = match need_upgrade with
-      | true -> run_as_opam "cd %s/opam-repository && opam admin upgrade-format && git checkout -b v2 && git add . && git commit -a -m 'opam admin upgrade-format'" opamhome
+      | true -> run_as_opam "cd %s/opam-repository && opam admin upgrade && git checkout -b v2 && git add . && git commit -a -m 'opam admin upgrade'" opamhome
       | false -> empty in
     run_as_opam "git clone -b %s %s" branch repo @@
     master_cmds @@

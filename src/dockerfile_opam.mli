@@ -45,7 +45,7 @@ val opam_init :
     by default and [branch] is [master] by default.
     If [compiler-version] is specified, an [opam switch] is executed to that
     version.  If unspecified, then the [system] switch is default.
-    [need_upgrade] will run the [opam admin upgrade-format] on the repository
+    [need_upgrade] will run [opam admin upgrade] on the repository
     for the latest OPAM2 metadata format.  *)
 
 val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Dockerfile.t
