@@ -302,6 +302,8 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
       match ocaml_version with
       |"4.05.0" -> "4.05.0+trunk"
       |"4.05.0+flambda" -> "4.05.0+trunk+flambda"
+      |"4.06.0" -> "4.06.0+trunk"
+      |"4.06.0+flambda" -> "4.06.0+trunk+flambda"
       |_ -> ocaml_version
     in
     match builtin_ocaml_of_distro distro with

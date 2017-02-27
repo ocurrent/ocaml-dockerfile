@@ -1,3 +1,8 @@
+v2.2.2
+------
+
+* Register 4.06.0 as a trunk compiler revision.
+
 v2.2.1 2017-02-22 Cambridge
 ---------------------------
 
