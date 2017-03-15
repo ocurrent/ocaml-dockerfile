@@ -1,3 +1,8 @@
+v2.2.3
+------
+
+* Correctly install aspcud in all Alpine 3.5 containers.
+
 v2.2.2
 ------
 
