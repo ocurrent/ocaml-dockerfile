@@ -1,12 +1,8 @@
-v2.2.3
-------
-
-* Correctly install aspcud in all Alpine 3.5 containers.
-
-v2.2.2
-------
+v2.2.2 2017-03-22 Cambridge
+---------------------------
 
 * Register 4.06.0 as a trunk compiler revision.
+* Correctly install aspcud in all Alpine 3.5 containers.
 
 v2.2.1 2017-02-22 Cambridge
 ---------------------------
