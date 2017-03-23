@@ -69,8 +69,23 @@ let opam_init
 
 let install_opam_from_source ?prefix ?(branch="1.2") () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
-  Linux.run_sh "cd /tmp/opam && make cold && make%s install && rm -rf /tmp/opam"
+  let wrappers_dir = match prefix with
+  | None -> "/usr/local/share/opam"
+  | Some p -> Filename.concat p "share/opam"
+  in
+  Linux.run_sh
+    "cd /tmp/opam && \
+     make cold && \
+     make%s install && \
+     for w in build install remove do \
+       mkdir -p %s && \
+       cp shell/wrap-$w.sh %s && \
+       echo 'wrap-$w-commands: \"%s/wrap-$w.sh\"' >> /etc/opamrc || \
+       true; \
+     done && \
+     rm -rf /tmp/opam"
     (match prefix with None -> "" |Some p -> " prefix=\""^p^"\"")
+    wrappers_dir wrappers_dir wrappers_dir
 
 let header ?maintainer img tag =
   let maintainer = match maintainer with None -> empty | Some t -> Dockerfile.maintainer "%s" t in
