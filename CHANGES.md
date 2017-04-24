@@ -1,3 +1,13 @@
+v2.2.3 2017-04-24 Cambridge
+--------------------------
+
+* Add OCaml 4.04.1 to the stable released set.
+* Add Ubuntu 17.04 and Fedora 25 to the distribution list.
+* Setup OPAM2 wrappers in containers. This will enforce Linux
+  namespaces upon building and installing the packages, preventing
+  them from doing network access when they shouldn't or writing files
+  where they shouldn't (#1 from @AltGr).
+
 v2.2.2 2017-03-22 Cambridge
 ---------------------------
 

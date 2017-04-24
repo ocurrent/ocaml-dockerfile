@@ -24,29 +24,29 @@ type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
-  | `Fedora of [ `V21 | `V22 | `V23 | `V24 ]
+  | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 | `V42_2 ]
-  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 ]
 ] [@@deriving sexp]
 
-let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubuntu `V16_10);
+let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubuntu `V16_10); (`Ubuntu `V17_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V9); (`Debian `V8); (`Debian `V7);
-                (`Fedora `V22); (`Fedora `V23); (`Fedora `V24);
+                (`Fedora `V22); (`Fedora `V23); (`Fedora `V24); (`Fedora `V25);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7); (`OpenSUSE `V42_1); (`OpenSUSE `V42_2);
                 (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `V3_5); (`Alpine `Latest)]
 
 let latest_stable_distros = [
-  (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V24);
+  (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V25);
   (`CentOS `V7); (`OracleLinux `V7); (`Alpine `Latest); (`OpenSUSE `V42_2) ]
 
 let master_distro = `Debian `Stable
-let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.0+flambda" ]
+let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.0+flambda"; "4.04.1"; "4.04.1+flambda" ]
 let dev_ocaml_versions = [ "4.05.0"; "4.05.0+flambda"; "4.06.0"; "4.06.0+flambda" ]
 let all_ocaml_versions = stable_ocaml_versions @ dev_ocaml_versions
-let latest_ocaml_version = "4.04.0"
+let latest_ocaml_version = "4.04.1"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
 
@@ -62,6 +62,7 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V15_10 -> Some "4.01.0"
   |`Ubuntu `V16_04 -> Some "4.02.3"
   |`Ubuntu `V16_10 -> Some "4.02.3"
+  |`Ubuntu `V17_04 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine `V3_4 -> Some "4.02.3"
   |`Alpine (`V3_5 | `Latest) -> Some "4.04.0"
@@ -69,6 +70,7 @@ let builtin_ocaml_of_distro = function
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
   |`Fedora `V24 -> Some "4.02.3"
+  |`Fedora `V25 -> Some "4.02.3"
   |`CentOS `V6 -> Some "3.11.2"
   |`CentOS `V7 -> Some "4.01.0"
   |`OpenSUSE `V42_1 -> Some "4.02.3"
@@ -83,6 +85,7 @@ let tag_of_distro = function
   |`Ubuntu `V15_10 -> "ubuntu-15.10"
   |`Ubuntu `V16_04 -> "ubuntu-16.04"
   |`Ubuntu `V16_10 -> "ubuntu-16.10"
+  |`Ubuntu `V17_04 -> "ubuntu-17.04"
   |`Debian `Stable -> "debian-stable"
   |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
@@ -95,6 +98,7 @@ let tag_of_distro = function
   |`Fedora `V22 -> "fedora-22"
   |`Fedora `V23 -> "fedora-23"
   |`Fedora `V24 -> "fedora-24"
+  |`Fedora `V25 -> "fedora-25"
   |`OracleLinux `V7 -> "oraclelinux-7"
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
@@ -110,6 +114,7 @@ let distro_of_tag x : t option = match x with
   |"ubuntu-15.10" -> Some (`Ubuntu `V15_10)
   |"ubuntu-16.04" -> Some (`Ubuntu `V16_04)
   |"ubuntu-16.10" -> Some (`Ubuntu `V16_10)
+  |"ubuntu-17.04" -> Some (`Ubuntu `V17_04)
   |"debian-stable" -> Some (`Debian `Stable)
   |"debian-unstable" -> Some (`Debian `Unstable)
   |"debian-testing" -> Some (`Debian `Testing)
@@ -122,6 +127,7 @@ let distro_of_tag x : t option = match x with
   |"fedora-22" -> Some (`Fedora `V22)
   |"fedora-23" -> Some (`Fedora `V23)
   |"fedora-24" -> Some (`Fedora `V24)
+  |"fedora-25" -> Some (`Fedora `V25)
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
@@ -138,6 +144,7 @@ let human_readable_string_of_distro = function
   |`Ubuntu `V15_10 -> "Ubuntu 15.10"
   |`Ubuntu `V16_04 -> "Ubuntu 16.04"
   |`Ubuntu `V16_10 -> "Ubuntu 16.10"
+  |`Ubuntu `V17_04 -> "Ubuntu 17.04"
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
@@ -150,6 +157,7 @@ let human_readable_string_of_distro = function
   |`Fedora `V22 -> "Fedora 22"
   |`Fedora `V23 -> "Fedora 23"
   |`Fedora `V24 -> "Fedora 24"
+  |`Fedora `V25 -> "Fedora 25"
   |`OracleLinux `V7 -> "OracleLinux 7"
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
