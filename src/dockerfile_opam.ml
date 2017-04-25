@@ -67,25 +67,24 @@ let opam_init
     master_cmds @@
     run_as_opam "opam init -a -y %s%s/opam-repository" compiler opamhome
 
-let install_opam_from_source ?prefix ?(branch="1.2") () =
+let install_opam_from_source ?prefix ?(install_wrappers=false) ?(branch="1.2") () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
   let wrappers_dir = match prefix with
   | None -> "/usr/local/share/opam"
   | Some p -> Filename.concat p "share/opam"
   in
+  let inst name =
+    Printf.sprintf "cp shell/wrap-%s.sh %s && echo 'wrap-%s-commands: \"%s/wrap-%s.sh\"' >> /etc/opamrc.userns" 
+      name wrappers_dir name wrappers_dir name in
+  let wrapper_cmd =
+    match install_wrappers with
+    | false -> "echo Not installing OPAM2 wrappers"
+    | true -> Fmt.strf "mkdir -p %s && %s" wrappers_dir (String.concat " && " [inst "build"; inst "install"; inst "remove"])
+  in
   Linux.run_sh
-    "cd /tmp/opam && \
-     make cold && \
-     make%s install && \
-     for w in build install remove do \
-       mkdir -p %s && \
-       cp shell/wrap-$w.sh %s && \
-       echo 'wrap-$w-commands: \"%s/wrap-$w.sh\"' >> /etc/opamrc || \
-       true; \
-     done && \
-     rm -rf /tmp/opam"
+    "cd /tmp/opam && make cold && make%s install && %s && rm -rf /tmp/opam"
     (match prefix with None -> "" |Some p -> " prefix=\""^p^"\"")
-    wrappers_dir wrappers_dir wrappers_dir
+    wrapper_cmd
 
 let header ?maintainer img tag =
   let maintainer = match maintainer with None -> empty | Some t -> Dockerfile.maintainer "%s" t in

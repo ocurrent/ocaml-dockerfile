@@ -48,10 +48,11 @@ val opam_init :
     [need_upgrade] will run [opam admin upgrade] on the repository
     for the latest OPAM2 metadata format.  *)
 
-val install_opam_from_source : ?prefix:string -> ?branch:string -> unit -> Dockerfile.t
+val install_opam_from_source : ?prefix:string -> ?install_wrappers:bool -> ?branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] defaults to the [1.2] stable branch.
-    The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
+    The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin].
+    If [install_wrappers] is [true] then OPAM2 sandboxing scripts are installed (defaults to [false]). *)
 
 val install_cloud_solver : Dockerfile.t
 (** [install_cloud_solver] will use the hosted OPAM aspcud service from IRILL.  It will

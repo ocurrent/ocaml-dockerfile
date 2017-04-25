@@ -206,18 +206,18 @@ let compare a b =
 (* OPAM2 needs to run an upgrade over main opam repository *)
 let opam2_test opam_version =
   match opam_version with
-  |Some "master" -> opam_version, true
-  |Some ov -> opam_version, false
-  |None -> (Some latest_opam_version), false
+  |Some "master" -> opam_version, true, true
+  |Some ov -> opam_version, false, false
+  |None -> (Some latest_opam_version), false, false
 
 (* Apt based Dockerfile *)
 let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
-    let branch, need_upgrade = opam2_test opam_version in
+    let branch, need_upgrade, install_wrappers = opam2_test opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apt")::labels) @@
     Linux.Apt.install "aspcud" @@
-    install_opam_from_source ?branch () @@
+    install_opam_from_source ~install_wrappers ?branch () @@
     Linux.Apt.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@
     opam_init ?compiler_version ~need_upgrade () @@
@@ -228,7 +228,7 @@ let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
 
 (* Yum RPM based Dockerfile *)
 let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels distro tag =
-    let branch, need_upgrade = opam2_test opam_version in
+    let branch, need_upgrade, install_wrappers = opam2_test opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "yum")::labels) @@
@@ -236,7 +236,7 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
     (* TODO FIXME opam2dev needs openssl as a dependency but review if this is still needed by release *)
     let extra = match need_upgrade with false -> extra | true -> "openssl" :: extra in
     Linux.RPM.dev_packages ~extra:(String.concat " " ("which"::"tar"::"wget"::"xz"::extra)) () @@
-    install_opam_from_source ~prefix:"/usr" ?branch () @@
+    install_opam_from_source ~install_wrappers ~prefix:"/usr" ?branch () @@
     Dockerfile_opam.install_cloud_solver @@
     run "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers" @@
     Linux.RPM.add_user ~sudo:true "opam" @@
@@ -249,13 +249,13 @@ let yum_opam ?(extra=[]) ?extra_cmd ?pin ?opam_version ?compiler_version labels 
 
 (* Apk (alpine) Dockerfile *)
 let apk_opam ?pin ?opam_version ?compiler_version ~os_version labels tag =
-    let branch, need_upgrade = opam2_test opam_version in
+    let branch, need_upgrade, install_wrappers = opam2_test opam_version in
     add_comment ?compiler_version tag @@
     header "ocaml/ocaml" tag @@
     label (("distro_style", "apk")::labels) @@
     (match opam_version with
      |Some "1.2" -> Linux.Apk.install "rsync xz opam"
-     |_ -> Linux.Apk.install "rsync xz" @@ install_opam_from_source ~prefix:"/usr" ?branch ()) @@
+     |_ -> Linux.Apk.install "rsync xz" @@ install_opam_from_source ~install_wrappers ~prefix:"/usr" ?branch ()) @@
     (match os_version with
      |`Latest|`V3_5 -> Linux.Apk.install "aspcud"
      |`V3_3|`V3_4 -> Dockerfile_opam.install_cloud_solver) @@
@@ -269,7 +269,7 @@ let apk_opam ?pin ?opam_version ?compiler_version ~os_version labels tag =
 
 (* Zypper (OpenSUSE) Dockerfile *)
 let zypper_opam ?pin ?opam_version ?compiler_version labels tag =
-  let branch, need_upgrade = opam2_test opam_version in 
+  let branch, need_upgrade, install_wrappers = opam2_test opam_version in 
   add_comment ?compiler_version tag @@
   header "ocaml/ocaml" tag @@
   label (("distro_style", "zypper")::labels) @@
