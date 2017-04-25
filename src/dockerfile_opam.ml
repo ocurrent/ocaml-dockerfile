@@ -50,8 +50,8 @@ let opam_init
   ?(repo="git://github.com/ocaml/opam-repository")
   ?(need_upgrade=false)
   ?compiler_version () =
-    let is_mainline = function (* only covers the compilers we use *)
-      |"4.04.0"|"4.03.0"|"4.02.3"|"4.01.0"|"4.00.1" -> true
+    let is_mainline = function (* FIXME only covers the compilers we use *)
+      |"4.04.1"|"4.04.0"|"4.03.0"|"4.02.3"|"4.01.0"|"4.00.1" -> true
       |_ -> false in
     let compiler =
       match compiler_version, need_upgrade with
