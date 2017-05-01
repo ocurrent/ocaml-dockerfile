@@ -1,4 +1,4 @@
-v2.2.3 2017-04-24 Cambridge
+v2.2.3 2017-05-01 Cambridge
 --------------------------
 
 * Add OCaml 4.04.1 to the stable released set.
@@ -6,7 +6,9 @@ v2.2.3 2017-04-24 Cambridge
 * Setup OPAM2 wrappers in containers. This will enforce Linux
   namespaces upon building and installing the packages, preventing
   them from doing network access when they shouldn't or writing files
-  where they shouldn't (#1 from @AltGr).
+  where they shouldn't (#1 from @AltGr).  These are not activated
+  by default and are present in `/etc/opamrc.userns` in the relevant
+  OPAM2 containers.
 
 v2.2.2 2017-03-22 Cambridge
 ---------------------------
