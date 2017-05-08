@@ -4,5 +4,5 @@
  ((name        dockerfile_opam)
   (public_name dockerfile-opam)
   (wrapped false)
-  (libraries   (dockerfile fmt sexplib cmdliner))
+  (libraries  (dockerfile fmt sexplib cmdliner str))
  ))
