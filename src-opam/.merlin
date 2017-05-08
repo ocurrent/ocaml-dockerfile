@@ -1,0 +1,13 @@
+B ../_build/default/src
+B ../_build/default/src-opam
+FLG -w -40
+PKG bigarray
+PKG bytes
+PKG cmdliner
+PKG fmt
+PKG result
+PKG sexplib
+PKG sexplib.0
+PKG uchar
+PKG unix
+S .

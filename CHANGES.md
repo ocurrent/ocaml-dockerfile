@@ -1,3 +1,11 @@
+v3.0.0
+------
+
+* Split up OPAM packages into `dockerfile` and `dockerfile-opam`.
+  The latter contains the OPAM- and Linux-specific modules, with
+  the core DSL in `dockerfile`.
+* Port to [jbuilder](https://github.com/janestreet/jbuilder).
+
 v2.2.3 2017-05-01 Cambridge
 --------------------------
 

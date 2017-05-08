@@ -1,0 +1,10 @@
+B ../_build/default/src
+FLG -w -40
+PKG bigarray
+PKG fmt
+PKG result
+PKG sexplib
+PKG sexplib.0
+PKG uchar
+PKG unix
+S .
