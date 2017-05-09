@@ -1,0 +1,8 @@
+(jbuild_version 1)
+
+(library
+ ((name        dockerfile_opam)
+  (public_name dockerfile-opam)
+  (wrapped false)
+  (libraries  (dockerfile fmt sexplib cmdliner str))
+ ))

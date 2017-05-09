@@ -1,4 +1,0 @@
-true : bin_annot, debug, principal, strict_sequence, safe_string
-true : package(sexplib ppx_sexp_conv str bytes cmdliner fmt)
-<src> : include
-<test> : include

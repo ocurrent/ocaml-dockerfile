@@ -1,4 +1,4 @@
-FROM ocaml/opam:debian-7_ocaml-4.02.3
+FROM ocaml/opam:alpine
 RUN sudo -u opam sh -c "opam pin add -n dockerfile https://github.com/avsm/ocaml-dockerfile.git" && \
   sudo -u opam sh -c "opam update -u" && \
   sudo -u opam sh -c "opam depext -u dockerfile" && \

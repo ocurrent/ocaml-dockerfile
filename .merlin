@@ -1,6 +1,0 @@
-PKG bytes
-PKG sexplib
-PKG cmdliner
-S src
-S test
-B _build/**

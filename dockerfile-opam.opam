@@ -10,13 +10,8 @@ tags: ["org:mirage" "org:ocamllabs"]
 available: [ ocaml-version >= "4.02.3"]
 depends: [
   "ocamlfind" {build}
-  "ocamlbuild" {build}
-  "ppx_sexp_conv" {build}
-  "ppx_deriving" {build}
-  "topkg" {build}
+  "jbuilder" {build}
+  "dockerfile" {>="3.0.0"}
   "cmdliner"
-  "sexplib"
-  "base-bytes"
-  "fmt"
 ]
-build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]
+build: ["jbuilder" "build" "-p" name "-j" jobs]
