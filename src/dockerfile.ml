@@ -24,11 +24,11 @@ type shell_or_exec = [
 ] [@@deriving sexp]
 
 type sources_to_dest =
-  [ `Src of string list ] * [ `Dst of string ] [@@deriving sexp]
+  [`From of string option ] * [ `Src of string list ] * [ `Dst of string ] [@@deriving sexp]
 
 type line = [
   | `Comment of string
-  | `From of [ `Image of string | `Image_tag of string * string ]
+  | `From of [ `Image of string * string option | `Image_tag of string * string * string option ]
   | `Maintainer of string
   | `Run of shell_or_exec
   | `Cmd of shell_or_exec
@@ -93,7 +93,8 @@ let string_of_env_list =
 
 let string_of_sources_to_dest (t:sources_to_dest) =
   match t with
-  | `Src sl, `Dst d -> String.concat " " (sl @ [d])
+  | `From None, `Src sl, `Dst d -> String.concat " " (sl @ [d])
+  | `From (Some frm), `Src sl, `Dst d -> sprintf "--from=%s %s" frm (String.concat " " (sl @ [d]))
 
 let string_of_label_list ls =
   List.map (fun (k,v) -> sprintf "%s=%S" k v) ls |> String.concat " "
@@ -101,8 +102,10 @@ let string_of_label_list ls =
 let rec string_of_line (t:line) = 
   match t with
   | `Comment c -> cmd "#"  c
-  | `From (`Image i) -> cmd "FROM" i
-  | `From (`Image_tag (i,t)) -> sprintf "FROM %s:%s" i t
+  | `From (`Image (i, None)) -> cmd "FROM" i
+  | `From (`Image (i, Some alias)) -> cmd "FROM" (i ^ " as " ^ alias)
+  | `From (`Image_tag (i,t,None)) -> sprintf "FROM %s:%s" i t
+  | `From (`Image_tag (i,t,Some alias)) -> sprintf "FROM %s:%s as %s" i t alias
   | `Maintainer m -> cmd "MAINTAINER" m
   | `Run c -> cmd "RUN" (string_of_shell_or_exec c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec c)
@@ -118,10 +121,10 @@ let rec string_of_line (t:line) =
   | `Label ls -> cmd "LABEL" (string_of_label_list ls)
 
 (* Function interface *)
-let from ?tag img =
+let from ?alias ?tag img =
   match tag with
-  | None -> [ `From (`Image img) ]
-  | Some tag -> [ `From (`Image_tag (img, tag)) ]
+  | None -> [ `From (`Image (img, alias)) ]
+  | Some tag -> [ `From (`Image_tag (img, tag, alias)) ]
 
 let comment fmt = ksprintf (fun c -> [ `Comment c ]) fmt
 let maintainer fmt = ksprintf (fun m -> [ `Maintainer m ]) fmt
@@ -132,8 +135,8 @@ let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
 let expose_port p : t = [ `Expose [p] ]
 let expose_ports p : t = [ `Expose p ]
 let env e : t = [ `Env e ]
-let add ~src ~dst : t = [ `Add (`Src src, `Dst dst) ]
-let copy ~src ~dst : t = [ `Copy (`Src src, `Dst dst) ]
+let add ?from ~src ~dst () : t = [ `Add (`From from, `Src src, `Dst dst) ]
+let copy ?from ~src ~dst () : t = [ `Copy (`From from, `Src src, `Dst dst) ]
 let user fmt = ksprintf (fun u -> [ `User u ]) fmt
 let onbuild t = List.map (fun l -> `Onbuild l) t
 let volume fmt = ksprintf (fun v -> [ `Volume [v] ]) fmt

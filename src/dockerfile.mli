@@ -55,18 +55,26 @@ val maybe : ('a -> t) -> 'a option -> t
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
 
-val from : ?tag:string -> string -> t
+val from : ?alias:string -> ?tag:string -> string -> t
 (** The [from] instruction sets the base image for subsequent instructions.
 
     - A valid Dockerfile must have [from] as its first instruction. The image
       can be any valid image.
     - [from] must be the first non-comment instruction in the Dockerfile.
     - [from] can appear multiple times within a single Dockerfile in order to
-      create multiple images. Simply make a note of the last image ID output
-      by the commit before each new FROM command.
+      create multiple images. Multiple FROM commands will result in a multi-stage
+      build, and the [?from] argument to the {!copy} and {!add} functions
+      can move artefacts across stages.
+
+    By default, the stages are not named, and you refer to them by their
+    integer number, starting with 0 for the first [FROM] instruction. However,
+    you can name your stages, by supplying an [?alias] argument.  The alias
+    can be supplied to the [?from] parameter to {!copy} or {!add} to refer
+    to this particular stage by name.
 
     If no [tag] is supplied, [latest] is assumed. If the used tag does not
-    exist, an error will be returned. *)
+    exist, an error will be returned.
+*)
 
 val maintainer :  ('a, unit, string, t) format4 -> 'a
 (** [maintainer] sets the author field of the generated images. *)
@@ -116,8 +124,8 @@ val env : (string * string) list -> t
   instructions. This is functionally equivalent to prefixing a shell
   command with [<key>=<value>]. *)
 
-val add : src:string list -> dst:string -> t
-(** [add ~src ~dst] copies new files, directories or remote file URLs
+val add : ?from:string -> src:string list -> dst:string -> unit -> t
+(** [add ?from ~src ~dst ()] copies new files, directories or remote file URLs
   from [src] and adds them to the filesystem of the container at the
   [dst] path.
 
@@ -135,11 +143,17 @@ val add : src:string list -> dst:string -> t
   used to set the mtime on the destination file. Then, like any other
   file processed during an ADD, mtime will be included in the
   determination of whether or not the file has changed and the cache
-  should be updated. *)
+  should be updated.
 
-val copy : src:string list -> dst:string -> t
-(** [copy ~src ~dst] copies new files or directories from [src] and
-  adds them to the filesystem of the container at the path [dst]. *)
+  The [?from] parameter allows artefacts to be retrieved from multiple
+  {!commands}. It can either be an integer number (starting with 0 for the
+  first {!from} command, or a named stage (supplied via [?alias] to the
+  {!from} command). *)
+
+val copy : ?from:string -> src:string list -> dst:string -> unit -> t
+(** [copy ?from ~src ~dst ()] copies new files or directories from [src] and
+  adds them to the filesystem of the container at the path [dst]. See
+  {!add} for more detailed documentation. *)
 
 val user : ('a, unit, string, t) format4 -> 'a
 (** [user fmt] sets the user name or UID to use when running the image

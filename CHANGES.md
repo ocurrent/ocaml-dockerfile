@@ -1,5 +1,10 @@
-v3.0.0
-------
+v3.0.0 2017-05-23 Cambridge
+---------------------------
+
+* Add support for [multistage builds](https://docs.docker.com/engine/userguide/eng-image/multistage-build/)
+  to the `from`, `add`, and `copy` commands.
+
+There are also backwards incompatible changes to the package layout:
 
 * Split up OPAM packages into `dockerfile` and `dockerfile-opam`.
   The latter contains the OPAM- and Linux-specific modules, with
