@@ -9,10 +9,8 @@ bug-reports: "https://github.com/avsm/ocaml-dockerfile/issues"
 tags: ["org:mirage" "org:ocamllabs"]
 available: [ ocaml-version >= "4.02.3"]
 depends: [
-  "ocamlfind" {build}
-  "jbuilder" {build}
+  "jbuilder" {build & >="1.0+beta10"}
   "ppx_sexp_conv" {build}
-  "topkg" {build}
   "sexplib"
   "base-bytes"
   "fmt"

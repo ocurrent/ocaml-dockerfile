@@ -3,6 +3,6 @@
 (library
  ((name dockerfile)
   (public_name dockerfile)
-  (libraries   (sexplib fmt))
-  (preprocess  (per_file ((pps (ppx_sexp_conv)) (dockerfile))))
+  (libraries (sexplib fmt))
+  (preprocess (per_module ((pps (ppx_sexp_conv)) (dockerfile))))
  ))
