@@ -15,4 +15,7 @@ depends: [
   "base-bytes"
   "fmt"
 ]
-build: ["jbuilder" "build" "-p" name "-j" jobs]
+build: [
+  ["jbuilder" "subst" "-p" name "--name" name] {pinned}
+  ["jbuilder" "build" "-p" name "-j" jobs]
+]
