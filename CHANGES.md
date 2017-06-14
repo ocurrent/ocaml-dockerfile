@@ -1,4 +1,4 @@
-v3.0.0 2017-05-23 Cambridge
+v3.0.0 2017-06-14 Cambridge
 ---------------------------
 
 * Add support for [multistage builds](https://docs.docker.com/engine/userguide/eng-image/multistage-build/)
