@@ -23,9 +23,9 @@
 (** {2 Known distributions and OCaml variants} *)
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
-  | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 | `V42_2 ]

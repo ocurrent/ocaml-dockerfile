@@ -21,9 +21,9 @@ open Dockerfile_opam
 module Linux = Dockerfile_linux
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
-  | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 ]
   | `OracleLinux of [ `V7 ]
   | `OpenSUSE of [ `V42_1 | `V42_2 ]
@@ -32,11 +32,11 @@ type t = [
 
 let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubuntu `V16_10); (`Ubuntu `V17_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
-                (`Debian `V9); (`Debian `V8); (`Debian `V7);
+                (`Debian `V10); (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23); (`Fedora `V24); (`Fedora `V25);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7); (`OpenSUSE `V42_1); (`OpenSUSE `V42_2);
-                (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `V3_5); (`Alpine `Latest)]
+                (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `V3_5); (`Alpine `V3_6); (`Alpine `Latest)]
 
 let latest_stable_distros = [
   (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V25);
@@ -52,10 +52,10 @@ let latest_opam_version = "1.2.2"
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro = function
-  |`Debian (`Stable |`V8) -> Some "4.01.0"
-  |`Debian `Testing -> Some "4.02.3"
-  |`Debian (`Unstable | `V9) -> Some "4.02.3"
   |`Debian `V7 -> Some "3.12.1"
+  |`Debian `V8 -> Some "4.01.0"
+  |`Debian (`V9 | `Stable) -> Some "4.02.3"
+  |`Debian (`V10 | `Testing | `Unstable) -> Some "4.02.3"
   |`Ubuntu `V12_04 -> Some "3.12.1"
   |`Ubuntu `V14_04 -> Some "4.01.0"
   |`Ubuntu `V15_04 -> Some "4.01.0"
@@ -65,7 +65,8 @@ let builtin_ocaml_of_distro = function
   |`Ubuntu `V17_04 -> Some "4.02.3"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine `V3_4 -> Some "4.02.3"
-  |`Alpine (`V3_5 | `Latest) -> Some "4.04.0"
+  |`Alpine `V3_5 -> Some "4.04.0"
+  |`Alpine (`V3_6 | `Latest) -> Some "4.04.1"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -89,6 +90,7 @@ let tag_of_distro = function
   |`Debian `Stable -> "debian-stable"
   |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
+  |`Debian `V10 -> "debian-10"
   |`Debian `V9 -> "debian-9"
   |`Debian `V8 -> "debian-8"
   |`Debian `V7 -> "debian-7"
@@ -103,6 +105,7 @@ let tag_of_distro = function
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
   |`Alpine `V3_5 -> "alpine-3.5"
+  |`Alpine `V3_6 -> "alpine-3.6"
   |`Alpine `Latest -> "alpine"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
   |`OpenSUSE `V42_2 -> "opensuse-42.2"
@@ -118,6 +121,7 @@ let distro_of_tag x : t option = match x with
   |"debian-stable" -> Some (`Debian `Stable)
   |"debian-unstable" -> Some (`Debian `Unstable)
   |"debian-testing" -> Some (`Debian `Testing)
+  |"debian-10" -> Some (`Debian `V10)
   |"debian-9" -> Some (`Debian `V9)
   |"debian-8" -> Some (`Debian `V8)
   |"debian-7" -> Some (`Debian `V7)
@@ -132,6 +136,7 @@ let distro_of_tag x : t option = match x with
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
   |"alpine-3.5" -> Some (`Alpine `V3_5)
+  |"alpine-3.6" -> Some (`Alpine `V3_6)
   |"alpine" -> Some (`Alpine `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
   |"opensuse-42.2" -> Some (`OpenSUSE `V42_2)
@@ -148,6 +153,7 @@ let human_readable_string_of_distro = function
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
+  |`Debian `V10 -> "Debian 9 (Buster)"
   |`Debian `V9 -> "Debian 9 (Stretch)"
   |`Debian `V8 -> "Debian 8 (Jessie)"
   |`Debian `V7 -> "Debian 7 (Wheezy)"
@@ -162,7 +168,8 @@ let human_readable_string_of_distro = function
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
   |`Alpine `V3_5 -> "Alpine 3.5"
-  |`Alpine `Latest -> "Alpine Stable (3.5)"
+  |`Alpine `V3_6 -> "Alpine 3.6"
+  |`Alpine `Latest -> "Alpine Stable (3.6)"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
   |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
 
@@ -257,7 +264,7 @@ let apk_opam ?pin ?opam_version ?compiler_version ~os_version labels tag =
      |Some "1.2" -> Linux.Apk.install "rsync xz opam"
      |_ -> Linux.Apk.install "rsync xz" @@ install_opam_from_source ~install_wrappers ~prefix:"/usr" ?branch ()) @@
     (match os_version with
-     |`Latest|`V3_5 -> Linux.Apk.install "aspcud"
+     |`Latest|`V3_5 |`V3_6-> Linux.Apk.install "aspcud"
      |`V3_3|`V3_4 -> Dockerfile_opam.install_cloud_solver) @@
     Linux.Apk.add_user ~sudo:true "opam" @@
     Linux.Git.init () @@

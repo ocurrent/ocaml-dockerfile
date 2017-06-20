@@ -1,3 +1,10 @@
+v3.1.0 2017-06-20 Cambridge
+---------------------------
+
+* Add support for Alpine 3.6 and Debian 10 (Buster).
+* Bump the most recent Debian Stable to Debian 9.
+* Bump the most recent Alpine to Alpine 3.6.
+
 v3.0.0 2017-06-14 Cambridge
 ---------------------------
 
