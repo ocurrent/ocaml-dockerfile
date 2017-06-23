@@ -43,10 +43,10 @@ let latest_stable_distros = [
   (`CentOS `V7); (`OracleLinux `V7); (`Alpine `Latest); (`OpenSUSE `V42_2) ]
 
 let master_distro = `Debian `Stable
-let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.0+flambda"; "4.04.1"; "4.04.1+flambda" ]
+let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.1"; "4.04.2"; "4.04.2+flambda" ]
 let dev_ocaml_versions = [ "4.05.0"; "4.05.0+flambda"; "4.06.0"; "4.06.0+flambda" ]
 let all_ocaml_versions = stable_ocaml_versions @ dev_ocaml_versions
-let latest_ocaml_version = "4.04.1"
+let latest_ocaml_version = "4.04.2"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
 

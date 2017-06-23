@@ -1,9 +1,10 @@
-v3.1.0 2017-06-20 Cambridge
+v3.1.0 2017-06-21 Cambridge
 ---------------------------
 
 * Add support for Alpine 3.6 and Debian 10 (Buster).
 * Bump the most recent Debian Stable to Debian 9.
 * Bump the most recent Alpine to Alpine 3.6.
+* Add OCaml 4.04.2 as the most recent compiler
 
 v3.0.0 2017-06-14 Cambridge
 ---------------------------
