@@ -1,5 +1,5 @@
-v3.1.1
-------
+v3.1.1 2017-07-14 Cambridge
+---------------------------
 
 * Mark OCaml 4.05.0 as a released stable version.
 * Remove the Alpine 3.5 camlp4 hack as it has been fixed in a
