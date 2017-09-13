@@ -20,7 +20,7 @@ open Dockerfile
 open Dockerfile_opam
 module Linux = Dockerfile_linux
 
-type t = [ 
+type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `Latest ]
   | `CentOS of [ `V6 | `V7 ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
@@ -276,7 +276,7 @@ let apk_opam ?pin ?opam_version ?compiler_version ~os_version labels tag =
 
 (* Zypper (OpenSUSE) Dockerfile *)
 let zypper_opam ?pin ?opam_version ?compiler_version labels tag =
-  let branch, need_upgrade, install_wrappers = opam2_test opam_version in 
+  let branch, need_upgrade, install_wrappers = opam2_test opam_version in
   add_comment ?compiler_version tag @@
   header "ocaml/ocaml" tag @@
   label (("distro_style", "zypper")::labels) @@
@@ -355,7 +355,7 @@ let latest_dockerfile_matrix ?(opam_version=latest_opam_version) ?(extra=[]) ?pi
   List.map (fun distro ->
     distro,
     to_dockerfile ?pin ~opam_version ~ocaml_version:latest_ocaml_version ~distro ()
-  ) (latest_stable_distros @ extra) |> 
+  ) (latest_stable_distros @ extra) |>
   List.sort (fun (a,_) (b,_) -> compare a b)
 
 let map_tag ?filter fn =
