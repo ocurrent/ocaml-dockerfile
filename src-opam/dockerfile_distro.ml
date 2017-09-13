@@ -229,7 +229,7 @@ let apt_opam ?pin ?opam_version ?compiler_version labels distro tag =
     Linux.Git.init () @@
     opam_init ?compiler_version ~need_upgrade () @@
     (match pin with Some x -> run_as_opam "opam pin add %s" x | None -> empty) @@
-    run_as_opam "opam install -y depext travis-opam" @@
+    Dockerfile.copy ~from:"ocaml/ci-opam" ~src:["/ci-opam"] ~dst:"/usr/bin" () @@
     entrypoint_exec ["opam";"config";"exec";"--"] @@
     cmd_exec ["bash"]
 
