@@ -2,6 +2,8 @@ platform:
   - x86
 
 environment:
+  PACKAGE: dockerfile-opam
+  PINS: dockerfile.dev:.
   FORK_USER: ocaml
   FORK_BRANCH: master
   CYG_ROOT: C:\cygwin64
