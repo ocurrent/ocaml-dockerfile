@@ -1,3 +1,9 @@
+v3.2.0
+------
+
+* Also mark OCaml 4.05.0 as a mainline release for opam2 as well.
+* Update OPAM 2 build mechanism to use `make cold`.
+
 v3.1.0 2017-07-14 Cambridge
 ---------------------------
 

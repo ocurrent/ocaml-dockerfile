@@ -51,7 +51,7 @@ let opam_init
   ?(need_upgrade=false)
   ?compiler_version () =
     let is_mainline = function (* FIXME only covers the compilers we use *)
-      |"4.04.2"|"4.04.1"|"4.04.0"|"4.03.0"|"4.02.3"|"4.01.0"|"4.00.1" -> true
+      |"4.05.0"|"4.04.2"|"4.04.1"|"4.04.0"|"4.03.0"|"4.02.3"|"4.01.0"|"4.00.1" -> true
       |_ -> false in
     let compiler =
       match compiler_version, need_upgrade with
