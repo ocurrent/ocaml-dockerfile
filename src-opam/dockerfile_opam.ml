@@ -81,9 +81,15 @@ let install_opam_from_source ?prefix ?(install_wrappers=false) ?(branch="1.2") (
     | false -> "echo Not installing OPAM2 wrappers"
     | true -> Fmt.strf "mkdir -p %s && %s" wrappers_dir (String.concat " && " [inst "build"; inst "install"; inst "remove"])
   in
+  let install_target =
+    match branch with
+    |"1.2" -> "install"
+    |_ -> "cold-install"
+  in
   Linux.run_sh
-    "cd /tmp/opam && make cold && make%s install && %s && rm -rf /tmp/opam"
+    "cd /tmp/opam && make cold && make%s %s && %s && rm -rf /tmp/opam"
     (match prefix with None -> "" |Some p -> " prefix=\""^p^"\"")
+    install_target
     wrapper_cmd
 
 let header ?maintainer img tag =
