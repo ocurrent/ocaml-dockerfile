@@ -30,23 +30,23 @@ type t = [
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 ]
 ] [@@deriving sexp]
 
-let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubuntu `V16_10); (`Ubuntu `V17_04);
+let distros = [ (`Ubuntu `V12_04); (`Ubuntu `V14_04); (`Ubuntu `V16_04); (`Ubuntu `V17_04);
                 (`Debian `Stable); (`Debian `Testing); (`Debian `Unstable);
                 (`Debian `V10); (`Debian `V9); (`Debian `V8); (`Debian `V7);
                 (`Fedora `V22); (`Fedora `V23); (`Fedora `V24); (`Fedora `V25);
                 (`CentOS `V6); (`CentOS `V7);
                 (`OracleLinux `V7); (`OpenSUSE `V42_1); (`OpenSUSE `V42_2);
-                (`Alpine `V3_3); (`Alpine `V3_4); (`Alpine `V3_5); (`Alpine `V3_6); (`Alpine `Latest)]
+                (`Alpine `V3_5); (`Alpine `V3_6); (`Alpine `Latest)]
 
 let latest_stable_distros = [
   (`Ubuntu `V16_04); (`Debian `Stable); (`Fedora `V25);
   (`CentOS `V7); (`OracleLinux `V7); (`Alpine `Latest); (`OpenSUSE `V42_2) ]
 
 let master_distro = `Debian `Stable
-let stable_ocaml_versions = [ "4.00.1"; "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.1"; "4.04.2"; "4.04.2+flambda"; "4.05.0"; "4.05.0+flambda" ]
-let dev_ocaml_versions = [ "4.06.0"; "4.06.0+flambda" ]
+let stable_ocaml_versions = [ "4.01.0"; "4.02.3"; "4.03.0"; "4.03.0+flambda"; "4.04.0"; "4.04.1"; "4.04.2"; "4.04.2+flambda"; "4.05.0"; "4.05.0+flambda"; "4.06.0"; "4.06.0+flambda" ]
+let dev_ocaml_versions = [ ]
 let all_ocaml_versions = stable_ocaml_versions @ dev_ocaml_versions
-let latest_ocaml_version = "4.04.2"
+let latest_ocaml_version = "4.05.0"
 let opam_versions = [ "1.2.2" ]
 let latest_opam_version = "1.2.2"
 
@@ -315,8 +315,8 @@ let to_dockerfile ?pin ?(opam_version=latest_opam_version) ~ocaml_version ~distr
     (* Rewrite the dev version to add a +trunk tag. *)
     let ocaml_version =
       match ocaml_version with
-      |"4.06.0" -> "4.06.0+trunk"
-      |"4.06.0+flambda" -> "4.06.0+trunk+flambda"
+      |"4.07.0" -> "4.07.0+trunk"
+      |"4.07.0+flambda" -> "4.07.0+trunk+flambda"
       |_ -> ocaml_version
     in
     match builtin_ocaml_of_distro distro with

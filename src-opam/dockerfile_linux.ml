@@ -55,7 +55,7 @@ module RPM = struct
     run "chmod 700 .ssh"
 
   let dev_packages ?extra () =
-    install "sudo passwd bzip2 patch nano git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
+    install "sudo passwd bzip2 gcc-c++ patch nano git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
     groupinstall "\"Development Tools\""
 
   let install_system_ocaml =
@@ -140,7 +140,7 @@ module Zypper = struct
 
   let dev_packages ?extra () =
     install "-t pattern devel_C_C++" @@
-    install "sudo git unzip curl" @@
+    install "sudo gcc-c++ git unzip curl" @@
     (maybe (install "%s") extra)
 
   let add_user ?uid ?gid ?(sudo=false) username =
