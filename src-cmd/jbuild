@@ -1,0 +1,10 @@
+(jbuild_version 1)
+
+(library
+ ((name        dockerfile_cmd)
+  (public_name dockerfile-cmd)
+  (synopsis "Utilit=y functions to generate Dockerfiles and execute Docker commands")
+  (wrapped false)
+  (preprocess (per_module ((pps (ppx_sexp_conv)) (dockerfile_cmd))))
+  (libraries  (dockerfile cmdliner bos fmt.tty logs.cli fmt.cli logs.fmt csv))
+ ))

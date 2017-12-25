@@ -1,4 +1,5 @@
 opam-version: "1.2"
+version: "4.0.0"
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 authors: ["Anil Madhavapeddy <anil@recoil.org>"]
 homepage: "https://github.com/avsm/ocaml-dockerfile"
@@ -11,6 +12,7 @@ available: [ ocaml-version >= "4.02.3"]
 depends: [
   "jbuilder" {build & >="1.0+beta10"}
   "dockerfile" {>="3.0.0"}
+  "ocaml-version"
   "cmdliner"
 ]
 build: [

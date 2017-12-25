@@ -21,8 +21,8 @@
 
 (** {2 Core combinators and serializers} *)
 
-type t
 (** [t] is a list of Dockerfile lines *)
+type t
 
 val sexp_of_t : t -> Sexplib.Sexp.t
 (** [sexp_of_t t] converts a Dockerfile into a s-expression representation. *)
@@ -37,10 +37,10 @@ val string_of_t : t -> string
 val pp : t Fmt.t
 (** [pp] is a formatter that outputs a {!t} in Dockerfile format. *)
 
-val (@@) : t -> t -> t
+val ( @@ ) : t -> t -> t
 (** [a @@ b] concatenates two Dockerfile fragments into one. *)
 
-val (@@@) : t -> t list -> t
+val ( @@@ ) : t -> t list -> t
 (** [a @@@ b] concatenates the [b] list of Dockerfile fragments onto [a]. *)
 
 val empty : t
@@ -76,7 +76,7 @@ val from : ?alias:string -> ?tag:string -> string -> t
     exist, an error will be returned.
 *)
 
-val maintainer :  ('a, unit, string, t) format4 -> 'a
+val maintainer : ('a, unit, string, t) format4 -> 'a
 (** [maintainer] sets the author field of the generated images. *)
 
 val run : ('a, unit, string, t) format4 -> 'a
@@ -160,7 +160,7 @@ val user : ('a, unit, string, t) format4 -> 'a
   and for any {!run}, {!cmd}, {!entrypoint} commands that follow it in
   the Dockerfile.  *)
 
-val workdir :  ('a, unit, string, t) format4 -> 'a
+val workdir : ('a, unit, string, t) format4 -> 'a
 (** [workdir fmt] sets the working directory for any {!run}, {!cmd}
   and {!entrypoint} instructions that follow it in the Dockerfile.
 
@@ -168,7 +168,7 @@ val workdir :  ('a, unit, string, t) format4 -> 'a
   path is provided, it will be relative to the path of the previous
   {!workdir} instruction. *)
 
-val volume :  ('a, unit, string, t) format4 -> 'a
+val volume : ('a, unit, string, t) format4 -> 'a
 (** [volume fmt] will create a mount point with the specified name
   and mark it as holding externally mounted volumes from native host
   or other containers. The value can be a JSON array or a plain string
@@ -179,7 +179,7 @@ val volumes : string list -> t
   in [mounts] and mark them as holding externally mounted volumes
   from native host or other containers. *)
 
-val entrypoint :  ('a, unit, string, t) format4 -> 'a
+val entrypoint : ('a, unit, string, t) format4 -> 'a
 (** [entrypoint fmt] allows you to configure a container that will
   run as an executable.  The [fmt] string will be executed using
   a [/bin/sh] subshell.
