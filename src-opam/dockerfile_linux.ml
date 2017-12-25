@@ -23,8 +23,8 @@ let run_as_user user fmt = ksprintf (run "sudo -u %s sh -c %S" user) fmt
 
 module Git = struct
   let init ?(name="Docker") ?(email="docker@example.com") () =
-    run "git config --global user.email %S" "docker@example.com" @@
-    run "git config --global user.name %S" "Docker CI"
+    run "git config --global user.email %S" email @@
+    run "git config --global user.name %S" name
 end
 
 let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
@@ -35,7 +35,9 @@ module RPM = struct
   let install fmt = ksprintf (run "rpm --rebuilddb && yum install -y %s && yum clean all") fmt
   let groupinstall fmt = ksprintf (run "rpm --rebuilddb && yum groupinstall -y %s && yum clean all") fmt
 
-  let add_user ?(sudo=false) username =
+  let add_user ?uid ?gid ?(sudo=false) username =
+    let uid = match uid with Some u -> sprintf "-u %d " u | None -> "" in
+    let gid = match gid with Some g -> sprintf "-g %d " g | None -> "" in
     let home = "/home/"^username in
     (match sudo with
     | false -> empty
@@ -45,7 +47,7 @@ module RPM = struct
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile @@
         run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
-    run "useradd -d %s -m -s /bin/bash %s" home username @@
+    run "useradd -d %s %s%s-m -s /bin/bash %s" home uid gid username @@
     run "passwd -l %s" username @@
     run "chown -R %s:%s %s" username username home @@
     user "%s" username @@
@@ -55,7 +57,7 @@ module RPM = struct
     run "chmod 700 .ssh"
 
   let dev_packages ?extra () =
-    install "sudo passwd bzip2 patch nano git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
+    install "sudo passwd bzip2 patch nano gcc-c++ git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
     groupinstall "\"Development Tools\""
 
   let install_system_ocaml =
@@ -73,7 +75,9 @@ module Apt = struct
     install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip rsync curl dialog nano libx11-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
-  let add_user ?(sudo=false) username =
+  let add_user ?uid ?gid ?(sudo=false) username =
+    let uid = match uid with Some u -> sprintf "--uid %d " u | None -> "" in
+    let gid = match gid with Some g -> sprintf "--gid %d " g | None -> "" in
     let home = "/home/"^username in
     (match sudo with
     | false -> empty
@@ -82,7 +86,7 @@ module Apt = struct
         run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile) @@
-    run "adduser --disabled-password --gecos '' %s" username @@
+    run "adduser %s%s--disabled-password --gecos '' %s" uid gid username @@
     run "passwd -l %s" username @@
     run "chown -R %s:%s %s" username username home @@
     user "%s" username @@
@@ -124,23 +128,18 @@ module Apk = struct
     run "mkdir .ssh" @@
     run "chmod 700 .ssh"
 
-  let install_system_ocaml ?(add_custom_apk=false) version =
-    match add_custom_apk with
-    | false -> empty
-    | true ->
-      run "cd /etc/apk/keys && curl -OL http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/x86_64/anil@recoil.org-5687cc79.rsa.pub" @@
-      run "echo http://www.cl.cam.ac.uk/~avsm2/alpine-ocaml/%s >> /etc/apk/repositories" version @@
-      install "ocaml camlp4"
+  let install_system_ocaml =
+    run "apk add ocaml camlp4"
 end
 
 (* Zypper (opensuse) rules *)
 module Zypper = struct
   let update = run "zypper update -y"
-  let install fmt = ksprintf (fun s -> update @@ run "zypper install -y %s" s) fmt
+  let install fmt = ksprintf (fun s -> update @@ run "zypper install --force-resolution -y %s" s) fmt
 
   let dev_packages ?extra () =
     install "-t pattern devel_C_C++" @@
-    install "sudo git unzip curl" @@
+    install "sudo git unzip curl gcc-c++" @@
     (maybe (install "%s") extra)
 
   let add_user ?uid ?gid ?(sudo=false) username =

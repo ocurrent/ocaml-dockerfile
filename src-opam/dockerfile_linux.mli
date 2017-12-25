@@ -39,7 +39,7 @@ module RPM : sig
   val groupinstall : ('a, unit, string, t) format4 -> 'a
   (** [groupinstall fmt] will run [yum groupinstall] on the supplied package list. *)
 
-  val add_user : ?sudo:bool -> string -> t
+  val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
   (** [add_user username] will install a new user with name [username] and a locked
       password.  If [sudo] is true then root access with no password will also be
       configured.  The default value for [sudo] is [false]. *)
@@ -60,7 +60,7 @@ module Apt : sig
   val install : ('a, unit, string, t) format4 -> 'a
   (** [install fmt] will [apt-get update && apt-get install] the packages specified by the [fmt] format string. *)
 
-  val add_user : ?sudo:bool -> string -> t
+  val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
   (** [add_user username] will install a new user with name [username] and a locked
       password.  If [sudo] is true then root access with no password will also be
       configured.  The default value for [sudo] is [false]. *)
@@ -90,9 +90,8 @@ module Apk : sig
       password.  If [sudo] is true then root access with no password will also be
       configured.  The default value for [sudo] is [false]. *)
 
-  val install_system_ocaml : ?add_custom_apk:bool -> string -> t
-  (** Install the system OCaml packages via Apk. The [version] should be either [3.3] or [3.4]. *)
-
+  val install_system_ocaml : t
+  (** Install the system OCaml packages via Apk *)
 end
 
 (** Rules for Zypper-based distributions such as OpenSUSE *)
