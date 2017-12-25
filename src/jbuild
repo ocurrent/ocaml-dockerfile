@@ -3,6 +3,7 @@
 (library
  ((name dockerfile)
   (public_name dockerfile)
+  (synopsis "Dockerfile eDSL and combinators")
   (libraries (sexplib fmt))
   (preprocess (per_module ((pps (ppx_sexp_conv)) (dockerfile))))
  ))
