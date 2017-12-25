@@ -15,9 +15,9 @@ awk/sed-style assembly.
 
 ocaml-dockerfile is distributed under the ISC license.
 
-- **HTML Documentation**: http://docs.mirage.io/dockerfile
-- **Source:**: https://github.com/avsm/ocaml-dockerfile
-- **Issues**: https://github.com/avsm/ocaml-dockerfile/issues
+- **HTML Documentation**: <http://anil-code.recoil.org/ocaml-dockerfile>
+- **Source:**: <https://github.com/avsm/ocaml-dockerfile>
+- **Issues**: <https://github.com/avsm/ocaml-dockerfile/issues>
 - **Email**: <anil@recoil.org>
 
 ## Installation
@@ -26,6 +26,7 @@ dockerfile can be installed with `opam`:
 
     opam install dockerfile
     opam install dockerfile-opam
+    opam install dockerfile-cmd
 
 The `dockerfile-opam` package includes modules for OPAM- and Linux-specific
 Dockerfile generation, such as common distributions.

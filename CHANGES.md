@@ -1,5 +1,5 @@
-v4.0.0dev
-------
+v4.0.0 2017-12-25 Cambridge
+---------------------------
 
 Major API iteration to:
 
@@ -11,9 +11,9 @@ Major API iteration to:
   distributions to be marked as deprecated.
 
 Other changes:
-* Also mark OCaml 4.05.0 as a mainline release for opam2 as well.
 * Update OPAM 2 build mechanism to use `make cold`.
 * Drop support for opam1 containers; use an older library version for those.
+* Also mark OCaml 4.05.0 and 4.06.0 as a mainline release for opam2 as well.
 
 v3.1.0 2017-07-14 Cambridge
 ---------------------------
