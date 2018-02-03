@@ -143,6 +143,7 @@ let gen_opam2_distro ?labels d =
           | `V3_4 -> "3.4"
           | `V3_5 -> "3.5"
           | `V3_6 -> "3.6"
+          | `V3_7 -> "3.7"
           | `Latest -> assert false
         in
         apk_opam2 ?labels ~distro:"alpine" ~tag ()

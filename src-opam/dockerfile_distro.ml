@@ -19,7 +19,7 @@
 open Astring
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `Latest ]
   | `CentOS of [ `V6 | `V7 | `Latest ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `Latest ]
@@ -40,7 +40,7 @@ type arch = [
 ] [@@deriving sexp]
 
 let distros = [
-  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `Latest;
+  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `Latest;
   `CentOS `V6; `CentOS `V7; `CentOS `Latest;
   `Debian `V9; `Debian `V8; `Debian `V7;
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
@@ -53,8 +53,8 @@ let distros = [
   
 let distro_status (d:t) : status = match d with
   | `Alpine ( `V3_3 | `V3_4 | `V3_5) -> `Deprecated
-  | `Alpine `V3_6 -> `Active
-  | `Alpine `Latest -> `Alias (`Alpine `V3_6)
+  | `Alpine (`V3_6 | `V3_7) -> `Active
+  | `Alpine `Latest -> `Alias (`Alpine `V3_7)
   | `CentOS `V7 -> `Active
   | `CentOS `V6 -> `Deprecated
   | `CentOS `Latest -> `Alias (`CentOS `V7)
@@ -124,6 +124,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`Alpine `V3_4 -> Some "4.02.3"
   |`Alpine `V3_5 -> Some "4.04.0"
   |`Alpine `V3_6 -> Some "4.04.1"
+  |`Alpine `V3_7 -> Some "4.04.2"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -176,6 +177,7 @@ let tag_of_distro (d:t) = match d with
   |`Alpine `V3_4 -> "alpine-3.4"
   |`Alpine `V3_5 -> "alpine-3.5"
   |`Alpine `V3_6 -> "alpine-3.6"
+  |`Alpine `V3_7 -> "alpine-3.7"
   |`Alpine `Latest -> "alpine"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
   |`OpenSUSE `V42_2 -> "opensuse-42.2"
@@ -215,6 +217,7 @@ let distro_of_tag x : t option = match x with
   |"alpine-3.4" -> Some (`Alpine `V3_4)
   |"alpine-3.5" -> Some (`Alpine `V3_5)
   |"alpine-3.6" -> Some (`Alpine `V3_6)
+  |"alpine-3.7" -> Some (`Alpine `V3_7)
   |"alpine" -> Some (`Alpine `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
   |"opensuse-42.2" -> Some (`OpenSUSE `V42_2)
@@ -253,6 +256,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Alpine `V3_4 -> "Alpine 3.4"
   |`Alpine `V3_5 -> "Alpine 3.5"
   |`Alpine `V3_6 -> "Alpine 3.6"
+  |`Alpine `V3_7 -> "Alpine 3.7"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
   |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
   |`OpenSUSE `V42_3 -> "OpenSUSE 42.3"
