@@ -214,10 +214,6 @@ let opam2_mirror (hub_id: string) =
   @@ run "opam install -yj4 cohttp-lwt-unix" @@ run "opam admin cache"
 
 
-let tag_of_ocaml_version ov =
-  Ocaml_version.to_string ov |> String.map (function '+' -> '-' | x -> x)
-
-
 let all_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
   let compilers =
@@ -235,6 +231,10 @@ let all_ocaml_compilers hub_id arch distro =
   in
   (Fmt.strf "%s-ocaml" distro, d)
 
+let tag_of_ocaml_version ov =
+  Ocaml_version.with_patch ov None |>
+  Ocaml_version.to_string |>
+  String.map (function '+' -> '-' | x -> x)
 
 let separate_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in

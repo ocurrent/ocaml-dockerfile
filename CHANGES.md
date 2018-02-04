@@ -2,6 +2,8 @@ v4.1.0
 ------
 
 - Add support for Alpine 3.7
+- Alter the individual compiler containers to omit the patch version
+  from the name. They will always have the latest patch version for CI.
 
 v4.0.0 2017-12-25 Cambridge
 ---------------------------
