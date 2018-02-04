@@ -169,6 +169,7 @@ let gen_opam2_distro ?labels d =
           | `V16_10 -> "yakkety"
           | `V17_04 -> "zesty"
           | `V17_10 -> "artful"
+          | `V18_04 -> "bionic"
           | `Latest | `LTS -> assert false
         in
         apt_opam2 ?labels ~distro:"ubuntu" ~tag ()
