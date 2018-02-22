@@ -219,13 +219,15 @@ let all_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
   let compilers =
     OV.Releases.recent |> List.filter (OV.Has.arch arch)
-    |> List.map OV.Opam.default_switch |> List.map OV.to_string
-    |> List.map (run "opam switch create %s") |> ( @@@ ) empty
+    |> List.map OV.Opam.V1.default_switch |>
+    List.map (fun t -> Fmt.strf "%s:%s" (OV.to_string t) (OV.Opam.V2.package t))
+    |> fun ovs -> run "opam switches create %s" (String.concat " " ovs)
   in
   let d =
     header hub_id (Fmt.strf "%s-opam" distro)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
-    @@ run "opam init -k git -a /home/opam/opam-repository" @@ compilers
+    @@ run "opam init -k git -a /home/opam/opam-repository" 
+    @@ run "opam pin add -y opam-switches git://github.com/avsm/opam-switches.git" @@ compilers
     @@ run "opam switch default"
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
@@ -241,7 +243,7 @@ let separate_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
   OV.Releases.recent_with_dev |> List.filter (OV.Has.arch arch)
   |> List.map (fun ov ->
-         let default_switch = OV.(Opam.default_switch ov |> to_string) in
+         let default_switch = OV.(Opam.V1.default_switch ov |> to_string) in
          let variants =
            List.map OV.to_string (OV.Opam.variant_switches ov)
            |> List.map (run "opam switch create %s") |> ( @@@ ) empty
