@@ -57,7 +57,8 @@ module RPM = struct
     run "chmod 700 .ssh"
 
   let dev_packages ?extra () =
-    install "sudo passwd bzip2 patch nano gcc-c++ git%s" (match extra with None -> "" | Some x -> " " ^ x) @@
+    install "sudo passwd bzip2 patch nano gcc-c++ git tar curl xz libX11-devel which%s"
+      (match extra with None -> "" | Some x -> " " ^ x) @@
     groupinstall "\"Development Tools\""
 
   let install_system_ocaml =
@@ -72,7 +73,7 @@ module Apt = struct
   let dev_packages ?extra () =
     update @@
     run "echo 'Acquire::Retries \"5\";' > /etc/apt/apt.conf.d/mirror-retry" @@
-    install "sudo pkg-config git build-essential m4 software-properties-common aspcud unzip rsync curl dialog nano libx11-dev%s"
+    install "build-essential curl git rsync sudo unzip nano libx11-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
@@ -106,7 +107,7 @@ module Apk = struct
   let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
   let dev_packages ?extra () =
-    install "alpine-sdk openssh bash nano ncurses-dev %s"
+    install "build-base tar ca-certificates git rsync curl sudo bash libx11-dev nano ncurses-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
@@ -139,7 +140,7 @@ module Zypper = struct
 
   let dev_packages ?extra () =
     install "-t pattern devel_C_C++" @@
-    install "sudo git unzip curl gcc-c++" @@
+    install "sudo git unzip curl gcc-c++ libX11-devel" @@
     (maybe (install "%s") extra)
 
   let add_user ?uid ?gid ?(sudo=false) username =
