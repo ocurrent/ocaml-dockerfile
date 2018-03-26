@@ -214,12 +214,15 @@ let opam2_mirror (hub_id: string) =
   @@ run "opam init -a /home/opam/opam-repository" @@ env [("OPAMJOBS", "24")]
   @@ run "opam install -yj4 cohttp-lwt-unix" @@ run "opam admin cache"
 
+let opam_switches =
+  run "opam pin add -y opam-switches git://github.com/avsm/opam-switches.git"
 
 let all_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
   let compilers =
-    OV.Releases.recent |> List.filter (OV.Has.arch arch)
-    |> List.map OV.Opam.V1.default_switch |>
+    OV.Releases.recent |>
+    List.filter (OV.Has.arch arch) |>
+    List.map OV.Opam.default_switch |>
     List.map (fun t -> Fmt.strf "%s:%s" (OV.to_string t) (OV.Opam.V2.package t))
     |> fun ovs -> run "opam switches create %s" (String.concat " " ovs)
   in
@@ -227,7 +230,8 @@ let all_ocaml_compilers hub_id arch distro =
     header hub_id (Fmt.strf "%s-opam" distro)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam init -k git -a /home/opam/opam-repository" 
-    @@ run "opam pin add -y opam-switches git://github.com/avsm/opam-switches.git" @@ compilers
+    @@ opam_switches
+    @@ compilers
     @@ run "opam switch default"
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
@@ -243,16 +247,17 @@ let separate_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
   OV.Releases.recent_with_dev |> List.filter (OV.Has.arch arch)
   |> List.map (fun ov ->
-         let default_switch = OV.(Opam.V1.default_switch ov |> to_string) in
+         let default_switch = OV.(Opam.default_switch ov |> to_string) in
          let variants =
-           List.map OV.to_string (OV.Opam.variant_switches ov)
-           |> List.map (run "opam switch create %s") |> ( @@@ ) empty
+           OV.Opam.variant_switches ov |>
+           List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t)) |>
+           fun ovs -> run "opam switches create %s" (String.concat " " ovs)
          in
          let d =
            header hub_id (Fmt.strf "%s-opam" distro)
            @@ workdir "/home/opam/opam-repository"
-           @@ run "opam init -k git -a /home/opam/opam-repository -c %s"
-                default_switch
+           @@ run "opam init -k git -a /home/opam/opam-repository -c %s" default_switch
+           @@ opam_switches
            @@ variants @@ run "opam switch %s" default_switch
            @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
            @@ cmd "bash"
