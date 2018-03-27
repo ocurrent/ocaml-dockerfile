@@ -223,7 +223,7 @@ let all_ocaml_compilers hub_id arch distro =
     OV.Releases.recent |>
     List.filter (OV.Has.arch arch) |>
     List.map OV.Opam.default_switch |>
-    List.map (fun t -> Fmt.strf "%s:%s" (OV.to_string t) (OV.Opam.V2.package t))
+    List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t))
     |> fun ovs -> run "opam switches create %s" (String.concat " " ovs)
   in
   let d =
