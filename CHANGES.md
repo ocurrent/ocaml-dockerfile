@@ -1,6 +1,8 @@
 v4.1.0
 ------
 
+- Ensure that X11 is available in the containers so that the
+  OCaml Graphics module is available (#8 via @kit-ty-kate)
 - Add concept of a "Tier 1" and "Tier 2" distro so that we can
   categorise them more easily for container generation.
 - Add support for Alpine 3.7 and Ubuntu 18.04.
