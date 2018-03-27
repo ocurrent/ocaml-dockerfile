@@ -30,7 +30,7 @@ type t = [
 
 type status = [
   | `Deprecated
-  | `Active
+  | `Active of [ `Tier1 | `Tier2 ]
   | `Alias of t
 ] [@@deriving sexp]
 
@@ -52,26 +52,28 @@ let distros = [
   `Ubuntu `Latest; `Ubuntu `LTS ]
   
 let distro_status (d:t) : status = match d with
-  | `Alpine ( `V3_3 | `V3_4 | `V3_5) -> `Deprecated
-  | `Alpine (`V3_6 | `V3_7) -> `Active
+  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6) -> `Deprecated
+  | `Alpine `V3_7 -> `Active `Tier1
   | `Alpine `Latest -> `Alias (`Alpine `V3_7)
-  | `CentOS `V7 -> `Active
+  | `CentOS `V7 -> `Active `Tier2
   | `CentOS `V6 -> `Deprecated
   | `CentOS `Latest -> `Alias (`CentOS `V7)
   | `Debian `V7 -> `Deprecated
-  | `Debian ( `V8 | `V9 ) -> `Active
+  | `Debian `V8  -> `Active `Tier2
+  | `Debian `V9 -> `Active `Tier1
   | `Debian `Stable -> `Alias (`Debian `V9)
-  | `Debian `Testing -> `Active
-  | `Debian `Unstable -> `Active
-  | `Fedora ( `V21 | `V22 | `V23 | `V24 ) -> `Deprecated
-  | `Fedora (`V25 | `V26 | `V27 ) -> `Active
-  | `Fedora `Latest -> `Alias (`Fedora `V26)
-  | `OracleLinux `V7 -> `Active
+  | `Debian `Testing -> `Active `Tier2
+  | `Debian `Unstable -> `Active `Tier2
+  | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26) -> `Deprecated
+  | `Fedora `V27 -> `Active `Tier1
+  | `Fedora `Latest -> `Alias (`Fedora `V27)
+  | `OracleLinux `V7 -> `Active `Tier2
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V7)
   | `OpenSUSE `V42_1 | `OpenSUSE `V42_2 -> `Deprecated
-  | `OpenSUSE `V42_3 -> `Active
+  | `OpenSUSE `V42_3 -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V42_3)
-  | `Ubuntu ( `V12_04 | `V14_04 | `V16_04 | `V17_10 | `V18_04 ) -> `Active
+  | `Ubuntu ( `V12_04 | `V14_04 ) -> `Active `Tier2
+  | `Ubuntu ( `V16_04 | `V17_10 |  `V18_04 ) -> `Active `Tier1
   | `Ubuntu ( `V15_04 | `V15_10 | `V16_10 | `V17_04 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V16_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V17_10)
@@ -101,7 +103,23 @@ let distro_supported_on (a:arch) (d:t) =
   List.mem a (distro_arches d)
 
 let active_distros =
-  List.filter (fun d -> distro_status d = `Active) distros
+  List.filter (fun d -> match distro_status d with `Active _ -> true | _ -> false ) distros
+
+let active_tier1_distros =
+  List.filter (fun d -> match distro_status d with `Active `Tier1 -> true | _ -> false ) distros
+
+let active_tier2_distros =
+  List.filter (fun d -> match distro_status d with `Active `Tier2 -> true | _ -> false ) distros
+
+let is_active_tier1 t =
+  match resolve_alias t |> distro_status with
+  | `Active `Tier1 -> true
+  | _ -> false
+
+let is_active_tier2 t =
+  match resolve_alias t |> distro_status with
+  | `Active `Tier2 -> true
+  | _ -> false
 
 let inactive_distros =
   List.filter (fun d -> distro_status d = `Deprecated) distros

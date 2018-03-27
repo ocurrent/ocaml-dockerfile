@@ -47,6 +47,11 @@ val distro_arches : t -> arch list
 val distro_supported_on : arch -> t -> bool
 val active_distros : t list
 val inactive_distros : t list
+val active_tier1_distros : t list
+val active_tier2_distros : t list
+val is_active_tier1 : t -> bool
+val is_active_tier2 : t -> bool
+
 val latest_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
 

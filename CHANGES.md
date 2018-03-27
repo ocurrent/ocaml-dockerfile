@@ -1,6 +1,8 @@
 v4.1.0
 ------
 
+- Add concept of a "Tier 1" and "Tier 2" distro so that we can
+  categorise them more easily for container generation.
 - Add support for Alpine 3.7 and Ubuntu 18.04.
 - Alter the individual compiler containers to omit the patch version
   from the name. They will always have the latest patch version for CI.
