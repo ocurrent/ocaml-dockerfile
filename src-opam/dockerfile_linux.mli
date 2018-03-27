@@ -82,8 +82,8 @@ module Apk : sig
   (** [install fmt] will [apk add] the packages specified by the [fmt] format string. *)
 
   val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base alpine-sdk.
-      Extra packages may also be optionally supplied via [extra]. *)
+  (** [dev_packages ?extra ()] will install the base development tools and [sudo],
+      [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
   (** [add_user username] will install a new user with name [username] and a locked

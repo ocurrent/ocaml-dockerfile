@@ -64,8 +64,7 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
-  @@ Linux.Apk.install
-       "build-base tar ca-certificates git rsync curl sudo bash"
+  @@ Linux.Apk.dev_packages ()
   @@ Linux.Apk.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
@@ -80,7 +79,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
-  @@ Linux.Apt.install "build-essential curl git rsync sudo unzip"
+  @@ Linux.Apt.dev_packages ()
   @@ Linux.Apt.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
@@ -94,7 +93,7 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
   @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
        ~branch:"master" ()
   @@ from ~tag distro @@ Linux.RPM.update
-  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz" ()
+  @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
@@ -111,7 +110,8 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.Zypper.dev_packages ()
   @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
        ~branch:"master" ()
-  @@ from ~tag distro @@ Linux.Zypper.dev_packages ()
+  @@ from ~tag distro
+  @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
@@ -276,4 +276,3 @@ let multiarch_manifest ~target ~platforms =
     |> String.concat "\n"
   in
   Fmt.strf "image: %s\nmanifests:\n%s" target ms
-
