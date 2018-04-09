@@ -53,6 +53,12 @@ let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   run "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make install" rel prefix @@
   run "rm -rf %s bubblewrap-%s" file rel
 
+let disable_bubblewrap =
+  run "sed -i -e 's/^wrap-/#wrap-/g' ~/.opam/config"
+
+let enable_bubblewrap =
+  run "sed -i -e 's/^#wrap-/wrap-/g' ~/.opam/config"
+
 let header ?maintainer img tag =
   let maintainer =
     match maintainer with
@@ -232,10 +238,10 @@ let all_ocaml_compilers hub_id arch distro =
   let d =
     header hub_id (Fmt.strf "%s-opam" distro)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
-    @@ run "opam init -k git -a /home/opam/opam-repository" 
+    @@ run "opam init -k git -a /home/opam/opam-repository --bare"
+    @@ disable_bubblewrap
     @@ opam_switches
     @@ compilers
-    @@ run "opam switch default"
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
   in
@@ -262,6 +268,7 @@ let separate_ocaml_compilers hub_id arch distro =
            header hub_id (Fmt.strf "%s-opam" distro)
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
+           @@ disable_bubblewrap
            @@ create_default_switch
            @@ opam_switches
            @@ variants

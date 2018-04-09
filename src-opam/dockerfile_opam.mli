@@ -34,6 +34,12 @@ val install_opam_from_source :
     The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin].
     If [install_wrappers] is [true] then OPAM2 sandboxing scripts are installed (defaults to [false]). *)
 
+val enable_bubblewrap : Dockerfile.t
+(** [enable_bubblewrap] modifies the opam configuration to turn on the sandboxing wrapper. *)
+
+val disable_bubblewrap: Dockerfile.t
+(** [disable_bubblewrap] modifies the opam configuration to turn off the sandboxing wrapper. *)
+
 val gen_opam2_distro :
   ?labels:(string * string) list -> Dockerfile_distro.t
   -> string * Dockerfile.t
