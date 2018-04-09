@@ -224,7 +224,9 @@ let opam2_mirror (hub_id: string) =
   @@ run "opam install -yj4 cohttp-lwt-unix" @@ run "opam admin cache"
 
 let opam_switches =
-  run "opam pin add -y opam-switches git://github.com/avsm/opam-switches.git"
+  run "curl -OL https://raw.githubusercontent.com/avsm/opam-switches/master/opam-switches" @@
+  run "chmod a+x opam-switches" @@
+  run "mv opam-switches /usr/bin/opam-switches"
 
 let all_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
@@ -233,7 +235,7 @@ let all_ocaml_compilers hub_id arch distro =
     List.filter (OV.Has.arch arch) |>
     List.map OV.Opam.default_switch |>
     List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t))
-    |> fun ovs -> run "opam switches create %s" (String.concat " " ovs)
+    |> fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
   in
   let d =
     header hub_id (Fmt.strf "%s-opam" distro)
@@ -262,7 +264,7 @@ let separate_ocaml_compilers hub_id arch distro =
          let variants =
            OV.Opam.variant_switches ov |>
            List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t)) |>
-           fun ovs -> run "opam switches create %s" (String.concat " " ovs)
+           fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
          in
          let d =
            header hub_id (Fmt.strf "%s-opam" distro)
