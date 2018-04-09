@@ -44,6 +44,14 @@ let install_opam_from_source ?(prefix= "/usr/local") ?(install_wrappers= false)
        "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && %s && rm -rf /tmp/opam"
        prefix prefix prefix prefix prefix wrapper_cmd
 
+let install_bubblewrap_from_source ?(prefix="/usr/local") () =
+  let rel = "0.2.1" in
+  let file = Fmt.strf "bubblewrap-%s.tar.xz" rel in
+  let url = Fmt.strf "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz" rel rel in
+  run "curl -OL %s" url @@
+  run "tar xf %s" file @@
+  run "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make install" rel prefix @@
+  run "rm -rf %s bubblewrap-%s" file rel
 
 let header ?maintainer img tag =
   let maintainer =
@@ -60,7 +68,8 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates"
   @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
-  @@ run "strip /usr/local/bin/opam*" @@ from ~tag distro
+  @@ run "strip /usr/local/bin/opam*"
+  @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
@@ -73,9 +82,11 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
 (* Debian based Dockerfile *)
 let apt_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apt") :: labels)
-  @@ Linux.Apt.install "build-essential curl git"
+  @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
+  @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
   @@ from ~tag distro
+  @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
@@ -89,11 +100,14 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
 let yum_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apt") :: labels)
   @@ Linux.RPM.update 
-  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz" ()
+  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel" ()
+  @@ install_bubblewrap_from_source ()
+  @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
   @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
        ~branch:"master" ()
   @@ from ~tag distro @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
@@ -108,10 +122,12 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
 let zypper_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
+  @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
        ~branch:"master" ()
   @@ from ~tag distro
   @@ Linux.Zypper.dev_packages ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()

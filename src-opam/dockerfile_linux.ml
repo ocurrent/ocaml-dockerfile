@@ -57,7 +57,7 @@ module RPM = struct
     run "chmod 700 .ssh"
 
   let dev_packages ?extra () =
-    install "sudo passwd bzip2 patch nano gcc-c++ git tar curl xz libX11-devel which%s"
+    install "sudo passwd bzip2 patch nano gcc-c++ git tar curl xz libX11-devel bubblewrap which%s"
       (match extra with None -> "" | Some x -> " " ^ x) @@
     groupinstall "\"Development Tools\""
 
@@ -73,7 +73,7 @@ module Apt = struct
   let dev_packages ?extra () =
     update @@
     run "echo 'Acquire::Retries \"5\";' > /etc/apt/apt.conf.d/mirror-retry" @@
-    install "build-essential curl git rsync sudo unzip nano libx11-dev%s"
+    install "build-essential curl git rsync sudo unzip nano libcap-dev libx11-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
@@ -107,7 +107,7 @@ module Apk = struct
   let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
   let dev_packages ?extra () =
-    install "build-base patch tar ca-certificates git rsync curl sudo bash libx11-dev nano ncurses-dev%s"
+    install "build-base patch tar ca-certificates git rsync curl sudo bash libx11-dev nano bubblewrap ncurses-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
@@ -140,7 +140,7 @@ module Zypper = struct
 
   let dev_packages ?extra () =
     install "-t pattern devel_C_C++" @@
-    install "sudo git unzip curl gcc-c++ libX11-devel" @@
+    install "sudo git unzip curl gcc-c++ libcap-devel libX11-devel" @@
     (maybe (install "%s") extra)
 
   let add_user ?uid ?gid ?(sudo=false) username =
