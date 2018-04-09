@@ -226,7 +226,7 @@ let opam2_mirror (hub_id: string) =
 let opam_switches =
   run "curl -OL https://raw.githubusercontent.com/avsm/opam-switches/master/opam-switches" @@
   run "chmod a+x opam-switches" @@
-  run "mv opam-switches /usr/bin/opam-switches"
+  run "sudo mv opam-switches /usr/bin/opam-switches"
 
 let all_ocaml_compilers hub_id arch distro =
   let distro = D.tag_of_distro distro in
