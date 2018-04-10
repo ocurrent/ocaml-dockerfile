@@ -105,27 +105,17 @@ let distro_arches ov (d:t) : arch list =
 let distro_supported_on (a:arch) ov (d:t) =
   List.mem a (distro_arches ov d)
 
-let active_distros =
-  List.filter (fun d -> match distro_status d with `Active _ -> true | _ -> false ) distros
+let active_distros arch =
+  List.filter (fun d -> match distro_status d with `Active _ -> true | _ -> false ) distros |>
+  List.filter (distro_supported_on arch OV.Releases.latest)
 
-let active_tier1_distros =
-  List.filter (fun d -> match distro_status d with `Active `Tier1 -> true | _ -> false ) distros
+let active_tier1_distros arch =
+  List.filter (fun d -> match distro_status d with `Active `Tier1 -> true | _ -> false ) distros |>
+  List.filter (distro_supported_on arch OV.Releases.latest)
 
-let active_tier2_distros =
-  List.filter (fun d -> match distro_status d with `Active `Tier2 -> true | _ -> false ) distros
-
-let is_active_tier1 t =
-  match resolve_alias t |> distro_status with
-  | `Active `Tier1 -> true
-  | _ -> false
-
-let is_active_tier2 t =
-  match resolve_alias t |> distro_status with
-  | `Active `Tier2 -> true
-  | _ -> false
-
-let inactive_distros =
-  List.filter (fun d -> distro_status d = `Deprecated) distros
+let active_tier2_distros arch =
+  List.filter (fun d -> match distro_status d with `Active `Tier2 -> true | _ -> false ) distros |>
+  List.filter (distro_supported_on arch OV.Releases.latest)
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro (d:t) : string option =
