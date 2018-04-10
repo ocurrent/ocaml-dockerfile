@@ -96,7 +96,7 @@ let distro_arches ov (d:t) : arch list =
   match resolve_alias d, ov with
   | `Debian (`V8 | `V9), _ -> [ `X86_64; `Aarch64 ]
   | `Alpine (`V3_6 | `V3_7), _ -> [ `X86_64; `Aarch64 ]
-  | `Ubuntu `V18_04, ov when OV.(compare Releases.v4_06_0 ov) >= 0  -> [ `X86_64; `Aarch64 ]
+  | `Ubuntu `V18_04, ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   | `Ubuntu `V18_04, _ -> [ `X86_64 ]
   | `Ubuntu (`V16_04 | `V17_04 | `V17_10), _ -> [ `X86_64; `Aarch64 ]
   | _ -> [ `X86_64 ]

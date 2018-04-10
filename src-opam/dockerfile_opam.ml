@@ -229,16 +229,16 @@ let opam_switches =
   run "sudo mv opam-switches /usr/bin/opam-switches"
 
 let all_ocaml_compilers hub_id arch distro =
-  let distro = D.tag_of_distro distro in
+  let distro_tag = D.tag_of_distro distro in
   let compilers =
     OV.Releases.recent |>
-    List.filter (OV.Has.arch arch) |>
+    List.filter (fun ov -> D.distro_supported_on arch ov distro) |>
     List.map OV.Opam.default_switch |>
     List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t))
     |> fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
   in
   let d =
-    header hub_id (Fmt.strf "%s-opam" distro)
+    header hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
     @@ disable_bubblewrap
@@ -247,7 +247,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
   in
-  (Fmt.strf "%s-ocaml" distro, d)
+  (Fmt.strf "%s-ocaml" distro_tag, d)
 
 let tag_of_ocaml_version ov =
   Ocaml_version.with_patch ov None |>
@@ -255,8 +255,8 @@ let tag_of_ocaml_version ov =
   String.map (function '+' -> '-' | x -> x)
 
 let separate_ocaml_compilers hub_id arch distro =
-  let distro = D.tag_of_distro distro in
-  OV.Releases.recent_with_dev |> List.filter (OV.Has.arch arch)
+  let distro_tag = D.tag_of_distro distro in
+  OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro) 
   |> List.map (fun ov ->
          let default_switch = OV.Opam.default_switch ov in
          let default_switch_name = OV.(with_patch (with_variant default_switch None) None |> to_string) in
@@ -267,7 +267,7 @@ let separate_ocaml_compilers hub_id arch distro =
            fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
          in
          let d =
-           header hub_id (Fmt.strf "%s-opam" distro)
+           header hub_id (Fmt.strf "%s-opam" distro_tag)
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
            @@ disable_bubblewrap
@@ -278,7 +278,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
            @@ cmd "bash"
          in
-         (Fmt.strf "%s-ocaml-%s" distro (tag_of_ocaml_version ov), d) )
+         (Fmt.strf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )
 
 
 let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
