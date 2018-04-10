@@ -90,17 +90,20 @@ let resolve_alias d =
   | `Alias x -> x
   | _ -> d
 
-let distro_arches (d:t) : arch list =
-  match resolve_alias d with
-  | `Debian (`V8 | `V9) -> [ `X86_64; `Aarch64 ]
-  | `Alpine (`V3_6 | `V3_7) -> [ `X86_64; `Aarch64 ]
-  | `Ubuntu (`V16_04 | `V17_04 | `V17_10 | `V18_04) -> [ `X86_64; `Aarch64 ]
-  | _ -> [ `X86_64 ]
-
 module OV = Ocaml_version
 
-let distro_supported_on (a:arch) (d:t) =
-  List.mem a (distro_arches d)
+let distro_arches ov (d:t) : arch list =
+  match resolve_alias d, ov with
+  | `Debian (`V8 | `V9), _ -> [ `X86_64; `Aarch64 ]
+  | `Alpine (`V3_6 | `V3_7), _ -> [ `X86_64; `Aarch64 ]
+  | `Ubuntu `V18_04, ov when OV.(compare Releases.v4_06_0 ov) >= 0  -> [ `X86_64; `Aarch64 ]
+  | `Ubuntu `V18_04, _ -> [ `X86_64 ]
+  | `Ubuntu (`V16_04 | `V17_04 | `V17_10), _ -> [ `X86_64; `Aarch64 ]
+  | _ -> [ `X86_64 ]
+
+
+let distro_supported_on (a:arch) ov (d:t) =
+  List.mem a (distro_arches ov d)
 
 let active_distros =
   List.filter (fun d -> match distro_status d with `Active _ -> true | _ -> false ) distros

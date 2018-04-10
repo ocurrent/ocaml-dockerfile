@@ -1,4 +1,4 @@
-v4.1.0
+v5.0.0
 ------
 
 - Install the Bubblewrap sandboxing tool in all distributions.
@@ -9,6 +9,9 @@ v4.1.0
 - Add support for Alpine 3.7 and Ubuntu 18.04.
 - Alter the individual compiler containers to omit the patch version
   from the name. They will always have the latest patch version for CI.
+- Allow distro selection to be filtered by OCaml version and architecture.
+  This allows combinations like Ubuntu 18.04 (which breaks on earlier
+  versions of OCaml due to the shift to PIE) to be expressed.
 
 v4.0.0 2017-12-25 Cambridge
 ---------------------------

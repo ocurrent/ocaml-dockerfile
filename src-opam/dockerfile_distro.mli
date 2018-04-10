@@ -43,8 +43,8 @@ val resolve_alias : t -> t
 val distros : t list
 (** Enumeration of the supported Docker container distributions *)
 
-val distro_arches : t -> arch list
-val distro_supported_on : arch -> t -> bool
+val distro_arches : Ocaml_version.t -> t -> arch list
+val distro_supported_on : arch -> Ocaml_version.t -> t -> bool
 val active_distros : t list
 val inactive_distros : t list
 val active_tier1_distros : t list
