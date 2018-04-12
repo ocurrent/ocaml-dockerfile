@@ -80,7 +80,7 @@ let distro_status (d:t) : status = match d with
 
 let latest_distros =
   [ `Alpine `Latest; `CentOS `Latest;
-    `Debian `Stable; `OracleLinux `Latest;
+    `Debian `Stable; `OracleLinux `Latest; `OpenSUSE `Latest;
     `Fedora `Latest; `Ubuntu `Latest; `Ubuntu `LTS ]
 
 let master_distro = `Debian `Stable

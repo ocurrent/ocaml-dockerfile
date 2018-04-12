@@ -12,6 +12,7 @@ v5.0.0
 - Allow distro selection to be filtered by OCaml version and architecture.
   This allows combinations like Ubuntu 18.04 (which breaks on earlier
   versions of OCaml due to the shift to PIE) to be expressed.
+- Add missing OpenSUSE to the latest distros list.
 
 v4.0.0 2017-12-25 Cambridge
 ---------------------------
