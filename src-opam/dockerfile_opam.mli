@@ -64,7 +64,7 @@ val separate_ocaml_compilers :
   Dockerfiles that build individual OCaml compiler versions and their
   variants (e.g. flambda) in separate containers. *)
 
-val bulk_build : string -> Dockerfile_distro.t -> Ocaml_version.t -> string -> (string * Dockerfile.t) list
+val bulk_build : string -> Dockerfile_distro.t -> Ocaml_version.t -> string -> Dockerfile.t
 (** [bulk_build hub_id distro ov rev] will setup a bulk build environment
   for OCaml version [ov] on distribution [distro] using the Git revision [rev]
   from opam-repository. *)

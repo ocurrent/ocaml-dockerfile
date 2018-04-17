@@ -292,7 +292,6 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   @@ run "opam update"
   @@ run "opam install -y depext"
   @@ run "opam depext -iy jbuilder ocamlfind"
-  |> fun dfile -> [opam_repo_rev, dfile]
 
 let multiarch_manifest ~target ~platforms =
   let ms =
