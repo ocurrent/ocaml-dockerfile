@@ -285,7 +285,7 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   let ov_base = OV.(to_string (with_variant ocaml_version None)) in
   header prod_hub_id (Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) ov_base)
   @@ run "opam switch %s" (OV.to_string ocaml_version)
-  @@ env [("OPAMYES", "1"); ("OPAMVERBOSE", "1"); ("OPAMJOBS", "2")]
+  @@ env [("OPAMYES", "1")]
   @@ workdir "/home/opam/opam-repository"
   @@ run "git pull origin master"
   @@ run "git checkout %s" opam_repo_rev
