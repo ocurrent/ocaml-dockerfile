@@ -216,7 +216,7 @@ let gen_opam2_distro ?labels d =
 
 (* Generate archive mirror *)
 let opam2_mirror (hub_id: string) =
-  header hub_id "alpine-3.6-ocaml-4.05.0"
+  header hub_id "alpine-3.7-ocaml-4.06"
   @@ run "sudo apk add --update bash m4"
   @@ workdir "/home/opam/opam-repository" @@ run "git checkout master"
   @@ run "git pull origin master"
@@ -234,7 +234,7 @@ let all_ocaml_compilers hub_id arch distro =
     OV.Releases.recent |>
     List.filter (fun ov -> D.distro_supported_on arch ov distro) |>
     List.map OV.Opam.default_switch |>
-    List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t))
+    List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.package t))
     |> fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
   in
   let d =
@@ -244,6 +244,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ disable_bubblewrap
     @@ opam_switches
     @@ compilers
+    @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
   in
