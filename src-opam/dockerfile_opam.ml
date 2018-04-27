@@ -248,7 +248,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
   in
-  (Fmt.strf "%s-ocaml" distro_tag, d)
+  (Fmt.strf "%s" distro_tag, d)
 
 let tag_of_ocaml_version ov =
   Ocaml_version.with_patch ov None |>
