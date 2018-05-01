@@ -195,6 +195,7 @@ let gen_opam2_distro ?labels d =
           | `V25 -> "25"
           | `V26 -> "26"
           | `V27 -> "27"
+          | `V28 -> "28"
           | `Latest -> assert false
         in
         yum_opam2 ?labels ~distro:"fedora" ~tag ()

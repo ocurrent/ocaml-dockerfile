@@ -6,7 +6,7 @@ v5.0.0
   OCaml Graphics module is available (#8 via @kit-ty-kate)
 - Add concept of a "Tier 1" and "Tier 2" distro so that we can
   categorise them more easily for container generation.
-- Add support for Alpine 3.7 and Ubuntu 18.04.
+- Add support for Alpine 3.7 and Ubuntu 18.04 and Fedora 28.
 - Alter the individual compiler containers to omit the patch version
   from the name. They will always have the latest patch version for CI.
 - Allow distro selection to be filtered by OCaml version and architecture.
