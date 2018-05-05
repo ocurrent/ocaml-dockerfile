@@ -54,10 +54,13 @@ let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   run "rm -rf %s bubblewrap-%s" file rel
 
 let disable_bubblewrap =
-  run "sed -i -e 's/^wrap-/#wrap-/g' ~/.opam/config"
+  run "echo 'wrap-build-commands: []' > ~/.opamrc" @@
+  run "echo 'wrap-install-commands: []' >> ~/.opamrc" @@
+  run "echo 'wrap-remove-commands: []' >> ~/.opamrc" @@
+  run "echo 'required-tools: []' >> ~/.opamrc"
 
 let enable_bubblewrap =
-  run "sed -i -e 's/^#wrap-/wrap-/g' ~/.opam/config"
+  run "rm ~/.opamrc"
 
 let header ?maintainer img tag =
   let maintainer =
@@ -241,8 +244,8 @@ let all_ocaml_compilers hub_id arch distro =
   let d =
     header hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
-    @@ run "opam init -k git -a /home/opam/opam-repository --bare"
     @@ disable_bubblewrap
+    @@ run "opam init -k git -a /home/opam/opam-repository --bare"
     @@ opam_switches
     @@ compilers
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
@@ -271,8 +274,8 @@ let separate_ocaml_compilers hub_id arch distro =
          let d =
            header hub_id (Fmt.strf "%s-opam" distro_tag)
            @@ workdir "/home/opam/opam-repository"
-           @@ run "opam init -k git -a /home/opam/opam-repository --bare"
            @@ disable_bubblewrap
+           @@ run "opam init -k git -a /home/opam/opam-repository --bare"
            @@ create_default_switch
            @@ opam_switches
            @@ variants
