@@ -32,8 +32,8 @@ let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
 (** RPM rules *)
 module RPM = struct
   let update = run "yum update -y"
-  let install fmt = ksprintf (run "rpm --rebuilddb && yum install -y %s && yum clean all") fmt
-  let groupinstall fmt = ksprintf (run "rpm --rebuilddb && yum groupinstall -y %s && yum clean all") fmt
+  let install fmt = ksprintf (run "yum install -y %s && yum clean all") fmt
+  let groupinstall fmt = ksprintf (run "yum groupinstall -y %s && yum clean all") fmt
 
   let add_user ?uid ?gid ?(sudo=false) username =
     let uid = match uid with Some u -> sprintf "-u %d " u | None -> "" in
