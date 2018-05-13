@@ -107,14 +107,15 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
 
 (* RPM based Dockerfile *)
 let yum_opam2 ?(labels= []) ~distro ~tag () =
-  header distro tag @@ label (("distro_style", "apt") :: labels)
+  header distro tag @@ label (("distro_style", "rpm") :: labels)
+  @@ Linux.RPM.install "yum-plugin-ovl"
   @@ Linux.RPM.update 
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel" ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
   @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
        ~branch:"master" ()
-  @@ from ~tag distro @@ Linux.RPM.update
+  @@ from ~tag distro @@ Linux.RPM.install "yum-plugin-ovl" @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
