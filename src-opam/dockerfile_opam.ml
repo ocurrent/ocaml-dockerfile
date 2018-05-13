@@ -108,6 +108,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
 (* RPM based Dockerfile *)
 let yum_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "rpm") :: labels)
+  @@ run "touch /var/lib/rpm/*"
   @@ Linux.RPM.install "yum-plugin-ovl"
   @@ Linux.RPM.update 
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel" ()
