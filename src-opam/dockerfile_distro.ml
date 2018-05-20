@@ -76,8 +76,8 @@ let distro_status (d:t) : status = match d with
   | `Ubuntu ( `V12_04 | `V14_04  ) -> `Active `Tier2
   | `Ubuntu ( `V16_04 |  `V18_04 ) -> `Active `Tier1
   | `Ubuntu ( `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10) -> `Deprecated
-  | `Ubuntu `LTS -> `Alias (`Ubuntu `V16_04)
-  | `Ubuntu `Latest -> `Alias (`Ubuntu `V17_10)
+  | `Ubuntu `LTS -> `Alias (`Ubuntu `V18_04)
+  | `Ubuntu `Latest -> `Alias (`Ubuntu `V18_04)
 
 let latest_distros =
   [ `Alpine `Latest; `CentOS `Latest;
