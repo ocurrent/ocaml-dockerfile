@@ -229,27 +229,23 @@ let opam2_mirror (hub_id: string) =
   @@ run "opam init -a /home/opam/opam-repository" @@ env [("OPAMJOBS", "24")]
   @@ run "opam install -yj4 cohttp-lwt-unix" @@ run "opam admin cache"
 
-let opam_switches =
-  run "curl -OL https://raw.githubusercontent.com/avsm/opam-switches/master/opam-switches" @@
-  run "chmod a+x opam-switches" @@
-  run "sudo mv opam-switches /usr/bin/opam-switches"
-
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   let compilers =
     OV.Releases.recent |>
     List.filter (fun ov -> D.distro_supported_on arch ov distro) |>
     List.map OV.Opam.default_switch |>
-    List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.package t))
-    |> fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
+    List.map (fun t ->
+      run "opam switch create %s %s"
+        (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.package t)) |>
+      (@@@) empty
   in
   let d =
     header hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ disable_bubblewrap
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
-    @@ opam_switches
-    @@ compilers
+    @@ compilers 
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ cmd "bash"
@@ -270,8 +266,8 @@ let separate_ocaml_compilers hub_id arch distro =
          let create_default_switch = run "opam switch create %s %s" default_switch_name OV.(to_string default_switch) in
          let variants =
            OV.Opam.variant_switches ov |>
-           List.map (fun t -> Fmt.strf "%s:%s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t)) |>
-           fun ovs -> run "opam-switches create %s" (String.concat " " ovs)
+           List.map (fun t -> run "opam switch create %s %s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t)) |>
+          (@@@) empty
          in
          let d =
            header hub_id (Fmt.strf "%s-opam" distro_tag)
@@ -279,7 +275,6 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ disable_bubblewrap
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
            @@ create_default_switch
-           @@ opam_switches
            @@ variants
            @@ run "opam switch %s" default_switch_name
            @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
