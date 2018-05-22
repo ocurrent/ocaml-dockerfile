@@ -207,7 +207,7 @@ let distro_of_tag x : t option = match x with
   |"ubuntu-16.10" -> Some (`Ubuntu `V16_10)
   |"ubuntu-17.04" -> Some (`Ubuntu `V17_04)
   |"ubuntu-17.10" -> Some (`Ubuntu `V17_10)
-  |"ubuntu-18.04" -> Some (`Ubuntu `V17_10)
+  |"ubuntu-18.04" -> Some (`Ubuntu `V18_04)
   |"ubuntu" -> Some (`Ubuntu `Latest)
   |"ubuntu-lts" -> Some (`Ubuntu `LTS)
   |"debian-stable" -> Some (`Debian `Stable)
