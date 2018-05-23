@@ -36,6 +36,7 @@ type t = [
 type arch = [
   | `X86_64
   | `Aarch64
+  | `Ppc64le
 ] [@@deriving sexp]
 
 val resolve_alias : t -> t
