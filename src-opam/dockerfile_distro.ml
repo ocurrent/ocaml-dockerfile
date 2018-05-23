@@ -96,7 +96,7 @@ module OV = Ocaml_version
 
 let distro_arches ov (d:t) : arch list =
   match resolve_alias d, ov with
-  | `Debian (`V8 | `V9), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
+  | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64; `Ppc64le ]
   | `Alpine (`V3_6 | `V3_7), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
   | `Ubuntu (`V16_04|`V18_04|`V17_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   | _ -> [ `X86_64 ]
