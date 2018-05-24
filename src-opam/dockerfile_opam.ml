@@ -99,6 +99,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
+  @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ Linux.Apt.dev_packages ()
   @@ Linux.Apt.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
   @@ run
