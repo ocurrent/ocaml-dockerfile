@@ -2,7 +2,8 @@ v5.0.0
 ------
 
 - Add Ppc64le architecture.
-- Install the Bubblewrap sandboxing tool in all distributions.
+- Install the Bubblewrap sandboxing tool in all distributions and
+  remove the older wrappers for opam2 namespace usage.
 - Ensure that X11 is available in the containers so that the
   OCaml Graphics module is available (#8 via @kit-ty-kate)
 - Add concept of a "Tier 1" and "Tier 2" distro so that we can

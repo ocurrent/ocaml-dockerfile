@@ -27,18 +27,11 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
     format string as the [opam] user. *)
 
 val install_opam_from_source :
-  ?prefix:string -> ?install_wrappers:bool -> ?branch:string -> unit
+  ?prefix:string -> ?branch:string -> unit
   -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] defaults to the [1.2] stable branch.
-    The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin].
-    If [install_wrappers] is [true] then OPAM2 sandboxing scripts are installed (defaults to [false]). *)
-
-val enable_bubblewrap : Dockerfile.t
-(** [enable_bubblewrap] modifies the opam configuration to turn on the sandboxing wrapper. *)
-
-val disable_bubblewrap: Dockerfile.t
-(** [disable_bubblewrap] modifies the opam configuration to turn off the sandboxing wrapper. *)
+    The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
 
 val gen_opam2_distro :
   ?labels:(string * string) list -> Dockerfile_distro.t

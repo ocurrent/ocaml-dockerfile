@@ -24,25 +24,13 @@ module OV = Ocaml_version
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(prefix= "/usr/local") ?(install_wrappers= false)
-    ?(branch= "master") () =
-  let wrappers_dir = Filename.concat prefix "share/opam" in
-  let inst name =
-    Printf.sprintf
-      "cp shell/wrap-%s.sh %s && echo 'wrap-%s-commands: \"%s/wrap-%s.sh\"' >> /etc/opamrc.userns"
-      name wrappers_dir name wrappers_dir name
-  in
-  let wrapper_cmd =
-    match install_wrappers with
-    | false -> "echo Not installing OPAM2 wrappers"
-    | true ->
-        Fmt.strf "mkdir -p %s && %s" wrappers_dir
-          (String.concat " && " [inst "build"; inst "install"; inst "remove"])
-  in
+let install_opam_from_source ?(prefix= "/usr/local") ?(branch= "master") () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch
+  (* temp fix until #3385 is resolved in opam *)
+  @@ run "sed -e 's/dbbe94d760ddb89217d617041d12e789/987c4970715713f21e6c79b4f3cba430/g' -i /tmp/opam/src_ext/Makefile.sources"
   @@ Linux.run_sh
-       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && %s && rm -rf /tmp/opam"
-       prefix prefix prefix prefix prefix wrapper_cmd
+       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam"
+       prefix prefix prefix prefix prefix
 
 let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   let rel = "0.2.1" in
@@ -53,15 +41,27 @@ let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   run "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make install" rel prefix @@
   run "rm -rf %s bubblewrap-%s" file rel
 
-let disable_bubblewrap =
-  run "echo 'wrap-build-commands: []' > ~/.opamrc" @@
-  run "echo 'wrap-install-commands: []' >> ~/.opamrc" @@
-  run "echo 'wrap-remove-commands: []' >> ~/.opamrc" @@
-  run "echo 'required-tools: []' >> ~/.opamrc"
-
-let enable_bubblewrap =
-  run "rm ~/.opamrc"
-
+let install_bubblewrap_wrappers =
+  (* Enable bubblewrap *)
+  run "echo 'wrap-build-commands: []' > ~/.opamrc-nosandbox" @@
+  run "echo 'wrap-install-commands: []' >> ~/.opamrc-nosandbox" @@
+  run "echo 'wrap-remove-commands: []' >> ~/.opamrc-nosandbox" @@
+  run "echo 'required-tools: []' >> ~/.opamrc-nosandbox" @@
+  run "echo '#!/bin/sh' > /home/opam/opam-sandbox-disable" @@
+  run "echo 'cp ~/.opamrc-nosandbox ~/.opamrc' >> /home/opam/opam-sandbox-disable" @@
+  run "echo 'echo --- opam sandboxing disabled' >> /home/opam/opam-sandbox-disable" @@
+  run "chmod a+x /home/opam/opam-sandbox-disable" @@
+  run "sudo mv /home/opam/opam-sandbox-disable /usr/bin/opam-sandbox-disable" @@
+  (* Disable bubblewrap *)
+  run "echo 'wrap-build-commands: [\"%%{hooks}%%/sandbox.sh\" \"build\"]' > ~/.opamrc-sandbox" @@
+  run "echo 'wrap-install-commands: [\"%%{hooks}%%/sandbox.sh\" \"install\"]' >> ~/.opamrc-sandbox" @@
+  run "echo 'wrap-remove-commands: [\"%%{hooks}%%/sandbox.sh\" \"remove\"]' >> ~/.opamrc-sandbox" @@
+  run "echo '#!/bin/sh' > /home/opam/opam-sandbox-enable" @@
+  run "echo 'cp ~/.opamrc-sandbox ~/.opamrc' >> /home/opam/opam-sandbox-enable" @@
+  run "echo 'echo --- opam sandboxing enabled' >> /home/opam/opam-sandbox-enable" @@
+  run "chmod a+x /home/opam/opam-sandbox-enable" @@
+  run "sudo mv /home/opam/opam-sandbox-enable /usr/bin/opam-sandbox-enable"
+   
 let header ?maintainer img tag =
   let maintainer =
     match maintainer with
@@ -76,14 +76,15 @@ let header ?maintainer img tag =
 let apk_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates"
-  @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
+  @@ install_opam_from_source ~branch:"master" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
   @@ Linux.Apk.dev_packages ()
-  @@ Linux.Apk.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
+  @@ Linux.Apk.add_user ~uid:1000 ~sudo:true "opam"
+  @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
@@ -93,7 +94,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
+  @@ install_opam_from_source ~branch:"master" ()
   @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
@@ -101,7 +102,8 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
        ~dst:"/usr/bin/opam-installer" ()
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ Linux.Apt.dev_packages ()
-  @@ Linux.Apt.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
+  @@ Linux.Apt.add_user ~uid:1000 ~sudo:true "opam"
+  @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
@@ -114,9 +116,8 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.RPM.update 
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel" ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~install_wrappers:true ~branch:"master" ()
-  @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
-       ~branch:"master" ()
+  @@ install_opam_from_source ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~branch:"master" ()
   @@ from ~tag distro @@ Linux.RPM.install "yum-plugin-ovl" @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
@@ -125,7 +126,8 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
        ~dst:"/usr/bin/opam-installer" ()
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
-  @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
+  @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
+  @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
@@ -135,15 +137,15 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~install_wrappers:true
-       ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~branch:"master" ()
   @@ from ~tag distro
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
-  @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam" @@ Linux.Git.init ()
+  @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
+  @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
@@ -244,7 +246,7 @@ let all_ocaml_compilers hub_id arch distro =
   let d =
     header hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
-    @@ disable_bubblewrap
+    @@ run "opam-sandbox-disable"
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
     @@ compilers 
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
@@ -273,7 +275,7 @@ let separate_ocaml_compilers hub_id arch distro =
          let d =
            header hub_id (Fmt.strf "%s-opam" distro_tag)
            @@ workdir "/home/opam/opam-repository"
-           @@ disable_bubblewrap
+           @@ run "opam-sandbox-disable"
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
            @@ create_default_switch
            @@ variants
