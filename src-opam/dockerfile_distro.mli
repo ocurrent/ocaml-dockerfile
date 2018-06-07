@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2016 Anil Madhavapeddy <anil@recoil.org>
+ * Copyright (c) 2016-2018 Anil Madhavapeddy <anil@recoil.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -15,9 +15,9 @@
  *
  *)
 
-(** Run OPAM commands across a matrix of Docker containers.
+(** Run Opam commands across a matrix of Docker containers.
     Each of these containers represents a different version of
-    OCaml, OPAM and an OS distribution (such as Debian or Alpine).
+    OCaml, Opam and an OS distribution (such as Debian or Alpine).
   *)
 
 (** {2 Known distributions and OCaml variants} *)
@@ -33,29 +33,22 @@ type t = [
 ] [@@deriving sexp] 
 (** Supported Docker container distributions *)
 
-type arch = [
-  | `X86_64
-  | `Aarch64
-  | `Ppc64le
-] [@@deriving sexp]
+val compare : t -> t -> int
+(** [compare a b] is a lexical comparison function for {!t}. *)
 
 val resolve_alias : t -> t
+(** [resolve_alias t] will resolve [t] into a concrete version. This removes
+   versions such as [Latest]. *)
 
 val distros : t list
 (** Enumeration of the supported Docker container distributions *)
-
-val distro_arches : Ocaml_version.t -> t -> arch list
-val distro_supported_on : arch -> Ocaml_version.t -> t -> bool
-val active_distros : arch -> t list
-val active_tier1_distros : arch -> t list
-val active_tier2_distros : arch -> t list
 
 val latest_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
 
 val master_distro : t
 (** The distribution that is the top-level alias for the [latest] tag
-    in the [ocaml/opam] Docker Hub build. *)
+    in the [ocaml/opam2] Docker Hub build. *)
 
 val builtin_ocaml_of_distro : t -> string option
 (** [builtin_ocaml_of_distro t] will return the OCaml version
@@ -85,5 +78,38 @@ val human_readable_short_string_of_distro : t -> string
 (** [human_readable_short_string_of_distro t] returns a human readable
   short version of the distribution tag, excluding version information. *)
 
-val compare : t -> t -> int
-(** [compare a b] is a lexical comparison function for {!t}. *)
+(** {2 CPU architectures} *)
+
+type arch = [
+  | `X86_64
+  | `Aarch64
+  | `Ppc64le
+] [@@deriving sexp]
+(** CPU Architectures *)
+
+val distro_arches : Ocaml_version.t -> t -> arch list
+(** [distro_arches ov t] returns the list of architectures that
+    distribution [t] is supported on for OCaml compiler version [ov] *)
+
+val distro_supported_on : arch -> Ocaml_version.t -> t -> bool
+(** [distro_supported_on arch ov distro] returns [true] if the
+    combination of CPU [arch], compiler version [ov] is available
+    on the distribution [distro]. *)
+
+(** {2 Opam build infrastructure support} *)
+
+val active_distros : arch -> t list
+(** [active_distros arch] returns the list of currently supported
+    distributions in the opam build infrastructure.  Distributions
+    that are end-of-life upstream will rotate out of this list
+    regularly. *)
+
+val active_tier1_distros : arch -> t list
+(** Tier 1 distributions are those supported for the full matrix
+    of compiler versions in the opam build infrastructure. *)
+
+val active_tier2_distros : arch -> t list
+(** Tier 2 distributions are those supported for a limited set
+    of compiler versions in the opam build infrastructure. *)
+
+
