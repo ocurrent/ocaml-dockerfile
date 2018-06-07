@@ -1,3 +1,8 @@
+dev
+---
+
+- Remove unnecessary cmdliner dep in dockerfile-opam
+
 v5.0.0 2018-06-07 Cambridge
 ---------------------------
 
