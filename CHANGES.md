@@ -1,7 +1,6 @@
-v5.0.0
-------
+v5.0.0 2018-06-07 Cambridge
+---------------------------
 
-- Add Ppc64le architecture.
 - Install the Bubblewrap sandboxing tool in all distributions and
   remove the older wrappers for opam2 namespace usage.
 - Ensure that X11 is available in the containers so that the
@@ -17,6 +16,7 @@ v5.0.0
   This allows combinations like Ubuntu 18.04 (which breaks on earlier
   versions of OCaml due to the shift to PIE) to be expressed.
 - Add missing OpenSUSE to the latest distros list.
+- Add Ppc64le architecture.
 
 v4.0.0 2017-12-25 Cambridge
 ---------------------------
