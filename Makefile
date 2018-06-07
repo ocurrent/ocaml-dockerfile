@@ -18,7 +18,7 @@ publish-doc: doc
 	git -C .gh-pages checkout --orphan gh-pages
 	git -C .gh-pages reset
 	git -C .gh-pages clean -dxf
-	cp -r _build/default/_doc/* .gh-pages/
+	cp -r _build/default/_doc/_html/* .gh-pages/
 	git -C .gh-pages add .
 	git -C .gh-pages commit -m "Update Pages"
 	git -C .gh-pages push origin gh-pages -f
