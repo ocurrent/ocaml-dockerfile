@@ -2,6 +2,7 @@ dev
 ---
 
 - Remove unnecessary cmdliner dep in dockerfile-opam
+- Support Tier2 distros in bulk builds
 
 v5.0.0 2018-06-07 Cambridge
 ---------------------------

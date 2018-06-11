@@ -285,8 +285,13 @@ let separate_ocaml_compilers hub_id arch distro =
 
 
 let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
-  let ov_base = OV.(to_string (with_variant ocaml_version None)) in
-  header prod_hub_id (Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) ov_base)
+  (* Use the main image if its a variant-free version of OCaml *) 
+  let tag =
+    match OV.extra ocaml_version with
+    | None -> D.tag_of_distro distro
+    | Some _ -> Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) OV.(to_string (with_variant ocaml_version None))
+  in
+  header prod_hub_id tag
   @@ run "opam switch %s" (OV.to_string ocaml_version)
   @@ env [("OPAMYES", "1")]
   @@ workdir "/home/opam/opam-repository"
