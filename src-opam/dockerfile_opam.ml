@@ -285,11 +285,15 @@ let separate_ocaml_compilers hub_id arch distro =
 
 
 let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
-  (* Use the main image if its a variant-free version of OCaml *) 
+  let use_main_tag =
+    (OV.extra ocaml_version <> None) ||
+    (* TODO pass arch up as a param *)
+    (List.mem (D.resolve_alias distro) (D.active_tier1_distros `X86_64)) in
   let tag =
-    match OV.extra ocaml_version with
-    | None -> D.tag_of_distro distro
-    | Some _ -> Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) OV.(to_string (with_variant ocaml_version None))
+    if use_main_tag then
+      Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) OV.(to_string (with_variant ocaml_version None))
+    else 
+      D.tag_of_distro distro
   in
   header prod_hub_id tag
   @@ run "opam switch %s" (OV.to_string ocaml_version)
