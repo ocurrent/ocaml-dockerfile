@@ -73,7 +73,7 @@ let header ?maintainer img tag =
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apk") :: labels)
-  @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates"
+  @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
   @@ install_opam_from_source ~branch:"master" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag distro

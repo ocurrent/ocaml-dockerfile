@@ -5,6 +5,7 @@ dev
   containers so they remain non-interactive.
 - install rsync in RPM distros
 - Install opam-depext in the containers by default
+- fix opam2 alpine installation by installing openssl
 
 v5.1.0 2018-06-15 Cambridge
 ---------------------------
