@@ -249,6 +249,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ compilers 
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
+    @@ run "opam install -y depext"
     @@ cmd "bash"
   in
   (Fmt.strf "%s" distro_tag, d)
@@ -278,6 +279,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ create_default_switch
            @@ variants
            @@ run "opam switch %s" default_switch_name
+           @@ run "opam install -y depext"
            @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
            @@ cmd "bash"
          in
@@ -302,7 +304,6 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   @@ run "git pull origin master"
   @@ run "git checkout %s" opam_repo_rev
   @@ run "opam update"
-  @@ run "opam install -y depext"
   @@ run "opam depext -iy jbuilder ocamlfind"
 
 let multiarch_manifest ~target ~platforms =

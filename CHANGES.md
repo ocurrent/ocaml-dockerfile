@@ -1,3 +1,8 @@
+dev
+---
+
+- Install opam-depext in the containers by default
+
 v5.1.0 2018-06-15 Cambridge
 ---------------------------
 
