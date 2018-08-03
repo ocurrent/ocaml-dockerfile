@@ -250,6 +250,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
     @@ run "opam install -y depext"
+    @@ env ["OPAMYES","1"]
     @@ cmd "bash"
   in
   (Fmt.strf "%s" distro_tag, d)
@@ -280,6 +281,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ variants
            @@ run "opam switch %s" default_switch_name
            @@ run "opam install -y depext"
+           @@ env ["OPAMYES","1"]
            @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
            @@ cmd "bash"
          in
