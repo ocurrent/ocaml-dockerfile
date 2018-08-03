@@ -57,7 +57,7 @@ module RPM = struct
     run "chmod 700 .ssh"
 
   let dev_packages ?extra () =
-    install "sudo passwd bzip2 patch nano gcc-c++ git tar curl xz libX11-devel bubblewrap which%s"
+    install "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel bubblewrap which%s"
       (match extra with None -> "" | Some x -> " " ^ x) @@
     groupinstall "\"Development Tools\""
 
