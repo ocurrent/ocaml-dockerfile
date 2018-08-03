@@ -112,7 +112,7 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
   @@ run "touch /var/lib/rpm/*"
   @@ Linux.RPM.install "yum-plugin-ovl"
   @@ Linux.RPM.update 
-  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel" ()
+  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~branch:"master" ()
   @@ install_opam_from_source ~prefix:"/usr" ~branch:"master" ()
