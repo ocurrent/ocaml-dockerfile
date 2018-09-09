@@ -80,35 +80,28 @@ val human_readable_short_string_of_distro : t -> string
 
 (** {2 CPU architectures} *)
 
-type arch = [
-  | `X86_64
-  | `Aarch64
-  | `Ppc64le
-] [@@deriving sexp]
-(** CPU Architectures *)
-
-val distro_arches : Ocaml_version.t -> t -> arch list
+val distro_arches : Ocaml_version.t -> t -> Ocaml_version.arch list
 (** [distro_arches ov t] returns the list of architectures that
     distribution [t] is supported on for OCaml compiler version [ov] *)
 
-val distro_supported_on : arch -> Ocaml_version.t -> t -> bool
+val distro_supported_on : Ocaml_version.arch -> Ocaml_version.t -> t -> bool
 (** [distro_supported_on arch ov distro] returns [true] if the
     combination of CPU [arch], compiler version [ov] is available
     on the distribution [distro]. *)
 
 (** {2 Opam build infrastructure support} *)
 
-val active_distros : arch -> t list
+val active_distros : Ocaml_version.arch -> t list
 (** [active_distros arch] returns the list of currently supported
     distributions in the opam build infrastructure.  Distributions
     that are end-of-life upstream will rotate out of this list
     regularly. *)
 
-val active_tier1_distros : arch -> t list
+val active_tier1_distros : Ocaml_version.arch -> t list
 (** Tier 1 distributions are those supported for the full matrix
     of compiler versions in the opam build infrastructure. *)
 
-val active_tier2_distros : arch -> t list
+val active_tier2_distros : Ocaml_version.arch -> t list
 (** Tier 2 distributions are those supported for a limited set
     of compiler versions in the opam build infrastructure. *)
 

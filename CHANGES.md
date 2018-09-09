@@ -7,6 +7,7 @@ dev
 - Install opam-depext in the containers by default
 - fix opam2 alpine and centos installation by installing openssl
 - add a dependency on `ppx_sexp_conv` for dockerfile-cmd
+- add support for Aarch32 in distros
 
 v5.1.0 2018-06-15 Cambridge
 ---------------------------

@@ -34,12 +34,6 @@ type status = [
   | `Alias of t
 ] [@@deriving sexp]
 
-type arch = [
-  | `X86_64
-  | `Aarch64
-  | `Ppc64le
-] [@@deriving sexp]
-
 let distros = [
   `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `Latest;
   `CentOS `V6; `CentOS `V7; `CentOS `Latest;
@@ -94,15 +88,15 @@ let resolve_alias d =
 
 module OV = Ocaml_version
 
-let distro_arches ov (d:t) : arch list =
+let distro_arches ov (d:t) =
   match resolve_alias d, ov with
-  | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64; `Ppc64le ]
+  | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64; `Ppc64le; `Aarch32 ]
   | `Alpine (`V3_6 | `V3_7), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
   | `Ubuntu (`V16_04|`V18_04|`V17_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   | _ -> [ `X86_64 ]
 
 
-let distro_supported_on (a:arch) ov (d:t) =
+let distro_supported_on a ov (d:t) =
   List.mem a (distro_arches ov d)
 
 let active_distros arch =
