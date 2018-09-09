@@ -8,6 +8,7 @@ dev
 - fix opam2 alpine and centos installation by installing openssl
 - add a dependency on `ppx_sexp_conv` for dockerfile-cmd
 - add support for Aarch32 in distros
+- install coreutils in Alpine since OCaml 4.08 needs GNU stat to compile
 
 v5.1.0 2018-06-15 Cambridge
 ---------------------------
