@@ -9,6 +9,7 @@ dev
 - add a dependency on `ppx_sexp_conv` for dockerfile-cmd
 - add support for Aarch32 in distros
 - install coreutils in Alpine since OCaml 4.08 needs GNU stat to compile
+- add support for Ubuntu 18.10 release.
 
 v5.1.0 2018-06-15 Cambridge
 ---------------------------

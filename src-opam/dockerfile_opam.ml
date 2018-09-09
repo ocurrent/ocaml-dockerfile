@@ -185,6 +185,7 @@ let gen_opam2_distro ?labels d =
           | `V17_04 -> "zesty"
           | `V17_10 -> "artful"
           | `V18_04 -> "bionic"
+          | `V18_10 -> "cosmic"
           | `Latest | `LTS -> assert false
         in
         apt_opam2 ?labels ~distro:"ubuntu" ~tag ()
