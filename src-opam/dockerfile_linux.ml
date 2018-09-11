@@ -107,7 +107,7 @@ module Apk = struct
   let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
   let dev_packages ?extra () =
-    install "build-base patch tar ca-certificates git rsync curl sudo bash libx11-dev nano bubblewrap coreutils ncurses-dev%s"
+    install "build-base patch tar ca-certificates git rsync curl sudo bash libx11-dev nano bubblewrap coreutils xz ncurses-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
@@ -140,7 +140,7 @@ module Zypper = struct
 
   let dev_packages ?extra () =
     install "-t pattern devel_C_C++" @@
-    install "sudo git unzip curl gcc-c++ libcap-devel libX11-devel" @@
+    install "sudo git unzip curl gcc-c++ libcap-devel xz libX11-devel" @@
     (maybe (install "%s") extra)
 
   let add_user ?uid ?gid ?(sudo=false) username =
