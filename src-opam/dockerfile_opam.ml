@@ -237,10 +237,9 @@ let all_ocaml_compilers hub_id arch distro =
   let compilers =
     OV.Releases.recent |>
     List.filter (fun ov -> D.distro_supported_on arch ov distro) |>
-    List.map OV.Opam.default_switch |>
     List.map (fun t ->
       run "opam switch create %s %s"
-        (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.package t)) |>
+        (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.name t)) |>
       (@@@) empty
   in
   let d =
@@ -266,12 +265,10 @@ let separate_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro) 
   |> List.map (fun ov ->
-         let default_switch = OV.Opam.default_switch ov in
-         let default_switch_name = OV.(with_patch (with_variant default_switch None) None |> to_string) in
-         let create_default_switch = run "opam switch create %s %s" default_switch_name OV.(to_string default_switch) in
+         let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
-           OV.Opam.variant_switches ov |>
-           List.map (fun t -> run "opam switch create %s %s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.package t)) |>
+           OV.Opam.V2.switches arch ov |>
+           List.map (fun t -> run "opam switch create %s %s" (OV.(to_string (with_patch t None))) (OV.Opam.V2.name t)) |>
           (@@@) empty
          in
          let d =
@@ -279,7 +276,6 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam-sandbox-disable"
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
-           @@ create_default_switch
            @@ variants
            @@ run "opam switch %s" default_switch_name
            @@ run "opam install -y depext"
