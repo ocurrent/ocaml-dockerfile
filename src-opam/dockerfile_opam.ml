@@ -267,7 +267,7 @@ let separate_ocaml_compilers hub_id arch distro =
   |> List.map (fun ov ->
          let add_remote =
            if List.mem ov OV.Releases.dev then
-             run "opam repo add ocaml-dev https://github.com/ocaml/ocaml-pr-repository --set-default"
+             run "opam repo add ocaml-dev git://github.com/ocaml/ocaml-pr-repository --set-default"
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
@@ -309,7 +309,7 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   @@ run "git pull origin master"
   @@ run "git checkout %s" opam_repo_rev
   @@ run "opam update"
-  @@ run "opam depext -iy jbuilder ocamlfind"
+  @@ run "opam depext -iy dune ocamlfind"
 
 let multiarch_manifest ~target ~platforms =
   let ms =
