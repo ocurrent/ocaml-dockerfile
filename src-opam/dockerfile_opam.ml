@@ -265,6 +265,10 @@ let separate_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro) 
   |> List.map (fun ov ->
+         let add_remote =
+           if List.mem ov OV.Releases.dev then
+             run "opam repo add ocaml-dev https://github.com/ocaml/ocaml-pr-repository --set-default"
+           else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
            OV.Opam.V2.switches arch ov |>
@@ -276,6 +280,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam-sandbox-disable"
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
+           @@ add_remote
            @@ variants
            @@ run "opam switch %s" default_switch_name
            @@ run "opam install -y depext"
