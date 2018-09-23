@@ -74,7 +74,7 @@ let header ?maintainer img tag =
 let apk_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
-  @@ install_opam_from_source ~branch:"master" ()
+  @@ install_opam_from_source ~branch:"2.0" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
@@ -114,8 +114,7 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.RPM.update 
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~branch:"2.0" ()
-  @@ install_opam_from_source ~prefix:"/usr" ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
   @@ from ~tag distro @@ Linux.RPM.install "yum-plugin-ovl" @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
