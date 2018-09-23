@@ -24,7 +24,7 @@ module OV = Ocaml_version
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(prefix= "/usr/local") ?(branch= "master") () =
+let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch
   @@ Linux.run_sh
        "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam"
@@ -92,7 +92,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~branch:"master" ()
+  @@ install_opam_from_source ~branch:"2.0" ()
   @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
@@ -114,7 +114,7 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.RPM.update 
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~branch:"master" ()
+  @@ install_opam_from_source ~branch:"2.0" ()
   @@ install_opam_from_source ~prefix:"/usr" ~branch:"master" ()
   @@ from ~tag distro @@ Linux.RPM.install "yum-plugin-ovl" @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
@@ -135,7 +135,7 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
   header distro tag @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
   @@ from ~tag distro
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()

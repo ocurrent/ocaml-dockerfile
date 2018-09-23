@@ -11,6 +11,8 @@ dev
 - install coreutils in Alpine since OCaml 4.08 needs GNU stat to compile
 - add support for Ubuntu 18.10 and Alpine 3.8 releases.
 - add xz to Alpine and Zypper distributions.
+- `install_opam_from_source` requires an explicit branch rather
+  than defaulting to master.
 
 v5.1.0 2018-06-15 Cambridge
 ---------------------------

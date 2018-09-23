@@ -27,10 +27,11 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
     format string as the [opam] user. *)
 
 val install_opam_from_source :
-  ?prefix:string -> ?branch:string -> unit
+  ?prefix:string -> branch:string -> unit
   -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
-    The [branch] defaults to the [1.2] stable branch.
+    The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.x or [master] for
+    the latest trunk version).
     The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
 
 val gen_opam2_distro :
