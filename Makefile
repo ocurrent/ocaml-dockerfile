@@ -1,16 +1,16 @@
 .PHONY: all clean
 
 all:
-	jbuilder build --dev
+	dune build
 
 clean:
-	jbuilder clean
+	dune clean
 
 test:
-	jbuilder runtest
+	dune runtest
 
 doc:
-	jbuilder build @doc
+	dune build @doc
 
 publish-doc: doc
 	rm -rf .gh-pages
@@ -26,9 +26,8 @@ publish-doc: doc
 
 REPO=../../mirage/opam-repository
 PACKAGES=$(REPO)/packages
-# until we have https://github.com/ocaml/opam-publish/issues/38
 pkg-%:
-	topkg opam pkg -n $*
+	dune-release opam pkg -n $*
 	mkdir -p $(PACKAGES)/$*
 	cp -r _build/$*.* $(PACKAGES)/$*/
 	cd $(PACKAGES) && git add $*
