@@ -9,13 +9,13 @@ bug-reports: "https://github.com/avsm/ocaml-dockerfile/issues"
 tags: ["org:mirage" "org:ocamllabs"]
 available: [ ocaml-version >= "4.02.3"]
 depends: [
-  "jbuilder" {build & >="1.0+beta10"}
+  "dune" {build}
   "dockerfile" {>="3.0.0"}
   "ocaml-version" {>="0.3.0"}
   "cmdliner"
   "astring"
 ]
 build: [
-  ["jbuilder" "subst" "-p" name "--name" name] {pinned}
-  ["jbuilder" "build" "-p" name "-j" jobs]
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs]
 ]

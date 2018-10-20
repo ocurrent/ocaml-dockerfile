@@ -1,0 +1,7 @@
+(library
+ (name        dockerfile_opam)
+ (public_name dockerfile-opam)
+ (synopsis "Dockerfile functions to generate opam2 base containers")
+ (wrapped false)
+ (libraries ocaml-version dockerfile fmt sexplib astring)
+ (preprocess (per_module ((pps ppx_sexp_conv) dockerfile_distro))))
