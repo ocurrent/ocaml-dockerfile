@@ -25,6 +25,7 @@ module OV = Ocaml_version
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
 let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
+  Linux.Git.init () @@
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch
   @@ 
   run "git -C /tmp/opam pull https://github.com/dra27/opam fix-seq-patch"
