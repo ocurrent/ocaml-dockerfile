@@ -27,7 +27,7 @@ let run_as_opam fmt = Linux.run_as_user "opam" fmt
 let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
   Linux.Git.init () @@
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@ 
-  Linux.run_sh "cd /tmp/opam && git fetch https://github.com/dra27/opam fix-seq-patch && git cherry-pick 957a0d6" @@
+  Linux.run_sh "cd /tmp/opam && git fetch https://github.com/dra27/opam fix-seq-patch && git cherry-pick 957a0d6 f6d001761256eec3e9" @@
   Linux.run_sh
        "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam"
        prefix prefix prefix prefix prefix
