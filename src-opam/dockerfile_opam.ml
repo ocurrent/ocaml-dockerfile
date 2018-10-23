@@ -33,7 +33,7 @@ let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
        prefix prefix prefix prefix prefix
 
 let install_bubblewrap_from_source ?(prefix="/usr/local") () =
-  let rel = "0.2.1" in
+  let rel = "0.3.1" in
   let file = Fmt.strf "bubblewrap-%s.tar.xz" rel in
   let url = Fmt.strf "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz" rel rel in
   run "curl -OL %s" url @@
