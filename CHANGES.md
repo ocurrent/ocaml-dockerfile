@@ -13,6 +13,7 @@ dev
 - add xz to Alpine and Zypper distributions.
 - `install_opam_from_source` requires an explicit branch rather
   than defaulting to master.
+- update version of Bubblewrap in containers to 0.3.1.
 - port build system from Jbuilder to Dune.
 
 v5.1.0 2018-06-15 Cambridge
