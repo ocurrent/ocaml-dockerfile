@@ -1,5 +1,8 @@
-dev
----
+v6.0.0 2018-11-15 Cambridge
+---------------------------
+
+This release focuses on the opam 2.0 release and the resulting
+containers built on ocaml/opam2 on the Docker Hub.
 
 - set the `OPAMYES` variable to true by default in ocaml
   containers so they remain non-interactive.
