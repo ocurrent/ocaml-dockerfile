@@ -244,6 +244,10 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   @@ run "opam update"
   @@ run "opam depext -iy dune ocamlfind"
 
+let deprecated =
+  header "alpine" "latest"
+  @@ run "echo 'This container is now deprecated and no longer supported. Please see https://github.com/ocaml/infrastructure/wiki/Containers for the latest supported tags.  Try to use the longer term supported aliases instead of specific distribution versions if you want to avoid seeing this message in the future.' && exit 1"
+
 let multiarch_manifest ~target ~platforms =
   let ms =
     List.map

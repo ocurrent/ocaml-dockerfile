@@ -63,6 +63,9 @@ val bulk_build : string -> Dockerfile_distro.t -> Ocaml_version.t -> string -> D
   for OCaml version [ov] on distribution [distro] using the Git revision [rev]
   from opam-repository. *)
 
+val deprecated : Dockerfile.t 
+(** [deprecated] is a minimal container that outputs a deprecation error. This is used to replace unsupported containers on the Hub rather than leaving an unmaintained distribution lying around with possible security holes. *)
+
 val multiarch_manifest : target:string -> platforms:(string * string) list -> string
 (** [multiarch_manifest ~target ~platforms] will generate a manifest-tool compliant yaml file to
   build a [target] on the given multiarch [platforms]. *)
