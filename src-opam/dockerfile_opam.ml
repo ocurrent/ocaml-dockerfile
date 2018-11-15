@@ -204,6 +204,7 @@ let gen_opam2_distro ?labels d =
           | `V26 -> "26"
           | `V27 -> "27"
           | `V28 -> "28"
+          | `V29 -> "28"
           | `Latest -> assert false
         in
         yum_opam2 ?labels ~distro:"fedora" ~tag ()
@@ -216,6 +217,7 @@ let gen_opam2_distro ?labels d =
           | `V42_1 -> "42.1"
           | `V42_2 -> "42.2"
           | `V42_3 -> "42.3"
+          | `V15_0 -> "15.0"
           | `Latest -> assert false
         in
         zypper_opam2 ?labels ~distro:"opensuse" ~tag ()
