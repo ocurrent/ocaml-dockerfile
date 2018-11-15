@@ -313,5 +313,90 @@ let latest_tag_of_distro (t:t) =
   |`Alpine _ -> "alpine"
   |`OpenSUSE _ -> "opensuse"
 
+type package_manager = [ `Apt | `Yum | `Apk | `Zypper ] [@@deriving sexp]
+
+let package_manager (t:t) =
+  match t with
+  |`Ubuntu _ -> `Apt
+  |`Debian _ -> `Apt
+  |`CentOS _ -> `Yum
+  |`Fedora _ -> `Yum
+  |`OracleLinux _ -> `Yum
+  |`Alpine _ -> `Apk
+  |`OpenSUSE _ -> `Zypper
+
+let base_distro_tag d =
+  match resolve_alias d with
+  | `Alpine v ->
+        let tag =
+          match v with
+          | `V3_3 -> "3.3"
+          | `V3_4 -> "3.4"
+          | `V3_5 -> "3.5"
+          | `V3_6 -> "3.6"
+          | `V3_7 -> "3.7"
+          | `V3_8 -> "3.8"
+          | `Latest -> assert false
+        in
+        "alpine", tag
+   | `Debian v ->
+        let tag =
+          match v with
+          | `V7 -> "7"
+          | `V8 -> "8"
+          | `V9 -> "9"
+          | `Testing -> "testing"
+          | `Unstable -> "unstable"
+          | `Stable -> assert false
+        in
+        "debian",tag
+    | `Ubuntu v ->
+        let tag =
+          match v with
+          | `V12_04 -> "precise"
+          | `V14_04 -> "trusty"
+          | `V15_04 -> "vivid"
+          | `V15_10 -> "wily"
+          | `V16_04 -> "xenial"
+          | `V16_10 -> "yakkety"
+          | `V17_04 -> "zesty"
+          | `V17_10 -> "artful"
+          | `V18_04 -> "bionic"
+          | `V18_10 -> "cosmic"
+          | `Latest | `LTS -> assert false
+        in
+        "ubuntu", tag
+    | `CentOS v ->
+        let tag = match v with `V6 -> "6" | `V7 -> "7" | _ -> assert false in
+        "centos", tag
+    | `Fedora v ->
+        let tag =
+          match v with
+          | `V21 -> "21"
+          | `V22 -> "22"
+          | `V23 -> "23"
+          | `V24 -> "24"
+          | `V25 -> "25"
+          | `V26 -> "26"
+          | `V27 -> "27"
+          | `V28 -> "28"
+          | `V29 -> "28"
+          | `Latest -> assert false
+        in
+        "fedora", tag
+    | `OracleLinux v ->
+        let tag = match v with `V7 -> "7" | _ -> assert false in
+        "oraclelinux", tag
+    | `OpenSUSE v ->
+        let tag =
+          match v with
+          | `V42_1 -> "42.1"
+          | `V42_2 -> "42.2"
+          | `V42_3 -> "42.3"
+          | `V15_0 -> "15.0"
+          | `Latest -> assert false
+        in
+        "opensuse/leap", tag
+
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)

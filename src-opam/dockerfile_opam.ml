@@ -147,83 +147,14 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
-
 let gen_opam2_distro ?labels d =
-  let fn =
-    match D.resolve_alias d with
-    | `Alpine v ->
-        let tag =
-          match v with
-          | `V3_3 -> "3.3"
-          | `V3_4 -> "3.4"
-          | `V3_5 -> "3.5"
-          | `V3_6 -> "3.6"
-          | `V3_7 -> "3.7"
-          | `V3_8 -> "3.8"
-          | `Latest -> assert false
-        in
-        apk_opam2 ?labels ~distro:"alpine" ~tag ()
-    | `Debian v ->
-        let tag =
-          match v with
-          | `V7 -> "7"
-          | `V8 -> "8"
-          | `V9 -> "9"
-          | `Testing -> "testing"
-          | `Unstable -> "unstable"
-          | `Stable -> assert false
-        in
-        apt_opam2 ?labels ~distro:"debian" ~tag ()
-    | `Ubuntu v ->
-        let tag =
-          match v with
-          | `V12_04 -> "precise"
-          | `V14_04 -> "trusty"
-          | `V15_04 -> "vivid"
-          | `V15_10 -> "wily"
-          | `V16_04 -> "xenial"
-          | `V16_10 -> "yakkety"
-          | `V17_04 -> "zesty"
-          | `V17_10 -> "artful"
-          | `V18_04 -> "bionic"
-          | `V18_10 -> "cosmic"
-          | `Latest | `LTS -> assert false
-        in
-        apt_opam2 ?labels ~distro:"ubuntu" ~tag ()
-    | `CentOS v ->
-        let tag = match v with `V6 -> "6" | `V7 -> "7" | _ -> assert false in
-        yum_opam2 ?labels ~distro:"centos" ~tag ()
-    | `Fedora v ->
-        let tag =
-          match v with
-          | `V21 -> "21"
-          | `V22 -> "22"
-          | `V23 -> "23"
-          | `V24 -> "24"
-          | `V25 -> "25"
-          | `V26 -> "26"
-          | `V27 -> "27"
-          | `V28 -> "28"
-          | `V29 -> "28"
-          | `Latest -> assert false
-        in
-        yum_opam2 ?labels ~distro:"fedora" ~tag ()
-    | `OracleLinux v ->
-        let tag = match v with `V7 -> "7" | _ -> assert false in
-        yum_opam2 ?labels ~distro:"oraclelinux" ~tag ()
-    | `OpenSUSE v ->
-        let tag =
-          match v with
-          | `V42_1 -> "42.1"
-          | `V42_2 -> "42.2"
-          | `V42_3 -> "42.3"
-          | `V15_0 -> "15.0"
-          | `Latest -> assert false
-        in
-        zypper_opam2 ?labels ~distro:"opensuse" ~tag ()
-  in
-  (D.tag_of_distro d, fn)
-
+  let distro, tag = D.base_distro_tag d in
+  let fn = match D.package_manager d with
+  | `Apk -> apk_opam2 ?labels ~tag ~distro ()
+  | `Apt -> apt_opam2 ?labels ~tag ~distro ()
+  | `Yum -> yum_opam2 ?labels ~tag ~distro ()
+  | `Zypper -> zypper_opam2 ?labels ~tag ~distro ()
+  in (D.tag_of_distro d, fn)
 
 (* Generate archive mirror *)
 let opam2_mirror (hub_id: string) =

@@ -55,21 +55,6 @@ val builtin_ocaml_of_distro : t -> string option
   supplied with the distribution packaging, and [None] if there
   is no supported version. *)
 
-val tag_of_distro : t -> string
-(** Convert a distribution to a Docker Hub tag.  The full
-  form of this is [ocaml/TAG] on the Docker Hub. *)
-
-val distro_of_tag : string -> t option
-(** [distro_of_tag s] parses [s] into a {!t} distribution, and
-    [None] otherwise. *)
-
-val latest_tag_of_distro : t -> string
-(** [latest_tag_of_dsistro distro] will generate a Docker Hub
-  tag that is a convenient short form for the latest stable
-  release of a particular distribution.  This tag will be
-  regularly rewritten to point to any new releases of the
-  distribution. *)
-
 val human_readable_string_of_distro : t -> string
 (** [human_readable_string_of_distro t] returns a human readable
   version of the distribution tag, including version information. *)
@@ -77,6 +62,41 @@ val human_readable_string_of_distro : t -> string
 val human_readable_short_string_of_distro : t -> string
 (** [human_readable_short_string_of_distro t] returns a human readable
   short version of the distribution tag, excluding version information. *)
+
+type package_manager = [
+  | `Apk  (** Alpine Apk *)
+  | `Apt  (** Debian Apt *)
+  | `Yum  (** Fedora Yum *)
+  | `Zypper (** OpenSUSE Zypper *) ] [@@deriving sexp]
+(** The package manager used by a distro. *)
+  
+val package_manager : t -> package_manager
+(** [package_manager t] returns the type of package manager used
+ by that distribution.  Many derived distributions (such as OracleLinux)
+ share the same package manager from a base distribution (such as CentOS). *)
+
+(** {2 Docker Hub addresses} *)
+
+val tag_of_distro : t -> string
+(** [tag_of_distro t] convert a distribution [t] to a Docker Hub tag. *)
+
+val distro_of_tag : string -> t option
+(** [distro_of_tag s] parses [s] into a {!t} distribution, and
+    [None] otherwise. *)
+
+val latest_tag_of_distro : t -> string
+(** [latest_tag_of_distro distro] will generate a Docker Hub
+  tag that is a convenient short form for the latest stable
+  release of a particular distribution.  This tag will be
+  regularly rewritten to point to any new releases of the
+  distribution. *)
+
+val base_distro_tag : t -> string * string
+(** [base_distro_tag t] will return a tuple of a Docker Hub
+ user/repository and tag for which the base image of a distribution
+ can be found (e.g. [opensuse/leap],[15.0] which maps to [opensuse/leap:15.0]
+ on the Docker Hub).  This base image is in turn can be used to generate opam
+ and other OCaml tool Dockerfiles. *)
 
 (** {2 CPU architectures} *)
 
@@ -104,5 +124,4 @@ val active_tier1_distros : Ocaml_version.arch -> t list
 val active_tier2_distros : Ocaml_version.arch -> t list
 (** Tier 2 distributions are those supported for a limited set
     of compiler versions in the opam build infrastructure. *)
-
 

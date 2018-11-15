@@ -3,6 +3,7 @@ dev
 
 - Add support for Fedora 29 and OpenSUSE Leap 15.0
 - Demote some releases to Tier 2 from Tier 1.
+- Add functions to calculate base distro tags in `Dockerfile_distro`.
 
 v6.0.0 2018-11-15 Cambridge
 ---------------------------
