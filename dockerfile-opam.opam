@@ -11,7 +11,7 @@ available: [ ocaml-version >= "4.02.3"]
 depends: [
   "dune" {build}
   "dockerfile" {>="3.0.0"}
-  "ocaml-version" {>="0.3.0"}
+  "ocaml-version" {>="1.0.0"}
   "cmdliner"
   "astring"
 ]
