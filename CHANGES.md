@@ -6,6 +6,7 @@ dev
 - Add functions to calculate base distro tags in `Dockerfile_distro`.
 - Install bzip2 and rsync on OpenSUSE distros.
 - Add a `Dockerfile_opam.deprecated` container for being able to turn off older distros. 
+- Install `which` into OpenSUSE containers by default.
 
 v6.0.0 2018-11-15 Cambridge
 ---------------------------
