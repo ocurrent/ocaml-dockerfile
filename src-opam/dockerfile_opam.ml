@@ -200,7 +200,7 @@ let separate_ocaml_compilers hub_id arch distro =
   |> List.map (fun ov ->
          let add_remote =
            if List.mem ov OV.Releases.dev then
-             run "opam repo add ocaml-dev git://github.com/ocaml/ocaml-pr-repository --set-default"
+             run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
