@@ -199,7 +199,7 @@ let separate_ocaml_compilers hub_id arch distro =
   OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro) 
   |> List.map (fun ov ->
          let add_remote =
-           if List.mem ov OV.Releases.dev then
+           if OV.Releases.is_dev ov then
              run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
