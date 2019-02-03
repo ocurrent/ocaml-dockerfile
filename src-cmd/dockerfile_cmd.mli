@@ -71,37 +71,6 @@ module Docker : sig
   val manifest_push_file : Fpath.t -> Bos.Cmd.t
 end
 
-(** GNU Parallel command invocation *)
-module Parallel : sig
-
-  module Joblog : sig
-    type t = {
-      arg: string;
-      seq: int;
-      host: string;
-      start_time: float;
-      run_time: float;
-      send: int;
-      receive: int;
-      exit_code: int;
-      signal: int;
-      command: string;
-      build_logfiles: (string * string) option;
-    } [@@deriving sexp]
-  end
-  type joblog = Joblog.t 
-  type t = joblog list [@@deriving sexp]
-
-  val run :
-    ?mode:[< `Local
-           | `Remote of [< `Controlmaster | `Ssh ] * string list
-           > `Local ] ->
-    ?delay:float -> ?jobs:int -> ?retries:int ->
-    Fpath.t -> string -> Bos.Cmd.t ->
-    string list -> (joblog list, [> Rresult.R.msg ]) result
- 
-end
-
 (** Opam2 command invocation *)
 module Opam : sig
   val bin : Bos.Cmd.t

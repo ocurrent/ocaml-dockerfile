@@ -1,13 +1,14 @@
 dev
 ---
 
-- Add support for Fedora 29 and OpenSUSE Leap 15.0
+- Add support for Fedora 29 and OpenSUSE Leap 15.0 and Alpine 3.9.
 - Demote some releases to Tier 2 from Tier 1.
 - Add functions to calculate base distro tags in `Dockerfile_distro`.
 - Install bzip2 and rsync on OpenSUSE distros.
 - Add a `Dockerfile_opam.deprecated` container for being able to turn off older distros. 
 - Install `which` into OpenSUSE containers by default.
 - Use `+trunk` suffix for dev versions of compiler.
+- Remove unused GNU Parallel wrapper in `dockerfile_cmd`.
 
 v6.0.0 2018-11-15 Cambridge
 ---------------------------

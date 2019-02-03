@@ -19,7 +19,7 @@
 open Astring
 
 type t = [ 
-  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `Latest ]
   | `CentOS of [ `V6 | `V7 | `Latest ]
   | `Debian of [ `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `Latest ]
@@ -35,7 +35,7 @@ type status = [
 ] [@@deriving sexp]
 
 let distros = [
-  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `Latest;
+  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `Latest;
   `CentOS `V6; `CentOS `V7; `CentOS `Latest;
   `Debian `V9; `Debian `V8; `Debian `V7;
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
@@ -47,10 +47,10 @@ let distros = [
   `Ubuntu `Latest; `Ubuntu `LTS ]
   
 let distro_status (d:t) : status = match d with
-  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6) -> `Deprecated
-  | `Alpine `V3_7 -> `Active `Tier2
-  | `Alpine `V3_8 -> `Active `Tier1
-  | `Alpine `Latest -> `Alias (`Alpine `V3_8)
+  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7) -> `Deprecated
+  | `Alpine `V3_8 -> `Active `Tier2
+  | `Alpine `V3_9 -> `Active `Tier1
+  | `Alpine `Latest -> `Alias (`Alpine `V3_9)
   | `CentOS `V7 -> `Active `Tier2
   | `CentOS `V6 -> `Deprecated
   | `CentOS `Latest -> `Alias (`CentOS `V7)
@@ -132,6 +132,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`Alpine `V3_6 -> Some "4.04.1"
   |`Alpine `V3_7 -> Some "4.04.2"
   |`Alpine `V3_8 -> Some "4.06.1"
+  |`Alpine `V3_9 -> Some "4.06.1"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
   |`Fedora `V23 -> Some "4.02.2"
@@ -193,6 +194,7 @@ let tag_of_distro (d:t) = match d with
   |`Alpine `V3_6 -> "alpine-3.6"
   |`Alpine `V3_7 -> "alpine-3.7"
   |`Alpine `V3_8 -> "alpine-3.8"
+  |`Alpine `V3_9 -> "alpine-3.9"
   |`Alpine `Latest -> "alpine"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
   |`OpenSUSE `V42_2 -> "opensuse-42.2"
@@ -239,6 +241,7 @@ let distro_of_tag x : t option = match x with
   |"alpine-3.6" -> Some (`Alpine `V3_6)
   |"alpine-3.7" -> Some (`Alpine `V3_7)
   |"alpine-3.8" -> Some (`Alpine `V3_8)
+  |"alpine-3.9" -> Some (`Alpine `V3_9)
   |"alpine" -> Some (`Alpine `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
   |"opensuse-42.2" -> Some (`OpenSUSE `V42_2)
@@ -284,6 +287,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Alpine `V3_6 -> "Alpine 3.6"
   |`Alpine `V3_7 -> "Alpine 3.7"
   |`Alpine `V3_8 -> "Alpine 3.8"
+  |`Alpine `V3_9 -> "Alpine 3.9"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
   |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
   |`OpenSUSE `V42_3 -> "OpenSUSE 42.3"
@@ -335,6 +339,7 @@ let base_distro_tag d =
           | `V3_6 -> "3.6"
           | `V3_7 -> "3.7"
           | `V3_8 -> "3.8"
+          | `V3_9 -> "3.9"
           | `Latest -> assert false
         in
         "alpine", tag
