@@ -1,5 +1,5 @@
-dev
----
+v6.1.0 2019-02-06 Cambridge
+---------------------------
 
 - Add support for Fedora 29 and OpenSUSE Leap 15.0 and Alpine 3.9.
 - Demote some releases to Tier 2 from Tier 1.
