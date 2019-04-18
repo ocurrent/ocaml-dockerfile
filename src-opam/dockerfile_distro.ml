@@ -25,7 +25,7 @@ type t = [
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `Latest ]
   | `OracleLinux of [ `V7 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `Latest ]
-  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `LTS | `Latest ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `LTS | `Latest ]
 ] [@@deriving sexp]
 
 type status = [
@@ -43,7 +43,7 @@ let distros = [
   `OracleLinux `V7; `OracleLinux `Latest;
   `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `Latest;
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
-  `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10;
+  `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04;
   `Ubuntu `Latest; `Ubuntu `LTS ]
   
 let distro_status (d:t) : status = match d with
@@ -68,10 +68,10 @@ let distro_status (d:t) : status = match d with
   | `OpenSUSE `V42_1 | `OpenSUSE `V42_2 -> `Deprecated
   | `OpenSUSE (`V42_3|`V15_0) -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_0)
-  | `Ubuntu (`V14_04 |`V16_04 | `V18_04 | `V18_10 ) -> `Active `Tier2
+  | `Ubuntu (`V14_04 |`V16_04 | `V18_04 | `V18_10 | `V19_04 ) -> `Active `Tier2
   | `Ubuntu ( `V12_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V18_04)
-  | `Ubuntu `Latest -> `Alias (`Ubuntu `V18_10)
+  | `Ubuntu `Latest -> `Alias (`Ubuntu `V19_04)
 
 let latest_distros =
   [ `Alpine `Latest; `CentOS `Latest;
@@ -91,7 +91,7 @@ let distro_arches ov (d:t) =
   match resolve_alias d, ov with
   | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64; `Ppc64le; `Aarch32 ]
   | `Alpine (`V3_6 | `V3_7 | `V3_8), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
-  | `Ubuntu (`V16_04|`V18_04|`V17_10|`V18_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
+  | `Ubuntu (`V16_04|`V18_04|`V17_10|`V18_10|`V19_04), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   | _ -> [ `X86_64 ]
 
 
@@ -126,6 +126,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`Ubuntu `V17_10 -> Some "4.04.0"
   |`Ubuntu `V18_04 -> Some "4.05.0"
   |`Ubuntu `V18_10 -> Some "4.05.0"
+  |`Ubuntu `V19_04 -> Some "4.05.0"
   |`Alpine `V3_3 -> Some "4.02.3"
   |`Alpine `V3_4 -> Some "4.02.3"
   |`Alpine `V3_5 -> Some "4.04.0"
@@ -165,6 +166,7 @@ let tag_of_distro (d:t) = match d with
   |`Ubuntu `V17_10 -> "ubuntu-17.10"
   |`Ubuntu `V18_04 -> "ubuntu-18.04"
   |`Ubuntu `V18_10 -> "ubuntu-18.10"
+  |`Ubuntu `V19_04 -> "ubuntu-19.04"
   |`Ubuntu `Latest -> "ubuntu"
   |`Ubuntu `LTS -> "ubuntu-lts"
   |`Debian `Stable -> "debian-stable"
@@ -213,6 +215,7 @@ let distro_of_tag x : t option = match x with
   |"ubuntu-17.10" -> Some (`Ubuntu `V17_10)
   |"ubuntu-18.04" -> Some (`Ubuntu `V18_04)
   |"ubuntu-18.10" -> Some (`Ubuntu `V18_10)
+  |"ubuntu-19.04" -> Some (`Ubuntu `V19_04)
   |"ubuntu" -> Some (`Ubuntu `Latest)
   |"ubuntu-lts" -> Some (`Ubuntu `LTS)
   |"debian-stable" -> Some (`Debian `Stable)
@@ -263,6 +266,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Ubuntu `V17_10 -> "Ubuntu 17.10"
   |`Ubuntu `V18_04 -> "Ubuntu 18.04"
   |`Ubuntu `V18_10 -> "Ubuntu 18.10"
+  |`Ubuntu `V19_04 -> "Ubuntu 19_04"
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
@@ -367,6 +371,7 @@ let base_distro_tag d =
           | `V17_10 -> "artful"
           | `V18_04 -> "bionic"
           | `V18_10 -> "cosmic"
+          | `V19_04 -> "disco"
           | `Latest | `LTS -> assert false
         in
         "ubuntu", tag
