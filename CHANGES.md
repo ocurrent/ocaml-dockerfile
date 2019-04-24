@@ -1,9 +1,9 @@
-dev
----
+v6.1.1 2019-04-24 Cambridge
+---------------------------
 
 - Add support for Ubuntu 19.04 (Disco).
 
-v6.1.0 2018-02-06 Cambridge
+v6.1.0 2019-02-06 Cambridge
 ---------------------------
 
 - Add support for Fedora 29 and OpenSUSE Leap 15.0 and Alpine 3.9.
