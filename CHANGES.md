@@ -1,3 +1,9 @@
+v6.1.1 2019-04-24 Cambridge
+---------------------------
+
+- Add support for Ubuntu 19.04 (Disco). (@avsm)
+- Upgrade opam metadata to 2.0 format. (@avsm)
+
 v6.1.0 2019-02-06 Cambridge
 ---------------------------
 
