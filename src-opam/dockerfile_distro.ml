@@ -47,8 +47,7 @@ let distros = [
   `Ubuntu `Latest; `Ubuntu `LTS ]
   
 let distro_status (d:t) : status = match d with
-  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7) -> `Deprecated
-  | `Alpine `V3_8 -> `Active `Tier2
+  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8) -> `Deprecated
   | `Alpine `V3_9 -> `Active `Tier1
   | `Alpine `Latest -> `Alias (`Alpine `V3_9)
   | `CentOS `V7 -> `Active `Tier2
@@ -60,16 +59,16 @@ let distro_status (d:t) : status = match d with
   | `Debian `Stable -> `Alias (`Debian `V9)
   | `Debian `Testing -> `Active `Tier2
   | `Debian `Unstable -> `Active `Tier2
-  | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26) -> `Deprecated
-  | `Fedora (`V27|`V28|`V29) -> `Active `Tier2
+  | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28) -> `Deprecated
+  | `Fedora `V29 -> `Active `Tier2
   | `Fedora `Latest -> `Alias (`Fedora `V29)
   | `OracleLinux `V7 -> `Active `Tier2
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V7)
   | `OpenSUSE `V42_1 | `OpenSUSE `V42_2 -> `Deprecated
   | `OpenSUSE (`V42_3|`V15_0) -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_0)
-  | `Ubuntu (`V14_04 |`V16_04 | `V18_04 | `V19_04 ) -> `Active `Tier2
-  | `Ubuntu ( `V12_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10) -> `Deprecated
+  | `Ubuntu (`V16_04 | `V18_04 | `V19_04 ) -> `Active `Tier2
+  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V18_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V19_04)
 
