@@ -1,3 +1,6 @@
+
+- Ensure Alpine 3.9 has an arm64 build (@avsm)
+
 v6.1.1 2019-04-24 Cambridge
 ---------------------------
 
