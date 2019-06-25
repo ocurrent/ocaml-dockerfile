@@ -1,4 +1,8 @@
+v6.2.0 2019-06-25 Cambridge
+---------------------------
 
+- Add Fedora 30, Debian 10 (Buster), OpenSUSE 15.1 (Leap) and
+  Alpine 3.10 to the distribution list (@avsm)
 - Ensure Alpine 3.9 has an arm64 build (@avsm)
 - Deprecate Ubuntu 14.04, Fedora 27/28 and Alpine 3.8 in favour of
   newer upstream versions (@avsm)
