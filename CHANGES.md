@@ -1,3 +1,8 @@
+
+- Ensure Alpine 3.9 has an arm64 build (@avsm)
+- Deprecate Ubuntu 14.04, Fedora 27/28 and Alpine 3.8 in favour of
+  newer upstream versions (@avsm)
+
 v6.1.1 2019-04-24 Cambridge
 ---------------------------
 
