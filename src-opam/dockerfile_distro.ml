@@ -56,7 +56,7 @@ let distro_status (d:t) : status = match d with
   | `CentOS `Latest -> `Alias (`CentOS `V7)
   | `Debian `V7 -> `Deprecated
   | `Debian `V8  -> `Active `Tier2
-  | `Debian `V9 -> `Active `Tier1
+  | `Debian `V9 -> `Active `Tier2
   | `Debian `V10 -> `Active `Tier1
   | `Debian `Stable -> `Alias (`Debian `V9)
   | `Debian `Testing -> `Active `Tier2
@@ -283,7 +283,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
-  |`Debian `V10 -> "Debian 9 (Buster)"
+  |`Debian `V10 -> "Debian 10 (Buster)"
   |`Debian `V9 -> "Debian 9 (Stretch)"
   |`Debian `V8 -> "Debian 8 (Jessie)"
   |`Debian `V7 -> "Debian 7 (Wheezy)"
@@ -371,7 +371,7 @@ let base_distro_tag d =
           | `V7 -> "7"
           | `V8 -> "8"
           | `V9 -> "9"
-          | `V10 -> "buster" (* TODO until final release *)
+          | `V10 -> "buster"
           | `Testing -> "testing"
           | `Unstable -> "unstable"
           | `Stable -> assert false

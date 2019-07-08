@@ -1,3 +1,8 @@
+dev
+---
+
+- Demote Debian 9 to a Tier 2 now that Debian 10 is stable.
+
 v6.2.0 2019-06-25 Cambridge
 ---------------------------
 
