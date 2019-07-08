@@ -279,7 +279,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Ubuntu `V17_10 -> "Ubuntu 17.10"
   |`Ubuntu `V18_04 -> "Ubuntu 18.04"
   |`Ubuntu `V18_10 -> "Ubuntu 18.10"
-  |`Ubuntu `V19_04 -> "Ubuntu 19_04"
+  |`Ubuntu `V19_04 -> "Ubuntu 19.04"
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
