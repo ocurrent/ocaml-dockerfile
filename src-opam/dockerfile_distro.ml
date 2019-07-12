@@ -18,7 +18,7 @@
 (** Distro selection for various OPAM combinations *)
 open Astring
 
-type t = [ 
+type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `Latest ]
   | `CentOS of [ `V6 | `V7 | `Latest ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
@@ -45,7 +45,7 @@ let distros = [
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04;
   `Ubuntu `Latest; `Ubuntu `LTS ]
-  
+
 let distro_status (d:t) : status = match d with
   | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8) -> `Deprecated
   | `Alpine `V3_9 -> `Active `Tier2
@@ -58,7 +58,7 @@ let distro_status (d:t) : status = match d with
   | `Debian `V8  -> `Active `Tier2
   | `Debian `V9 -> `Active `Tier2
   | `Debian `V10 -> `Active `Tier1
-  | `Debian `Stable -> `Alias (`Debian `V9)
+  | `Debian `Stable -> `Alias (`Debian `V10)
   | `Debian `Testing -> `Active `Tier2
   | `Debian `Unstable -> `Active `Tier2
   | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29) -> `Deprecated
