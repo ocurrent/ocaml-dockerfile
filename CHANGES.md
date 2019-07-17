@@ -1,3 +1,9 @@
+dev
+---
+
+- add beta repository for switches if there is a dev release
+  in any of the compilers for that switch.
+
 v6.2.0 2019-06-25 Cambridge
 ---------------------------
 

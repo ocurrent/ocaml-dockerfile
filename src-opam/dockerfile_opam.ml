@@ -169,11 +169,15 @@ let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   let compilers =
     OV.Releases.recent |>
-    List.filter (fun ov -> D.distro_supported_on arch ov distro) |>
+    List.filter (fun ov -> D.distro_supported_on arch ov distro) |> fun ovs ->
+    let add_beta_remote =
+      if List.exists OV.Releases.is_dev ovs then
+         run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
+      else empty in
     List.map (fun t ->
       run "opam switch create %s %s"
-        (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.name t)) |>
-      (@@@) empty
+        (OV.(to_string (with_patch (with_variant t None) None))) (OV.Opam.V2.name t)) ovs |>
+      (@@@) add_beta_remote
   in
   let d =
     header hub_id (Fmt.strf "%s-opam" distro_tag)
