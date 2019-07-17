@@ -18,7 +18,7 @@
 (** Distro selection for various OPAM combinations *)
 open Astring
 
-type t = [ 
+type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `Latest ]
   | `CentOS of [ `V6 | `V7 | `Latest ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
@@ -45,7 +45,7 @@ let distros = [
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04;
   `Ubuntu `Latest; `Ubuntu `LTS ]
-  
+
 let distro_status (d:t) : status = match d with
   | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8) -> `Deprecated
   | `Alpine `V3_9 -> `Active `Tier2
@@ -56,9 +56,9 @@ let distro_status (d:t) : status = match d with
   | `CentOS `Latest -> `Alias (`CentOS `V7)
   | `Debian `V7 -> `Deprecated
   | `Debian `V8  -> `Active `Tier2
-  | `Debian `V9 -> `Active `Tier1
+  | `Debian `V9 -> `Active `Tier2
   | `Debian `V10 -> `Active `Tier1
-  | `Debian `Stable -> `Alias (`Debian `V9)
+  | `Debian `Stable -> `Alias (`Debian `V10)
   | `Debian `Testing -> `Active `Tier2
   | `Debian `Unstable -> `Active `Tier2
   | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29) -> `Deprecated
@@ -279,11 +279,11 @@ let rec human_readable_string_of_distro (d:t) =
   |`Ubuntu `V17_10 -> "Ubuntu 17.10"
   |`Ubuntu `V18_04 -> "Ubuntu 18.04"
   |`Ubuntu `V18_10 -> "Ubuntu 18.10"
-  |`Ubuntu `V19_04 -> "Ubuntu 19_04"
+  |`Ubuntu `V19_04 -> "Ubuntu 19.04"
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
-  |`Debian `V10 -> "Debian 9 (Buster)"
+  |`Debian `V10 -> "Debian 10 (Buster)"
   |`Debian `V9 -> "Debian 9 (Stretch)"
   |`Debian `V8 -> "Debian 8 (Jessie)"
   |`Debian `V7 -> "Debian 7 (Wheezy)"
@@ -371,7 +371,7 @@ let base_distro_tag d =
           | `V7 -> "7"
           | `V8 -> "8"
           | `V9 -> "9"
-          | `V10 -> "buster" (* TODO until final release *)
+          | `V10 -> "buster"
           | `Testing -> "testing"
           | `Unstable -> "unstable"
           | `Stable -> assert false
