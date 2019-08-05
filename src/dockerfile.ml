@@ -22,7 +22,7 @@ type shell_or_exec =
   [@@deriving sexp]
 
 type sources_to_dest =
-  [`From of string option] * [`Src of string list] * [`Dst of string]
+  [`From of string option] * [`Src of string list] * [`Dst of string] * [`Chown of string option]
   [@@deriving sexp]
 
 type line =
@@ -101,12 +101,19 @@ let string_of_env_list = function
   | el -> String.concat " " (List.map (fun (k, v) -> sprintf "%s=%S" k v) el)
 
 
-let string_of_sources_to_dest (t: sources_to_dest) =
-  match t with
-  | `From None, `Src sl, `Dst d -> String.concat " " (sl @ [d])
-  | `From Some frm, `Src sl, `Dst d ->
-      sprintf "--from=%s %s" frm (String.concat " " (sl @ [d]))
+let optional name = function
+  | None -> []
+  | Some value -> [sprintf "%s=%s" name value]
 
+
+let string_of_sources_to_dest (t: sources_to_dest) =
+  let `From frm, `Src sl, `Dst d, `Chown chown = t in
+  String.concat " " (
+    optional "--chown" chown @
+    optional "--from" frm @
+    sl @
+    [d]
+  )
 
 let string_of_label_list ls =
   List.map (fun (k, v) -> sprintf "%s=%S" k v) ls |> String.concat " "
@@ -159,9 +166,9 @@ let expose_ports p : t = [`Expose p]
 
 let env e : t = [`Env e]
 
-let add ?from ~src ~dst () : t = [`Add (`From from, `Src src, `Dst dst)]
+let add ?chown ?from ~src ~dst () : t = [`Add (`From from, `Src src, `Dst dst, `Chown chown)]
 
-let copy ?from ~src ~dst () : t = [`Copy (`From from, `Src src, `Dst dst)]
+let copy ?chown ?from ~src ~dst () : t = [`Copy (`From from, `Src src, `Dst dst, `Chown chown)]
 
 let user fmt = ksprintf (fun u -> [`User u]) fmt
 
