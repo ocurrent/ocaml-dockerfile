@@ -85,8 +85,6 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.Apk.dev_packages ()
   @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
-  @@ run
-       "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
 
 (* Debian based Dockerfile *)
@@ -104,8 +102,6 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.Apt.dev_packages ()
   @@ Linux.Apt.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
-  @@ run
-       "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
 
 (* RPM based Dockerfile *)
@@ -127,8 +123,6 @@ let yum_opam2 ?(labels= []) ~distro ~tag () =
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
   @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
-  @@ run
-       "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
 
 (* Zypper based Dockerfile *)
@@ -145,8 +139,6 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
        ~dst:"/usr/bin/opam-installer" ()
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
-  @@ run
-       "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
 
 let gen_opam2_distro ?labels d =
   let distro, tag = D.base_distro_tag d in
