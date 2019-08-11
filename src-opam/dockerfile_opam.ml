@@ -81,8 +81,9 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()
+  @@ run "addgroup opam"
   @@ Linux.Apk.dev_packages ()
-  @@ Linux.Apk.add_user ~uid:1000 ~sudo:true "opam"
+  @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
   @@ run
        "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
