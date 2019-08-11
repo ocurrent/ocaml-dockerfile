@@ -124,7 +124,7 @@ val env : (string * string) list -> t
   instructions. This is functionally equivalent to prefixing a shell
   command with [<key>=<value>]. *)
 
-val add : ?from:string -> src:string list -> dst:string -> unit -> t
+val add : ?chown:string -> ?from:string -> src:string list -> dst:string -> unit -> t
 (** [add ?from ~src ~dst ()] copies new files, directories or remote file URLs
   from [src] and adds them to the filesystem of the container at the
   [dst] path.
@@ -150,7 +150,7 @@ val add : ?from:string -> src:string list -> dst:string -> unit -> t
   first {!from} command, or a named stage (supplied via [?alias] to the
   {!from} command). *)
 
-val copy : ?from:string -> src:string list -> dst:string -> unit -> t
+val copy : ?chown:string -> ?from:string -> src:string list -> dst:string -> unit -> t
 (** [copy ?from ~src ~dst ()] copies new files or directories from [src] and
   adds them to the filesystem of the container at the path [dst]. See
   {!add} for more detailed documentation. *)

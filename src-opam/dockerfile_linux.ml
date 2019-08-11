@@ -145,7 +145,7 @@ module Zypper = struct
 
   let add_user ?uid ?gid ?(sudo=false) username =
     let home = "/home/"^username in
-    run "useradd %s%s -d %s -m %s"
+    run "useradd %s%s -d %s -m --user-group %s"
       (match uid with None -> "" | Some d -> sprintf "-u %d " d)
       (match gid with None -> "" | Some g -> sprintf "-g %d " g)
       home username @@
