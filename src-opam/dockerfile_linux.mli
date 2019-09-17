@@ -92,6 +92,9 @@ module Apk : sig
 
   val install_system_ocaml : t
   (** Install the system OCaml packages via Apk *)
+
+  val add_repository : ?tag:string -> string -> t
+  (** [add_repository ~tag url] adds "@tag url" to "/etc/apk/repositories". *)
 end
 
 (** Rules for Zypper-based distributions such as OpenSUSE *)

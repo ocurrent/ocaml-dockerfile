@@ -78,6 +78,7 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
   @@ install_opam_from_source ~branch:"2.0" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag distro
+  @@ Linux.Apk.add_repository ~tag:"testing" "http://dl-cdn.alpinelinux.org/alpine/edge/testing"
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
        ~dst:"/usr/bin/opam-installer" ()

@@ -131,6 +131,11 @@ module Apk = struct
 
   let install_system_ocaml =
     run "apk add ocaml camlp4"
+
+  let add_repository ?tag url =
+    match tag with
+    | None -> run "echo '%s' >> /etc/apk/repositories" url
+    | Some tag -> run "echo '@%s %s' >> /etc/apk/repositories" tag url
 end
 
 (* Zypper (opensuse) rules *)
