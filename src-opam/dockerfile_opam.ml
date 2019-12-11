@@ -116,15 +116,16 @@ let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
     if yum_workaround then
       run "touch /var/lib/rpm/*"
       @@ Linux.RPM.install "yum-plugin-ovl"
-      @@ Linux.RPM.update 
     else empty
   in
   header distro tag @@ label (("distro_style", "rpm") :: labels)
   @@ workaround
+  @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
   @@ from ~tag distro @@ workaround
+  @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
