@@ -1,3 +1,5 @@
+- Do not install `yum-ovl-plugin` workaround on CentOS 8.
+
 v6.3.0 2019-08-11 Cambridge
 ---------------------------
 
