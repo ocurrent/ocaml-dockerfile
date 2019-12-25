@@ -2,7 +2,7 @@ language: c
 sudo: false
 services:
   - docker
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docker.sh
 script: bash ./.travis-docker.sh
 env:
  global:
@@ -13,3 +13,5 @@ env:
    - OCAML_VERSION=4.06 DISTRO=debian-stable PACKAGE=dockerfile-cmd
    - OCAML_VERSION=4.08 DISTRO=ubuntu PACKAGE=dockerfile-cmd
    - OCAML_VERSION=4.08 DISTRO=alpine PACKAGE=dockerfile-cmd
+   - OCAML_VERSION=4.09 DISTRO=ubuntu PACKAGE=dockerfile-cmd
+   - OCAML_VERSION=4.09 DISTRO=alpine PACKAGE=dockerfile-cmd
