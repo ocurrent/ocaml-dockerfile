@@ -105,16 +105,24 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
 
-(* RPM based Dockerfile *)
-let yum_opam2 ?(labels= []) ~distro ~tag () =
+(* RPM based Dockerfile.
+   [yum_workaround activates the overlay/yum workaround needed
+   for older versions of yum as found in CentOS 7 and earlier *)
+let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
+  let workaround =
+    if yum_workaround then
+      run "touch /var/lib/rpm/*"
+      @@ Linux.RPM.install "yum-plugin-ovl"
+    else empty
+  in
   header distro tag @@ label (("distro_style", "rpm") :: labels)
-  @@ run "touch /var/lib/rpm/*"
-  @@ Linux.RPM.install "yum-plugin-ovl"
-  @@ Linux.RPM.update 
+  @@ workaround
+  @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
-  @@ from ~tag distro @@ Linux.RPM.install "yum-plugin-ovl" @@ Linux.RPM.update
+  @@ from ~tag distro @@ workaround
+  @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
@@ -146,7 +154,9 @@ let gen_opam2_distro ?labels d =
   let fn = match D.package_manager d with
   | `Apk -> apk_opam2 ?labels ~tag ~distro ()
   | `Apt -> apt_opam2 ?labels ~tag ~distro ()
-  | `Yum -> yum_opam2 ?labels ~tag ~distro ()
+  | `Yum ->
+     let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
+     yum_opam2 ?labels ~yum_workaround ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ~tag ~distro ()
   in (D.tag_of_distro d, fn)
 

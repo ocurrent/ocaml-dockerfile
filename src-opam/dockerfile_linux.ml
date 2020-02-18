@@ -57,9 +57,9 @@ module RPM = struct
     run "chmod 700 .ssh"
 
   let dev_packages ?extra () =
+    groupinstall "\"Development Tools\"" @@
     install "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel bubblewrap which%s"
-      (match extra with None -> "" | Some x -> " " ^ x) @@
-    groupinstall "\"Development Tools\""
+      (match extra with None -> "" | Some x -> " " ^ x)
 
   let install_system_ocaml =
     install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"

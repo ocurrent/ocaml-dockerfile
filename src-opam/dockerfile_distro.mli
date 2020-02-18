@@ -22,15 +22,15 @@
 
 (** {2 Known distributions and OCaml variants} *)
 
-type t = [ 
+type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `Latest ]
-  | `CentOS of [ `V6 | `V7 | `Latest ]
+  | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `Latest ]
   | `OracleLinux of [ `V7 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `LTS | `Latest ]
-] [@@deriving sexp] 
+] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
 val compare : t -> t -> int
@@ -69,7 +69,7 @@ type package_manager = [
   | `Yum  (** Fedora Yum *)
   | `Zypper (** OpenSUSE Zypper *) ] [@@deriving sexp]
 (** The package manager used by a distro. *)
-  
+
 val package_manager : t -> package_manager
 (** [package_manager t] returns the type of package manager used
  by that distribution.  Many derived distributions (such as OracleLinux)
@@ -124,4 +124,3 @@ val active_tier1_distros : Ocaml_version.arch -> t list
 val active_tier2_distros : Ocaml_version.arch -> t list
 (** Tier 2 distributions are those supported for a limited set
     of compiler versions in the opam build infrastructure. *)
-

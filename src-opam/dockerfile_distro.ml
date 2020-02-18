@@ -20,7 +20,7 @@ open Astring
 
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `Latest ]
-  | `CentOS of [ `V6 | `V7 | `Latest ]
+  | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `Latest ]
   | `OracleLinux of [ `V7 | `Latest ]
@@ -36,7 +36,7 @@ type status = [
 
 let distros = [
   `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10; `Alpine `Latest;
-  `CentOS `V6; `CentOS `V7; `CentOS `Latest;
+  `CentOS `V6; `CentOS `V7; `CentOS `V8; `CentOS `Latest;
   `Debian `V10; `Debian `V9; `Debian `V8; `Debian `V7;
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
   `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27; `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `Latest;
@@ -51,7 +51,7 @@ let distro_status (d:t) : status = match d with
   | `Alpine `V3_9 -> `Active `Tier2
   | `Alpine `V3_10 -> `Active `Tier1
   | `Alpine `Latest -> `Alias (`Alpine `V3_10)
-  | `CentOS `V7 -> `Active `Tier2
+  | `CentOS (`V7 | `V8) -> `Active `Tier2
   | `CentOS `V6 -> `Deprecated
   | `CentOS `Latest -> `Alias (`CentOS `V7)
   | `Debian `V7 -> `Deprecated
@@ -149,6 +149,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`Fedora `V30 -> Some "4.07.0"
   |`CentOS `V6 -> Some "3.11.2"
   |`CentOS `V7 -> Some "4.01.0"
+  |`CentOS `V8 -> Some "4.07.0"
   |`OpenSUSE `V42_1 -> Some "4.02.3"
   |`OpenSUSE `V42_2 -> Some "4.03.0"
   |`OpenSUSE `V42_3 -> Some "4.03.0"
@@ -183,6 +184,7 @@ let tag_of_distro (d:t) = match d with
   |`Debian `V7 -> "debian-7"
   |`CentOS `V6 -> "centos-6"
   |`CentOS `V7 -> "centos-7"
+  |`CentOS `V8 -> "centos-8"
   |`CentOS `Latest -> "centos"
   |`Fedora `Latest -> "fedora"
   |`Fedora `V21 -> "fedora-21"
@@ -236,6 +238,7 @@ let distro_of_tag x : t option = match x with
   |"debian-7" -> Some (`Debian `V7)
   |"centos-6" -> Some (`CentOS `V6)
   |"centos-7" -> Some (`CentOS `V7)
+  |"centos-8" -> Some (`CentOS `V8)
   |"fedora-21" -> Some (`Fedora `V21)
   |"fedora-22" -> Some (`Fedora `V22)
   |"fedora-23" -> Some (`Fedora `V23)
@@ -289,6 +292,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Debian `V7 -> "Debian 7 (Wheezy)"
   |`CentOS `V6 -> "CentOS 6"
   |`CentOS `V7 -> "CentOS 7"
+  |`CentOS `V8 -> "CentOS 8"
   |`Fedora `V21 -> "Fedora 21"
   |`Fedora `V22 -> "Fedora 22"
   |`Fedora `V23 -> "Fedora 23"
@@ -395,7 +399,7 @@ let base_distro_tag d =
         in
         "ubuntu", tag
     | `CentOS v ->
-        let tag = match v with `V6 -> "6" | `V7 -> "7" | _ -> assert false in
+        let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" | _ -> assert false in
         "centos", tag
     | `Fedora v ->
         let tag =
