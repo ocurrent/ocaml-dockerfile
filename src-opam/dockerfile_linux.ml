@@ -58,7 +58,7 @@ module RPM = struct
 
   let dev_packages ?extra () =
     groupinstall "\"Development Tools\"" @@
-    install "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel bubblewrap which%s"
+    install "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel bubblewrap which m4 diffutils findutils%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let install_system_ocaml =
