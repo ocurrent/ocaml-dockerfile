@@ -35,10 +35,13 @@ val install_opam_from_source :
     The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
 
 val gen_opam2_distro :
+  ?clone_opam_repo:bool ->
   ?labels:(string * string) list -> Dockerfile_distro.t
   -> string * Dockerfile.t
 (** [gen_opam2_distro d] will generate a Dockerfile for Linux distribution [d].
-   @return a tuple of the Docker tag and the Dockerfile. *)
+   @return a tuple of the Docker tag and the Dockerfile.
+   If [clone_opam_repo] is true (the default) then the Dockerfile will also git
+   clone the official opam-repository into [/home/opam/opam-repository].  *)
 
 val opam2_mirror : string -> Dockerfile.t
 (** [opam2_mirror hub_id] generates an opam2 mirror archive that stores the

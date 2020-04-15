@@ -149,7 +149,7 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-let gen_opam2_distro ?labels d =
+let gen_opam2_distro ?(clone_opam_repo=true) ?labels d =
   let distro, tag = D.base_distro_tag d in
   let fn = match D.package_manager d with
   | `Apk -> apk_opam2 ?labels ~tag ~distro ()
@@ -158,7 +158,11 @@ let gen_opam2_distro ?labels d =
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
      yum_opam2 ?labels ~yum_workaround ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ~tag ~distro ()
-  in (D.tag_of_distro d, fn)
+  in
+  let clone = if clone_opam_repo then
+    run "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
+  else empty in
+  (D.tag_of_distro d, fn @@ clone)
 
 (* Generate archive mirror *)
 let opam2_mirror (hub_id: string) =

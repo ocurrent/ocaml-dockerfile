@@ -7,6 +7,9 @@ dev
 - Add Fedora 31 and Ubuntu 19.10 (@XVilka @talex5)
 - Add Alpine 3.11 and Ubuntu 20.04 (@avsm)
 - Remove Ubuntu 19.04 from the supported distro list (@avsm).
+- Add a `clone_opam_repo` optional argument to `gen_opam2_distro`
+  to let the caller decide whether or not to have the git clone
+  present in the container (@avsm @talex5).
 
 v6.3.0 2019-08-11 Cambridge
 ---------------------------
