@@ -108,7 +108,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
 (* RPM based Dockerfile.
    [yum_workaround activates the overlay/yum workaround needed
    for older versions of yum as found in CentOS 7 and earlier *)
-let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
+let yum_opam2 ?(labels= []) ?extra ~yum_workaround ~distro ~tag () =
   let workaround =
     if yum_workaround then
       run "touch /var/lib/rpm/*"
@@ -123,7 +123,7 @@ let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
   @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
   @@ from ~tag distro @@ workaround
   @@ Linux.RPM.update
-  @@ Linux.RPM.dev_packages ()
+  @@ Linux.RPM.dev_packages ?extra ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
@@ -156,7 +156,8 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?labels d =
   | `Apt -> apt_opam2 ?labels ~tag ~distro ()
   | `Yum ->
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
-     yum_opam2 ?labels ~yum_workaround ~tag ~distro ()
+     let extra = match d with `CentOS _ -> Some "epel-release" | _ -> None in
+     yum_opam2 ?labels ~yum_workaround ?extra ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ~tag ~distro ()
   in
   let clone = if clone_opam_repo then
