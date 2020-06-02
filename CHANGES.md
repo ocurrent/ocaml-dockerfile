@@ -1,3 +1,10 @@
+dev
+---
+
+- Add Fedora 32, Alpine 3.12 (@avsm)
+- Move Fedora 30 to deprecated, and Alpine 3.11 to Tier 2 (@avsm)
+- Add i386 architecture (@avsm). 
+
 v6.4.0 2020-04-16 Lockdown At Home
 ----------------------------------
 
