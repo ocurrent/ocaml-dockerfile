@@ -24,21 +24,22 @@ module OV = Ocaml_version
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
+let install_opam_from_source ?arch ?(prefix= "/usr/local") ~branch () =
+  let pers = if arch = Some `I386 then "linux32 " else "" in
   Linux.Git.init () @@
   (* Temporary workaround: use avsm fork to build on gcc10 *)
   run "git clone -b %s git://github.com/avsm/opam /tmp/opam" branch @@
   Linux.run_sh
-       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam"
-       prefix prefix prefix prefix prefix
+       "cd /tmp/opam && %s make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam" pers prefix prefix prefix prefix prefix
 
-let install_bubblewrap_from_source ?(prefix="/usr/local") () =
+let install_bubblewrap_from_source ?arch ?(prefix="/usr/local") () =
+  let pers = if arch = Some `I386 then "linux32 " else "" in
   let rel = "0.3.1" in
   let file = Fmt.strf "bubblewrap-%s.tar.xz" rel in
   let url = Fmt.strf "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz" rel rel in
   run "curl -OL %s" url @@
   run "tar xf %s" file @@
-  run "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make install" rel prefix @@
+  run "cd bubblewrap-%s && %s ./configure --prefix=%s && %s make && sudo make install" rel pers prefix pers @@
   run "rm -rf %s bubblewrap-%s" file rel
 
 let install_bubblewrap_wrappers =
@@ -73,10 +74,10 @@ let header ?maintainer img tag =
 
 
 (* Apk based Dockerfile *)
-let apk_opam2 ?(labels= []) ~distro ~tag () =
+let apk_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
-  @@ install_opam_from_source ~branch:"2.0" ()
+  @@ install_opam_from_source ?arch ~branch:"2.0" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag distro
   @@ Linux.Apk.add_repository ~tag:"testing" "http://dl-cdn.alpinelinux.org/alpine/edge/testing"
@@ -90,11 +91,11 @@ let apk_opam2 ?(labels= []) ~distro ~tag () =
 
 
 (* Debian based Dockerfile *)
-let apt_opam2 ?(labels= []) ~distro ~tag () =
+let apt_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header distro tag @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
-  @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~branch:"2.0" ()
+  @@ install_bubblewrap_from_source ?arch ()
+  @@ install_opam_from_source ?arch ~branch:"2.0" ()
   @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
@@ -109,7 +110,7 @@ let apt_opam2 ?(labels= []) ~distro ~tag () =
 (* RPM based Dockerfile.
    [yum_workaround activates the overlay/yum workaround needed
    for older versions of yum as found in CentOS 7 and earlier *)
-let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
+let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~distro ~tag () =
   let workaround =
     if yum_workaround then
       run "touch /var/lib/rpm/*"
@@ -120,8 +121,8 @@ let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
   @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
-  @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
+  @@ install_bubblewrap_from_source ?arch ()
+  @@ install_opam_from_source ?arch ~prefix:"/usr" ~branch:"2.0" ()
   @@ from ~tag distro @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
@@ -136,11 +137,11 @@ let yum_opam2 ?(labels= []) ~yum_workaround ~distro ~tag () =
 
 
 (* Zypper based Dockerfile *)
-let zypper_opam2 ?(labels= []) ~distro ~tag () =
+let zypper_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header distro tag @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
-  @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
+  @@ install_bubblewrap_from_source ?arch ()
+  @@ install_opam_from_source ?arch ~prefix:"/usr" ~branch:"2.0" ()
   @@ from ~tag distro
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
@@ -153,12 +154,12 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let distro, tag = D.base_distro_tag ?arch d in
   let fn = match D.package_manager d with
-  | `Apk -> apk_opam2 ?labels ~tag ~distro ()
-  | `Apt -> apt_opam2 ?labels ~tag ~distro ()
+  | `Apk -> apk_opam2 ?labels ?arch ~tag ~distro ()
+  | `Apt -> apt_opam2 ?labels ?arch ~tag ~distro ()
   | `Yum ->
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
-     yum_opam2 ?labels ~yum_workaround ~tag ~distro ()
-  | `Zypper -> zypper_opam2 ?labels ~tag ~distro ()
+     yum_opam2 ?labels ?arch ~yum_workaround ~tag ~distro ()
+  | `Zypper -> zypper_opam2 ?labels ?arch ~tag ~distro ()
   in
   let clone = if clone_opam_repo then
     run "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
