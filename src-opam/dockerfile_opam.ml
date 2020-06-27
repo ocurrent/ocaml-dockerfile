@@ -163,7 +163,10 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let clone = if clone_opam_repo then
     run "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
   else empty in
-  (D.tag_of_distro d, fn @@ clone)
+  let personality = match arch with
+    | Some `I386 -> entrypoint_exec ["linux32"]
+    | _ -> empty in
+  (D.tag_of_distro d, fn @@ clone @@ personality)
 
 (* Generate archive mirror *)
 let opam2_mirror (hub_id: string) =
