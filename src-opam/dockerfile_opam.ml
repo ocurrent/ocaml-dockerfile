@@ -26,7 +26,7 @@ let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
 let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
   Linux.Git.init () @@
-  (** Temporary workaround: use avsm fork to build on gcc10 *)
+  (* Temporary workaround: use avsm fork to build on gcc10 *)
   run "git clone -b %s git://github.com/avsm/opam /tmp/opam" branch @@
   Linux.run_sh
        "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam"
@@ -150,8 +150,8 @@ let zypper_opam2 ?(labels= []) ~distro ~tag () =
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-let gen_opam2_distro ?(clone_opam_repo=true) ?labels d =
-  let distro, tag = D.base_distro_tag d in
+let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
+  let distro, tag = D.base_distro_tag ?arch d in
   let fn = match D.package_manager d with
   | `Apk -> apk_opam2 ?labels ~tag ~distro ()
   | `Apt -> apt_opam2 ?labels ~tag ~distro ()
