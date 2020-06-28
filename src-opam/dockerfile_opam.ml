@@ -200,13 +200,14 @@ let all_ocaml_compilers hub_id arch distro =
       (@@@) add_beta_remote
   in
   let d =
+    let pers = match arch with `I386 -> ["/usr/bin/linux32"] | _ -> [] in
     header ~arch hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam-sandbox-disable"
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
     @@ compilers 
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
-    @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
+    @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
     @@ run "opam install -y depext"
     @@ env ["OPAMYES","1"]
     @@ cmd "bash"
@@ -233,6 +234,7 @@ let separate_ocaml_compilers hub_id arch distro =
           (@@@) empty
          in
          let d =
+           let pers = match arch with `I386 -> ["/usr/bin/linux32"] | _ -> [] in
            header ~arch hub_id (Fmt.strf "%s-opam" distro_tag)
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam-sandbox-disable"
@@ -242,7 +244,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ run "opam switch %s" default_switch_name
            @@ run "opam install -y depext"
            @@ env ["OPAMYES","1"]
-           @@ entrypoint_exec ["opam"; "config"; "exec"; "--"]
+           @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
            @@ cmd "bash"
          in
          (Fmt.strf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )
