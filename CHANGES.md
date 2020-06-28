@@ -8,6 +8,7 @@ dev
   image sources (@avsm)
 - Add [Dockerfile.shell] to specify a custom shell to subsequent
   [run] commands (@avsm).
+- Upgrade bubblewrap in containers to latest 0.4.1 (@avsm)
 
 v6.4.0 2020-04-16 Lockdown At Home
 ----------------------------------
