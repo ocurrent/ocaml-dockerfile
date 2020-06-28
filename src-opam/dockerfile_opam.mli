@@ -26,9 +26,7 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 (** [run_as_opam fmt] runs the command specified by the [fmt]
     format string as the [opam] user. *)
 
-val install_opam_from_source :
-  ?arch:Ocaml_version.arch -> ?prefix:string -> branch:string -> unit
-  -> Dockerfile.t
+val install_opam_from_source : ?prefix:string -> branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.x or [master] for
     the latest trunk version).
