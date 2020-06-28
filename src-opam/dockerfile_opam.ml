@@ -202,7 +202,7 @@ let all_ocaml_compilers hub_id arch distro =
       (@@@) add_beta_remote
   in
   let d =
-    header hub_id (Fmt.strf "%s-opam" distro_tag)
+    header ~arch hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam-sandbox-disable"
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
@@ -235,7 +235,7 @@ let separate_ocaml_compilers hub_id arch distro =
           (@@@) empty
          in
          let d =
-           header hub_id (Fmt.strf "%s-opam" distro_tag)
+           header ~arch hub_id (Fmt.strf "%s-opam" distro_tag)
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam-sandbox-disable"
            @@ run "opam init -k git -a /home/opam/opam-repository --bare"
