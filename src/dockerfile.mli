@@ -55,7 +55,7 @@ val maybe : ('a -> t) -> 'a option -> t
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
 
-val from : ?alias:string -> ?tag:string -> string -> t
+val from : ?alias:string -> ?tag:string -> ?platform:string -> string -> t
 (** The [from] instruction sets the base image for subsequent instructions.
 
     - A valid Dockerfile must have [from] as its first instruction. The image
@@ -74,6 +74,11 @@ val from : ?alias:string -> ?tag:string -> string -> t
 
     If no [tag] is supplied, [latest] is assumed. If the used tag does not
     exist, an error will be returned.
+
+    The optional [platform] flag can be used to specify the platform of the
+    image in case the [from] references a multi-platform image.  For example,
+    [linux/386] could be used. By default, the target platform of the build
+    request is ued if this is not specified.
 *)
 
 val maintainer : ('a, unit, string, t) format4 -> 'a

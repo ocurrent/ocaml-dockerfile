@@ -25,10 +25,15 @@ type sources_to_dest =
   [`From of string option] * [`Src of string list] * [`Dst of string] * [`Chown of string option]
   [@@deriving sexp]
 
+type from = {
+  image : string;
+  tag: string option;
+  alias: string option;
+  platform: string option } [@@deriving sexp]
+
 type line =
   [ `Comment of string
-  | `From of [ `Image of string * string option
-             | `Image_tag of string * string * string option ]
+  | `From of from
   | `Maintainer of string
   | `Run of shell_or_exec
   | `Cmd of shell_or_exec
@@ -122,10 +127,12 @@ let string_of_label_list ls =
 let rec string_of_line (t: line) =
   match t with
   | `Comment c -> cmd "#" c
-  | `From `Image (i, None) -> cmd "FROM" i
-  | `From `Image (i, Some alias) -> cmd "FROM" (i ^ " as " ^ alias)
-  | `From `Image_tag (i, t, None) -> sprintf "FROM %s:%s" i t
-  | `From `Image_tag (i, t, Some alias) -> sprintf "FROM %s:%s as %s" i t alias
+  | `From {image; tag; alias; platform} ->
+      cmd "FROM" (String.concat "" [
+        (match platform with None -> "" | Some p -> "--platform="^p^" ");
+        image;
+        (match tag with None -> "" | Some t -> ":"^t);
+        (match alias with None -> "" | Some a -> " as " ^ a)])
   | `Maintainer m -> cmd "MAINTAINER" m
   | `Run c -> cmd "RUN" (string_of_shell_or_exec c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec c)
@@ -142,11 +149,8 @@ let rec string_of_line (t: line) =
 
 
 (* Function interface *)
-let from ?alias ?tag img =
-  match tag with
-  | None -> [`From (`Image (img, alias))]
-  | Some tag -> [`From (`Image_tag (img, tag, alias))]
-
+let from ?alias ?tag ?platform image =
+  [`From { image; tag; alias; platform }]
 
 let comment fmt = ksprintf (fun c -> [`Comment c]) fmt
 
