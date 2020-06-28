@@ -35,7 +35,7 @@ let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   let rel = "0.4.1" in
   let file = Fmt.strf "bubblewrap-%s.tar.xz" rel in
   let url = Fmt.strf "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz" rel rel in
-  run "curl -OL %s" url @@
+  run "curl -fOL %s" url @@
   run "tar xf %s" file @@
   run "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make install" rel prefix @@
   run "rm -rf %s bubblewrap-%s" file rel
