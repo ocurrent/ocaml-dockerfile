@@ -42,6 +42,7 @@ type line =
   | `Add of sources_to_dest
   | `Copy of sources_to_dest
   | `Entrypoint of shell_or_exec
+  | `Shell of string list
   | `Volume of string list
   | `User of string
   | `Workdir of string
@@ -143,6 +144,7 @@ let rec string_of_line (t: line) =
   | `User u -> cmd "USER" u
   | `Volume vl -> cmd "VOLUME" (json_array_of_list vl)
   | `Entrypoint el -> cmd "ENTRYPOINT" (string_of_shell_or_exec el)
+  | `Shell sl -> cmd "SHELL" (json_array_of_list sl)
   | `Workdir wd -> cmd "WORKDIR" wd
   | `Onbuild t -> cmd "ONBUILD" (string_of_line t)
   | `Label ls -> cmd "LABEL" (string_of_label_list ls)
@@ -187,6 +189,8 @@ let label ls = [`Label ls]
 let entrypoint fmt = ksprintf (fun e -> [`Entrypoint (`Shell e)]) fmt
 
 let entrypoint_exec e : t = [`Entrypoint (`Exec e)]
+
+let shell s : t = [`Shell s]
 
 let workdir fmt = ksprintf (fun wd -> [`Workdir wd]) fmt
 

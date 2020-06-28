@@ -207,6 +207,14 @@ val entrypoint_exec : string list -> t
   {!cmd_exec} to set additional defaults that are more likely to be changed
   by the user starting the Docker container. *)
 
+val shell : string list -> t
+(** [shell t] allows the default shell used for the shell form of
+    commands to be overridden. The default shell on Linux is
+    ["/bin/sh"; "-c"], and on Windows is ["cmd"; "/S"; "/C"].
+    The [shell] instruction can appear multiple times. Each [shell]
+    instruction overrides all previous [shell] instructions, and
+    affects all subsequent instructions. *)
+
 val onbuild : t -> t
 (** [onbuild t] adds to the image a trigger instruction [t] to be
   executed at a later time, when the image is used as the base for
