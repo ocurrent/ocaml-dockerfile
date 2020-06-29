@@ -1,14 +1,16 @@
-dev
----
+v6.5.0 2020-06-29 Lockdown At Home
+----------------------------------
 
-- Add Fedora 32, Alpine 3.12 (@avsm)
+- Add Fedora 32, Alpine 3.12 to the known distros (@avsm)
 - Move Fedora 30 to deprecated, and Alpine 3.11 to Tier 2 (@avsm)
-- Add i386 architecture (@avsm). 
+- Add i386 architecture build support (@avsm). 
 - Add a [Dockerfile.from ?platform] argument to specify multiarch
   image sources (@avsm)
 - Add [Dockerfile.shell] to specify a custom shell to subsequent
   [run] commands (@avsm).
 - Upgrade bubblewrap in containers to latest 0.4.1 (@avsm)
+- Make the curl step fail if the download fails in bubblewrap
+  installation (@talex5 #20)
 
 v6.4.0 2020-04-16 Lockdown At Home
 ----------------------------------
