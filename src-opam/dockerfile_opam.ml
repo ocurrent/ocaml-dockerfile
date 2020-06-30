@@ -27,7 +27,7 @@ let run_as_opam fmt = Linux.run_as_user "opam" fmt
 let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
   Linux.Git.init () @@
   (* Temporary workaround: use avsm fork to build on gcc10 *)
-  run "git clone -b %s git://github.com/avsm/opam /tmp/opam" branch @@
+  run "git clone -b %s git://github.com/avsm/opam /tmp/opam && cd /tmp/opam && git checkout 015ea2fc54e1c09de134b81ca8c62eadcb2c0c7c" branch @@
   Linux.run_sh
        "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam" prefix prefix prefix prefix prefix
 
