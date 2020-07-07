@@ -11,6 +11,8 @@ v6.5.0 2020-06-29 Lockdown At Home
 - Upgrade bubblewrap in containers to latest 0.4.1 (@avsm)
 - Make the curl step fail if the download fails in bubblewrap
   installation (@talex5 #20)
+- Switch aarch32 builds to use a Linux32 personality, so they
+  can be built on 64-bit aarm64 hosts. (@avsm)
 
 v6.4.0 2020-04-16 Lockdown At Home
 ----------------------------------

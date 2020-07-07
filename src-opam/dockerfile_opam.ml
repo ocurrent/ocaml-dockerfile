@@ -65,10 +65,11 @@ let header ?arch ?maintainer img tag =
   let platform =
     match arch with
     | Some `I386 -> Some "386"
+    | Some `Aarch32 -> Some "arm"
     | _ -> None in
   let shell =
     match arch with
-    | Some `I386 -> shell ["/usr/bin/linux32";"/bin/sh";"-c"]
+    | Some arch when OV.arch_is_32bit arch -> shell ["/usr/bin/linux32";"/bin/sh";"-c"]
     | _ -> empty in
   let maintainer =
     match maintainer with
@@ -172,7 +173,7 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
     run "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
   else empty in
   let personality = match arch with
-    | Some `I386 -> entrypoint_exec ["/usr/bin/linux32"]
+    | Some arch when OV.arch_is_32bit arch -> entrypoint_exec ["/usr/bin/linux32"]
     | _ -> empty in
   (D.tag_of_distro d, fn @@ clone @@ personality)
 
@@ -200,7 +201,7 @@ let all_ocaml_compilers hub_id arch distro =
       (@@@) add_beta_remote
   in
   let d =
-    let pers = match arch with `I386 -> ["/usr/bin/linux32"] | _ -> [] in
+    let pers = if OV.arch_is_32bit arch then ["/usr/bin/linux32"] else [] in
     header ~arch hub_id (Fmt.strf "%s-opam" distro_tag)
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam-sandbox-disable"
@@ -234,7 +235,7 @@ let separate_ocaml_compilers hub_id arch distro =
           (@@@) empty
          in
          let d =
-           let pers = match arch with `I386 -> ["/usr/bin/linux32"] | _ -> [] in
+           let pers = if OV.arch_is_32bit arch then ["/usr/bin/linux32"] else [] in
            header ~arch hub_id (Fmt.strf "%s-opam" distro_tag)
            @@ workdir "/home/opam/opam-repository"
            @@ run "opam-sandbox-disable"

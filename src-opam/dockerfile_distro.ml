@@ -412,6 +412,7 @@ let base_distro_tag ?(arch=`X86_64) d =
         in
         match arch with
         | `I386 -> "i386/debian", tag
+        | `Aarch32 -> "arm32v7/debian", tag
         | _ -> "debian", tag
     end
     | `Ubuntu v ->
