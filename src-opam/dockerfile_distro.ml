@@ -70,8 +70,8 @@ let distro_status (d:t) : status = match d with
   | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0) -> `Deprecated
   | `OpenSUSE `V15_1 -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_1)
-  | `Ubuntu (`V16_04 | `V18_04 | `V19_10 | `V20_04) -> `Active `Tier2
-  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04) -> `Deprecated
+  | `Ubuntu (`V16_04 | `V18_04 | `V20_04) -> `Active `Tier2
+  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V18_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V19_10)
 
