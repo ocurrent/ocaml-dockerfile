@@ -24,7 +24,7 @@ type t = [
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `Latest ]
   | `OracleLinux of [ `V7 | `Latest ]
-  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `Latest ]
+  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `LTS | `Latest ]
 ] [@@deriving sexp]
 
@@ -41,7 +41,7 @@ let distros = [
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
   `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27; `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `V31; `Fedora `V32; `Fedora `Latest;
   `OracleLinux `V7; `OracleLinux `Latest;
-  `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `Latest;
+  `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `Latest;
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04;
   `Ubuntu `Latest; `Ubuntu `LTS ]
@@ -68,7 +68,8 @@ let distro_status (d:t) : status = match d with
   | `OracleLinux `V7 -> `Active `Tier2
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V7)
   | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0) -> `Deprecated
-  | `OpenSUSE `V15_1 -> `Active `Tier2
+  | `OpenSUSE `V15_1 -> `Active `Tier2 (* TODO deprecate in Aug 2020 *)
+  | `OpenSUSE `V15_2 -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_1)
   | `Ubuntu (`V16_04 | `V18_04 | `V20_04) -> `Active `Tier2
   | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
@@ -162,6 +163,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V42_3 -> Some "4.03.0"
   |`OpenSUSE `V15_0 -> Some "4.05.0"
   |`OpenSUSE `V15_1 -> Some "4.05.0"
+  |`OpenSUSE `V15_2 -> Some "4.05.0"
   |`OracleLinux `V7 -> None
   |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
   |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
@@ -226,6 +228,7 @@ let tag_of_distro (d:t) = match d with
   |`OpenSUSE `V42_3 -> "opensuse-42.3"
   |`OpenSUSE `V15_0 -> "opensuse-15.0"
   |`OpenSUSE `V15_1 -> "opensuse-15.1"
+  |`OpenSUSE `V15_2 -> "opensuse-15.2"
   |`OpenSUSE `Latest -> "opensuse"
 
 let distro_of_tag x : t option = match x with
@@ -285,6 +288,7 @@ let distro_of_tag x : t option = match x with
   |"opensuse-42.3" -> Some (`OpenSUSE `V42_3)
   |"opensuse-15.0" -> Some (`OpenSUSE `V15_0)
   |"opensuse-15.1" -> Some (`OpenSUSE `V15_1)
+  |"opensuse-15.2" -> Some (`OpenSUSE `V15_2)
   |"opensuse" -> Some (`OpenSUSE `Latest)
   |_ -> None
 
@@ -342,6 +346,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`OpenSUSE `V42_3 -> "OpenSUSE 42.3"
   |`OpenSUSE `V15_0 -> "OpenSUSE 15.0 (Leap)"
   |`OpenSUSE `V15_1 -> "OpenSUSE 15.1 (Leap)"
+  |`OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
   |`Alpine `Latest | `Ubuntu `Latest | `Ubuntu `LTS | `CentOS `Latest | `Fedora `Latest
   |`OracleLinux `Latest | `OpenSUSE `Latest -> alias ()
 
@@ -466,6 +471,7 @@ let base_distro_tag ?(arch=`X86_64) d =
           | `V42_3 -> "42.3"
           | `V15_0 -> "15.0"
           | `V15_1 -> "15.1"
+          | `V15_2 -> "15.2"
           | `Latest -> assert false
         in
         "opensuse/leap", tag
