@@ -4,6 +4,7 @@ v6.6.0 2020-07-21 Cambridge
 - Deprecate Ubuntu 19.10 (@talex5 #21)
 - Add OpenSUSE 15.2 Leap (@avsm)
 - Build Ubuntu ppc64le (@talex5 #21)
+- Upgrade build files to dune 2.0 (@avsm)
 
 v6.5.0 2020-06-29 Lockdown At Home
 ----------------------------------
