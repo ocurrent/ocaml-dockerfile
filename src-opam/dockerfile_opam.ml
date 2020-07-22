@@ -111,6 +111,7 @@ let apt_opam2 ?(labels=[]) ?arch ~distro ~tag () =
        ~dst:"/usr/bin/opam-installer" ()
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ Linux.Apt.dev_packages ()
+  @@ run "echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections"
   @@ Linux.Apt.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
