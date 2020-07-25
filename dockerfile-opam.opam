@@ -12,7 +12,7 @@ authors: "Anil Madhavapeddy <anil@recoil.org>"
 license: "ISC"
 tags: ["org:mirage" "org:ocamllabs"]
 homepage: "https://github.com/avsm/ocaml-dockerfile"
-doc: "https://avsm.github.io/ocaml-dockerfile/"
+doc: "https://avsm.github.io/ocaml-dockerfile/doc"
 bug-reports: "https://github.com/avsm/ocaml-dockerfile/issues"
 depends: [
   "ocaml" {>= "4.02.3"}
