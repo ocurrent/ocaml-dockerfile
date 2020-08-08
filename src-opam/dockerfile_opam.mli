@@ -26,11 +26,16 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 (** [run_as_opam fmt] runs the command specified by the [fmt]
     format string as the [opam] user. *)
 
-val install_opam_from_source : ?prefix:string -> branch:string -> unit -> Dockerfile.t
+val install_opam_from_source : ?add_default_link:bool ->
+  ?prefix:string -> branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.x or [master] for
     the latest trunk version).
-    The binaries are installed under [<prefix>/bin], defaulting to [/usr/local/bin]. *)
+    The binaries are installed under [<prefix>/bin/opam-<branch>],
+    defaulting to [/usr/local/bin].
+    If [add_default_link] is true (the default), then the [opam-<branch>]
+    binary is hardlinked to [opam].  Set it to false if you want to install
+    multiple opam binaries from different branches in the same container. *)
 
 val gen_opam2_distro :
   ?clone_opam_repo:bool ->
@@ -69,7 +74,9 @@ val bulk_build : string -> Dockerfile_distro.t -> Ocaml_version.t -> string -> D
   from opam-repository. *)
 
 val deprecated : Dockerfile.t 
-(** [deprecated] is a minimal container that outputs a deprecation error. This is used to replace unsupported containers on the Hub rather than leaving an unmaintained distribution lying around with possible security holes. *)
+(** [deprecated] is a minimal container that outputs a deprecation error. This
+   is used to replace unsupported containers on the Hub rather than leaving an
+   unmaintained distribution lying around with possible security holes. *)
 
 val multiarch_manifest : target:string -> platforms:(string * string) list -> string
 (** [multiarch_manifest ~target ~platforms] will generate a manifest-tool compliant yaml file to

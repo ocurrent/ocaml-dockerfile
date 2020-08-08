@@ -1,3 +1,17 @@
+dev
+---
+
+- Do not install `opam-installer` in images any more. This turns
+  out to be a largely optional component as the opam binary
+  installer doesn't include it either.  It will be made optional
+  in the final opam 2.1 release.
+
+- Build multiple versions of opam in the base images. This results
+  in an `opam-2.0` and `opam-2.1` binary being installed, with
+  a hardlink to `opam <- opam.2.0` so the defaults are unchanged.
+  This allows upstream CI images to switch the hardlink to make
+  it easier to test newer releases of opam, and also upgrades.
+
 v6.6.1 2020-07-25 Cambridge
 ---------------------------
 

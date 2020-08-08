@@ -24,12 +24,13 @@ module OV = Ocaml_version
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(prefix= "/usr/local") ~branch () =
-  Linux.Git.init () @@
-  (* Temporary workaround: use avsm fork to build on gcc10 *)
-  run "git clone -b %s git://github.com/avsm/opam /tmp/opam && cd /tmp/opam && git checkout 015ea2fc54e1c09de134b81ca8c62eadcb2c0c7c" branch @@
+let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ~branch () =
+  run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
   Linux.run_sh
-       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam && cp /tmp/opam/opam-installer %s/bin/opam-installer && chmod a+x %s/bin/opam %s/bin/opam-installer && rm -rf /tmp/opam" prefix prefix prefix prefix prefix
+       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam" prefix prefix branch prefix branch @@
+  if add_default_link then
+    run "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
+  else empty
 
 let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   let rel = "0.4.1" in
@@ -85,13 +86,15 @@ let header ?arch ?maintainer img tag =
 let apk_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header ?arch distro tag @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
-  @@ install_opam_from_source ~branch:"2.0" ()
+  @@ Linux.Git.init ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag distro
   @@ Linux.Apk.add_repository ~tag:"testing" "http://dl-cdn.alpinelinux.org/alpine/edge/testing"
-  @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
-  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
-       ~dst:"/usr/bin/opam-installer" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ run "addgroup opam"
   @@ Linux.Apk.dev_packages ()
   @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
@@ -102,13 +105,15 @@ let apk_opam2 ?(labels=[]) ?arch ~distro ~tag () =
 let apt_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header ?arch distro tag @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
+  @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~branch:"2.0" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
   @@ from ~tag distro
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
-  @@ copy ~from:"0" ~src:["/usr/local/bin/opam"] ~dst:"/usr/bin/opam" ()
-  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-installer"]
-       ~dst:"/usr/bin/opam-installer" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ Linux.Apt.dev_packages ()
   @@ run "echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections"
@@ -130,15 +135,17 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~distro ~tag () =
   @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
+  @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"master" ()
   @@ from ~tag distro @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
-  @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
-  @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
-       ~dst:"/usr/bin/opam-installer" ()
+  @@ copy ~from:"0" ~src:["/usr/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
   @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
@@ -149,14 +156,16 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~distro ~tag () =
 let zypper_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header ?arch distro tag @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
+  @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~branch:"2.0" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"master" ()
   @@ from ~tag distro
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
-  @@ copy ~from:"0" ~src:["/usr/bin/opam"] ~dst:"/usr/bin/opam" ()
-  @@ copy ~from:"0" ~src:["/usr/bin/opam-installer"]
-       ~dst:"/usr/bin/opam-installer" ()
+  @@ copy ~from:"0" ~src:["/usr/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
