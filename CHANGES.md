@@ -1,10 +1,10 @@
-dev
----
+v7.0.0 2020-08-14 Cambridge
+---------------------------
 
 - Do not install `opam-installer` in images any more. This turns
   out to be a largely optional component as the opam binary
   installer doesn't include it either.  It will be made optional
-  in the final opam 2.1 release.
+  in the final opam 2.1 release. (@avsm)
 
 - Build multiple versions of opam in the base images. This results
   in an `opam-2.0` and `opam-2.1` binary being installed, with
