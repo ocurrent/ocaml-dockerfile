@@ -172,7 +172,7 @@ let zypper_opam2 ?(labels=[]) ?arch ~distro ~tag () =
 (* Pacman based Dockerfile *)
 let pacman_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header ?arch distro tag @@ label (("distro_style", "pacman") :: labels)
-  @@ Linux.Pacman.install "make gcc bzip2 git tar curl ca-certificates openssl"
+  @@ Linux.Pacman.install "make gcc patch bzip2 git tar curl ca-certificates openssl"
   @@ Linux.Git.init ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
