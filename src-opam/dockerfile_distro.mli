@@ -24,6 +24,7 @@
 
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `Latest ]
+  | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `Latest ]
@@ -67,7 +68,9 @@ type package_manager = [
   | `Apk  (** Alpine Apk *)
   | `Apt  (** Debian Apt *)
   | `Yum  (** Fedora Yum *)
-  | `Zypper (** OpenSUSE Zypper *) ] [@@deriving sexp]
+  | `Zypper (** OpenSUSE Zypper *)
+  | `Pacman (** Archlinux Pacman *)
+] [@@deriving sexp]
 (** The package manager used by a distro. *)
 
 val package_manager : t -> package_manager
