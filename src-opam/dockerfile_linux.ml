@@ -181,18 +181,17 @@ module Pacman = struct
 
   let add_user ?uid ?gid ?(sudo=false) username =
     let home = "/home/"^username in
-    run "adduser -S %s%s%s"
+    run "useradd %s%s -d %s -m --user-group %s"
       (match uid with None -> "" | Some d -> sprintf "-u %d " d)
       (match gid with None -> "" | Some g -> sprintf "-g %d " g)
-      username @@
+      home username @@
     (match sudo with
     | false -> empty
     | true ->
         let sudofile = "/etc/sudoers.d/"^username in
         run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
         run "chmod 440 %s" sudofile @@
-        run "chown root:root %s" sudofile @@
-        run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
+        run "chown root:root %s" sudofile) @@
     user "%s" username @@
     workdir "%s" home @@
     run "mkdir .ssh" @@
