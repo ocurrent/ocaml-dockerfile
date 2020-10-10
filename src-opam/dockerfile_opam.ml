@@ -169,6 +169,22 @@ let zypper_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
+(* Pacman based Dockerfile *)
+let pacman_opam2 ?(labels=[]) ?arch ~distro ~tag () =
+  header ?arch distro tag @@ label (("distro_style", "pacman") :: labels)
+  @@ Linux.Pacman.install "make gcc bzip2 git tar curl ca-certificates openssl"
+  @@ Linux.Git.init ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
+  @@ run "strip /usr/local/bin/opam*"
+  @@ from ~tag distro
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ Linux.Apk.dev_packages ()
+  @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
+  @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
+
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let distro, tag = D.base_distro_tag ?arch d in
   let fn = match D.package_manager d with
@@ -178,6 +194,7 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
      yum_opam2 ?labels ?arch ~yum_workaround ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ?arch ~tag ~distro ()
+  | `Pacman -> pacman_opam2 ?labels ?arch ~tag ~distro ()
   in
   let clone = if clone_opam_repo then
     run "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
