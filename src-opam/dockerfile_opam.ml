@@ -61,7 +61,7 @@ let install_bubblewrap_wrappers =
   run "echo 'echo --- opam sandboxing enabled' >> /home/opam/opam-sandbox-enable" @@
   run "chmod a+x /home/opam/opam-sandbox-enable" @@
   run "sudo mv /home/opam/opam-sandbox-enable /usr/bin/opam-sandbox-enable"
-   
+
 let header ?arch ?maintainer img tag =
   let platform =
     match arch with
@@ -233,7 +233,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam-sandbox-disable"
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
-    @@ compilers 
+    @@ compilers
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
     @@ run "opam install -y depext"
@@ -249,7 +249,7 @@ let tag_of_ocaml_version ov =
 
 let separate_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
-  OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro) 
+  OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro)
   |> List.map (fun ov ->
          let add_remote =
            if OV.Releases.is_dev ov then
@@ -286,7 +286,7 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   let tag =
     if use_main_tag then
       Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) OV.(to_string (with_variant ocaml_version None))
-    else 
+    else
       D.tag_of_distro distro
   in
   header prod_hub_id tag

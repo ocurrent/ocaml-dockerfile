@@ -397,97 +397,97 @@ let package_manager (t:t) =
 let base_distro_tag ?(arch=`X86_64) d =
   match resolve_alias d with
   | `Alpine v -> begin
-        let tag =
-          match v with
-          | `V3_3 -> "3.3"
-          | `V3_4 -> "3.4"
-          | `V3_5 -> "3.5"
-          | `V3_6 -> "3.6"
-          | `V3_7 -> "3.7"
-          | `V3_8 -> "3.8"
-          | `V3_9 -> "3.9"
-          | `V3_10 -> "3.10"
-          | `V3_11 -> "3.11"
-          | `V3_12 -> "3.12"
-          | `Latest -> assert false
-        in
-        match arch with
-        | `I386 -> "i386/alpine", tag
-        | _ -> "alpine", tag
-   end
+      let tag =
+        match v with
+        | `V3_3 -> "3.3"
+        | `V3_4 -> "3.4"
+        | `V3_5 -> "3.5"
+        | `V3_6 -> "3.6"
+        | `V3_7 -> "3.7"
+        | `V3_8 -> "3.8"
+        | `V3_9 -> "3.9"
+        | `V3_10 -> "3.10"
+        | `V3_11 -> "3.11"
+        | `V3_12 -> "3.12"
+        | `Latest -> assert false
+      in
+      match arch with
+      | `I386 -> "i386/alpine", tag
+      | _ -> "alpine", tag
+    end
   | `Archlinux `Latest ->
       "archlinux", "latest"
-   | `Debian v -> begin
-        let tag =
-          match v with
-          | `V7 -> "7"
-          | `V8 -> "8"
-          | `V9 -> "9"
-          | `V10 -> "buster"
-          | `Testing -> "testing"
-          | `Unstable -> "unstable"
-          | `Stable -> assert false
-        in
-        match arch with
-        | `I386 -> "i386/debian", tag
-        | `Aarch32 -> "arm32v7/debian", tag
-        | _ -> "debian", tag
+  | `Debian v -> begin
+      let tag =
+        match v with
+        | `V7 -> "7"
+        | `V8 -> "8"
+        | `V9 -> "9"
+        | `V10 -> "buster"
+        | `Testing -> "testing"
+        | `Unstable -> "unstable"
+        | `Stable -> assert false
+      in
+      match arch with
+      | `I386 -> "i386/debian", tag
+      | `Aarch32 -> "arm32v7/debian", tag
+      | _ -> "debian", tag
     end
-    | `Ubuntu v ->
-        let tag =
-          match v with
-          | `V12_04 -> "precise"
-          | `V14_04 -> "trusty"
-          | `V15_04 -> "vivid"
-          | `V15_10 -> "wily"
-          | `V16_04 -> "xenial"
-          | `V16_10 -> "yakkety"
-          | `V17_04 -> "zesty"
-          | `V17_10 -> "artful"
-          | `V18_04 -> "bionic"
-          | `V18_10 -> "cosmic"
-          | `V19_04 -> "disco"
-          | `V19_10 -> "eoan"
-          | `V20_04 -> "focal"
-          | `Latest | `LTS -> assert false
-        in
-        "ubuntu", tag
-    | `CentOS v ->
-        let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" | _ -> assert false in
-        "centos", tag
-    | `Fedora v ->
-        let tag =
-          match v with
-          | `V21 -> "21"
-          | `V22 -> "22"
-          | `V23 -> "23"
-          | `V24 -> "24"
-          | `V25 -> "25"
-          | `V26 -> "26"
-          | `V27 -> "27"
-          | `V28 -> "28"
-          | `V29 -> "29"
-          | `V30 -> "30"
-          | `V31 -> "31"
-          | `V32 -> "32"
-          | `Latest -> assert false
-        in
-        "fedora", tag
-    | `OracleLinux v ->
-        let tag = match v with `V7 -> "7" | _ -> assert false in
-        "oraclelinux", tag
-    | `OpenSUSE v ->
-        let tag =
-          match v with
-          | `V42_1 -> "42.1"
-          | `V42_2 -> "42.2"
-          | `V42_3 -> "42.3"
-          | `V15_0 -> "15.0"
-          | `V15_1 -> "15.1"
-          | `V15_2 -> "15.2"
-          | `Latest -> assert false
-        in
-        "opensuse/leap", tag
+  | `Ubuntu v ->
+      let tag =
+        match v with
+        | `V12_04 -> "precise"
+        | `V14_04 -> "trusty"
+        | `V15_04 -> "vivid"
+        | `V15_10 -> "wily"
+        | `V16_04 -> "xenial"
+        | `V16_10 -> "yakkety"
+        | `V17_04 -> "zesty"
+        | `V17_10 -> "artful"
+        | `V18_04 -> "bionic"
+        | `V18_10 -> "cosmic"
+        | `V19_04 -> "disco"
+        | `V19_10 -> "eoan"
+        | `V20_04 -> "focal"
+        | `Latest | `LTS -> assert false
+      in
+      "ubuntu", tag
+  | `CentOS v ->
+      let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" | _ -> assert false in
+      "centos", tag
+  | `Fedora v ->
+      let tag =
+        match v with
+        | `V21 -> "21"
+        | `V22 -> "22"
+        | `V23 -> "23"
+        | `V24 -> "24"
+        | `V25 -> "25"
+        | `V26 -> "26"
+        | `V27 -> "27"
+        | `V28 -> "28"
+        | `V29 -> "29"
+        | `V30 -> "30"
+        | `V31 -> "31"
+        | `V32 -> "32"
+        | `Latest -> assert false
+      in
+      "fedora", tag
+  | `OracleLinux v ->
+      let tag = match v with `V7 -> "7" | _ -> assert false in
+      "oraclelinux", tag
+  | `OpenSUSE v ->
+      let tag =
+        match v with
+        | `V42_1 -> "42.1"
+        | `V42_2 -> "42.2"
+        | `V42_3 -> "42.3"
+        | `V15_0 -> "15.0"
+        | `V15_1 -> "15.1"
+        | `V15_2 -> "15.2"
+        | `Latest -> assert false
+      in
+      "opensuse/leap", tag
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
