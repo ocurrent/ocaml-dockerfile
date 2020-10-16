@@ -46,6 +46,14 @@ val distros : t list
 val latest_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
 
+val latest_tier1_distros : t list
+(** Enumeration of the latest stable supported distributions that
+  are well enough supported in opam-repository. *)
+
+val latest_tier2_distros : t list
+(** Enumeration of the latest stable supported distributions that
+  are not well supported in opam-repository. *)
+
 val master_distro : t
 (** The distribution that is the top-level alias for the [latest] tag
     in the [ocaml/opam2] Docker Hub build. *)

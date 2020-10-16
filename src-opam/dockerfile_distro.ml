@@ -66,32 +66,38 @@ let distro_status (d:t) : status = match d with
   | `Alpine `V3_12 -> `Active `Tier1
   | `Alpine `Latest -> `Alias (`Alpine `V3_12)
   | `CentOS (`V6 | `V7) -> `Deprecated
-  | `CentOS `V8 -> `Active `Tier2
+  | `CentOS `V8 -> `Active `Tier1
   | `CentOS `Latest -> `Alias (`CentOS `V8)
   | `Debian (`V7 | `V8 | `V9) -> `Deprecated
   | `Debian `V10 -> `Active `Tier1
   | `Debian `Stable -> `Alias (`Debian `V10)
-  | `Debian `Testing -> `Active `Tier2
-  | `Debian `Unstable -> `Active `Tier2
+  | `Debian `Testing -> `Active `Tier1
+  | `Debian `Unstable -> `Active `Tier1
   | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31) -> `Deprecated
-  | `Fedora `V32 -> `Active `Tier2
+  | `Fedora `V32 -> `Active `Tier1
   | `Fedora `Latest -> `Alias (`Fedora `V32)
   | `OracleLinux `V7 -> `Deprecated
   | `OracleLinux `V8 -> `Active `Tier2
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V8)
   | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1) -> `Deprecated
-  | `OpenSUSE `V15_2 -> `Active `Tier2
+  | `OpenSUSE `V15_2 -> `Active `Tier1
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_2)
-  | `Ubuntu (`V16_04 | `V18_04 | `V20_04) -> `Active `Tier2
-  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
+  | `Ubuntu (`V18_04 | `V20_04) -> `Active `Tier1
+  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V18_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_04)
 
 let latest_distros =
   [ `Alpine `Latest; `CentOS `Latest;
-    `Debian `Stable; `Debian `Testing; `Debian Unstable;
+    `Debian `Stable; `Debian `Testing; `Debian `Unstable;
     `OracleLinux `Latest; `OpenSUSE `Latest; `Fedora `Latest;
     `Ubuntu `Latest; `Ubuntu `LTS ]
+
+let latest_tier1_distros =
+  List.filter (fun d -> match distro_status d with `Active `Tier1 -> true | _ -> false) distros
+
+let latest_tier2_distros =
+  List.filter (fun d -> match distro_status d with `Active `Tier2 -> true | _ -> false) distros
 
 let master_distro = `Debian `Stable
 
