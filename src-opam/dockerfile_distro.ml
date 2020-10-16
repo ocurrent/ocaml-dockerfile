@@ -23,7 +23,7 @@ type t = [
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `Latest ]
-  | `OracleLinux of [ `V7 | `Latest ]
+  | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `LTS | `Latest ]
 ] [@@deriving sexp]
@@ -40,7 +40,7 @@ let distros = [
   `Debian `V10; `Debian `V9; `Debian `V8; `Debian `V7;
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
   `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27; `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `V31; `Fedora `V32; `Fedora `Latest;
-  `OracleLinux `V7; `OracleLinux `Latest;
+  `OracleLinux `V7; `OracleLinux `V8; `OracleLinux `Latest;
   `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `Latest;
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04;
@@ -65,8 +65,9 @@ let distro_status (d:t) : status = match d with
   | `Fedora `V31 -> `Active `Tier2
   | `Fedora `V32 -> `Active `Tier2
   | `Fedora `Latest -> `Alias (`Fedora `V31) (* TODO until opam-repo fixed for older ocaml *)
-  | `OracleLinux `V7 -> `Active `Tier2
-  | `OracleLinux `Latest -> `Alias (`OracleLinux `V7)
+  | `OracleLinux `V7 -> `Deprecated
+  | `OracleLinux `V8 -> `Active `Tier2
+  | `OracleLinux `Latest -> `Alias (`OracleLinux `V8)
   | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0) -> `Deprecated
   | `OpenSUSE `V15_1 -> `Active `Tier2 (* TODO deprecate in Aug 2020 *)
   | `OpenSUSE `V15_2 -> `Active `Tier2
@@ -166,6 +167,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V15_1 -> Some "4.05.0"
   |`OpenSUSE `V15_2 -> Some "4.05.0"
   |`OracleLinux `V7 -> None
+  |`OracleLinux `V8 -> None
   |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
   |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
   |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest -> assert false
@@ -212,6 +214,7 @@ let tag_of_distro (d:t) = match d with
   |`Fedora `V31 -> "fedora-31"
   |`Fedora `V32 -> "fedora-32"
   |`OracleLinux `V7 -> "oraclelinux-7"
+  |`OracleLinux `V8 -> "oraclelinux-8"
   |`OracleLinux `Latest -> "oraclelinux"
   |`Alpine `V3_3 -> "alpine-3.3"
   |`Alpine `V3_4 -> "alpine-3.4"
@@ -272,6 +275,7 @@ let distro_of_tag x : t option = match x with
   |"fedora-32" -> Some (`Fedora `V32)
   |"fedora" -> Some (`Fedora `Latest)
   |"oraclelinux-7" -> Some (`OracleLinux `V7)
+  |"oraclelinux-8" -> Some (`OracleLinux `V8)
   |"oraclelinux" -> Some (`OracleLinux `Latest)
   |"alpine-3.3" -> Some (`Alpine `V3_3)
   |"alpine-3.4" -> Some (`Alpine `V3_4)
@@ -332,6 +336,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Fedora `V31 -> "Fedora 31"
   |`Fedora `V32 -> "Fedora 32"
   |`OracleLinux `V7 -> "OracleLinux 7"
+  |`OracleLinux `V8 -> "OracleLinux 8"
   |`Alpine `V3_3 -> "Alpine 3.3"
   |`Alpine `V3_4 -> "Alpine 3.4"
   |`Alpine `V3_5 -> "Alpine 3.5"
@@ -462,7 +467,12 @@ let base_distro_tag ?(arch=`X86_64) d =
         in
         "fedora", tag
     | `OracleLinux v ->
-        let tag = match v with `V7 -> "7" | _ -> assert false in
+        let tag =
+          match v with
+          | `V7 -> "7"
+          | `V8 -> "8"
+          | _ -> assert false
+        in
         "oraclelinux", tag
     | `OpenSUSE v ->
         let tag =
