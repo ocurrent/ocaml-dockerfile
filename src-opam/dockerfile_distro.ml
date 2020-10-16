@@ -35,52 +35,63 @@ type status = [
 ] [@@deriving sexp]
 
 let distros = [
-  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10; `Alpine `V3_11; `Alpine `V3_12; `Alpine `Latest;
+  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6;
+  `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10;
+  `Alpine `V3_11; `Alpine `V3_12;
+  `Alpine `Latest;
+
   `CentOS `V6; `CentOS `V7; `CentOS `V8; `CentOS `Latest;
-  `Debian `V10; `Debian `V9; `Debian `V8; `Debian `V7;
+
+  `Debian `V7; `Debian `V8; `Debian `V9; `Debian `V10;
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
-  `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27; `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `V31; `Fedora `V32; `Fedora `Latest;
+
+  `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27;
+  `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `V31; `Fedora `V32;
+  `Fedora `Latest;
+
   `OracleLinux `V7; `OracleLinux `V8; `OracleLinux `Latest;
-  `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `Latest;
+
+  `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0;
+  `OpenSUSE `V15_1; `OpenSUSE `V15_2;
+  `OpenSUSE `Latest;
+
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
-  `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04;
-  `Ubuntu `Latest; `Ubuntu `LTS ]
+  `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10;
+  `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04;
+  `Ubuntu `Latest; `Ubuntu `LTS;
+]
 
 let distro_status (d:t) : status = match d with
-  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10) -> `Deprecated
-  | `Alpine `V3_11 -> `Active `Tier2
+  | `Alpine ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11) -> `Deprecated
   | `Alpine `V3_12 -> `Active `Tier1
-  | `Alpine `Latest -> `Alias (`Alpine `V3_11)
-  | `CentOS (`V7 | `V8) -> `Active `Tier2
-  | `CentOS `V6 -> `Deprecated
-  | `CentOS `Latest -> `Alias (`CentOS `V7)
-  | `Debian `V7 -> `Deprecated
-  | `Debian `V8  -> `Active `Tier2
-  | `Debian `V9 -> `Active `Tier2
+  | `Alpine `Latest -> `Alias (`Alpine `V3_12)
+  | `CentOS (`V6 | `V7) -> `Deprecated
+  | `CentOS `V8 -> `Active `Tier2
+  | `CentOS `Latest -> `Alias (`CentOS `V8)
+  | `Debian (`V7 | `V8 | `V9) -> `Deprecated
   | `Debian `V10 -> `Active `Tier1
   | `Debian `Stable -> `Alias (`Debian `V10)
   | `Debian `Testing -> `Active `Tier2
   | `Debian `Unstable -> `Active `Tier2
-  | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30) -> `Deprecated
-  | `Fedora `V31 -> `Active `Tier2
+  | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31) -> `Deprecated
   | `Fedora `V32 -> `Active `Tier2
-  | `Fedora `Latest -> `Alias (`Fedora `V31) (* TODO until opam-repo fixed for older ocaml *)
+  | `Fedora `Latest -> `Alias (`Fedora `V32)
   | `OracleLinux `V7 -> `Deprecated
   | `OracleLinux `V8 -> `Active `Tier2
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V8)
-  | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0) -> `Deprecated
-  | `OpenSUSE `V15_1 -> `Active `Tier2 (* TODO deprecate in Aug 2020 *)
+  | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1) -> `Deprecated
   | `OpenSUSE `V15_2 -> `Active `Tier2
-  | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_1)
+  | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_2)
   | `Ubuntu (`V16_04 | `V18_04 | `V20_04) -> `Active `Tier2
   | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V18_04)
-  | `Ubuntu `Latest -> `Alias (`Ubuntu `V19_10)
+  | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_04)
 
 let latest_distros =
   [ `Alpine `Latest; `CentOS `Latest;
-    `Debian `Stable; `OracleLinux `Latest; `OpenSUSE `Latest;
-    `Fedora `Latest; `Ubuntu `Latest; `Ubuntu `LTS ]
+    `Debian `Stable; `Debian `Testing; `Debian Unstable;
+    `OracleLinux `Latest; `OpenSUSE `Latest; `Fedora `Latest;
+    `Ubuntu `Latest; `Ubuntu `LTS ]
 
 let master_distro = `Debian `Stable
 
