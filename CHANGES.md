@@ -2,6 +2,10 @@ dev
 ---
 
 - Add ArchLinux support (@kit-ty-kate #23)
+- Move Alpine 3.11 to deprecated (@kit-ty-kate #23).
+- Add OracleLinux v8 (@kit-ty-kate #24)
+- Add Ubuntu 20.10 (@avsm)
+- Make Alpine 3.12 and Fedora 32 the latest versions.
 
 v7.0.0 2020-08-14 Cambridge
 ---------------------------
