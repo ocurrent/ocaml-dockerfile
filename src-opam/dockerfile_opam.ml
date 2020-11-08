@@ -61,7 +61,7 @@ let install_bubblewrap_wrappers =
   run "echo 'echo --- opam sandboxing enabled' >> /home/opam/opam-sandbox-enable" @@
   run "chmod a+x /home/opam/opam-sandbox-enable" @@
   run "sudo mv /home/opam/opam-sandbox-enable /usr/bin/opam-sandbox-enable"
-   
+
 let header ?arch ?maintainer img tag =
   let platform =
     match arch with
@@ -169,6 +169,22 @@ let zypper_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
+(* Pacman based Dockerfile *)
+let pacman_opam2 ?(labels=[]) ?arch ~distro ~tag () =
+  header ?arch distro tag @@ label (("distro_style", "pacman") :: labels)
+  @@ Linux.Pacman.install "make gcc patch bzip2 git tar curl ca-certificates openssl"
+  @@ Linux.Git.init ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
+  @@ run "strip /usr/local/bin/opam*"
+  @@ from ~tag distro
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ Linux.Pacman.dev_packages ()
+  @@ Linux.Pacman.add_user ~uid:1000 ~sudo:true "opam"
+  @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
+
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let distro, tag = D.base_distro_tag ?arch d in
   let fn = match D.package_manager d with
@@ -178,6 +194,7 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
      yum_opam2 ?labels ?arch ~yum_workaround ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ?arch ~tag ~distro ()
+  | `Pacman -> pacman_opam2 ?labels ?arch ~tag ~distro ()
   in
   let clone = if clone_opam_repo then
     run "git clone git://github.com/ocaml/opam-repository /home/opam/opam-repository"
@@ -216,7 +233,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ run "opam-sandbox-disable"
     @@ run "opam init -k git -a /home/opam/opam-repository --bare"
-    @@ compilers 
+    @@ compilers
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
     @@ run "opam install -y depext"
@@ -232,7 +249,7 @@ let tag_of_ocaml_version ov =
 
 let separate_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
-  OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro) 
+  OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro)
   |> List.map (fun ov ->
          let add_remote =
            if OV.Releases.is_dev ov then
@@ -269,7 +286,7 @@ let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
   let tag =
     if use_main_tag then
       Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) OV.(to_string (with_variant ocaml_version None))
-    else 
+    else
       D.tag_of_distro distro
   in
   header prod_hub_id tag

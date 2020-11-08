@@ -169,3 +169,34 @@ module Zypper = struct
   let install_system_ocaml =
     install "ocaml camlp4 ocaml-ocamldoc"
 end
+
+(** Pacman rules *)
+module Pacman = struct
+  let update = run "pacman -Syu --noconfirm"
+  let install fmt = ksprintf (fun s -> run "pacman -Syu --noconfirm %s" s) fmt
+
+  let dev_packages ?extra () =
+    install "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano bubblewrap coreutils xz ncurses%s"
+      (match extra with None -> "" | Some x -> " " ^ x)
+
+  let add_user ?uid ?gid ?(sudo=false) username =
+    let home = "/home/"^username in
+    run "useradd %s%s -d %s -m --user-group %s"
+      (match uid with None -> "" | Some d -> sprintf "-u %d " d)
+      (match gid with None -> "" | Some g -> sprintf "-g %d " g)
+      home username @@
+    (match sudo with
+    | false -> empty
+    | true ->
+        let sudofile = "/etc/sudoers.d/"^username in
+        run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+        run "chmod 440 %s" sudofile @@
+        run "chown root:root %s" sudofile) @@
+    user "%s" username @@
+    workdir "%s" home @@
+    run "mkdir .ssh" @@
+    run "chmod 700 .ssh"
+
+  let install_system_ocaml =
+    run "pacman add ocaml ocaml-compiler-libs"
+end
