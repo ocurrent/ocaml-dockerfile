@@ -1,3 +1,8 @@
+dev
+---
+
+- Add ArchLinux support (@kit-ty-kate #23)
+
 v7.0.0 2020-08-14 Cambridge
 ---------------------------
 
