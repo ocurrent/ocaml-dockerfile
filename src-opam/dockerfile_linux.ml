@@ -176,7 +176,7 @@ module Pacman = struct
   let install fmt = ksprintf (fun s -> run "pacman -Syu --noconfirm %s" s) fmt
 
   let dev_packages ?extra () =
-    install "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano bubblewrap coreutils xz ncurses%s"
+    install "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano bubblewrap coreutils xz ncurses diffutils unzip%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
