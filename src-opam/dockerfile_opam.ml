@@ -122,9 +122,13 @@ let apt_opam2 ?(labels=[]) ?arch ~distro ~tag () =
 
 
 (* RPM based Dockerfile.
-   [yum_workaround activates the overlay/yum workaround needed
-   for older versions of yum as found in CentOS 7 and earlier *)
-let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~distro ~tag () =
+
+   [yum_workaround] activates the overlay/yum workaround needed
+   for older versions of yum as found in CentOS 7 and earlier
+
+   [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
+   This is needed to get most of *-devel packages frequently used by opam packages. *)
+let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~distro ~tag () =
   let workaround =
     if yum_workaround then
       run "touch /var/lib/rpm/*"
@@ -150,6 +154,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~distro ~tag () =
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
   @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
+  @@ (if enable_powertools then run "sudo dnf config-manager --set-enabled PowerTools" else empty)
 
 
 (* Zypper based Dockerfile *)
@@ -192,7 +197,8 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   | `Apt -> apt_opam2 ?labels ?arch ~tag ~distro ()
   | `Yum ->
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
-     yum_opam2 ?labels ?arch ~yum_workaround ~tag ~distro ()
+     let enable_powertools = match d with `CentOS (`V6 | `V7) -> false | `CentOS _ -> true | _ -> false in
+     yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ?arch ~tag ~distro ()
   | `Pacman -> pacman_opam2 ?labels ?arch ~tag ~distro ()
   in
