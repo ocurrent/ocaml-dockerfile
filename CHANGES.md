@@ -6,6 +6,8 @@ dev
 - Add OracleLinux v8 (@kit-ty-kate #24)
 - Add Ubuntu 20.10 (@avsm)
 - Make Alpine 3.12 and Fedora 32 the latest versions.
+- Update the latest versions of Ubuntu LTS to 20.04
+  and CentOS to 8 and OracleLinux to 8 (@avsm)
 
 v7.0.0 2020-08-14 Cambridge
 ---------------------------
