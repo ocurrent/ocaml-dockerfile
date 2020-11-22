@@ -96,6 +96,7 @@ let distro_arches ov (d:t) =
   | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Alpine (`V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
   | `Ubuntu (`V18_04|`V20_04|`V20_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64; `Ppc64le ]
+  | `Fedora (`V33), ov when OV.(compare Releases.v4_08_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   | _ -> [ `X86_64 ]
 
 
