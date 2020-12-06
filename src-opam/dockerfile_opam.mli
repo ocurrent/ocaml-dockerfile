@@ -50,11 +50,6 @@ val gen_opam2_distro :
    to be multiarch (the main exception to this is i386, which requires different
    base images from amd64). *)
 
-val opam2_mirror : string -> Dockerfile.t
-(** [opam2_mirror hub_id] generates an opam2 mirror archive that stores the
-  results of [opam admin make] in the container when built. This container
-  is suitable to serve as an archive mirror using [cohttp-lwt-unix] *)
-
 val all_ocaml_compilers :
   string -> Ocaml_version.arch -> Dockerfile_distro.t -> string * Dockerfile.t
 (** [all_ocaml_compilers hub_id arch distro] will generate an opam2
@@ -67,11 +62,6 @@ val separate_ocaml_compilers :
 (** [separate_ocaml_compilers hub_id arch distro] will install a list of
   Dockerfiles that build individual OCaml compiler versions and their
   variants (e.g. flambda) in separate containers. *)
-
-val bulk_build : string -> Dockerfile_distro.t -> Ocaml_version.t -> string -> Dockerfile.t
-(** [bulk_build hub_id distro ov rev] will setup a bulk build environment
-  for OCaml version [ov] on distribution [distro] using the Git revision [rev]
-  from opam-repository. *)
 
 val deprecated : Dockerfile.t 
 (** [deprecated] is a minimal container that outputs a deprecation error. This

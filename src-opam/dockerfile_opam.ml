@@ -210,15 +210,6 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
     | _ -> empty in
   (D.tag_of_distro d, fn @@ clone @@ personality)
 
-(* Generate archive mirror *)
-let opam2_mirror (hub_id: string) =
-  header hub_id "alpine-3.7-ocaml-4.06"
-  @@ run "sudo apk add --update bash m4"
-  @@ workdir "/home/opam/opam-repository" @@ run "git checkout master"
-  @@ run "git pull origin master"
-  @@ run "opam init -a /home/opam/opam-repository" @@ env [("OPAMJOBS", "24")]
-  @@ run "opam install -yj4 cohttp-lwt-unix" @@ run "opam admin cache"
-
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   let compilers =
@@ -283,26 +274,6 @@ let separate_ocaml_compilers hub_id arch distro =
          in
          (Fmt.strf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )
 
-
-let bulk_build prod_hub_id distro ocaml_version opam_repo_rev =
-  let use_main_tag =
-    (OV.extra ocaml_version <> None) ||
-    (* TODO pass arch up as a param *)
-    (List.mem (D.resolve_alias distro) (D.active_tier1_distros `X86_64)) in
-  let tag =
-    if use_main_tag then
-      Fmt.strf "%s-ocaml-%s" (D.tag_of_distro distro) OV.(to_string (with_variant ocaml_version None))
-    else
-      D.tag_of_distro distro
-  in
-  header prod_hub_id tag
-  @@ run "opam switch %s" (OV.to_string ocaml_version)
-  @@ env [("OPAMYES", "1")]
-  @@ workdir "/home/opam/opam-repository"
-  @@ run "git pull origin master"
-  @@ run "git checkout %s" opam_repo_rev
-  @@ run "opam update"
-  @@ run "opam depext -iy dune ocamlfind"
 
 let deprecated =
   header "alpine" "latest"
