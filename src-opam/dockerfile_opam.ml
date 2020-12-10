@@ -146,6 +146,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~distro ~ta
   @@ from ~tag distro @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
+  @@ (if enable_powertools then run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update else empty)
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
@@ -154,7 +155,6 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~distro ~ta
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
   @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
-  @@ (if enable_powertools then run "sudo dnf config-manager --set-enabled PowerTools" else empty)
 
 
 (* Zypper based Dockerfile *)
