@@ -12,6 +12,8 @@ dev
 - Build aarch64 images for Fedora 33 and higher as well (@avsm).
 - Remove outdated bulk-build and archive functions from
   `Dockerfile_opam` (@avsm)
+- Create a Tier 3 for distros for things we do not want
+  to test in the opam repsitory (@avsm @kit-ty-kate)
 
 v7.0.0 2020-08-14 Cambridge
 ---------------------------

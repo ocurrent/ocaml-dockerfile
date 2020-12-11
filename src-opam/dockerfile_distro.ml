@@ -31,7 +31,7 @@ type t = [
 
 type status = [
   | `Deprecated
-  | `Active of [ `Tier1 | `Tier2 ]
+  | `Active of [ `Tier1 | `Tier2 | `Tier3 ]
   | `Alias of t
 ] [@@deriving sexp]
 
@@ -66,7 +66,8 @@ let distro_status (d:t) : status = match d with
   | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31) -> `Deprecated
   | `Fedora (`V32|`V33) -> `Active `Tier2
   | `Fedora `Latest -> `Alias (`Fedora `V33)
-  | `OracleLinux (`V7|`V8) -> `Active `Tier2
+  | `OracleLinux `V8 -> `Active `Tier2
+  | `OracleLinux `V7 -> `Active `Tier3
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V8)
   | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1) -> `Deprecated
   | `OpenSUSE `V15_2 -> `Active `Tier2
@@ -113,6 +114,10 @@ let active_tier1_distros arch =
 
 let active_tier2_distros arch =
   List.filter (fun d -> match distro_status d with `Active `Tier2 -> true | _ -> false ) distros |>
+  List.filter (distro_supported_on arch OV.Releases.latest)
+
+let active_tier3_distros arch =
+  List.filter (fun d -> match distro_status d with `Active `Tier3 -> true | _ -> false ) distros |>
   List.filter (distro_supported_on arch OV.Releases.latest)
 
 (* The distro-supplied version of OCaml *)
