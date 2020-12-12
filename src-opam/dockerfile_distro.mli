@@ -123,8 +123,20 @@ val active_distros : Ocaml_version.arch -> t list
 
 val active_tier1_distros : Ocaml_version.arch -> t list
 (** Tier 1 distributions are those supported for the full matrix
-    of compiler versions in the opam build infrastructure. *)
+    of compiler versions in the opam build infrastructure.
+    The {{:https://github.com/ocurrent/docker-base-images}Docker base images}
+    will compile a base image for every OCaml version, so this
+    list should be added to sparingly. *)
 
 val active_tier2_distros : Ocaml_version.arch -> t list
 (** Tier 2 distributions are those supported for a limited set
-    of compiler versions in the opam build infrastructure. *)
+    of compiler versions in the opam build infrastructure.  The
+    distros in this list are also tested for packages in the
+    opam repository. *)
+
+val active_tier3_distros : Ocaml_version.arch -> t list
+(** Tier 3 distributions are those supported for a limited set
+    of compiler versions in the opam build infrastructure.  While
+    these distros will have base images compiled for them, they
+    are not widely tested. Distros maybe here as they are on the
+    way to being deprecated, or new and still experimental. *)
