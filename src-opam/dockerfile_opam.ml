@@ -128,17 +128,18 @@ let apt_opam2 ?(labels=[]) ?arch ~distro ~tag () =
 
    [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
    This is needed to get most of *-devel packages frequently used by opam packages. *)
-let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~distro ~tag () =
+let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_scl ~enable_powertools ~distro ~tag () =
   let workaround =
     if yum_workaround then
       run "touch /var/lib/rpm/*"
       @@ Linux.RPM.install "yum-plugin-ovl"
     else empty
   in
+  let extra_scl = if enable_scl then " centos-release-scl" else "" in
   header ?arch distro tag @@ label (("distro_style", "rpm") :: labels)
   @@ workaround
   @@ Linux.RPM.update
-  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
+  @@ Linux.RPM.dev_packages ~extra:("which tar curl xz libcap-devel openssl" ^ extra_scl) ()
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
@@ -197,8 +198,9 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   | `Apt -> apt_opam2 ?labels ?arch ~tag ~distro ()
   | `Yum ->
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
-     let enable_powertools = match d with `CentOS (`V6 | `V7) -> false | `CentOS _ -> true | _ -> false in
-     yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~tag ~distro ()
+     let enable_powertools = match d with `CentOS (`V6 | `V7) -> false | `CentOS `V8 -> true | _ -> false in
+     let enable_scl = match d with `CentOS (`V6 | `V8) -> false | `CentOS `V7 -> true | _ -> false in
+     yum_opam2 ?labels ?arch ~yum_workaround ~enable_scl ~enable_powertools ~tag ~distro ()
   | `Zypper -> zypper_opam2 ?labels ?arch ~tag ~distro ()
   | `Pacman -> pacman_opam2 ?labels ?arch ~tag ~distro ()
   in

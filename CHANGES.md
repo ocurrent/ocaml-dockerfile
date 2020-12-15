@@ -9,6 +9,7 @@ dev
 - Update the latest versions of Ubuntu LTS to 20.04
   and CentOS to 8 and OracleLinux to 8 (@avsm)
 - Activate Powertools for CentOS 8 (@kit-ty-kate #26)
+  and SCL for CentOS 7 (@avsm)
 - Build aarch64 images for Fedora 33 and higher as well (@avsm).
 - Remove outdated bulk-build and archive functions from
   `Dockerfile_opam` (@avsm)
