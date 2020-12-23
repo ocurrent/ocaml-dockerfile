@@ -16,6 +16,7 @@ dev
   to test in the opam repository (@avsm @kit-ty-kate)
 - Add an `os_family` type (@MisterDA)
 - Add support for parser directives (@MisterDA)
+- Add Windows support (@MisterDA)
 
 v7.0.0 2020-08-14 Cambridge
 ---------------------------
