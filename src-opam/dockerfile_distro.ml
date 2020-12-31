@@ -29,6 +29,17 @@ type t = [
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `LTS | `Latest ]
 ] [@@deriving sexp]
 
+type os_family = [ `Linux ] [@@deriving sexp]
+
+let os_family_of_distro (t:t) : os_family =
+  match t with
+  | `Alpine _ | `Archlinux _ | `CentOS _ | `Debian _ | `Fedora _
+    | `OracleLinux _ | `OpenSUSE _ | `Ubuntu _ -> `Linux
+
+let os_family_to_string (os:os_family) =
+  match os with
+  | `Linux -> "linux"
+
 type status = [
   | `Deprecated
   | `Active of [ `Tier1 | `Tier2 | `Tier3 ]

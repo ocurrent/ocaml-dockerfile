@@ -34,6 +34,16 @@ type t = [
 ] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
+type os_family = [ `Linux ] [@@deriving sexp]
+(** Supported Docker container operating systems  *)
+
+val os_family_of_distro : t -> os_family
+(** [os_family_of_distro t] returns the OS family of the distro. *)
+
+val os_family_to_string : os_family -> string
+(** [os_family_to_string os] returns a string representing the OS
+   family. *)
+
 val compare : t -> t -> int
 (** [compare a b] is a lexical comparison function for {!t}. *)
 
