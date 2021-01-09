@@ -550,7 +550,7 @@ let base_distro_tag ?(arch=`X86_64) d =
        | `V20H2 -> "20H2"
        | `Latest -> assert false
      in
-     "mcr.microsoft.com/windows/servercore", tag
+     "mcr.microsoft.com/windows", tag
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)

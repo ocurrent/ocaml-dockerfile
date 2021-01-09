@@ -19,70 +19,79 @@
 
 open Dockerfile
 
-val cygarch : string
-(** Cygwin architecture  *)
-
-val cygroot : string
-(** Cygwin root directory *)
-
-val cygsetup : string
-(** Path to Cygwin setup executable  *)
-
-val cygcache : string
-(** Path to Cygwin package cache  *)
-
-val cygmirror : string
-(** Cygwin package repository  *)
-
-val run_sh : ('a, unit, string, t) format4 -> 'a
-(** [run_sh fmt] will execute [C:\cygwin64\bin\bash.exe --login -c "fmt"] after quoting [fmt]. *)
-
 val run_cmd : ('a, unit, string, t) format4 -> 'a
 (** [run_cmd fmt] will execute [cmd /S /C fmt]. *)
 
 val run_powershell : ('a, unit, string, t) format4 -> 'a
 (** [run_powershell fmt] will execute [powershell -Command "fmt"]. *)
 
-val install_cygsympathy_from_source : unit -> t
-(** Install CygSymPathy  *)
-
-val install_cygwin : unit -> t
-(** Install Cygwin  *)
-
-val install_ocaml_for_windows : ?version:string -> unit -> t
-(** Install fdopen's OCaml for Windows  *)
-
-val install_winget_cli : ?version:string -> unit -> t
-(** Install winget-cli  *)
-
 val install_vc_redist : ?version:string -> unit -> t
-(** Install Microsoft vc_redist  *)
+(** Install Microsoft Visual C++ Redistributable.
+   @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
 
-val install_visual_studio_compiler : ?version:string -> unit -> t
-(** Install Microsoft Visual Studio Compiler  *)
+val install_visual_studio_build_tools : ?version:string -> string list -> t
+(** Install Visual Studio Build Tools components.
+   @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
-val install_msvs_tools_from_source : ?version:string -> unit -> t
-(** Install MSVS Tools  *)
+val cleanup : unit -> t
+(** Cleanup caches. *)
 
 (** Rules for Cygwin-based installation *)
 module Cygwin : sig
-  val update : t
-  (** [update] will update Cygwin packages *)
+  type cyg = {
+      root : string; (** Cygwin root directory *)
+      mirror : string; (** Cygwin mirror *)
+    }
 
-  val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will install the supplied Cygwin package list. *)
+  val setup : cyg -> t
+  (** Setup Cygwin with CygSymPathy and msvs-tools, and no extra
+     Cygwin packages.
+     @see <https://github.com/dra27/cygsympathy/tree/script>
+     @see <https://github.com/metastack/msvs-tools> *)
 
-  val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development
-     tools. Extra packages may also be optionally supplied via
-     [extra]. *)
+  val install : cyg -> ('a, unit, string, t) format4 -> 'a
+  (** Install the supplied Cygwin package list. *)
 
-  val install_system_ocaml : t
-  (** Install the system OCaml packages via Cygwin *)
+  val update : cyg -> t
+  (** Update Cygwin packages. *)
+
+  val cygwin_packages : cyg -> ?extra:string -> unit -> t
+  (** [cygwin_packages cyg ?extra ()] will install the base
+     development tools for the OCaml Cygwin port. Extra packages may
+     also be optionally supplied via [extra]. *)
+
+  val mingw_packages : cyg -> ?extra:string -> unit -> t
+  (** [mingw_packages cyg ?extra ()] will install the base development
+     tools for the OCaml mingw port. Extra packages may also be
+     optionally supplied via [extra]. *)
+
+  val msvc_packages : cyg -> ?extra:string -> unit -> t
+  (** [msvc_packages cyg ?extra ()] will install the base development
+     tools for the OCaml MSVC port. Extra packages may also be
+     optionally supplied via [extra]. *)
+
+  val ocaml_for_windows_packages : cyg -> ?extra:string -> ?version:string -> unit -> t
+  (** [ocaml_for_windows_packages cyg ?extra ()] will install OCaml
+     for Windows and its required Cygwin packages. Extra packages may
+     also be optionally supplied via [extra].
+     @see <https://fdopen.github.io/opam-repository-mingw/> *)
+
+  val run_sh : cyg -> ('a, unit, string, t) format4 -> 'a
+  (** [run_sh cyg fmt] will execute in the Cygwin root
+     [\bin\bash.exe --login -c "fmt"]. *)
+
+  (** Rules for Git *)
+  module Git : sig
+    val init : cyg -> ?name:string -> ?email:string -> unit -> t
+    (** Configure the git name and email variables to sensible defaults *)
+  end
 end
 
 (** Rules for Winget-based installation *)
 module Winget : sig
+  val setup : ?version:string -> unit -> t
+  (** Setup winget-cli. *)
+
   val install : ('a, unit, string, t) format4 -> 'a
   (** [install fmt] will install the supplied Winget package list. *)
 
@@ -90,10 +99,10 @@ module Winget : sig
   (** [dev_packages ?extra ()] will install the base development
      tools and [git]. Extra packages may also be optionally supplied via
      [extra]. *)
-end
 
-(** Rules for Git *)
-module Git : sig
-  val init : ?name:string -> ?email:string -> unit -> t
-  (** Configure the git name and email variables to sensible defaults *)
+  (** Rules for Git *)
+  module Git : sig
+    val init : ?name:string -> ?email:string -> unit -> t
+    (** Configure the git name and email variables to sensible defaults *)
+  end
 end

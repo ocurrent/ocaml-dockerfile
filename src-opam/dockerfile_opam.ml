@@ -199,19 +199,22 @@ let pacman_opam2 ?(labels=[]) ?arch ~distro ~tag () =
 
 (* Cygwin based Dockerfile *)
 let cygwin_opam2 ?(labels=[]) ?arch ~distro ~tag () =
+  let cyg = {
+      Windows.Cygwin.root = {|C:\cygwin64|};
+      mirror = "http://mirrors.kernel.org/sourceware/cygwin/"
+    } in
   header ?arch distro tag @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.install_cygsympathy_from_source ()
-  @@ Windows.install_cygwin ()
-  @@ Windows.Cygwin.dev_packages ()
-  @@ Windows.install_ocaml_for_windows ()
+  @@ Windows.Cygwin.setup cyg
+  @@ Windows.Cygwin.ocaml_for_windows_packages cyg ()
   @@ Windows.install_vc_redist ()
-  @@ Windows.install_winget_cli ()
-  @@ Windows.Winget.install "git"
-  @@ Windows.install_visual_studio_compiler ()
-  @@ Windows.install_msvs_tools_from_source ()
-  @@ Windows.run_powershell {|Remove-Item 'C:\TEMP' -Recurse && Remove-Item 'C:\cygwin64\cache' -Recurse|}
-
+  @@ Windows.Winget.setup ()
+  @@ Windows.Winget.dev_packages ()
+  @@ Windows.install_visual_studio_build_tools [
+         "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
+         "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
+  @@ Windows.cleanup ()
+  @@ Windows.Cygwin.Git.init cyg () @@ Windows.Winget.Git.init ()
 
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let distro, tag = D.base_distro_tag ?arch d in
