@@ -48,7 +48,12 @@ module Cygwin = struct
       mirror : string;
     }
 
-  let run_sh cyg fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
+  let default = {
+      root = {|C:\cygwin64|};
+      mirror = "http://mirrors.kernel.org/sourceware/cygwin/";
+    }
+
+  let run_sh ?(cyg=default) fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
 
   let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
   let cygcache = {|C:\TEMP\cache|}
@@ -63,48 +68,48 @@ module Cygwin = struct
     @@ run {|mkdir %s\etc\postinstall\|} cyg.root
     @@ run {|mklink %s\etc\postinstall\zp_cygsympathy.sh %s\lib\cygsympathy\cygsympathy|} cyg.root cyg.root
 
-  let install_msvs_tools_from_source cyg ?version:(version="0.4.1") () =
+  let install_msvs_tools_from_source ?(version="0.4.1") cyg =
     add ~src:["https://github.com/metastack/msvs-tools/archive/" ^ version ^ ".tar.gz"]
       ~dst:({|C:\TEMP\msvs-tools.tar.gz|}) ()
-    @@ run_sh cyg {|cd /home && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /usr/bin|} version version
+    @@ run_sh ~cyg {|cd /home && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /usr/bin|} version version
 
-  let setup cyg =
+  let setup ?(cyg=default) () =
     add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
     @@ install_cygsympathy_from_source cyg
     @@ run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
         --root %s --site %s --local-package-dir %s|} cygsetup cyg.root cyg.mirror cygcache
-    @@ install_msvs_tools_from_source cyg ()
+    @@ install_msvs_tools_from_source cyg
 
-  let install cyg fmt =
+  let install ?(cyg=default) fmt =
     ksprintf (run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
         --root %s --site %s --local-package-dir %s `
         --packages %s|}
                 cygsetup cyg.root cyg.mirror cygcache) fmt
 
-  let update cyg =
+  let update ?(cyg=default) () =
     run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site --root %s `
         --site %s --local-package-dir %s --upgrade-also|}
       cygsetup cyg.root cyg.mirror cygcache
 
-  let packages cyg base extra =
-    install cyg base
+  let packages ?cyg base extra =
+    install ?cyg base
       (match extra with
        | None -> ""
        | Some x -> "," ^ (String.map (function ' ' -> ',' | c -> c) x))
 
-  let cygwin_packages cyg ?extra () = packages cyg "make,diffutils,ocaml,gcc-core,flexlink%s" extra
-  let mingw_packages cyg ?extra () = packages cyg "make,diffutils,mingw64-x86_64-gcc-core%s" extra
-  let msvc_packages cyg ?extra () = packages cyg "make,diffutils%s" extra
-  let ocaml_for_windows_packages cyg ?extra ?version:(version="0.0.0.2") () =
-    packages cyg "make,diffutils,mingw64-x86_64-gcc-g++,vim,git,curl,rsync,unzip,patch,m4%s" extra
+  let cygwin_packages ?cyg ?extra () = packages ?cyg "make,diffutils,ocaml,gcc-core,flexlink%s" extra
+  let mingw_packages ?cyg ?extra () = packages ?cyg "make,diffutils,mingw64-x86_64-gcc-core%s" extra
+  let msvc_packages ?cyg ?extra () = packages ?cyg "make,diffutils%s" extra
+  let ocaml_for_windows_packages ?cyg ?extra ?version:(version="0.0.0.2") () =
+    packages ?cyg "make,diffutils,mingw64-x86_64-gcc-g++,vim,git,curl,rsync,unzip,patch,m4%s" extra
     @@ add ~src:["https://github.com/fdopen/opam-repository-mingw/releases/download/" ^ version ^ "/opam64.tar.xz"]
          ~dst:{|C:\TEMP\|} ()
-    @@ run_sh cyg {|cd /home && tar -xf /cygdrive/c/TEMP/opam64.tar.xz && ./opam64/install.sh --prefix=/usr && rm -rf opam64 opam64.tar.xz|}
+    @@ run_sh ?cyg {|cd /home && tar -xf /cygdrive/c/TEMP/opam64.tar.xz && ./opam64/install.sh --prefix=/usr && rm -rf opam64 opam64.tar.xz|}
 
   module Git = struct
-    let init cyg ?(name="Docker") ?(email="docker@example.com") () =
-      run_sh cyg "git config --global user.email '%s'" email
-      @@ run_sh cyg "git config --global user.name '%s'" name
+    let init ?cyg ?(name="Docker") ?(email="docker@example.com") () =
+      run_sh ?cyg "git config --global user.email '%s'" email
+      @@ run_sh ?cyg "git config --global user.name '%s'" name
   end
 end
 
