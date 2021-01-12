@@ -45,6 +45,10 @@ val os_family_to_string : os_family -> string
 (** [os_family_to_string os] returns a string representing the OS
    family. *)
 
+val personality : os_family -> Ocaml_version.arch -> string option
+(** [personality os_family arch] returns the personality associated to
+   the architecture, if [os_family] is [`Linux]. *)
+
 val compare : t -> t -> int
 (** [compare a b] is a lexical comparison function for {!t}. *)
 

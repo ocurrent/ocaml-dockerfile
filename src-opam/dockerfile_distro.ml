@@ -43,6 +43,11 @@ let os_family_to_string (os:os_family) =
   | `Linux -> "linux"
   | `Windows -> "windows"
 
+let personality os_family arch =
+  match os_family with
+  | `Linux when Ocaml_version.arch_is_32bit arch -> Some "/usr/bin/linux32"
+  | _ -> None
+
 type status = [
   | `Deprecated
   | `Active of [ `Tier1 | `Tier2 | `Tier3 ]
