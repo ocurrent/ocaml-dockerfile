@@ -215,16 +215,19 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
   Windows.Winget.build_form_source ?arch ~distro ()
   @@ header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.Cygwin.setup ()
-  @@ Windows.Cygwin.ocaml_for_windows_packages ()
   @@ Windows.install_vc_redist ()
   @@ Windows.Winget.setup ()
   @@ Windows.Winget.dev_packages ()
   @@ Windows.install_visual_studio_build_tools [
          "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
          "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
-  @@ Windows.cleanup ()
   @@ Windows.Winget.Git.init ()
+  @@ Windows.Cygwin.setup ()
+  @@ Windows.Cygwin.cygwin_packages ()
+  @@ Windows.Cygwin.mingw_packages ()
+  @@ Windows.Cygwin.msvc_packages ()
+  @@ Windows.Cygwin.ocaml_for_windows_packages ()
+  @@ Windows.cleanup ()
 
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let fn = match D.package_manager d with

@@ -105,7 +105,7 @@ module Cygwin = struct
        | None -> ""
        | Some x -> "," ^ (String.map (function ' ' -> ',' | c -> c) x))
 
-  let cygwin_packages ?cyg ?extra () = packages ?cyg "make,diffutils,ocaml,gcc-core,flexlink%s" extra
+  let cygwin_packages ?cyg ?extra () = packages ?cyg "make,diffutils,ocaml,gcc-core,flexdll%s" extra
   let mingw_packages ?cyg ?extra () = packages ?cyg "make,diffutils,mingw64-x86_64-gcc-core%s" extra
   let msvc_packages ?cyg ?extra () = packages ?cyg "make,diffutils%s" extra
   let ocaml_for_windows_packages ?cyg ?extra ?version:(version="0.0.0.2") () =
