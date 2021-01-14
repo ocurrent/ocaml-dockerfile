@@ -212,8 +212,8 @@ let pacman_opam2 ?(labels=[]) ?arch distro () =
 
 (* Cygwin based Dockerfile *)
 let cygwin_opam2 ?(labels=[]) ?arch distro () =
-  let img, tag = D.base_distro_tag ?arch distro in
-  header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
+  Windows.Winget.build_form_source ?arch ~distro ()
+  @@ header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.Cygwin.setup ()
   @@ Windows.Cygwin.ocaml_for_windows_packages ()

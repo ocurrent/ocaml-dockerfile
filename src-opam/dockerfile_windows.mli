@@ -25,12 +25,15 @@ val run_cmd : ('a, unit, string, t) format4 -> 'a
 val run_powershell : ('a, unit, string, t) format4 -> 'a
 (** [run_powershell fmt] will execute [powershell -Command "fmt"]. *)
 
-val install_vc_redist : ?version:string -> unit -> t
+val install_vc_redist : ?vs_version:string -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
    @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
 
-val install_visual_studio_build_tools : ?version:string -> string list -> t
-(** Install Visual Studio Build Tools components.
+val install_visual_studio_build_tools : ?vs_version:string -> ?split:bool -> string list -> t
+(** Install Visual Studio Build Tools components. [split] controls
+   wether the components should be installed simultaneously or
+   sequentially. Although simlutaneously may be more efficient, it
+   seems to cause problems with Docker.
    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
 val cleanup : unit -> t
@@ -90,17 +93,25 @@ module Cygwin : sig
   end
 end
 
-(** Rules for Winget-based installation *)
+(** Rules for Winget-based installation.
+    @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
-  val setup : ?version:string -> unit -> t
-  (** Setup winget-cli. *)
+  val build_form_source :
+    ?arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
+    ?winget_version:string -> ?vs_version:string -> unit -> t
+  (** Build Winget from source. This won't send telemetry to
+     Microsoft. It is build in a separate Docker image, with alias
+     [winget-builder]. *)
 
-  val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will install the supplied Winget package list. *)
+  val setup : unit -> t
+  (** Setup winget-cli from the [winget-builder] Docker image. *)
+
+  val install : string list -> t
+  (** [install packages] will install the supplied Winget package list. *)
 
   val dev_packages : ?extra:string list -> unit -> t
   (** [dev_packages ?extra ()] will install the base development
-     tools and [git]. Extra packages may also be optionally supplied via
+     tools. Extra packages may also be optionally supplied via
      [extra]. *)
 
   (** Rules for Git *)

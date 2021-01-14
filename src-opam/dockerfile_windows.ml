@@ -21,23 +21,31 @@ open Printf
 let run_cmd fmt = ksprintf (run "cmd /S /C %s") fmt
 let run_powershell fmt = ksprintf (run {|powershell -Command "%s"|}) fmt
 
-let install_vc_redist ?version:(version="16") () =
-  add ~src:["https://aka.ms/vs/" ^ version ^ "/release/vc_redist.x64.exe"] ~dst:{|C:\TEMP\|} ()
+let install_vc_redist ?(vs_version="16") () =
+  add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe"] ~dst:{|C:\TEMP\|} ()
   @@ run {|C:\TEMP\vc_redist.x64.exe /install /passive /norestart /log C:\TEMP\vc_redist.log|}
 
-let install_visual_studio_build_tools ?version:(version="16") components =
+let install_visual_studio_build_tools ?(vs_version="16") ?(split=true) components =
+  let install =
+    let fmt = format_of_string
+      {|C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
+        --installPath C:\BuildTools --channelUri C:\TEMP\VisualStudio.chman `
+        --installChannelUri C:\TEMP\VisualStudio.chman%s|} in
+    if split then
+      List.fold_left (fun install component ->
+          install @@ run fmt (" `\n        --add " ^ component)) empty components
+    else
+      run fmt (List.fold_left (fun acc component ->
+                   acc ^ " `\n        --add " ^ component) "" components)
+  in
   (* https://docs.microsoft.com/en-us/visualstudio/install/advanced-build-tools-container?view=vs-2019#install-script *)
   (* FIXME: don't download from here? *)
   add ~src:["https://raw.githubusercontent.com/MisterDA/Windows-OCaml-Docker/images/Install.cmd"]
     ~dst:{|C:\TEMP\|} ()
   @@ add ~src:["https://aka.ms/vscollect.exe"] ~dst:{|C:\TEMP\collect.exe|} ()
-  @@ add ~src:["https://aka.ms/vs/" ^ version ^ "/release/channel"] ~dst:{|C:\TEMP\VisualStudio.chman|} ()
-  @@ add ~src:["https://aka.ms/vs/" ^ version ^ "/release/vs_buildtools.exe"] ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
-  @@ run {|C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
-        --installPath C:\BuildTools --channelUri C:\TEMP\VisualStudio.chman `
-        --installChannelUri C:\TEMP\VisualStudio.chman%s|}
-       (List.fold_left (fun acc component ->
-            acc ^ " `\n        --add " ^ component) "" components)
+  @@ add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/channel"] ~dst:{|C:\TEMP\VisualStudio.chman|} ()
+  @@ add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vs_buildtools.exe"] ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
+  @@ install
 
 let cleanup () =
   run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
@@ -114,27 +122,44 @@ module Cygwin = struct
 end
 
 module Winget = struct
-  let setup ?version:(version="v0.2.3162-preview") () =
-    add ~src:["https://github.com/microsoft/winget-cli/releases/download/" ^ version ^ "/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"]
-      ~dst:{|C:\TEMP\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.zip|} ()
-    @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
-    @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.appx AppInstaller_x64.zip|}
-    @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
+  let build_form_source ?arch ?(distro=`Windows `Latest) ?(winget_version="master") ?(vs_version="16") () =
+    let img, tag = Dockerfile_distro.base_distro_tag ?arch distro in
+    parser_directive (`Escape '`')
+    @@ from ~alias:"winget-builder" ~tag img
+    @@ user "ContainerAdministrator"
+    @@ install_vc_redist ~vs_version ()
+    @@ install_visual_studio_build_tools ~vs_version [
+           "Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools"; (* .NET desktop build tools *)
+           "Microsoft.VisualStudio.Workload.VCTools"; (* C++ build tools *)
+           "Microsoft.VisualStudio.Workload.UniversalBuildTools"; (* Universal Windows Platform build tools *)
+           "Microsoft.VisualStudio.Workload.MSBuildTools"; (* MSBuild Tools *)
+           "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"; (* VS 2019 C++ x64/x86 build tools *)
+           "Microsoft.VisualStudio.Component.Windows10SDK.18362"; (* Windows 10 SDK (10.0.18362.0) *)
+         ]
+    @@ add ~src:["https://github.com/microsoft/winget-cli/archive/" ^ winget_version ^ ".zip"]
+         ~dst:{|C:\TEMP\winget-cli.zip|} ()
+    @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli.zip -DestinationPath C:\TEMP\ -Force|}
+    @@ run {|cd C:\TEMP && rename winget-cli-%s winget-cli|} winget_version
+    @@ run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat x64 && cd C:\TEMP\winget-cli && msbuild -t:restore -m -p:RestorePackagesConfig=true -p:Configuration=Release src\AppInstallerCLI.sln|}
+    @@ run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat x64 && cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
     @@ run {|mkdir "C:\Program Files\winget-cli"|}
-    @@ run {|move "C:\TEMP\winget-cli\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|}
-    @@ run {|move "C:\TEMP\winget-cli\resources.pri" "C:\Program Files\winget-cli"|}
-    @@ run "%s"
-         {|for /f "tokens=1,2,*" %a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
-             reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%c;C:\Program Files\winget-cli"|}
+    @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|}
+    @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\resources.pri" "C:\Program Files\winget-cli\"|}
 
-  let install fmt = ksprintf (run "winget install %s && echo \027[0m") fmt
+  let setup () =
+    copy ~from:"winget-builder" ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
+    @@ run "%s"
+      {|for /f "tokens=1,2,*" %a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%c;C:\Program Files\winget-cli"|}
+
+  let install pkgs =
+    List.fold_left (fun acc pkg -> acc @@ run "winget install %s" pkg) empty pkgs
 
   let dev_packages ?extra () =
-    let git = install "git" in
+    let git = install ["git"] in
     match extra with
     | None -> git
-    | Some packages ->
-       List.fold_left (fun acc package -> acc @@ install "%s" package) git packages
+    | Some packages -> git @@ install packages
 
   module Git = struct
     let init ?(name="Docker") ?(email="docker@example.com") () =
