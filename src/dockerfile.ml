@@ -120,11 +120,9 @@ let optional name = function
 let string_of_sources_to_dest (t: sources_to_dest) =
   let `From frm, `Src sl, `Dst d, `Chown chown = t in
   String.concat " " (
-    optional "--chown" chown @
-    optional "--from" frm @
-    sl @
-    [d]
-  )
+      optional "--chown" chown
+      @ optional "--from" frm
+      @ [json_array_of_list (sl @ [d])])
 
 let string_of_label_list ls =
   List.map (fun (k, v) -> sprintf "%s=%S" k v) ls |> String.concat " "
