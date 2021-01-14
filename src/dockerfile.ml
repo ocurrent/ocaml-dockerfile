@@ -107,9 +107,8 @@ let string_of_shell_or_exec ~escape:(escape) (t: shell_or_exec) =
   | `Exec sl -> json_array_of_list sl
 
 
-let string_of_env_list = function
-  | [(k, v)] -> sprintf "%s %s" k v
-  | el -> String.concat " " (List.map (fun (k, v) -> sprintf "%s=%S" k v) el)
+let string_of_env_list el =
+  String.concat " " (List.map (fun (k, v) -> sprintf "%s=%S" k v) el)
 
 
 let optional name = function
