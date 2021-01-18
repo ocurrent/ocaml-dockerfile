@@ -43,6 +43,11 @@ let os_family_to_string (os:os_family) =
   | `Linux -> "linux"
   | `Windows -> "windows"
 
+let opam_repository (os:os_family) =
+  match os with
+  | `Linux -> "git://github.com/ocaml/opam-repository.git"
+  | `Windows -> "git://github.com/fdopen/opam-repository-mingw.git#opam2"
+
 let personality os_family arch =
   match os_family with
   | `Linux when Ocaml_version.arch_is_32bit arch -> Some "/usr/bin/linux32"

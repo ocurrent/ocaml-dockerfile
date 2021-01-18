@@ -45,6 +45,10 @@ val os_family_to_string : os_family -> string
 (** [os_family_to_string os] returns a string representing the OS
    family. *)
 
+val opam_repository : os_family -> string
+(** [opam_repository os_family] returns the git URL to the default
+   Opam repository. *)
+
 val personality : os_family -> Ocaml_version.arch -> string option
 (** [personality os_family arch] returns the personality associated to
    the architecture, if [os_family] is [`Linux]. *)

@@ -47,6 +47,11 @@ let install_visual_studio_build_tools ?(vs_version="16") ?(split=true) component
   @@ add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vs_buildtools.exe"] ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
   @@ install
 
+let append_path paths =
+  let paths = String.concat ";" paths in
+  run {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
+       reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%%c;%s"|} paths
+
 let cleanup () =
   run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
 
@@ -79,7 +84,7 @@ module Cygwin = struct
   let install_msvs_tools_from_source ?(version="0.4.1") cyg =
     add ~src:["https://github.com/metastack/msvs-tools/archive/" ^ version ^ ".tar.gz"]
       ~dst:({|C:\TEMP\msvs-tools.tar.gz|}) ()
-    @@ run_sh ~cyg {|cd /home && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /usr/bin|} version version
+    @@ run_sh ~cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /usr/bin|} version version
 
   let setup ?(cyg=default) () =
     add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
@@ -87,6 +92,8 @@ module Cygwin = struct
     @@ run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
         --root %s --site %s --local-package-dir %s|} cygsetup cyg.root cyg.mirror cygcache
     @@ install_msvs_tools_from_source cyg
+    @@ append_path (List.map ((^) cyg.root) [{|\usr\local\bin|}; {|\usr\bin|}])
+    @@ workdir {|%s\home\opam|} cyg.root
 
   let install ?(cyg=default) fmt =
     ksprintf (run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
@@ -112,7 +119,7 @@ module Cygwin = struct
     packages ?cyg "make,diffutils,mingw64-x86_64-gcc-g++,vim,git,curl,rsync,unzip,patch,m4%s" extra
     @@ add ~src:["https://github.com/fdopen/opam-repository-mingw/releases/download/" ^ version ^ "/opam64.tar.xz"]
          ~dst:{|C:\TEMP\|} ()
-    @@ run_sh ?cyg {|cd /home && tar -xf /cygdrive/c/TEMP/opam64.tar.xz && ./opam64/install.sh --prefix=/usr && rm -rf opam64 opam64.tar.xz|}
+    @@ run_sh ?cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/opam64.tar.xz && ./opam64/install.sh --prefix=/usr && rm -rf opam64 opam64.tar.xz|}
 
   module Git = struct
     let init ?cyg ?(name="Docker") ?(email="docker@example.com") () =
@@ -148,9 +155,7 @@ module Winget = struct
 
   let setup () =
     copy ~from:"winget-builder" ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
-    @@ run "%s"
-      {|for /f "tokens=1,2,*" %a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%c;C:\Program Files\winget-cli"|}
+    @@ append_path [{|C:\Program Files\winget-cli|}]
 
   let install pkgs =
     List.fold_left (fun acc pkg -> acc @@ run "winget install %s" pkg) empty pkgs
