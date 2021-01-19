@@ -112,9 +112,12 @@ module Apk = struct
 
   let add_user ?uid ?gid ?(sudo=false) username =
     let home = "/home/"^username in
+    (match gid with
+     | None -> empty
+     | Some gid -> run "addgroup -S -g %d %s" gid username) @@
     run "adduser -S %s%s%s"
       (match uid with None -> "" | Some d -> sprintf "-u %d " d)
-      (match gid with None -> "" | Some g -> sprintf "-g %d " g)
+      (match gid with None -> "" | Some _ -> sprintf "-G %s " username)
       username @@
     (match sudo with
     | false -> empty
