@@ -95,7 +95,6 @@ let apk_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
-  @@ run "addgroup opam"
   @@ Linux.Apk.dev_packages ()
   @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
