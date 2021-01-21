@@ -5,7 +5,7 @@ dev
 - Move Alpine 3.11 to deprecated (@kit-ty-kate #23).
 - Add OracleLinux v8 (@kit-ty-kate #24)
 - Add Ubuntu 20.10 and Fedora 33 (@avsm)
-- Make Alpine 3.12 and Fedora 32 the latest versions.
+- Make Alpine 3.13 and Fedora 33 the latest versions.
 - Update the latest versions of Ubuntu LTS to 20.04
   and CentOS to 8 and OracleLinux to 8 (@avsm)
 - Activate Powertools for CentOS 8 (@kit-ty-kate #26)
@@ -13,7 +13,7 @@ dev
 - Remove outdated bulk-build and archive functions from
   `Dockerfile_opam` (@avsm)
 - Create a Tier 3 for distros for things we do not want
-  to test in the opam repsitory (@avsm @kit-ty-kate)
+  to test in the opam repository (@avsm @kit-ty-kate)
 
 v7.0.0 2020-08-14 Cambridge
 ---------------------------
