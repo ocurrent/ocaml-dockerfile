@@ -49,37 +49,39 @@ module Cygwin : sig
   val default : cyg
   (** The default Cygwin root and mirror. *)
 
-  val setup : ?cyg:cyg -> unit -> t
-  (** Setup Cygwin with CygSymPathy and msvs-tools, and no extra
+  val setup : ?cyg:cyg -> ?extra:string list -> unit -> t
+  (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]
      Cygwin packages.
      @see <https://github.com/dra27/cygsympathy/tree/script>
      @see <https://github.com/metastack/msvs-tools> *)
 
   val install : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
-  (** Install the supplied Cygwin package list. *)
+  (** Install the supplied Cygwin package list. The packages should be
+     comma-separated. *)
 
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages : ?cyg:cyg -> ?extra:string -> unit -> t
-  (** [cygwin_packages ?cyg ?extra ()] will install the base
-     development tools for the OCaml Cygwin port. Extra packages may
-     also be optionally supplied via [extra]. *)
+  val cygwin_packages : ?extra:string list -> unit -> string list
+  (** [cygwin_packages ?extra ()] will install the base development
+     tools for the OCaml Cygwin port. Extra packages may also bep
+     optionally supplied via [extra]. *)
 
-  val mingw_packages : ?cyg:cyg -> ?extra:string -> unit -> t
-  (** [mingw_packages ?cyg ?extra ()] will install the base development
+  val mingw_packages : ?extra:string list -> unit -> string list
+  (** [mingw_packages ?extra ()] will install the base development
      tools for the OCaml mingw port. Extra packages may also be
      optionally supplied via [extra]. *)
 
-  val msvc_packages : ?cyg:cyg -> ?extra:string -> unit -> t
-  (** [msvc_packages ?cyg ?extra ()] will install the base development
+  val msvc_packages : ?extra:string list -> unit -> string list
+  (** [msvc_packages ?extra ()] will install the base development
      tools for the OCaml MSVC port. Extra packages may also be
      optionally supplied via [extra]. *)
 
-  val ocaml_for_windows_packages : ?cyg:cyg -> ?extra:string -> ?version:string -> unit -> t
-  (** [ocaml_for_windows_packages ?cyg ?extra ()] will install OCaml
-     for Windows and its required Cygwin packages. Extra packages may
-     also be optionally supplied via [extra].
+  val ocaml_for_windows_packages : ?cyg:cyg -> ?extra:string list -> ?version:string -> unit
+                                   -> string list * t
+  (** [ocaml_for_windows_packages ?extra ()] returns the list of
+     Cygwin packages dependencies, and the installation instructions.
+     Extra packages may also be optionally supplied via [extra].
      @see <https://fdopen.github.io/opam-repository-mingw/> *)
 
   val run_sh : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a

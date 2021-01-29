@@ -222,11 +222,13 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
          "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
          "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
   @@ Windows.Winget.Git.init ()
-  @@ Windows.Cygwin.setup ()
-  @@ Windows.Cygwin.cygwin_packages ()
-  @@ Windows.Cygwin.mingw_packages ()
-  @@ Windows.Cygwin.msvc_packages ()
-  @@ Windows.Cygwin.ocaml_for_windows_packages ()
+  @@ begin
+      let extra = Windows.Cygwin.msvc_packages () in
+      let extra = Windows.Cygwin.mingw_packages ~extra () in
+      let extra = Windows.Cygwin.cygwin_packages ~extra () in
+      let extra, t = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
+      Windows.Cygwin.setup ~extra () @@ t
+    end
   @@ Windows.cleanup ()
 
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
