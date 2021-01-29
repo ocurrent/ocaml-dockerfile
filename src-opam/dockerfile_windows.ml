@@ -84,7 +84,7 @@ module Cygwin = struct
   let install_msvs_tools_from_source ?(version="0.4.1") cyg =
     add ~src:["https://github.com/metastack/msvs-tools/archive/" ^ version ^ ".tar.gz"]
       ~dst:({|C:\TEMP\msvs-tools.tar.gz|}) ()
-    @@ run_sh ~cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /usr/bin|} version version
+    @@ run_sh ~cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin|} version version
 
   let cygwin ?(cyg=default) fmt =
     ksprintf (run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
@@ -99,7 +99,7 @@ module Cygwin = struct
     @@ install_cygsympathy_from_source cyg
     @@ cygwin ~cyg "--packages %s" (extra |> List.sort_uniq String.compare |> String.concat ",")
     @@ install_msvs_tools_from_source cyg
-    @@ append_path (List.map ((^) cyg.root) [{|\usr\local\bin|}; {|\usr\bin|}])
+    @@ append_path (List.map ((^) cyg.root) [{|\bin|}])
     @@ workdir {|%s\home\opam|} cyg.root
 
   let update ?(cyg=default) () =
