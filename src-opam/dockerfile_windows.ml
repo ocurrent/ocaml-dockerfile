@@ -52,6 +52,14 @@ let append_path paths =
   run {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%%c;%s"|} paths
 
+let ocaml_for_windows_compiler_variant os_family arch =
+  if os_family = `Windows then
+    match arch with
+    | `I386 -> Some "mingw32c"
+    | `X86_64 -> Some "mingw64c"
+    | _ -> None
+  else None
+
 let cleanup () =
   run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
 

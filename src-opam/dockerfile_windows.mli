@@ -36,6 +36,11 @@ val install_visual_studio_build_tools : ?vs_version:string -> ?split:bool -> str
    seems to cause problems with Docker.
    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
+val ocaml_for_windows_compiler_variant : Dockerfile_distro.os_family ->
+                                         Ocaml_version.arch -> string option
+(** Returns the OCaml for Windows specific OCaml compiler variant, if
+   applicable. *)
+
 val cleanup : unit -> t
 (** Cleanup caches. *)
 

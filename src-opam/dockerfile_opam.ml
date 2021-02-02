@@ -251,13 +251,6 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
     | None -> empty | Some pers -> entrypoint_exec [pers] in
   (D.tag_of_distro d, fn @@ clone @@ pers)
 
-let mingw_variant os_family arch distro ov =
-  if os_family  = `Windows && List.mem arch (Dockerfile_distro.distro_arches ov distro) then
-    match arch with
-    | `X86_64 | `I386 as arch -> Some (OV.Configure_options.to_string (`Mingw arch))
-    | _ -> assert false
-  else None
-
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   let os_family = Dockerfile_distro.os_family_of_distro distro in
@@ -268,10 +261,10 @@ let all_ocaml_compilers hub_id arch distro =
       if List.exists OV.Releases.is_dev ovs then
          run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
       else empty in
-    let variant = mingw_variant os_family arch distro in
+    let variant = Dockerfile_windows.ocaml_for_windows_compiler_variant os_family arch in
     List.map (fun t ->
       run "opam switch create %s %s"
-        (OV.(to_string (with_patch (with_variant t (variant t)) None))) (OV.Opam.V2.name t)) ovs |>
+        (OV.(to_string (with_patch (with_variant t variant) None))) (OV.Opam.V2.name t)) ovs |>
       (@@@) add_beta_remote
   in
   let d =
@@ -313,11 +306,11 @@ let separate_ocaml_compilers hub_id arch distro =
              run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
-         let variant = mingw_variant os_family arch distro in
+         let variant = Dockerfile_windows.ocaml_for_windows_compiler_variant os_family arch in
          let variants =
            OV.Opam.V2.switches arch ov
            |> List.map (fun t -> run "opam switch create %s %s"
-                                   (OV.(to_string (with_patch (with_variant t (variant t)) None))) (OV.Opam.V2.name t))
+                                   (OV.(to_string (with_patch (with_variant t variant) None))) (OV.Opam.V2.name t))
            |> (@@@) empty
          in
          let d =
