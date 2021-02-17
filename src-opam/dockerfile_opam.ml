@@ -153,6 +153,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools distro () =
     else empty
   in
   header ?arch distro @@ label (("distro_style", "rpm") :: labels)
+  @@ run "yum --version || dnf install -y yum"
   @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
