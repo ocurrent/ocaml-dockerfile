@@ -279,12 +279,12 @@ let all_ocaml_compilers hub_id arch distro =
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ sandbox
     @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
-         (if os_family = `Windows then "--disable-sandboxing" else "")
+         (if os_family = `Windows then " --disable-sandboxing" else "")
     @@ compilers
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
     @@ run "opam install -y depext%s"
-         (if os_family = `Windows then "depext-cygwinports" else "")
+         (if os_family = `Windows then " depext-cygwinports" else "")
     @@ env ["OPAMYES","1"]
     @@ match os_family with
        | `Linux -> cmd "bash"
