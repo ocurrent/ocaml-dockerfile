@@ -179,6 +179,11 @@ module Pacman = struct
   let install fmt = ksprintf (fun s -> run "pacman -Syu --noconfirm %s" s) fmt
 
   let dev_packages ?extra () =
+    (* BEGIN: tmp workaround *)
+    (* Mitigates https://github.com/actions/virtual-environments/issues/2658 *)
+    (* Workaround taken from: https://github.com/actions/virtual-environments/issues/2658#issuecomment-785410168 *)
+    run "patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && curl -LO \"https://repo.archlinuxcn.org/x86_64/$patched_glibc\" && bsdtar -C / -xvf \"$patched_glibc\" && echo 'IgnorePkg = glibc' >> /etc/pacman.conf" @@
+    (* END: tmp workaround *)
     install "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano bubblewrap coreutils xz ncurses diffutils unzip%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
