@@ -143,7 +143,9 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~distro ~ta
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
   @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"master" ()
-  @@ from ~tag distro @@ workaround
+  @@ from ~tag distro
+  @@ run "yum --version || dnf install -y yum"
+  @@ workaround
   @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ()
   @@ (if enable_powertools then run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update else empty)
@@ -177,7 +179,7 @@ let zypper_opam2 ?(labels=[]) ?arch ~distro ~tag () =
 (* Pacman based Dockerfile *)
 let pacman_opam2 ?(labels=[]) ?arch ~distro ~tag () =
   header ?arch distro tag @@ label (("distro_style", "pacman") :: labels)
-  @@ Linux.Pacman.install "make gcc patch bzip2 git tar curl ca-certificates openssl"
+  @@ Linux.Pacman.dev_packages ()
   @@ Linux.Git.init ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
