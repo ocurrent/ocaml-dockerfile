@@ -14,6 +14,9 @@ dev
   `Dockerfile_opam` (@avsm)
 - Create a Tier 3 for distros for things we do not want
   to test in the opam repository (@avsm @kit-ty-kate)
+- Add an `os_family` type (@MisterDA)
+- Add support for parser directives (@MisterDA)
+- Add Windows support (@MisterDA)
 
 v7.0.0 2020-08-14 Cambridge
 ---------------------------

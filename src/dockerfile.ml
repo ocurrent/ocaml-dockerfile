@@ -31,8 +31,13 @@ type from = {
   alias: string option;
   platform: string option } [@@deriving sexp]
 
+type parser_directive =
+  [ `Syntax of string | `Escape of char ]
+  [@@deriving sexp]
+
 type line =
-  [ `Comment of string
+  [ `ParserDirective of parser_directive
+  | `Comment of string
   | `From of from
   | `Maintainer of string
   | `Run of shell_or_exec
@@ -93,18 +98,17 @@ let json_array_of_list sl =
   sprintf "[ %s ]" (String.concat ", " (List.map quote sl))
 
 
-let string_of_shell_or_exec (t: shell_or_exec) =
+let string_of_shell_or_exec ~escape:(escape) (t: shell_or_exec) =
   match t with
   | `Shell s -> s
   | `Shells [] -> ""
   | `Shells [s] -> s
-  | `Shells l -> String.concat " && \\\n  " l
+  | `Shells l -> String.concat (" && "^escape^"\n  ") l
   | `Exec sl -> json_array_of_list sl
 
 
-let string_of_env_list = function
-  | [(k, v)] -> sprintf "%s %s" k v
-  | el -> String.concat " " (List.map (fun (k, v) -> sprintf "%s=%S" k v) el)
+let string_of_env_list el =
+  String.concat " " (List.map (fun (k, v) -> sprintf "%s=%S" k v) el)
 
 
 let optional name = function
@@ -115,18 +119,20 @@ let optional name = function
 let string_of_sources_to_dest (t: sources_to_dest) =
   let `From frm, `Src sl, `Dst d, `Chown chown = t in
   String.concat " " (
-    optional "--chown" chown @
-    optional "--from" frm @
-    sl @
-    [d]
-  )
+      optional "--chown" chown
+      @ optional "--from" frm
+      @ [json_array_of_list (sl @ [d])])
 
 let string_of_label_list ls =
   List.map (fun (k, v) -> sprintf "%s=%S" k v) ls |> String.concat " "
 
 
-let rec string_of_line (t: line) =
+let rec string_of_line ~escape:(escape) (t: line) =
   match t with
+  | `ParserDirective (`Escape c) ->
+     let escape = String.make 1 c in
+     cmd "#" ("escape="^escape)
+  | `ParserDirective (`Syntax str) -> cmd "#" ("syntax="^str)
   | `Comment c -> cmd "#" c
   | `From {image; tag; alias; platform} ->
       cmd "FROM" (String.concat "" [
@@ -135,22 +141,24 @@ let rec string_of_line (t: line) =
         (match tag with None -> "" | Some t -> ":"^t);
         (match alias with None -> "" | Some a -> " as " ^ a)])
   | `Maintainer m -> cmd "MAINTAINER" m
-  | `Run c -> cmd "RUN" (string_of_shell_or_exec c)
-  | `Cmd c -> cmd "CMD" (string_of_shell_or_exec c)
+  | `Run c -> cmd "RUN" (string_of_shell_or_exec ~escape c)
+  | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
   | `Env el -> cmd "ENV" (string_of_env_list el)
   | `Add c -> cmd "ADD" (string_of_sources_to_dest c)
   | `Copy c -> cmd "COPY" (string_of_sources_to_dest c)
   | `User u -> cmd "USER" u
   | `Volume vl -> cmd "VOLUME" (json_array_of_list vl)
-  | `Entrypoint el -> cmd "ENTRYPOINT" (string_of_shell_or_exec el)
+  | `Entrypoint el -> cmd "ENTRYPOINT" (string_of_shell_or_exec ~escape el)
   | `Shell sl -> cmd "SHELL" (json_array_of_list sl)
   | `Workdir wd -> cmd "WORKDIR" wd
-  | `Onbuild t -> cmd "ONBUILD" (string_of_line t)
+  | `Onbuild t -> cmd "ONBUILD" (string_of_line ~escape t)
   | `Label ls -> cmd "LABEL" (string_of_label_list ls)
 
 
 (* Function interface *)
+let parser_directive pd : t = [`ParserDirective pd]
+
 let from ?alias ?tag ?platform image =
   [`From { image; tag; alias; platform }]
 
@@ -194,6 +202,13 @@ let shell s : t = [`Shell s]
 
 let workdir fmt = ksprintf (fun wd -> [`Workdir wd]) fmt
 
-let string_of_t tl = String.concat "\n" (List.map string_of_line tl)
+let string_of_t tl =
+  let rec find_escape = function
+    | `ParserDirective (`Escape c) :: _ -> c
+    | `ParserDirective _ :: tl -> find_escape tl
+    | _ -> '\\'
+  in
+  let escape = String.make 1 (find_escape tl) in
+  String.concat "\n" (List.map (string_of_line ~escape) tl)
 
 let pp ppf tl = Fmt.pf ppf "%s" (string_of_t tl)
