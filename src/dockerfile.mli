@@ -52,6 +52,15 @@ val maybe : ('a -> t) -> 'a option -> t
 
 (** {2 Dockerfile commands} *)
 
+type parser_directive =
+  [ `Syntax of string | `Escape of char ]
+  [@@deriving sexp]
+
+val parser_directive : parser_directive -> t
+(** A parser directive. If used, needs to be the first line of the
+   Dockerfile.
+   @see <https://docs.docker.com/engine/reference/builder/#parser-directives>. *)
+
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
 

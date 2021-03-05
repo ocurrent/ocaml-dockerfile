@@ -27,7 +27,31 @@ type t = [
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `LTS | `Latest ]
+  | `Windows of [ `V20H2 | `Latest ]
 ] [@@deriving sexp]
+
+type os_family = [ `Linux | `Windows ] [@@deriving sexp]
+
+let os_family_of_distro (t:t) : os_family =
+  match t with
+  | `Alpine _ | `Archlinux _ | `CentOS _ | `Debian _ | `Fedora _
+    | `OracleLinux _ | `OpenSUSE _ | `Ubuntu _ -> `Linux
+  | `Windows _ -> `Windows
+
+let os_family_to_string (os:os_family) =
+  match os with
+  | `Linux -> "linux"
+  | `Windows -> "windows"
+
+let opam_repository (os:os_family) =
+  match os with
+  | `Linux -> "git://github.com/ocaml/opam-repository.git"
+  | `Windows -> "git://github.com/fdopen/opam-repository-mingw.git#opam2"
+
+let personality os_family arch =
+  match os_family with
+  | `Linux when Ocaml_version.arch_is_32bit arch -> Some "/usr/bin/linux32"
+  | _ -> None
 
 type status = [
   | `Deprecated
@@ -46,7 +70,9 @@ let distros = [
   `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `Latest;
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04; `Ubuntu `V20_10;
-  `Ubuntu `Latest; `Ubuntu `LTS ]
+  `Ubuntu `Latest; `Ubuntu `LTS;
+  `Windows `V20H2; `Windows `Latest;
+]
 
 let distro_status (d:t) : status = match d with
   | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11) -> `Deprecated
@@ -78,11 +104,13 @@ let distro_status (d:t) : status = match d with
   | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_10)
+  | `Windows `V20H2 -> `Active `Tier3
+  | `Windows `Latest -> `Alias (`Windows `V20H2)
 
 let latest_distros =
   [ `Alpine `Latest; `Archlinux `Latest; `CentOS `Latest;
     `Debian `Stable; `OracleLinux `Latest; `OpenSUSE `Latest;
-    `Fedora `Latest; `Ubuntu `Latest; `Ubuntu `LTS ]
+    `Fedora `Latest; `Ubuntu `Latest; `Ubuntu `LTS; `Windows `Latest; ]
 
 let master_distro = `Debian `Stable
 
@@ -179,9 +207,11 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V15_2 -> Some "4.05.0"
   |`OracleLinux `V7 -> Some "4.01.0"
   |`OracleLinux `V8 -> Some "4.07.0"
+  |`Windows `V20H2 -> Some "4.11.1"
   |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
   |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
-  |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest -> assert false
+  |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest
+  |`Windows `Latest -> assert false
 
 (* The Docker tag for this distro *)
 let tag_of_distro (d:t) = match d with
@@ -249,6 +279,8 @@ let tag_of_distro (d:t) = match d with
   |`OpenSUSE `V15_1 -> "opensuse-15.1"
   |`OpenSUSE `V15_2 -> "opensuse-15.2"
   |`OpenSUSE `Latest -> "opensuse"
+  |`Windows `V20H2 -> "windows-20H2"
+  |`Windows `Latest -> "windows"
 
 let distro_of_tag x : t option = match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
@@ -314,6 +346,8 @@ let distro_of_tag x : t option = match x with
   |"opensuse-15.1" -> Some (`OpenSUSE `V15_1)
   |"opensuse-15.2" -> Some (`OpenSUSE `V15_2)
   |"opensuse" -> Some (`OpenSUSE `Latest)
+  |"windows-20H2" -> Some (`Windows `V20H2)
+  |"windows" -> Some (`Windows `Latest)
   |_ -> None
 
 let rec human_readable_string_of_distro (d:t) =
@@ -376,8 +410,9 @@ let rec human_readable_string_of_distro (d:t) =
   |`OpenSUSE `V15_0 -> "OpenSUSE 15.0 (Leap)"
   |`OpenSUSE `V15_1 -> "OpenSUSE 15.1 (Leap)"
   |`OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
+  |`Windows `V20H2 -> "Windows 20H2"
   |`Alpine `Latest | `Ubuntu `Latest | `Ubuntu `LTS | `CentOS `Latest | `Fedora `Latest
-  |`OracleLinux `Latest | `OpenSUSE `Latest -> alias ()
+  |`OracleLinux `Latest | `OpenSUSE `Latest |`Windows `Latest -> alias ()
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
@@ -389,6 +424,7 @@ let human_readable_short_string_of_distro (t:t) =
   |`Alpine _ -> "Alpine"
   |`Archlinux _ -> "Archlinux"
   |`OpenSUSE _ -> "OpenSUSE"
+  |`Windows _ -> "Windows"
 
 (* The alias tag for the latest stable version of this distro *)
 let latest_tag_of_distro (t:t) =
@@ -401,8 +437,9 @@ let latest_tag_of_distro (t:t) =
   |`Alpine _ -> "alpine"
   |`Archlinux _ -> "archlinux"
   |`OpenSUSE _ -> "opensuse"
+  |`Windows _ -> "windows"
 
-type package_manager = [ `Apt | `Yum | `Apk | `Zypper | `Pacman ] [@@deriving sexp]
+type package_manager = [ `Apt | `Yum | `Apk | `Zypper | `Pacman | `Cygwin ] [@@deriving sexp]
 
 let package_manager (t:t) =
   match t with
@@ -414,6 +451,7 @@ let package_manager (t:t) =
   |`Alpine _ -> `Apk
   |`Archlinux _ -> `Pacman
   |`OpenSUSE _ -> `Zypper
+  |`Windows _ -> `Cygwin
 
 let base_distro_tag ?(arch=`X86_64) d =
   match resolve_alias d with
@@ -516,6 +554,13 @@ let base_distro_tag ?(arch=`X86_64) d =
         | `Latest -> assert false
       in
       "opensuse/leap", tag
+  | `Windows v ->
+     let tag =
+       match v with
+       | `V20H2 -> "20H2"
+       | `Latest -> assert false
+     in
+     "mcr.microsoft.com/windows", tag
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)

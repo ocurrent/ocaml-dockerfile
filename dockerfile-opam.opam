@@ -8,7 +8,10 @@ awk/sed-style assembly.
 The opam subpackage provides opam and Linux-specific distribution
 support for generating dockerfiles."""
 maintainer: "Anil Madhavapeddy <anil@recoil.org>"
-authors: "Anil Madhavapeddy <anil@recoil.org>"
+authors: [
+  "Anil Madhavapeddy <anil@recoil.org>"
+  "Antonin Décimo <antonin@tarides.com>"
+]
 license: "ISC"
 tags: ["org:mirage" "org:ocamllabs"]
 homepage: "https://github.com/avsm/ocaml-dockerfile"
