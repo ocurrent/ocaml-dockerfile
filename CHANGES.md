@@ -1,3 +1,9 @@
+dev
+---
+
+- add `libexecinfo-dev` to Alpine dev packages as it is used
+  by multicore OCaml (@avsm)
+
 v7.1.0 2021-02-25 Cambridge
 ---------------------------
 
