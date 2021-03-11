@@ -1,6 +1,12 @@
 dev
 ---
 
+- add `libexecinfo-dev` to Alpine dev packages as it is used
+  by multicore OCaml (@avsm)
+
+v7.1.0 2021-02-25 Cambridge
+---------------------------
+
 - Add ArchLinux support (@kit-ty-kate #23)
 - Move Alpine 3.11 to deprecated (@kit-ty-kate #23).
 - Add OracleLinux v8 (@kit-ty-kate #24)
