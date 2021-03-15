@@ -25,6 +25,14 @@ val run_cmd : ('a, unit, string, t) format4 -> 'a
 val run_powershell : ('a, unit, string, t) format4 -> 'a
 (** [run_powershell fmt] will execute [powershell -Command "fmt"]. *)
 
+val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
+(** [run_vc ~arch fmt] will execute [run fmt] with Visual
+   Compiler for [~arch] loaded in the environment. *)
+
+val run_ocaml_env : string -> ('a, unit, string, t) format4 -> 'a
+(** [run_ocaml_env args fmt] will execute [fmt] in the evironment
+   loaded by [ocaml-env exec] with [args]. *)
+
 val install_vc_redist : ?vs_version:string -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
    @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
@@ -36,10 +44,18 @@ val install_visual_studio_build_tools : ?vs_version:string -> ?split:bool -> str
    seems to cause problems with Docker.
    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
-val ocaml_for_windows_compiler_variant : Dockerfile_distro.os_family ->
-                                         Ocaml_version.arch -> string option
-(** Returns the OCaml for Windows specific OCaml compiler variant, if
-   applicable. *)
+type windows_port = [
+  | `Cygwin                     (* Currently unsupported. *)
+  | `Mingw
+  | `Msvc
+  ]
+(** A variant used to describe the switch in OCaml for Windows *)
+
+val ocaml_for_windows_variant_exn : port:windows_port -> arch:Ocaml_version.arch ->
+                                    switch:Ocaml_version.t -> (Ocaml_version.t * (string * string))
+(** [ocaml_for_windows_variant ~port ~arch] returns the
+   [(variant, (package_name, package_version))] of the OCaml compiler
+   package in OCaml for Windows, if applicable. *)
 
 val cleanup : unit -> t
 (** Cleanup caches. *)
@@ -93,6 +109,10 @@ module Cygwin : sig
   (** [run_sh ?cyg fmt] will execute in the Cygwin root
      [\bin\bash.exe --login -c "fmt"]. *)
 
+  val run_sh_ocaml_env : ?cyg:cyg -> string -> ('a, unit, string, t) format4 -> 'a
+  (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the evironment
+     loaded by [ocaml-env cygwin exec] with [args]. *)
+
   (** Rules for Git *)
   module Git : sig
     val init : ?cyg:cyg -> ?name:string -> ?email:string -> unit -> t
@@ -103,8 +123,8 @@ end
 (** Rules for Winget-based installation.
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
-  val build_form_source :
-    ?arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
+  val build_from_source :
+    arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
   (** Build Winget from source. This won't send telemetry to
      Microsoft. It is build in a separate Docker image, with alias

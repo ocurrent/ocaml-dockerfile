@@ -214,17 +214,14 @@ let pacman_opam2 ?(labels=[]) ?arch distro () =
 
 
 (* Cygwin based Dockerfile *)
-let cygwin_opam2 ?(labels=[]) ?arch distro () =
-  Windows.Winget.build_form_source ?arch ~distro ()
-  @@ header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
+let cygwin_opam2 ?(labels=[]) ~arch distro () =
+  Windows.Winget.build_from_source ~arch ~distro ()
+  @@ header ~arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.install_vc_redist ()
-  @@ Windows.Winget.setup ()
-  @@ Windows.Winget.dev_packages ()
   @@ Windows.install_visual_studio_build_tools [
          "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
          "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
-  @@ Windows.Winget.Git.init ()
   @@ begin
       let extra = Windows.Cygwin.msvc_packages () in
       let extra = Windows.Cygwin.mingw_packages ~extra () in
@@ -232,6 +229,9 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
       let extra, t = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
       Windows.Cygwin.setup ~extra () @@ t
     end
+  @@ Windows.Winget.setup ()
+  @@ Windows.Winget.dev_packages ()
+  @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 
 let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
@@ -244,7 +244,10 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
      yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools d ()
   | `Zypper -> zypper_opam2 ?labels ?arch d ()
   | `Pacman -> pacman_opam2 ?labels ?arch d ()
-  | `Cygwin -> cygwin_opam2 ?labels ?arch d ()
+  | `Cygwin ->
+     match arch with
+     | None -> failwith "Windows requires an explicit architecture"
+     | Some arch -> cygwin_opam2 ?labels ~arch d ()
   in
   let clone = if clone_opam_repo then
     let url = Dockerfile_distro.(os_family_of_distro d |> opam_repository) in
@@ -253,6 +256,17 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   let pers = match personality ?arch d with
     | None -> empty | Some pers -> entrypoint_exec [pers] in
   (D.tag_of_distro d, fn @@ clone @@ pers)
+
+let create_switches ~os_family ~arch t =
+  let create_switch switch pkg = run "opam switch create %s %s" (OV.to_string switch) pkg in
+  let switch = OV.with_patch t None in
+  if os_family = `Windows then
+    List.map (fun port ->
+        let switch, (pn, pv) = Dockerfile_windows.ocaml_for_windows_variant_exn ~port ~arch ~switch in
+        create_switch switch (pv ^ pn))
+      [`Mingw; `Msvc]
+  else
+    [create_switch switch (Ocaml_version.Opam.V2.name switch)]
 
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
@@ -264,11 +278,7 @@ let all_ocaml_compilers hub_id arch distro =
       if List.exists OV.Releases.is_dev ovs then
          run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
       else empty in
-    let variant = Dockerfile_windows.ocaml_for_windows_compiler_variant os_family arch in
-    List.map (fun t ->
-      run "opam switch create %s %s"
-        (OV.(to_string (with_patch (with_variant t variant) None))) (OV.Opam.V2.name t)) ovs |>
-      (@@@) add_beta_remote
+    add_beta_remote @@@ List.concat_map (create_switches ~os_family ~arch) ovs
   in
   let d =
     let pers = match personality ~arch distro with
@@ -309,12 +319,8 @@ let separate_ocaml_compilers hub_id arch distro =
              run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
-         let variant = Dockerfile_windows.ocaml_for_windows_compiler_variant os_family arch in
          let variants =
-           OV.Opam.V2.switches arch ov
-           |> List.map (fun t -> run "opam switch create %s %s"
-                                   (OV.(to_string (with_patch (with_variant t variant) None))) (OV.Opam.V2.name t))
-           |> (@@@) empty
+           empty @@@ List.concat_map (create_switches ~os_family ~arch) (OV.Opam.V2.switches arch ov)
          in
          let d =
            let pers = match personality ~arch distro with

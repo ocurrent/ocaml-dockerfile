@@ -4,6 +4,8 @@ dev
 - add `libexecinfo-dev` to Alpine dev packages as it is used
   by multicore OCaml (@avsm)
 - retrieve cygsympathy script from upstream master (@dra27)
+- Fixes to the Windows images, ease creation of mingw and msvc images
+  (@MisterDA)
 
 v7.1.0 2021-02-25 Cambridge
 ---------------------------
@@ -59,7 +61,7 @@ v6.5.0 2020-06-29 Lockdown At Home
 
 - Add Fedora 32, Alpine 3.12 to the known distros (@avsm)
 - Move Fedora 30 to deprecated, and Alpine 3.11 to Tier 2 (@avsm)
-- Add i386 architecture build support (@avsm). 
+- Add i386 architecture build support (@avsm).
 - Add a [Dockerfile.from ?platform] argument to specify multiarch
   image sources (@avsm)
 - Add [Dockerfile.shell] to specify a custom shell to subsequent
@@ -115,7 +117,7 @@ v6.1.0 2019-02-06 Cambridge
 - Demote some releases to Tier 2 from Tier 1.
 - Add functions to calculate base distro tags in `Dockerfile_distro`.
 - Install bzip2 and rsync on OpenSUSE distros.
-- Add a `Dockerfile_opam.deprecated` container for being able to turn off older distros. 
+- Add a `Dockerfile_opam.deprecated` container for being able to turn off older distros.
 - Install `which` into OpenSUSE containers by default.
 - Use `+trunk` suffix for dev versions of compiler.
 - Remove unused GNU Parallel wrapper in `dockerfile_cmd`.
@@ -157,7 +159,7 @@ v5.0.0 2018-06-07 Cambridge
 - Add concept of a "Tier 1" and "Tier 2" distro so that we can
   categorise them more easily for container generation.
 - Add support for Alpine 3.7 and Ubuntu 18.04 and Fedora 28.
-- Update Ubuntu LTS to 18.04. 
+- Update Ubuntu LTS to 18.04.
 - Deprecate Ubuntu 17.10 and 12.04 (now end-of-life).
 - Alter the individual compiler containers to omit the patch version
   from the name. They will always have the latest patch version for CI.
@@ -299,7 +301,7 @@ v1.7.0
   install `redhat-rpm-config` which is needed for pthreads.
 * Add an `extra` arg the Dockerfile_distro matrix targets to
   add more distros to the mix, such as Raspbian.
-* Support multiple OPAM versions in the matrix generation, 
+* Support multiple OPAM versions in the matrix generation,
   to make testing OPAM master easier.
 * Always do an `rpm --rebuilddb` before a Yum invocation to
   deal with possible OverlayFS brokenness.
@@ -398,4 +400,3 @@ v1.0.0 2014-12-30 Cambridge
 ---------------------------
 
 * Initial public release.
-
