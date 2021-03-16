@@ -162,7 +162,7 @@ module Winget = struct
   let build_from_source ~arch ?(distro=`Windows `Latest) ?(winget_version="master") ?(vs_version="16") () =
     let img, tag = Dockerfile_distro.base_distro_tag ~arch distro in
     parser_directive (`Escape '`')
-    @@ from ~alias:"winget-builder" ~tag img
+    @@ from ~alias:"winget-builder" ~tag "mcr.microsoft.com/windows/servercore"
     @@ user "ContainerAdministrator"
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
