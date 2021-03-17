@@ -80,11 +80,10 @@ module Cygwin = struct
   let cygcache = {|C:\TEMP\cache|}
 
   let install_cygsympathy_from_source cyg =
-    let cygsympathy = "dra27" in
     run {|mkdir %s\lib\cygsympathy\|} cyg.root
-    @@ add ~src:["https://raw.githubusercontent.com/" ^ cygsympathy ^ "/cygsympathy/script/cygsympathy.cmd"]
+    @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.cmd"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\|}) ()
-    @@ add ~src:["https://raw.githubusercontent.com/" ^ cygsympathy ^ "/cygsympathy/script/cygsympathy.sh"]
+    @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.sh"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\cygsympathy|}) ()
     @@ run {|mkdir %s\etc\postinstall\|} cyg.root
     @@ run {|mklink %s\etc\postinstall\zp_cygsympathy.sh %s\lib\cygsympathy\cygsympathy|} cyg.root cyg.root
