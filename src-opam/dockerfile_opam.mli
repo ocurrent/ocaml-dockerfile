@@ -63,7 +63,7 @@ val separate_ocaml_compilers :
   Dockerfiles that build individual OCaml compiler versions and their
   variants (e.g. flambda) in separate containers. *)
 
-val deprecated : Dockerfile.t 
+val deprecated : Dockerfile.t
 (** [deprecated] is a minimal container that outputs a deprecation error. This
    is used to replace unsupported containers on the Hub rather than leaving an
    unmaintained distribution lying around with possible security holes. *)

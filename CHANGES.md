@@ -4,8 +4,10 @@ dev
 - add `libexecinfo-dev` to Alpine dev packages as it is used
   by multicore OCaml (@avsm)
 - retrieve cygsympathy script from upstream master (@dra27)
-- Fixes to the Windows images, ease creation of mingw and msvc images
+- Fixes to the Windows images, smaller images, fix bugs
   (@MisterDA)
+- Introduce a Cygwin image, and move Windows Mingw and Windows Msvc at
+  the distro level. (@MisterDA)
 
 v7.1.0 2021-02-25 Cambridge
 ---------------------------

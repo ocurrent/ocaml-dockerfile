@@ -31,12 +31,13 @@ type t = [
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `LTS | `Latest ]
-  | `Windows of [ `V20H2 | `Latest ]
+  | `Cygwin of [ `V20H2 | `Latest ]
+  | `Windows of [`Mingw | `Msvc] * [ `V20H2 | `Latest ]
 ] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
-type os_family = [ `Linux | `Windows ] [@@deriving sexp]
-(** Supported Docker container operating systems  *)
+type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
+(** The operating system family a distro belongs to. *)
 
 val os_family_of_distro : t -> os_family
 (** [os_family_of_distro t] returns the OS family of the distro. *)
@@ -90,6 +91,7 @@ type package_manager = [
   | `Zypper (** OpenSUSE Zypper *)
   | `Pacman (** Archlinux Pacman *)
   | `Cygwin (** Cygwin package manager *)
+  | `Windows (** Native Windows, WinGet, Cygwin  *)
 ] [@@deriving sexp]
 (** The package manager used by a distro. *)
 

@@ -38,6 +38,16 @@ let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ~b
     run "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
   else empty
 
+(* Can't satisfy the typechecker... *)
+let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ~branch () =
+  let open Dockerfile_windows.Cygwin in
+  run_sh "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch
+  @@ run_sh
+       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam" prefix prefix branch prefix branch
+  @@ if add_default_link then
+       run_sh "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
+     else empty
+
 let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   let rel = "0.4.1" in
   let file = Fmt.strf "bubblewrap-%s.tar.xz" rel in
@@ -84,7 +94,7 @@ let header ?arch ?maintainer ?img ?tag d =
     | None -> empty in
   let escape =
     match D.os_family_of_distro d with
-    | `Windows -> parser_directive (`Escape '`')
+    | `Windows | `Cygwin -> parser_directive (`Escape '`')
     | _ -> empty in
   let img, tag =
     let dimg, dtag = D.base_distro_tag ?arch d in
@@ -212,22 +222,42 @@ let pacman_opam2 ?(labels=[]) ?arch distro () =
   @@ Linux.Pacman.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-
 (* Cygwin based Dockerfile *)
-let cygwin_opam2 ?(labels=[]) ~arch distro () =
-  Windows.Winget.build_from_source ~arch ~distro ()
-  @@ header ~arch distro @@ label (("distro_style", "cygwin") :: labels)
+let cygwin_opam2 ?(labels=[]) ?arch distro () =
+  let img, tag = D.base_distro_tag ?arch distro in
+  header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.install_vc_redist ()
-  @@ Windows.install_visual_studio_build_tools [
-         "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
-         "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
+  @@ Windows.Cygwin.(setup ~extra:(cygwin_packages ())) ()
+  @@ Windows.Cygwin.Git.init ()
+  @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ()
+  @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"master" ()
+  @@ run "strip /usr/local/bin/opam*"
+  @@ from ~tag img
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ Windows.Cygwin.(setup ~extra:(cygwin_packages ())) ()
+  @@ Windows.Cygwin.Git.init ()
+
+(* Native Windows, WinGet, Cygwin based Dockerfiles *)
+let windows_opam2 ?(labels=[]) ?arch distro () =
+  Windows.Winget.build_from_source ?arch ~distro ()
+  @@ header ?arch distro @@ label (("distro_style", "windows") :: labels)
+  @@ user "ContainerAdministrator"
   @@ begin
-      let extra = Windows.Cygwin.msvc_packages () in
-      let extra = Windows.Cygwin.mingw_packages ~extra () in
-      let extra = Windows.Cygwin.cygwin_packages ~extra () in
-      let extra, t = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
-      Windows.Cygwin.setup ~extra () @@ t
+      let extra, t = match distro with
+        | `Windows (`Mingw, _) ->
+           Windows.Cygwin.mingw_packages (), empty
+        | `Windows (`Msvc, _) ->
+           Windows.Cygwin.msvc_packages (),
+           Windows.install_visual_studio_build_tools [
+               "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
+               "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
+        | _ -> invalid_arg "Invalid distribution"
+      in
+      let extra, t' = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
+      Windows.install_vc_redist () @@ t
+      @@ Windows.Cygwin.setup ~extra () @@ t'
     end
   @@ Windows.Winget.setup ()
   @@ Windows.Winget.dev_packages ()
@@ -244,10 +274,8 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
      yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools d ()
   | `Zypper -> zypper_opam2 ?labels ?arch d ()
   | `Pacman -> pacman_opam2 ?labels ?arch d ()
-  | `Cygwin ->
-     match arch with
-     | None -> failwith "Windows requires an explicit architecture"
-     | Some arch -> cygwin_opam2 ?labels ~arch d ()
+  | `Cygwin -> cygwin_opam2 ?labels ?arch d ()
+  | `Windows -> windows_opam2 ?labels ?arch d ()
   in
   let clone = if clone_opam_repo then
     let url = Dockerfile_distro.(os_family_of_distro d |> opam_repository) in
@@ -257,16 +285,15 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
     | None -> empty | Some pers -> entrypoint_exec [pers] in
   (D.tag_of_distro d, fn @@ clone @@ pers)
 
-let create_switches ~os_family ~arch t =
+let create_switch ~arch distro t =
   let create_switch switch pkg = run "opam switch create %s %s" (OV.to_string switch) pkg in
   let switch = OV.with_patch t None in
-  if os_family = `Windows then
-    List.map (fun port ->
-        let switch, (pn, pv) = Dockerfile_windows.ocaml_for_windows_variant_exn ~port ~arch ~switch in
-        create_switch switch (pv ^ pn))
-      [`Mingw; `Msvc]
-  else
-    [create_switch switch (Ocaml_version.Opam.V2.name switch)]
+  match distro with
+  | `Windows (port, _) ->
+    let (pn, pv) = Dockerfile_windows.ocaml_for_windows_package_exn ~port ~arch ~switch in
+    create_switch switch (pv ^ pn)
+  | _ ->
+    create_switch switch (Ocaml_version.Opam.V2.name switch)
 
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
@@ -278,14 +305,14 @@ let all_ocaml_compilers hub_id arch distro =
       if List.exists OV.Releases.is_dev ovs then
          run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
       else empty in
-    add_beta_remote @@@ List.concat_map (create_switches ~os_family ~arch) ovs
+    add_beta_remote @@@ List.map (create_switch ~arch distro) ovs
   in
   let d =
     let pers = match personality ~arch distro with
       | None -> [] | Some pers -> [pers] in
     let sandbox = match os_family with
       | `Linux -> run "opam-sandbox-disable"
-      | `Windows -> empty
+      | `Windows | `Cygwin -> empty
     in
     header ~arch ~tag:(Fmt.strf "%s-opam" distro_tag) ~img:hub_id distro
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
@@ -299,7 +326,7 @@ let all_ocaml_compilers hub_id arch distro =
          (if os_family = `Windows then " depext-cygwinports" else "")
     @@ env ["OPAMYES","1"]
     @@ match os_family with
-       | `Linux -> cmd "bash"
+       | `Linux | `Cygwin -> cmd "bash"
        | `Windows -> cmd "CMD"
   in
   (Fmt.strf "%s" distro_tag, d)
@@ -320,14 +347,14 @@ let separate_ocaml_compilers hub_id arch distro =
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
-           empty @@@ List.concat_map (create_switches ~os_family ~arch) (OV.Opam.V2.switches arch ov)
+           empty @@@ List.map (create_switch ~arch distro) (OV.Opam.V2.switches arch ov)
          in
          let d =
            let pers = match personality ~arch distro with
              | None -> [] | Some pers -> [pers] in
            let sandbox = match os_family with
              | `Linux -> run "opam-sandbox-disable"
-             | `Windows -> empty in
+             | `Windows | `Cygwin -> empty in
            header ~arch ~tag:(Fmt.strf "%s-opam" distro_tag) ~img:hub_id distro
            @@ workdir "/home/opam/opam-repository"
            @@ sandbox
@@ -341,7 +368,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ env ["OPAMYES","1"]
            @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
            @@ match os_family with
-              | `Linux -> cmd "bash"
+              | `Linux | `Cygwin -> cmd "bash"
               | `Windows -> cmd "CMD"
          in
          (Fmt.strf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )

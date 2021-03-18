@@ -23,7 +23,7 @@ let run_powershell fmt = ksprintf (run {|powershell -Command "%s"|}) fmt
 let run_vc ~arch fmt =
   let arch = match arch with
     | `I386 -> "x86" | `X86_64 -> "amd64"
-    | `Aarch64 | `Aarch32 | `Ppc64le -> failwith "Cross-compiling isn't supported."
+    | `Aarch64 | `Aarch32 | `Ppc64le -> invalid_arg "Unsupported architecture"
   in
   ksprintf (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch) fmt
 let run_ocaml_env args fmt = ksprintf (run {|ocaml-env exec %s -- %s|} args) fmt
@@ -59,29 +59,16 @@ let prepend_path paths =
   run {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%s;%%c"|} paths
 
-type windows_port = [
-  | `Cygwin
-  | `Mingw
-  | `Msvc
-  ]
-
-let ocaml_for_windows_variant_exn ~port ~arch ~switch =
+let ocaml_for_windows_package_exn ~switch ~port ~arch =
   let variant =
     let bitness = if Ocaml_version.arch_is_32bit arch then "32" else "64" in
     match arch with
-    | `X86_64 | `I386 -> begin
-        match port with
-        | `Cygwin -> raise (Invalid_argument "Cygwin port is unsupported")
-        | `Mingw -> Some ("mingw" ^ bitness)
-        | `Msvc -> Some ("msvc" ^ bitness)
-      end
-    | _ -> raise (Invalid_argument "Unsupported architecture")
+    | `X86_64 | `I386 ->
+       (match port with `Mingw -> "mingw" | `Msvc -> "msvc") ^ bitness
+    | _ -> invalid_arg "Unsupported architecture"
   in
-  match variant with
-  | Some variant ->
-     let _, pkgver = Ocaml_version.Opam.V2.package switch in
-     Ocaml_version.with_variant switch (Some variant), ("ocaml-variants", pkgver ^ "+" ^ variant)
-  | _ -> raise (Invalid_argument "Could not determine Windows variant")
+  let _, pkgver = Ocaml_version.Opam.V2.package switch in
+  ("ocaml-variants", pkgver ^ "+" ^ variant)
 
 let cleanup () =
   run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
@@ -98,7 +85,7 @@ module Cygwin = struct
     }
 
   let run_sh ?(cyg=default) fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
-  let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh "ocaml-env exec %s -- %s" args) fmt
+  let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh ~cyg "ocaml-env exec %s -- %s" args) fmt
 
   let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
   let cygcache = {|C:\TEMP\cache|}
@@ -139,12 +126,13 @@ module Cygwin = struct
         --site %s --local-package-dir %s --upgrade-also|}
       cygsetup cyg.root cyg.mirror cygcache
 
-  let cygwin_packages ?(extra=[]) () = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "flexdll" :: extra
+  let cygwin_packages ?(extra=[]) () = "make" :: "diffutils" :: "ocaml" :: "gcc-core"
+                                       :: "flexdll" :: "git" :: "patch" :: "m4" :: extra
   let mingw_packages ?(extra=[]) () = "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
   let msvc_packages ?(extra=[]) () = "make" :: "diffutils" :: extra
   let ocaml_for_windows_packages ?cyg ?(extra=[]) ?version:(version="0.0.0.2") () =
     let packages = "make" :: "diffutils" :: "mingw64-x86_64-gcc-g++" :: "vim" :: "git"
-                   :: "curl" :: "rsync" :: "unzip" :: "patch" :: "m4" :: "gawk" :: extra in
+                   :: "curl" :: "rsync" :: "unzip" :: "patch" :: "m4" :: extra in
     let t =
       add ~src:["https://github.com/fdopen/opam-repository-mingw/releases/download/" ^ version ^ "/opam64.tar.xz"]
         ~dst:{|C:\TEMP\|} ()
@@ -160,8 +148,8 @@ module Cygwin = struct
 end
 
 module Winget = struct
-  let build_from_source ~arch ?(distro=`Windows `Latest) ?(winget_version="master") ?(vs_version="16") () =
-    let img, tag = Dockerfile_distro.base_distro_tag ~arch distro in
+  let build_from_source ?(arch=`X86_64) ?(distro=`Windows (`Mingw, `Latest)) ?(winget_version="master") ?(vs_version="16") () =
+    let _, tag = Dockerfile_distro.base_distro_tag ~arch distro in
     parser_directive (`Escape '`')
     @@ from ~alias:"winget-builder" ~tag "mcr.microsoft.com/windows/servercore"
     @@ user "ContainerAdministrator"

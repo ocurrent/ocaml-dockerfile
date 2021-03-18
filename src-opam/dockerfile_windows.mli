@@ -44,17 +44,11 @@ val install_visual_studio_build_tools : ?vs_version:string -> ?split:bool -> str
    seems to cause problems with Docker.
    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
-type windows_port = [
-  | `Cygwin                     (* Currently unsupported. *)
-  | `Mingw
-  | `Msvc
-  ]
-(** A variant used to describe the switch in OCaml for Windows *)
-
-val ocaml_for_windows_variant_exn : port:windows_port -> arch:Ocaml_version.arch ->
-                                    switch:Ocaml_version.t -> (Ocaml_version.t * (string * string))
+val ocaml_for_windows_package_exn :
+  switch:Ocaml_version.t -> port:[`Mingw | `Msvc] -> arch:Ocaml_version.arch ->
+  (string * string)
 (** [ocaml_for_windows_variant ~port ~arch] returns the
-   [(variant, (package_name, package_version))] of the OCaml compiler
+   [(package_name, package_version)] of the OCaml compiler
    package in OCaml for Windows, if applicable. *)
 
 val cleanup : unit -> t
@@ -124,7 +118,7 @@ end
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
   val build_from_source :
-    arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
+    ?arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
   (** Build Winget from source. This won't send telemetry to
      Microsoft. It is build in a separate Docker image, with alias
