@@ -131,6 +131,7 @@ module Cygwin = struct
     @@ cygwin ~cyg "--packages %s" (extra |> List.sort_uniq String.compare |> String.concat ",")
     @@ install_msvs_tools_from_source cyg
     @@ prepend_path (List.map ((^) cyg.root) [{|\bin|}])
+    @@ run {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|} cyg.root
     @@ workdir {|%s\home\opam|} cyg.root
 
   let update ?(cyg=default) () =
