@@ -227,7 +227,7 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.Cygwin.(setup ~extra:(cygwin_packages ())) ()
+  @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
   @@ Windows.Cygwin.Git.init ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"master" ()
@@ -236,7 +236,7 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
-  @@ Windows.Cygwin.(setup ~extra:(cygwin_packages ())) ()
+  @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
   @@ Windows.Cygwin.Git.init ()
 
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)

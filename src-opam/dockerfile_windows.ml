@@ -126,11 +126,21 @@ module Cygwin = struct
         --site %s --local-package-dir %s --upgrade-also|}
       cygsetup cyg.root cyg.mirror cygcache
 
-  let cygwin_packages ?(extra=[]) () = "make" :: "diffutils" :: "ocaml" :: "gcc-core"
-                                       :: "flexdll" :: "git" :: "patch" :: "m4" :: extra
+  let cygwin_packages ?(cyg=default) ?(extra=[]) ?(flexdll_version="0.39-1") () =
+    let packages = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git"
+                   :: "patch" :: "m4" :: "cygport" :: extra in
+    let t =
+      (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
+      add ~src:["http://mirrors.kernel.org/sourceware/cygwin/x86_64/release/flexdll/flexdll-" ^ flexdll_version ^ ".tar.xz"]
+        ~dst:(cyg.root ^ {|\flexdll.tar.xz|}) ()
+      @@ run_sh ~cyg "cd / && tar -xJf flexdll.tar.xz && rm flexdll.tar.xz"
+    in
+    packages, t
+
   let mingw_packages ?(extra=[]) () = "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
   let msvc_packages ?(extra=[]) () = "make" :: "diffutils" :: extra
-  let ocaml_for_windows_packages ?cyg ?(extra=[]) ?version:(version="0.0.0.2") () =
+
+  let ocaml_for_windows_packages ?cyg ?(extra=[]) ?(version="0.0.0.2") () =
     let packages = "make" :: "diffutils" :: "mingw64-x86_64-gcc-g++" :: "vim" :: "git"
                    :: "curl" :: "rsync" :: "unzip" :: "patch" :: "m4" :: extra in
     let t =

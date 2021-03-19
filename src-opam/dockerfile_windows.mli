@@ -77,7 +77,8 @@ module Cygwin : sig
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages : ?extra:string list -> unit -> string list
+  val cygwin_packages : ?cyg:cyg -> ?extra:string list ->
+                        ?flexdll_version:string -> unit -> string list * t
   (** [cygwin_packages ?extra ()] will install the base development
      tools for the OCaml Cygwin port. Extra packages may also bep
      optionally supplied via [extra]. *)
