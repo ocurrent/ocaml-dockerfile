@@ -158,7 +158,7 @@ module Cygwin = struct
 end
 
 module Winget = struct
-  let build_from_source ?(arch=`X86_64) ?(distro=`Windows (`Mingw, `Latest)) ?(winget_version="master") ?(vs_version="16") () =
+  let build_from_source ?(arch=`X86_64) ?(distro=`Windows (`Mingw, `Latest)) ?(winget_version="v-0.2.10191-preview") ?(vs_version="16") () =
     let _, tag = Dockerfile_distro.base_distro_tag ~arch distro in
     parser_directive (`Escape '`')
     @@ from ~alias:"winget-builder" ~tag "mcr.microsoft.com/windows/servercore"
