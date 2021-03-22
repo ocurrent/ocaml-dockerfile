@@ -32,7 +32,7 @@ type t = [
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `LTS | `Latest ]
   | `Cygwin of [ `V20H2 | `Latest ]
-  | `Windows of [`Mingw | `Msvc] * [ `V20H2 | `Latest ]
+  | `Windows of [`Mingw | `Msvc] * [ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 | `Latest ]
 ] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
