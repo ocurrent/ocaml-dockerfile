@@ -27,8 +27,8 @@ type t = [
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `LTS | `Latest ]
-  | `Cygwin of [ `V20H2 | `Latest ]
-  | `Windows of [`Mingw | `Msvc] * [ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 | `Latest ]
+  | `Cygwin of [ `V20H2 ]
+  | `Windows of [`Mingw | `Msvc] * [ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ]
 ] [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -74,9 +74,9 @@ let distros = [
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04; `Ubuntu `V20_10;
   `Ubuntu `Latest; `Ubuntu `LTS;
-  `Cygwin `V20H2; `Cygwin `Latest;
-  `Windows (`Mingw, `V1809); `Windows (`Mingw, `V1903); `Windows (`Mingw, `V1909); `Windows (`Mingw, `V2004); `Windows (`Mingw, `V20H2); `Windows (`Mingw, `Latest);
-  `Windows (`Msvc, `V1809); `Windows (`Msvc, `V1903); `Windows (`Msvc, `V1909); `Windows (`Msvc, `V2004); `Windows (`Msvc, `V20H2); `Windows (`Msvc, `Latest);
+  `Cygwin `V20H2;
+  `Windows (`Mingw, `V1809); `Windows (`Mingw, `V1903); `Windows (`Mingw, `V1909); `Windows (`Mingw, `V2004); `Windows (`Mingw, `V20H2);
+  `Windows (`Msvc, `V1809); `Windows (`Msvc, `V1903); `Windows (`Msvc, `V1909); `Windows (`Msvc, `V2004); `Windows (`Msvc, `V20H2);
 ]
 
 let distro_status (d:t) : status = match d with
@@ -110,16 +110,14 @@ let distro_status (d:t) : status = match d with
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_10)
   | `Cygwin `V20H2 -> `Active `Tier3
-  | `Cygwin `Latest -> `Alias (`Cygwin `V20H2)
   | `Windows (_, `V20H2) -> `Active `Tier3
-  | `Windows (port, `Latest) -> `Alias (`Windows (port, `V20H2))
   | `Windows (_, _) -> `Deprecated (* sorry David *)
 
 let latest_distros =
   [ `Alpine `Latest; `Archlinux `Latest; `CentOS `Latest;
     `Debian `Stable; `OracleLinux `Latest; `OpenSUSE `Latest;
     `Fedora `Latest; `Ubuntu `Latest; `Ubuntu `LTS;
-    `Cygwin `Latest; `Windows (`Mingw, `Latest); ]
+    `Cygwin `V20H2; `Windows (`Mingw, `V20H2); `Windows (`Msvc, `V20H2)]
 
 let master_distro = `Debian `Stable
 
@@ -217,10 +215,10 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OracleLinux `V7 -> Some "4.01.0"
   |`OracleLinux `V8 -> Some "4.07.0"
   |`Cygwin `V20H2 -> Some "4.10.0"
+  |`Windows _ -> None
   |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
   |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
-  |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest
-  |`Cygwin `Latest|`Windows _ -> assert false
+  |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest -> assert false
 
 (* The Docker tag for this distro *)
 let tag_of_distro (d:t) = match d with
@@ -289,19 +287,16 @@ let tag_of_distro (d:t) = match d with
   |`OpenSUSE `V15_2 -> "opensuse-15.2"
   |`OpenSUSE `Latest -> "opensuse"
   |`Cygwin `V20H2 -> "cygwin-20H2"
-  |`Cygwin `Latest -> "cygwin"
   |`Windows (`Mingw, `V1809) -> "windows-mingw-1809"
   |`Windows (`Mingw, `V1903) -> "windows-mingw-1903"
   |`Windows (`Mingw, `V1909) -> "windows-mingw-1909"
   |`Windows (`Mingw, `V2004) -> "windows-mingw-2004"
   |`Windows (`Mingw, `V20H2) -> "windows-mingw-20H2"
-  |`Windows (`Mingw, `Latest) -> "windows-mingw"
   |`Windows (`Msvc, `V1809) -> "windows-msvc-1809"
   |`Windows (`Msvc, `V1903) -> "windows-msvc-1903"
   |`Windows (`Msvc, `V1909) -> "windows-msvc-1909"
   |`Windows (`Msvc, `V2004) -> "windows-msvc-2004"
   |`Windows (`Msvc, `V20H2) -> "windows-msvc-20H2"
-  |`Windows (`Msvc, `Latest) -> "windows-msvc"
 
 let distro_of_tag x : t option = match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
@@ -368,19 +363,16 @@ let distro_of_tag x : t option = match x with
   |"opensuse-15.2" -> Some (`OpenSUSE `V15_2)
   |"opensuse" -> Some (`OpenSUSE `Latest)
   |"cygwin-20H2" -> Some (`Cygwin `V20H2)
-  |"cygwin" -> Some (`Cygwin `Latest)
   |"windows-mingw-1809" -> Some (`Windows (`Mingw, `V1809))
   |"windows-mingw-1903" -> Some (`Windows (`Mingw, `V1903))
   |"windows-mingw-1909" -> Some (`Windows (`Mingw, `V1909))
   |"windows-mingw-2004" -> Some (`Windows (`Mingw, `V2004))
   |"windows-mingw-20H2" -> Some (`Windows (`Mingw, `V20H2))
-  |"windows-mingw" -> Some (`Windows (`Msvc, `Latest))
   |"windows-msvc-1809" -> Some (`Windows (`Msvc, `V1809))
   |"windows-msvc-1903" -> Some (`Windows (`Msvc, `V1903))
   |"windows-msvc-1909" -> Some (`Windows (`Msvc, `V1909))
   |"windows-msvc-2004" -> Some (`Windows (`Msvc, `V2004))
   |"windows-msvc-20H2" -> Some (`Windows (`Msvc, `V20H2))
-  |"windows-msvc" -> Some (`Windows (`Msvc, `Latest))
   |_ -> None
 
 let rec human_readable_string_of_distro (d:t) =
@@ -455,8 +447,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Windows (`Msvc, `V2004) -> "Windows mingw 2004"
   |`Windows (`Msvc, `V20H2) -> "Windows mingw 20H2"
   |`Alpine `Latest | `Ubuntu `Latest | `Ubuntu `LTS | `CentOS `Latest | `Fedora `Latest
-  |`OracleLinux `Latest | `OpenSUSE `Latest
-  |`Cygwin `Latest |`Windows (_, `Latest) -> alias ()
+  |`OracleLinux `Latest | `OpenSUSE `Latest -> alias ()
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
@@ -607,7 +598,6 @@ let base_distro_tag ?(arch=`X86_64) d =
      let tag =
        match v with
        | `V20H2 -> "20H2"
-       | `Latest -> assert false
      in
      "mcr.microsoft.com/windows/servercore", tag
   | `Windows (_, v) ->
@@ -618,7 +608,6 @@ let base_distro_tag ?(arch=`X86_64) d =
        | `V1909 -> "1909"
        | `V2004 -> "2004"
        | `V20H2 -> "20H2"
-       | `Latest -> assert false
      in
      "mcr.microsoft.com/windows", tag
 
