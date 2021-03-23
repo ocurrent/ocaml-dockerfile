@@ -54,6 +54,10 @@ val personality : os_family -> Ocaml_version.arch -> string option
 (** [personality os_family arch] returns the personality associated to
    the architecture, if [os_family] is [`Linux]. *)
 
+val is_same_distro : t -> t -> bool
+(** [is_same_distro d1 d2] returns whether [d1] is the same distro as
+   [d2], regardless of their respective versions. *)
+
 val compare : t -> t -> int
 (** [compare a b] is a lexical comparison function for {!t}. *)
 

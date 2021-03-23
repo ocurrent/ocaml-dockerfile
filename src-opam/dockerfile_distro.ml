@@ -463,20 +463,19 @@ let human_readable_short_string_of_distro (t:t) =
   |`Windows (`Mingw, _) -> "Windows mingw"
   |`Windows (`Msvc, _) -> "Windows mvsc"
 
+let is_same_distro (d1:t) (d2:t) =
+  match d1, d2 with
+  | `Ubuntu _, `Ubuntu _ | `Debian _, `Debian _ | `CentOS _, `CentOS _
+    | `Fedora _, `Fedora _ | `OracleLinux _, `OracleLinux _
+    | `Alpine _, `Alpine _ | `Archlinux _, `Archlinux _
+    | `OpenSUSE _, `OpenSUSE _ | `Cygwin _, `Cygwin _ -> true
+  | `Windows (p1, _), `Windows (p2, _) when p1 = p2 -> true
+  | _ -> false
+
 (* The alias tag for the latest stable version of this distro *)
 let latest_tag_of_distro (t:t) =
-  match t with
-  |`Ubuntu _ ->  "ubuntu"
-  |`Debian _ -> "debian"
-  |`CentOS _ -> "centos"
-  |`Fedora _ -> "fedora"
-  |`OracleLinux _ -> "oraclelinux"
-  |`Alpine _ -> "alpine"
-  |`Archlinux _ -> "archlinux"
-  |`OpenSUSE _ -> "opensuse"
-  |`Cygwin _ -> "cygwin"
-  |`Windows (`Mingw, _) -> "windows-mingw"
-  |`Windows (`Msvc, _) -> "windows-msvc"
+  let latest = List.find (is_same_distro t) latest_distros in
+  tag_of_distro latest
 
 type package_manager = [ `Apt | `Yum | `Apk | `Zypper | `Pacman | `Cygwin | `Windows ] [@@deriving sexp]
 
