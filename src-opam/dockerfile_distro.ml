@@ -110,8 +110,7 @@ let distro_status (d:t) : status = match d with
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_10)
   | `Cygwin `V20H2 -> `Active `Tier3
-  | `Windows (_, `V20H2) -> `Active `Tier3
-  | `Windows (_, _) -> `Deprecated (* sorry David *)
+  | `Windows (_, _) -> `Active `Tier3
 
 let latest_distros =
   [ `Alpine `Latest; `Archlinux `Latest; `CentOS `Latest;
