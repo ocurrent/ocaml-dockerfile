@@ -158,10 +158,20 @@ module Cygwin = struct
 end
 
 module Winget = struct
-  let build_from_source ?(arch=`X86_64) ?(distro=`Windows (`Mingw, `V20H2)) ?(winget_version="v-0.2.10191-preview") ?(vs_version="16") () =
-    let _, tag = Dockerfile_distro.base_distro_tag ~arch distro in
+  let winget = "winget-builder"
+
+  let build_from_source ?(arch=`X86_64) ?(version=`V20H2)
+        ?(winget_version="v-0.2.10191-preview") ?(vs_version="16") () =
+    let tag =
+      match version with
+      | `V1809 -> "1809"
+      | `V1903 -> "1903"
+      | `V1909 -> "1909"
+      | `V2004 -> "2004"
+      | `V20H2 -> "20H2"
+    in
     parser_directive (`Escape '`')
-    @@ from ~alias:"winget-builder" ~tag "mcr.microsoft.com/windows/servercore"
+    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows/servercore"
     @@ user "ContainerAdministrator"
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
@@ -182,8 +192,8 @@ module Winget = struct
     @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|}
     @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\resources.pri" "C:\Program Files\winget-cli\"|}
 
-  let setup () =
-    copy ~from:"winget-builder" ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
+  let setup ?(from=winget) =
+    copy ~from ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
     @@ prepend_path [{|C:\Program Files\winget-cli|}]
 
   let install pkgs =

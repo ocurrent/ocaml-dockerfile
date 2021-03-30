@@ -115,21 +115,20 @@ module Cygwin : sig
   end
 end
 
-(** Rules for Winget-based installation.
+(** Rules for winget installation.
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
   val build_from_source :
-    ?arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
+    ?arch:Ocaml_version.arch -> ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
-  (** Build Winget from source. This won't send telemetry to
-     Microsoft. It is build in a separate Docker image, with alias
-     [winget-builder]. *)
+  (** Build winget from source. This won't send telemetry to
+     Microsoft. It is build in a separate Docker image. *)
 
-  val setup : unit -> t
-  (** Setup winget-cli from the [winget-builder] Docker image. *)
+  val setup : ?from:string -> t
+  (** Setup winget, copied from the [from] Docker image. *)
 
   val install : string list -> t
-  (** [install packages] will install the supplied Winget package list. *)
+  (** [install packages] will install the supplied winget package list. *)
 
   val dev_packages : ?extra:string list -> unit -> t
   (** [dev_packages ?extra ()] will install the base development

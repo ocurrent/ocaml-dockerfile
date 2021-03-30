@@ -240,8 +240,12 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
   @@ Windows.Cygwin.Git.init ()
 
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
-let windows_opam2 ?(labels=[]) ?arch distro () =
-  Windows.Winget.build_from_source ?arch ~distro ()
+let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
+  (match winget with
+   | None ->
+      let version = match distro with `Windows (_, v) -> v | _ -> assert false in
+      Windows.Winget.build_from_source ?arch ~version ()
+   | Some _ -> empty)
   @@ header ?arch distro @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ begin
@@ -259,12 +263,12 @@ let windows_opam2 ?(labels=[]) ?arch distro () =
       Windows.install_vc_redist () @@ t
       @@ Windows.Cygwin.setup ~extra () @@ t'
     end
-  @@ Windows.Winget.setup ()
+  @@ Windows.Winget.setup ?from:winget
   @@ Windows.Winget.dev_packages ()
   @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 
-let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
+let gen_opam2_distro ?winget ?(clone_opam_repo=true) ?arch ?labels d =
   let fn = match D.package_manager d with
   | `Apk -> apk_opam2 ?labels ?arch d ()
   | `Apt -> apt_opam2 ?labels ?arch d ()
@@ -275,7 +279,7 @@ let gen_opam2_distro ?(clone_opam_repo=true) ?arch ?labels d =
   | `Zypper -> zypper_opam2 ?labels ?arch d ()
   | `Pacman -> pacman_opam2 ?labels ?arch d ()
   | `Cygwin -> cygwin_opam2 ?labels ?arch d ()
-  | `Windows -> windows_opam2 ?labels ?arch d ()
+  | `Windows -> windows_opam2 ?winget ?labels ?arch d ()
   in
   let clone = if clone_opam_repo then
     let url = Dockerfile_distro.(os_family_of_distro d |> opam_repository) in

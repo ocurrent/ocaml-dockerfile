@@ -38,6 +38,7 @@ val install_opam_from_source : ?add_default_link:bool ->
     multiple opam binaries from different branches in the same container. *)
 
 val gen_opam2_distro :
+  ?winget:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list -> Dockerfile_distro.t
@@ -48,7 +49,10 @@ val gen_opam2_distro :
    clone the official opam-repository into [/home/opam/opam-repository].
    If [arch] is not specified, it defaults to the base image that is assumed
    to be multiarch (the main exception to this is i386, which requires different
-   base images from amd64). *)
+   base images from amd64).
+   For native Windows distributions, if [winget] is omitted, then winget
+   will be build in an prepended build stage. If specified, then
+   winget will be pulled from the [winget] external image. *)
 
 val all_ocaml_compilers :
   string -> Ocaml_version.arch -> Dockerfile_distro.t -> string * Dockerfile.t
