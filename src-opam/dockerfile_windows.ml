@@ -32,16 +32,12 @@ let install_vc_redist ?(vs_version="16") () =
   add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe"] ~dst:{|C:\TEMP\|} ()
   @@ run {|C:\TEMP\vc_redist.x64.exe /install /passive /norestart /log C:\TEMP\vc_redist.log|}
 
-let install_visual_studio_build_tools ?(vs_version="16") ?(split=false) components =
+let install_visual_studio_build_tools ?(vs_version="16") components =
   let install =
     let fmt = format_of_string
       {|C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
         --installPath C:\BuildTools --channelUri C:\TEMP\VisualStudio.chman `
         --installChannelUri C:\TEMP\VisualStudio.chman%s|} in
-    if split then
-      List.fold_left (fun install component ->
-          install @@ run fmt (" `\n        --add " ^ component)) empty components
-    else
       run fmt (List.fold_left (fun acc component ->
                    acc ^ " `\n        --add " ^ component) "" components)
   in
