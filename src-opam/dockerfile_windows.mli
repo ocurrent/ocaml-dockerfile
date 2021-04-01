@@ -64,7 +64,7 @@ module Cygwin : sig
   val default : cyg
   (** The default Cygwin root and mirror. *)
 
-  val setup : ?cyg:cyg -> ?extra:string list -> unit -> t
+  val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
   (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]
      Cygwin packages.
      @see <https://github.com/dra27/cygsympathy/tree/script>

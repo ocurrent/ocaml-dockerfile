@@ -115,8 +115,9 @@ module Cygwin = struct
   let install ?(cyg=default) fmt =
     ksprintf (cygwin ~cyg "--packages %s") fmt
 
-  let setup ?(cyg=default) ?(extra=[]) () =
-    add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
+  let setup ?(cyg=default) ?(winsymlinks_native=false) ?(extra=[]) () =
+    (if winsymlinks_native then env [("CYGWIN", "winsymlinks:native")] else empty)
+    @@ add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
     @@ install_cygsympathy_from_source cyg
     @@ cygwin ~cyg "--packages %s" (extra |> List.sort_uniq String.compare |> String.concat ",")
     @@ install_msvs_tools_from_source cyg
