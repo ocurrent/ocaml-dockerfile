@@ -67,7 +67,7 @@ module Cygwin : sig
   val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
   (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]
      Cygwin packages.
-     @see <https://github.com/dra27/cygsympathy/tree/script>
+     @see <https://github.com/metastack/cygsympathy>
      @see <https://github.com/metastack/msvs-tools> *)
 
   val install : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
