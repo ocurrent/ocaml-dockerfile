@@ -241,10 +241,9 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
 
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
 let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
+  let version = match distro with `Windows (_, v) -> v | _ -> assert false in
   (match winget with
-   | None ->
-      let version = match distro with `Windows (_, v) -> v | _ -> assert false in
-      Windows.Winget.build_from_source ?arch ~version ()
+   | None -> Windows.Winget.build_from_source ?arch ~version ()
    | Some _ -> empty)
   @@ header ?arch distro @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
@@ -264,7 +263,7 @@ let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
       @@ Windows.Cygwin.setup ~extra () @@ t'
     end
   @@ Windows.Winget.setup ?from:winget
-  @@ Windows.Winget.dev_packages ()
+  @@ Windows.Winget.dev_packages ~version ()
   @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 

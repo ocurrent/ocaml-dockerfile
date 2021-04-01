@@ -199,11 +199,11 @@ module Winget = struct
   let install pkgs =
     List.fold_left (fun acc pkg -> acc @@ run "winget install %s" pkg) empty pkgs
 
-  let dev_packages ?extra () =
-    let git = install ["git"] in
-    match extra with
-    | None -> git
-    | Some packages -> git @@ install packages
+  let dev_packages ?version ?extra () =
+    match version with
+    (* 2021-04-01: Installing git fails with exit-code 2316632065. *)
+    | Some `V1809 -> maybe install extra
+    | _ -> install ["git"] @@ maybe install extra
 
   module Git = struct
     let init ?(name="Docker") ?(email="docker@example.com") () =

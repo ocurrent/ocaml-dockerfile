@@ -130,10 +130,12 @@ module Winget : sig
   val install : string list -> t
   (** [install packages] will install the supplied winget package list. *)
 
-  val dev_packages : ?extra:string list -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development
+  val dev_packages :
+    ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
+    ?extra:string list -> unit -> t
+  (** [dev_packages ?version ?extra ()] will install the base development
      tools. Extra packages may also be optionally supplied via
-     [extra]. *)
+     [extra]. Using [?version] may change the set of installed packages. *)
 
   (** Rules for Git *)
   module Git : sig
