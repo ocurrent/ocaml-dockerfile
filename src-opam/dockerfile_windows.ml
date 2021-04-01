@@ -97,7 +97,10 @@ module Cygwin = struct
     @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.sh"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\cygsympathy|}) ()
     @@ run {|mkdir %s\etc\postinstall\|} cyg.root
-    @@ run {|mklink %s\etc\postinstall\zp_cygsympathy.sh %s\lib\cygsympathy\cygsympathy|} cyg.root cyg.root
+    (* Beware: CygSymPathy must be executed last, or it may miss files
+       installed by other post-install scripts. Use a name that is
+       greater than every other script in the lexicographic order. *)
+    @@ run {|mklink %s\etc\postinstall\zp_zcygsympathy.sh %s\lib\cygsympathy\cygsympathy|} cyg.root cyg.root
 
   let install_msvs_tools_from_source ?(version="0.4.1") cyg =
     add ~src:["https://github.com/metastack/msvs-tools/archive/" ^ version ^ ".tar.gz"]
