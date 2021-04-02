@@ -29,7 +29,7 @@ val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
 (** [run_vc ~arch fmt] will execute [run fmt] with Visual
    Compiler for [~arch] loaded in the environment. *)
 
-val run_ocaml_env : string -> ('a, unit, string, t) format4 -> 'a
+val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
 (** [run_ocaml_env args fmt] will execute [fmt] in the evironment
    loaded by [ocaml-env exec] with [args]. *)
 
@@ -101,7 +101,7 @@ module Cygwin : sig
   (** [run_sh ?cyg fmt] will execute in the Cygwin root
      [\bin\bash.exe --login -c "fmt"]. *)
 
-  val run_sh_ocaml_env : ?cyg:cyg -> string -> ('a, unit, string, t) format4 -> 'a
+  val run_sh_ocaml_env : ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
   (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the evironment
      loaded by [ocaml-env cygwin exec] with [args]. *)
 

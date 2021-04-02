@@ -26,7 +26,7 @@ let run_vc ~arch fmt =
     | `Aarch64 | `Aarch32 | `Ppc64le -> invalid_arg "Unsupported architecture"
   in
   ksprintf (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch) fmt
-let run_ocaml_env args fmt = ksprintf (run {|ocaml-env exec %s -- %s|} args) fmt
+let run_ocaml_env args fmt = ksprintf (run {|ocaml-env exec %s -- %s|} (String.concat " " args)) fmt
 
 let install_vc_redist ?(vs_version="16") () =
   add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe"] ~dst:{|C:\TEMP\|} ()
@@ -81,7 +81,7 @@ module Cygwin = struct
     }
 
   let run_sh ?(cyg=default) fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
-  let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh ~cyg "ocaml-env exec %s -- %s" args) fmt
+  let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh ~cyg "ocaml-env exec %s -- %s" (String.concat " " args)) fmt
 
   let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
   let cygcache = {|C:\TEMP\cache|}
