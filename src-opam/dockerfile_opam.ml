@@ -330,7 +330,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ env ["OPAMYES","1"]
     @@ match os_family with
        | `Linux | `Cygwin -> cmd "bash"
-       | `Windows -> cmd "CMD"
+       | `Windows -> cmd_exec ["cmd.exe"]
   in
   (Fmt.strf "%s" distro_tag, d)
 
@@ -372,7 +372,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
            @@ match os_family with
               | `Linux | `Cygwin -> cmd "bash"
-              | `Windows -> cmd "CMD"
+              | `Windows -> cmd_exec ["cmd.exe"]
          in
          (Fmt.strf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )
 
