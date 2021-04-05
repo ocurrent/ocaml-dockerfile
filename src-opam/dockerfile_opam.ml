@@ -30,6 +30,14 @@ let personality ?arch distro =
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
+let install_ocaml_from_source ?(prefix="/usr/local") ?(configure_options="") ~version () =
+  run "git clone -b %s --depth=1 https://github.com/ocaml/ocaml.git /tmp/ocaml" version @@
+  Linux.run_sh "cd /tmp/ocaml && ./configure --prefix=%s %s && make -j world.opt && sudo make install && rm -rf /tmp/ocaml"
+
+let install_ocamlfind_from_source ~version () =
+  run "git clone -b %s --depth=1 https://github.com/ocaml/ocamlfind /tmp/ocamlfind" version @@
+  Linux.run_sh "cd /tmp/ocamlfind && ./configure && make && sudo make install && rm -rf /tmp/ocamlfind"
+
 let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ~branch () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
   Linux.run_sh
