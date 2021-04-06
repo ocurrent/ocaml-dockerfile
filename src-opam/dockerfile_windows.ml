@@ -159,11 +159,10 @@ end
 
 module Winget = struct
   let winget = "winget-builder"
+  let winget_version = "v-0.2.10771-preview"
 
-  let build_from_source ?(arch=`X86_64) ?(version=`V20H2)
-        ?(winget_version="v-0.2.10191-preview") ?(vs_version="16") () =
-    let tag =
-      match version with
+  let header ?(version=`V20H2) () =
+    let tag = match version with
       | `V1809 -> "1809"
       | `V1903 -> "1903"
       | `V1909 -> "1909"
@@ -173,6 +172,15 @@ module Winget = struct
     parser_directive (`Escape '`')
     @@ from ~alias:winget ~tag "mcr.microsoft.com/windows/servercore"
     @@ user "ContainerAdministrator"
+
+  let footer path =
+    run {|mkdir "C:\Program Files\winget-cli"|}
+    @@ run {|move "C:\TEMP\winget-cli\%s\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|} path
+    @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
+    |> crunch
+
+  let build_from_source ?(arch=`X86_64) ?version ?(winget_version=winget_version) ?(vs_version="16") () =
+    header ?version ()
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
            "Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools"; (* .NET desktop build tools *)
@@ -188,13 +196,22 @@ module Winget = struct
     @@ run {|cd C:\TEMP && rename winget-cli-%s winget-cli|} winget_version
     @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -t:restore -m -p:RestorePackagesConfig=true -p:Configuration=Release src\AppInstallerCLI.sln|}
     @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
-    @@ run {|mkdir "C:\Program Files\winget-cli"|}
-    @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|}
-    @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\resources.pri" "C:\Program Files\winget-cli\"|}
+    @@ footer {|src\x64\Release\AppInstallerCLI|}
 
-  let setup ?(from=winget) =
+  let install_from_release ?version ?(winget_version=winget_version) () =
+    let dst = {|C:\TEMP\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.zip|} in
+    header ?version ()
+    @@ add ~src:["https://github.com/microsoft/winget-cli/releases/download/" ^ winget_version ^ "/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"]
+         ~dst ()
+    @@ run_powershell {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|} dst
+    @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.appx AppInstaller_x64.zip|}
+    @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
+    @@ footer ""
+
+  let setup ?(from=winget) () =
     copy ~from ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
     @@ prepend_path [{|C:\Program Files\winget-cli|}]
+  (* FIXME: disable telemetry *)
 
   let install pkgs =
     List.fold_left (fun acc pkg -> acc @@ run "winget install %s" pkg) empty pkgs

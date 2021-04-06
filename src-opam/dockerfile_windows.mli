@@ -121,7 +121,13 @@ module Winget : sig
   (** Build winget from source. This won't send telemetry to
      Microsoft. It is build in a separate Docker image. *)
 
-  val setup : ?from:string -> t
+  val install_from_release :
+    ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] -> ?winget_version:string -> unit -> t
+  (** Install winget from a released build. This won't send telemetry
+     to Microsoft. It is build installed first in a separate Docker
+     image. *)
+
+  val setup : ?from:string -> unit -> t
   (** Setup winget, copied from the [from] Docker image. *)
 
   val install : string list -> t
