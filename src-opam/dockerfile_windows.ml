@@ -154,6 +154,7 @@ module Cygwin = struct
       env ["HOME", cyg.root ^ {|\home\opam|}]
       @@ run_sh ~cyg "git config --global user.email '%s'" email
       @@ run_sh ~cyg "git config --global user.name '%s'" name
+      @@ run_sh ~cyg "git config --system core.longpaths true"
   end
 end
 
@@ -226,5 +227,6 @@ module Winget = struct
     let init ?(name="Docker") ?(email="docker@example.com") () =
       run "git config --global user.email %S" email
       @@ run "git config --global user.name %S" name
+      @@ run "git config --system core.longpaths true"
   end
 end
