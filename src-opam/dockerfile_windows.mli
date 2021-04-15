@@ -54,12 +54,14 @@ val cleanup : unit -> t
 (** Rules for Cygwin-based installation *)
 module Cygwin : sig
   type cyg = {
-      root : string; (** Cygwin root directory *)
-      mirror : string; (** Cygwin mirror *)
+      root : string; (** Root installation directory *)
+      site : string; (** Download site URL *)
+      args : string list; (** List of arguments to give to Cygwin's
+                             setup, except [--root] and [--site]. *)
     }
 
   val default : cyg
-  (** The default Cygwin root and mirror. *)
+  (** The default Cygwin root, mirror, and arguments. *)
 
   val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
   (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]

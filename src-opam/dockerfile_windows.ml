@@ -72,19 +72,22 @@ let cleanup () =
 module Cygwin = struct
   type cyg = {
       root : string;
-      mirror : string;
+      site : string;
+      args : string list;
     }
+
+  let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
+  let cygcache = {|C:\TEMP\cache|}
 
   let default = {
       root = {|C:\cygwin64|};
-      mirror = "http://mirrors.kernel.org/sourceware/cygwin/";
+      site = "http://mirrors.kernel.org/sourceware/cygwin/";
+      args = ["--quiet-mode"; "--no-shortcuts"; "--no-startmenu"; "--no-desktop";
+              "--only-site"; "--local-package-dir"; cygcache];
     }
 
   let run_sh ?(cyg=default) fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
   let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh ~cyg "ocaml-env exec %s -- %s" (String.concat " " args)) fmt
-
-  let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
-  let cygcache = {|C:\TEMP\cache|}
 
   let install_cygsympathy_from_source cyg =
     run {|mkdir %s\lib\cygsympathy\|} cyg.root
@@ -104,9 +107,7 @@ module Cygwin = struct
     @@ run_sh ~cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin|} version version
 
   let cygwin ?(cyg=default) fmt =
-    ksprintf (run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
-        --root %s --site %s --local-package-dir %s `
-        %s|} cygsetup cyg.root cyg.mirror cygcache) fmt
+    ksprintf (run {|%s %s --root %s --site %s %s|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site) fmt
 
   let install ?(cyg=default) fmt =
     ksprintf (cygwin ~cyg "--packages %s") fmt
@@ -122,9 +123,7 @@ module Cygwin = struct
     @@ workdir {|%s\home\opam|} cyg.root
 
   let update ?(cyg=default) () =
-    run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site --root %s `
-        --site %s --local-package-dir %s --upgrade-also|}
-      cygsetup cyg.root cyg.mirror cygcache
+    run {|%s %s --root %s --site %s --upgrade-also|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site
 
   let cygwin_packages ?(cyg=default) ?(extra=[]) ?(flexdll_version="0.39-1") () =
     let packages = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git"
