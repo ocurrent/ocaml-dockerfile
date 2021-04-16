@@ -211,7 +211,13 @@ module Winget = struct
   let setup ?(from=winget) () =
     copy ~from ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
     @@ prepend_path [{|C:\Program Files\winget-cli|}]
-  (* FIXME: disable telemetry *)
+    (* The json parser in Powershell 5 doesn't support comments. *)
+    @@ run_powershell {|winget settings ; `
+        $path=""""${Env:LocalAppData}\Microsoft\WinGet\Settings\settings.json"""" ; `
+        $json=(Get-Content -Encoding ascii $path | Select -SkipLast 1) -Join """"`n"""" ; `
+        $json=($json, '    """"telemetry"""": { """"disable"""": true },', """"}"""") -Join """"`n"""" ; `
+        $json | Set-Content -Encoding ascii -NoNewLine $path ; `
+        winget settings|}
 
   let install pkgs =
     List.fold_left (fun acc pkg -> acc @@ run "winget install %s" pkg) empty pkgs

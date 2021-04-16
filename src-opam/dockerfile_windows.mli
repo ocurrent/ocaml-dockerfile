@@ -120,17 +120,16 @@ module Winget : sig
   val build_from_source :
     ?arch:Ocaml_version.arch -> ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
-  (** Build winget from source. This won't send telemetry to
-     Microsoft. It is build in a separate Docker image. *)
+  (** Build winget from source (in a separate Docker image). *)
 
   val install_from_release :
     ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] -> ?winget_version:string -> unit -> t
-  (** Install winget from a released build. This won't send telemetry
-     to Microsoft. It is build installed first in a separate Docker
-     image. *)
+  (** Install winget from a released build (first in a separate Docker
+     image). *)
 
   val setup : ?from:string -> unit -> t
-  (** Setup winget, copied from the [from] Docker image. *)
+  (** Setup winget, copied from the [from] Docker image. Disable
+     winget telemetry. *)
 
   val install : string list -> t
   (** [install packages] will install the supplied winget package list. *)
