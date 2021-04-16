@@ -90,12 +90,11 @@ module Cygwin = struct
   let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh ~cyg "ocaml-env exec %s -- %s" (String.concat " " args)) fmt
 
   let install_cygsympathy_from_source cyg =
-    run {|mkdir %s\lib\cygsympathy\|} cyg.root
+    run {|mkdir %s\lib\cygsympathy && mkdir %s\etc\postinstall|} cyg.root cyg.root
     @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.cmd"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\|}) ()
     @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.sh"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\cygsympathy|}) ()
-    @@ run {|mkdir %s\etc\postinstall\|} cyg.root
     (* Beware: CygSymPathy must be executed last, or it may miss files
        installed by other post-install scripts. Use a name that is
        greater than every other script in the lexicographic order. *)
@@ -151,9 +150,7 @@ module Cygwin = struct
   module Git = struct
     let init ?(cyg=default) ?(name="Docker") ?(email="docker@example.com") () =
       env ["HOME", cyg.root ^ {|\home\opam|}]
-      @@ run_sh ~cyg "git config --global user.email '%s'" email
-      @@ run_sh ~cyg "git config --global user.name '%s'" name
-      @@ run_sh ~cyg "git config --system core.longpaths true"
+      @@ run_sh ~cyg "git config --global user.email '%s' && git config --global user.name '%s' && git config --system core.longpaths true" email name
   end
 end
 
@@ -230,8 +227,6 @@ module Winget = struct
 
   module Git = struct
     let init ?(name="Docker") ?(email="docker@example.com") () =
-      run "git config --global user.email %S" email
-      @@ run "git config --global user.name %S" name
-      @@ run "git config --system core.longpaths true"
+      run "git config --global user.email %S && git config --global user.name %S && git config --system core.longpaths true" email name
   end
 end
