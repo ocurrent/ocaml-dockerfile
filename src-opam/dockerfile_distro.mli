@@ -31,12 +31,13 @@ type t = [
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `LTS | `Latest ]
-  | `Windows of [ `V20H2 | `Latest ]
+  | `Cygwin of [ `V20H2 ]
+  | `Windows of [`Mingw | `Msvc] * [ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ]
 ] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
-type os_family = [ `Linux | `Windows ] [@@deriving sexp]
-(** Supported Docker container operating systems  *)
+type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
+(** The operating system family a distro belongs to. *)
 
 val os_family_of_distro : t -> os_family
 (** [os_family_of_distro t] returns the OS family of the distro. *)
@@ -52,6 +53,10 @@ val opam_repository : os_family -> string
 val personality : os_family -> Ocaml_version.arch -> string option
 (** [personality os_family arch] returns the personality associated to
    the architecture, if [os_family] is [`Linux]. *)
+
+val is_same_distro : t -> t -> bool
+(** [is_same_distro d1 d2] returns whether [d1] is the same distro as
+   [d2], regardless of their respective versions. *)
 
 val compare : t -> t -> int
 (** [compare a b] is a lexical comparison function for {!t}. *)
@@ -90,6 +95,7 @@ type package_manager = [
   | `Zypper (** OpenSUSE Zypper *)
   | `Pacman (** Archlinux Pacman *)
   | `Cygwin (** Cygwin package manager *)
+  | `Windows (** Native Windows, WinGet, Cygwin  *)
 ] [@@deriving sexp]
 (** The package manager used by a distro. *)
 

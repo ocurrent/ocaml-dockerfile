@@ -25,21 +25,28 @@ val run_cmd : ('a, unit, string, t) format4 -> 'a
 val run_powershell : ('a, unit, string, t) format4 -> 'a
 (** [run_powershell fmt] will execute [powershell -Command "fmt"]. *)
 
+val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
+(** [run_vc ~arch fmt] will execute [run fmt] with Visual
+   Compiler for [~arch] loaded in the environment. *)
+
+val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
+(** [run_ocaml_env args fmt] will execute [fmt] in the evironment
+   loaded by [ocaml-env exec] with [args]. *)
+
 val install_vc_redist : ?vs_version:string -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
    @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
 
-val install_visual_studio_build_tools : ?vs_version:string -> ?split:bool -> string list -> t
-(** Install Visual Studio Build Tools components. [split] controls
-   wether the components should be installed simultaneously or
-   sequentially. Although simlutaneously may be more efficient, it
-   seems to cause problems with Docker.
+val install_visual_studio_build_tools : ?vs_version:string -> string list -> t
+(** Install Visual Studio Build Tools components.
    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
-val ocaml_for_windows_compiler_variant : Dockerfile_distro.os_family ->
-                                         Ocaml_version.arch -> string option
-(** Returns the OCaml for Windows specific OCaml compiler variant, if
-   applicable. *)
+val ocaml_for_windows_package_exn :
+  switch:Ocaml_version.t -> port:[`Mingw | `Msvc] -> arch:Ocaml_version.arch ->
+  (string * string)
+(** [ocaml_for_windows_variant ~port ~arch] returns the
+   [(package_name, package_version)] of the OCaml compiler
+   package in OCaml for Windows, if applicable. *)
 
 val cleanup : unit -> t
 (** Cleanup caches. *)
@@ -47,17 +54,19 @@ val cleanup : unit -> t
 (** Rules for Cygwin-based installation *)
 module Cygwin : sig
   type cyg = {
-      root : string; (** Cygwin root directory *)
-      mirror : string; (** Cygwin mirror *)
+      root : string; (** Root installation directory *)
+      site : string; (** Download site URL *)
+      args : string list; (** List of arguments to give to Cygwin's
+                             setup, except [--root] and [--site]. *)
     }
 
   val default : cyg
-  (** The default Cygwin root and mirror. *)
+  (** The default Cygwin root, mirror, and arguments. *)
 
-  val setup : ?cyg:cyg -> ?extra:string list -> unit -> t
+  val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
   (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]
      Cygwin packages.
-     @see <https://github.com/dra27/cygsympathy/tree/script>
+     @see <https://github.com/metastack/cygsympathy>
      @see <https://github.com/metastack/msvs-tools> *)
 
   val install : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
@@ -67,7 +76,8 @@ module Cygwin : sig
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages : ?extra:string list -> unit -> string list
+  val cygwin_packages : ?cyg:cyg -> ?extra:string list ->
+                        ?flexdll_version:string -> unit -> string list * t
   (** [cygwin_packages ?extra ()] will install the base development
      tools for the OCaml Cygwin port. Extra packages may also bep
      optionally supplied via [extra]. *)
@@ -93,6 +103,10 @@ module Cygwin : sig
   (** [run_sh ?cyg fmt] will execute in the Cygwin root
      [\bin\bash.exe --login -c "fmt"]. *)
 
+  val run_sh_ocaml_env : ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
+  (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the evironment
+     loaded by [ocaml-env cygwin exec] with [args]. *)
+
   (** Rules for Git *)
   module Git : sig
     val init : ?cyg:cyg -> ?name:string -> ?email:string -> unit -> t
@@ -100,26 +114,32 @@ module Cygwin : sig
   end
 end
 
-(** Rules for Winget-based installation.
+(** Rules for winget installation.
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
-  val build_form_source :
-    ?arch:Ocaml_version.arch -> ?distro:Dockerfile_distro.t ->
+  val build_from_source :
+    ?arch:Ocaml_version.arch -> ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
-  (** Build Winget from source. This won't send telemetry to
-     Microsoft. It is build in a separate Docker image, with alias
-     [winget-builder]. *)
+  (** Build winget from source (in a separate Docker image). *)
 
-  val setup : unit -> t
-  (** Setup winget-cli from the [winget-builder] Docker image. *)
+  val install_from_release :
+    ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] -> ?winget_version:string -> unit -> t
+  (** Install winget from a released build (first in a separate Docker
+     image). *)
+
+  val setup : ?from:string -> unit -> t
+  (** Setup winget, copied from the [from] Docker image. Disable
+     winget telemetry. *)
 
   val install : string list -> t
-  (** [install packages] will install the supplied Winget package list. *)
+  (** [install packages] will install the supplied winget package list. *)
 
-  val dev_packages : ?extra:string list -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development
+  val dev_packages :
+    ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
+    ?extra:string list -> unit -> t
+  (** [dev_packages ?version ?extra ()] will install the base development
      tools. Extra packages may also be optionally supplied via
-     [extra]. *)
+     [extra]. Using [?version] may change the set of installed packages. *)
 
   (** Rules for Git *)
   module Git : sig

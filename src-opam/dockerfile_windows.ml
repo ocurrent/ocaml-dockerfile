@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2020 Tarides - Antonin Décimo <antonin@tarides.com>
+ * Copyright (c) 2020 - 2021 Tarides - Antonin Décimo <antonin@tarides.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -20,21 +20,24 @@ open Printf
 
 let run_cmd fmt = ksprintf (run "cmd /S /C %s") fmt
 let run_powershell fmt = ksprintf (run {|powershell -Command "%s"|}) fmt
+let run_vc ~arch fmt =
+  let arch = match arch with
+    | `I386 -> "x86" | `X86_64 -> "amd64"
+    | `Aarch64 | `Aarch32 | `Ppc64le -> invalid_arg "Unsupported architecture"
+  in
+  ksprintf (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch) fmt
+let run_ocaml_env args fmt = ksprintf (run {|ocaml-env exec %s -- %s|} (String.concat " " args)) fmt
 
 let install_vc_redist ?(vs_version="16") () =
   add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe"] ~dst:{|C:\TEMP\|} ()
   @@ run {|C:\TEMP\vc_redist.x64.exe /install /passive /norestart /log C:\TEMP\vc_redist.log|}
 
-let install_visual_studio_build_tools ?(vs_version="16") ?(split=false) components =
+let install_visual_studio_build_tools ?(vs_version="16") components =
   let install =
     let fmt = format_of_string
       {|C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
         --installPath C:\BuildTools --channelUri C:\TEMP\VisualStudio.chman `
         --installChannelUri C:\TEMP\VisualStudio.chman%s|} in
-    if split then
-      List.fold_left (fun install component ->
-          install @@ run fmt (" `\n        --add " ^ component)) empty components
-    else
       run fmt (List.fold_left (fun acc component ->
                    acc ^ " `\n        --add " ^ component) "" components)
   in
@@ -47,18 +50,21 @@ let install_visual_studio_build_tools ?(vs_version="16") ?(split=false) componen
   @@ add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vs_buildtools.exe"] ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
   @@ install
 
-let append_path paths =
+let prepend_path paths =
   let paths = String.concat ";" paths in
   run {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
-       reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%%c;%s"|} paths
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%s;%%c"|} paths
 
-let ocaml_for_windows_compiler_variant os_family arch =
-  if os_family = `Windows then
+let ocaml_for_windows_package_exn ~switch ~port ~arch =
+  let variant =
+    let bitness = if Ocaml_version.arch_is_32bit arch then "32" else "64" in
     match arch with
-    | `I386 -> Some "mingw32c"
-    | `X86_64 -> Some "mingw64c"
-    | _ -> None
-  else None
+    | `X86_64 | `I386 ->
+       (match port with `Mingw -> "mingw" | `Msvc -> "msvc") ^ bitness
+    | _ -> invalid_arg "Unsupported architecture"
+  in
+  let _, pkgver = Ocaml_version.Opam.V2.package switch in
+  ("ocaml-variants", pkgver ^ "+" ^ variant)
 
 let cleanup () =
   run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
@@ -66,27 +72,33 @@ let cleanup () =
 module Cygwin = struct
   type cyg = {
       root : string;
-      mirror : string;
+      site : string;
+      args : string list;
     }
-
-  let default = {
-      root = {|C:\cygwin64|};
-      mirror = "http://mirrors.kernel.org/sourceware/cygwin/";
-    }
-
-  let run_sh ?(cyg=default) fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
 
   let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
   let cygcache = {|C:\TEMP\cache|}
 
+  let default = {
+      root = {|C:\cygwin64|};
+      site = "http://mirrors.kernel.org/sourceware/cygwin/";
+      args = ["--quiet-mode"; "--no-shortcuts"; "--no-startmenu"; "--no-desktop";
+              "--only-site"; "--local-package-dir"; cygcache];
+    }
+
+  let run_sh ?(cyg=default) fmt = ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
+  let run_sh_ocaml_env ?(cyg=default) args fmt = ksprintf (run_sh ~cyg "ocaml-env exec %s -- %s" (String.concat " " args)) fmt
+
   let install_cygsympathy_from_source cyg =
-    run {|mkdir %s\lib\cygsympathy\|} cyg.root
+    run {|mkdir %s\lib\cygsympathy && mkdir %s\etc\postinstall|} cyg.root cyg.root
     @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.cmd"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\|}) ()
     @@ add ~src:["https://raw.githubusercontent.com/metastack/cygsympathy/master/cygsympathy.sh"]
          ~dst:(cyg.root ^ {|\lib\cygsympathy\cygsympathy|}) ()
-    @@ run {|mkdir %s\etc\postinstall\|} cyg.root
-    @@ run {|mklink %s\etc\postinstall\zp_cygsympathy.sh %s\lib\cygsympathy\cygsympathy|} cyg.root cyg.root
+    (* Beware: CygSymPathy must be executed last, or it may miss files
+       installed by other post-install scripts. Use a name that is
+       greater than every other script in the lexicographic order. *)
+    @@ run {|mklink %s\etc\postinstall\zp_zcygsympathy.sh %s\lib\cygsympathy\cygsympathy|} cyg.root cyg.root
 
   let install_msvs_tools_from_source ?(version="0.4.1") cyg =
     add ~src:["https://github.com/metastack/msvs-tools/archive/" ^ version ^ ".tar.gz"]
@@ -94,30 +106,39 @@ module Cygwin = struct
     @@ run_sh ~cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin|} version version
 
   let cygwin ?(cyg=default) fmt =
-    ksprintf (run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site `
-        --root %s --site %s --local-package-dir %s `
-        %s|} cygsetup cyg.root cyg.mirror cygcache) fmt
+    ksprintf (run {|%s %s --root %s --site %s %s|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site) fmt
 
   let install ?(cyg=default) fmt =
     ksprintf (cygwin ~cyg "--packages %s") fmt
 
-  let setup ?(cyg=default) ?(extra=[]) () =
-    add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
+  let setup ?(cyg=default) ?(winsymlinks_native=false) ?(extra=[]) () =
+    (if winsymlinks_native then env [("CYGWIN", "winsymlinks:native")] else empty)
+    @@ add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
     @@ install_cygsympathy_from_source cyg
     @@ cygwin ~cyg "--packages %s" (extra |> List.sort_uniq String.compare |> String.concat ",")
     @@ install_msvs_tools_from_source cyg
-    @@ append_path (List.map ((^) cyg.root) [{|\bin|}])
+    @@ prepend_path (List.map ((^) cyg.root) [{|\bin|}])
+    @@ run {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|} cyg.root
     @@ workdir {|%s\home\opam|} cyg.root
 
   let update ?(cyg=default) () =
-    run {|%s --quiet-mode --no-shortcuts --no-startmenu --no-desktop --only-site --root %s `
-        --site %s --local-package-dir %s --upgrade-also|}
-      cygsetup cyg.root cyg.mirror cygcache
+    run {|%s %s --root %s --site %s --upgrade-also|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site
 
-  let cygwin_packages ?(extra=[]) () = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "flexdll" :: extra
+  let cygwin_packages ?(cyg=default) ?(extra=[]) ?(flexdll_version="0.39-1") () =
+    let packages = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git"
+                   :: "patch" :: "m4" :: "cygport" :: extra in
+    let t =
+      (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
+      add ~src:["http://mirrors.kernel.org/sourceware/cygwin/x86_64/release/flexdll/flexdll-" ^ flexdll_version ^ ".tar.xz"]
+        ~dst:(cyg.root ^ {|\flexdll.tar.xz|}) ()
+      @@ run_sh ~cyg "cd / && tar -xJf flexdll.tar.xz && rm flexdll.tar.xz"
+    in
+    packages, t
+
   let mingw_packages ?(extra=[]) () = "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
   let msvc_packages ?(extra=[]) () = "make" :: "diffutils" :: extra
-  let ocaml_for_windows_packages ?cyg ?(extra=[]) ?version:(version="0.0.0.2") () =
+
+  let ocaml_for_windows_packages ?cyg ?(extra=[]) ?(version="0.0.0.2") () =
     let packages = "make" :: "diffutils" :: "mingw64-x86_64-gcc-g++" :: "vim" :: "git"
                    :: "curl" :: "rsync" :: "unzip" :: "patch" :: "m4" :: extra in
     let t =
@@ -127,18 +148,36 @@ module Cygwin = struct
     packages, t
 
   module Git = struct
-    let init ?cyg ?(name="Docker") ?(email="docker@example.com") () =
-      run_sh ?cyg "git config --global user.email '%s'" email
-      @@ run_sh ?cyg "git config --global user.name '%s'" name
+    let init ?(cyg=default) ?(name="Docker") ?(email="docker@example.com") () =
+      env ["HOME", cyg.root ^ {|\home\opam|}]
+      @@ run_sh ~cyg "git config --global user.email '%s' && git config --global user.name '%s' && git config --system core.longpaths true" email name
   end
 end
 
 module Winget = struct
-  let build_form_source ?arch ?(distro=`Windows `Latest) ?(winget_version="master") ?(vs_version="16") () =
-    let img, tag = Dockerfile_distro.base_distro_tag ?arch distro in
+  let winget = "winget-builder"
+  let winget_version = "v-0.2.10771-preview"
+
+  let header ?(version=`V20H2) () =
+    let tag = match version with
+      | `V1809 -> "1809"
+      | `V1903 -> "1903"
+      | `V1909 -> "1909"
+      | `V2004 -> "2004"
+      | `V20H2 -> "20H2"
+    in
     parser_directive (`Escape '`')
-    @@ from ~alias:"winget-builder" ~tag img
+    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows/servercore"
     @@ user "ContainerAdministrator"
+
+  let footer path =
+    run {|mkdir "C:\Program Files\winget-cli"|}
+    @@ run {|move "C:\TEMP\winget-cli\%s\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|} path
+    @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
+    |> crunch
+
+  let build_from_source ?(arch=`X86_64) ?version ?(winget_version=winget_version) ?(vs_version="16") () =
+    header ?version ()
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
            "Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools"; (* .NET desktop build tools *)
@@ -152,28 +191,42 @@ module Winget = struct
          ~dst:{|C:\TEMP\winget-cli.zip|} ()
     @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli.zip -DestinationPath C:\TEMP\ -Force|}
     @@ run {|cd C:\TEMP && rename winget-cli-%s winget-cli|} winget_version
-    @@ run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat x64 && cd C:\TEMP\winget-cli && msbuild -t:restore -m -p:RestorePackagesConfig=true -p:Configuration=Release src\AppInstallerCLI.sln|}
-    @@ run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat x64 && cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
-    @@ run {|mkdir "C:\Program Files\winget-cli"|}
-    @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|}
-    @@ run {|move "C:\TEMP\winget-cli\src\x64\Release\AppInstallerCLI\resources.pri" "C:\Program Files\winget-cli\"|}
+    @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -t:restore -m -p:RestorePackagesConfig=true -p:Configuration=Release src\AppInstallerCLI.sln|}
+    @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
+    @@ footer {|src\x64\Release\AppInstallerCLI|}
 
-  let setup () =
-    copy ~from:"winget-builder" ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
-    @@ append_path [{|C:\Program Files\winget-cli|}]
+  let install_from_release ?version ?(winget_version=winget_version) () =
+    let dst = {|C:\TEMP\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.zip|} in
+    header ?version ()
+    @@ add ~src:["https://github.com/microsoft/winget-cli/releases/download/" ^ winget_version ^ "/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"]
+         ~dst ()
+    @@ run_powershell {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|} dst
+    @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.appx AppInstaller_x64.zip|}
+    @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
+    @@ footer ""
+
+  let setup ?(from=winget) () =
+    copy ~from ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
+    @@ prepend_path [{|C:\Program Files\winget-cli|}]
+    (* The json parser in Powershell 5 doesn't support comments. *)
+    @@ run_powershell {|winget settings ; `
+        $path=""""${Env:LocalAppData}\Microsoft\WinGet\Settings\settings.json"""" ; `
+        $json=(Get-Content -Encoding ascii $path | Select -SkipLast 1) -Join """"`n"""" ; `
+        $json=($json, '    """"telemetry"""": { """"disable"""": true },', """"}"""") -Join """"`n"""" ; `
+        $json | Set-Content -Encoding ascii -NoNewLine $path ; `
+        winget settings|}
 
   let install pkgs =
     List.fold_left (fun acc pkg -> acc @@ run "winget install %s" pkg) empty pkgs
 
-  let dev_packages ?extra () =
-    let git = install ["git"] in
-    match extra with
-    | None -> git
-    | Some packages -> git @@ install packages
+  let dev_packages ?version ?extra () =
+    match version with
+    (* 2021-04-01: Installing git fails with exit-code 2316632065. *)
+    | Some `V1809 -> maybe install extra
+    | _ -> install ["git"] @@ maybe install extra
 
   module Git = struct
     let init ?(name="Docker") ?(email="docker@example.com") () =
-      run "git config --global user.email %S" email
-      @@ run "git config --global user.name %S" name
+      run "git config --global user.email %S && git config --global user.name %S && git config --system core.longpaths true" email name
   end
 end
