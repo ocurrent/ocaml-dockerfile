@@ -27,7 +27,7 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
     format string as the [opam] user. *)
 
 val install_opam_from_source : ?add_default_link:bool ->
-  ?prefix:string -> branch:string -> unit -> Dockerfile.t
+  ?prefix:string -> ?enable_0install_solver:bool -> branch:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.x or [master] for
     the latest trunk version).
@@ -35,7 +35,9 @@ val install_opam_from_source : ?add_default_link:bool ->
     defaulting to [/usr/local/bin].
     If [add_default_link] is true (the default), then the [opam-<branch>]
     binary is hardlinked to [opam].  Set it to false if you want to install
-    multiple opam binaries from different branches in the same container. *)
+    multiple opam binaries from different branches in the same container.
+    If [enable_0install_solver] is true (false by default), then the [builtin-0install]
+    solver should be accessible in the resulting opam binary. *)
 
 val gen_opam2_distro :
   ?winget:string ->

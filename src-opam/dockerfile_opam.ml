@@ -30,10 +30,11 @@ let personality ?arch distro =
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ~branch () =
+let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch () =
   run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
   Linux.run_sh
-       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam" prefix prefix branch prefix branch @@
+    "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
+    (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch @@
   if add_default_link then
     run "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
   else empty
@@ -114,7 +115,7 @@ let apk_opam2 ?(labels=[]) ?arch distro () =
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
   @@ Linux.Git.init ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
+  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ Linux.Apk.add_repository ~tag:"testing" "http://dl-cdn.alpinelinux.org/alpine/edge/testing"
@@ -134,7 +135,7 @@ let apt_opam2 ?(labels=[]) ?arch distro () =
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
+  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
@@ -170,7 +171,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools distro () =
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
   @@ from ~tag img
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
@@ -195,7 +196,7 @@ let zypper_opam2 ?(labels=[]) ?arch distro () =
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
   @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
   @@ from ~tag img
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
@@ -212,7 +213,7 @@ let pacman_opam2 ?(labels=[]) ?arch distro () =
   @@ Linux.Pacman.dev_packages ()
   @@ Linux.Git.init ()
   @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~add_default_link:false ~branch:"master" ()
+  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
