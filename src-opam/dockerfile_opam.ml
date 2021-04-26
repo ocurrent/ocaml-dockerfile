@@ -270,7 +270,7 @@ let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
       in
       let extra, t' = Windows.Cygwin.ocaml_for_windows_packages ~cyg ~extra () in
       Windows.install_vc_redist () @@ t
-      @@ Windows.Cygwin.setup ~cyg ~extra ~winsymlinks_native:true () @@ t'
+      @@ Windows.Cygwin.setup ~cyg ~extra () @@ t'
     end
   @@ Windows.Winget.setup ?from:winget ()
   @@ Windows.Winget.dev_packages ~version ()

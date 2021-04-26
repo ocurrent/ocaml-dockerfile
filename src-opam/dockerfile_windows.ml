@@ -111,7 +111,7 @@ module Cygwin = struct
   let install ?(cyg=default) fmt =
     ksprintf (cygwin ~cyg "--packages %s") fmt
 
-  let setup ?(cyg=default) ?(winsymlinks_native=false) ?(extra=[]) () =
+  let setup ?(cyg=default) ?(winsymlinks_native=true) ?(extra=[]) () =
     (if winsymlinks_native then env [("CYGWIN", "winsymlinks:native")] else empty)
     @@ add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
     @@ install_cygsympathy_from_source cyg

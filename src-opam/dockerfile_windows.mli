@@ -64,8 +64,9 @@ module Cygwin : sig
   (** The default Cygwin root, mirror, and arguments. *)
 
   val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
-  (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]
-     Cygwin packages.
+  (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
+     packages. Sets the [CYGWIN=winsymlinks:native] environment
+     variable by default.
      @see <https://github.com/metastack/cygsympathy>
      @see <https://github.com/metastack/msvs-tools> *)
 
