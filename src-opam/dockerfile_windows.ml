@@ -124,16 +124,10 @@ module Cygwin = struct
   let update ?(cyg=default) () =
     run {|%s %s --root %s --site %s --upgrade-also|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site
 
-  let cygwin_packages ?(cyg=default) ?(extra=[]) ?(flexdll_version="0.39-1") () =
-    let packages = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git"
-                   :: "patch" :: "m4" :: "cygport" :: extra in
-    let t =
-      (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
-      add ~src:["http://mirrors.kernel.org/sourceware/cygwin/x86_64/release/flexdll/flexdll-" ^ flexdll_version ^ ".tar.xz"]
-        ~dst:(cyg.root ^ {|\flexdll.tar.xz|}) ()
-      @@ run_sh ~cyg "cd / && tar -xJf flexdll.tar.xz && rm flexdll.tar.xz"
-    in
-    packages, t
+  let cygwin_packages ?(extra=[]) ?(flexdll_version="0.39-1") () =
+    (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
+    "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git" :: "patch" :: "m4"
+    :: "cygport" :: ("flexdll="^flexdll_version) :: extra
 
   (* GNU ld (found in binutils) 2.36 broke OCaml. Stay with 2.35 until
      a fix is available in OCaml. *)

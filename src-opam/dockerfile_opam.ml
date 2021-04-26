@@ -227,9 +227,10 @@ let pacman_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
 (* Cygwin based Dockerfile *)
 let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
+  let cyg = Windows.Cygwin.{ default with args = "--allow-test-packages" :: default.args } in
   header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
+  @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
@@ -238,7 +239,7 @@ let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
-  @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
+  @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
 
 (* TODO: Compile opam-2.0 and 2.1 instead of downloading binaries,
