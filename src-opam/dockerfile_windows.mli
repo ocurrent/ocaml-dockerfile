@@ -121,12 +121,13 @@ module Winget : sig
   val build_from_source :
     ?arch:Ocaml_version.arch -> ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
-  (** Build winget from source (in a separate Docker image). *)
+  (** Build winget from source (in a separate Docker image). The
+     optional [winget_version] specifies a Git reference. *)
 
   val install_from_release :
     ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] -> ?winget_version:string -> unit -> t
   (** Install winget from a released build (first in a separate Docker
-     image). *)
+     image). The optional [winget_version] specifies a Git tag. *)
 
   val setup : ?from:string -> unit -> t
   (** Setup winget, copied from the [from] Docker image. Disable

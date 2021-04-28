@@ -152,7 +152,6 @@ end
 
 module Winget = struct
   let winget = "winget-builder"
-  let winget_version = "v-0.2.10771-preview"
 
   let header ?(version=`V20H2) () =
     let tag = match version with
@@ -172,7 +171,7 @@ module Winget = struct
     @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
     |> crunch
 
-  let build_from_source ?(arch=`X86_64) ?version ?(winget_version=winget_version) ?(vs_version="16") () =
+  let build_from_source ?(arch=`X86_64) ?version ?(winget_version="master") ?(vs_version="16") () =
     header ?version ()
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
@@ -191,11 +190,17 @@ module Winget = struct
     @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
     @@ footer {|src\x64\Release\AppInstallerCLI|}
 
-  let install_from_release ?version ?(winget_version=winget_version) () =
-    let dst = {|C:\TEMP\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.zip|} in
+  let install_from_release ?version ?winget_version () =
+    let file = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe." in
+    let src =
+      let src = "https://github.com/microsoft/winget-cli/releases/" in
+      match winget_version with
+      | None -> src ^ "latest/download/" ^ file ^ "appxbundle"
+      | Some ver -> src ^ "download/" ^ ver ^ "/" ^ file ^ "appxbundle"
+    in
+    let dst = {|C:\TEMP\|} ^ file ^ "zip" in
     header ?version ()
-    @@ add ~src:["https://github.com/microsoft/winget-cli/releases/download/" ^ winget_version ^ "/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"]
-         ~dst ()
+    @@ add ~src:[src] ~dst ()
     @@ run_powershell {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|} dst
     @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.appx AppInstaller_x64.zip|}
     @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
