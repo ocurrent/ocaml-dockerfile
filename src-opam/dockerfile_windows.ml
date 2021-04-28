@@ -162,7 +162,7 @@ module Winget = struct
       | `V20H2 -> "20H2"
     in
     parser_directive (`Escape '`')
-    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows/servercore"
+    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows"
     @@ user "ContainerAdministrator"
 
   let footer path =
