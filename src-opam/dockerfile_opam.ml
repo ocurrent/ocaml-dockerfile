@@ -40,11 +40,12 @@ let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(
   else empty
 
 (* Can't satisfy the typechecker... *)
-let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ~branch () =
+let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch () =
   let open Dockerfile_windows.Cygwin in
-  run_sh "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch
-  @@ run_sh
-       "cd /tmp/opam && make cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam" prefix prefix branch prefix branch
+  run_sh "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
+  run_sh
+    "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
+    (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch
   @@ if add_default_link then
        run_sh "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
      else empty
@@ -231,7 +232,7 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
   @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
   @@ Windows.Cygwin.Git.init ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"master" ()
+  @@ install_opam_from_source_cygwin ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
