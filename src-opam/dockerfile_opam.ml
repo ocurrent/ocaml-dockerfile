@@ -30,8 +30,8 @@ let personality ?arch distro =
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch () =
-  run "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
+let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
+  run "git clone git://github.com/ocaml/opam /tmp/opam && git checkout %s" hash @@
   Linux.run_sh
     "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
     (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch @@
@@ -40,9 +40,9 @@ let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(
   else empty
 
 (* Can't satisfy the typechecker... *)
-let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch () =
+let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
   let open Dockerfile_windows.Cygwin in
-  run_sh "git clone -b %s git://github.com/ocaml/opam /tmp/opam" branch @@
+  run_sh "git clone git://github.com/ocaml/opam /tmp/opam && git checkout %s" hash @@
   run_sh
     "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
     (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch
@@ -110,13 +110,13 @@ let header ?arch ?maintainer ?img ?tag d =
   @@ shell
 
 (* Apk based Dockerfile *)
-let apk_opam2 ?(labels=[]) ?arch distro () =
+let apk_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
   @@ Linux.Git.init ()
-  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
+  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ Linux.Apk.add_repository ~tag:"testing" "http://dl-cdn.alpinelinux.org/alpine/edge/testing"
@@ -129,14 +129,14 @@ let apk_opam2 ?(labels=[]) ?arch distro () =
 
 
 (* Debian based Dockerfile *)
-let apt_opam2 ?(labels=[]) ?arch distro () =
+let apt_opam2 ?(labels=[]) ?arch distro ~hash_opam_2_0 ~hash_opam_master () =
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
+  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
@@ -156,7 +156,7 @@ let apt_opam2 ?(labels=[]) ?arch distro () =
 
    [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
    This is needed to get most of *-devel packages frequently used by opam packages. *)
-let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools distro () =
+let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   let workaround =
     if yum_workaround then
@@ -171,8 +171,8 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools distro () =
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ from ~tag img
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
@@ -190,14 +190,14 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools distro () =
 
 
 (* Zypper based Dockerfile *)
-let zypper_opam2 ?(labels=[]) ?arch distro () =
+let zypper_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
+  @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ from ~tag img
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
@@ -208,13 +208,13 @@ let zypper_opam2 ?(labels=[]) ?arch distro () =
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
 (* Pacman based Dockerfile *)
-let pacman_opam2 ?(labels=[]) ?arch distro () =
+let pacman_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "pacman") :: labels)
   @@ Linux.Pacman.dev_packages ()
   @@ Linux.Git.init ()
-  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
+  @@ install_opam_from_source ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
+  @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
@@ -225,14 +225,14 @@ let pacman_opam2 ?(labels=[]) ?arch distro () =
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
 (* Cygwin based Dockerfile *)
-let cygwin_opam2 ?(labels=[]) ?arch distro () =
+let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
   @@ Windows.Cygwin.Git.init ()
-  @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ()
-  @@ install_opam_from_source_cygwin ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ()
+  @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
+  @@ install_opam_from_source_cygwin ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
@@ -241,6 +241,9 @@ let cygwin_opam2 ?(labels=[]) ?arch distro () =
   @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
   @@ Windows.Cygwin.Git.init ()
 
+(* TODO: Compile opam-2.0 and 2.1 instead of downloading binaries,
+   add an option to enable 0install-solver,
+   and pass ~hash_opam_2_0 ~hash_opam_master like the cygwin one *)
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
 let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
   (* GNU Linker 2.36 may be breaking OCaml *)
@@ -274,17 +277,17 @@ let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
   @@ Windows.Cygwin.Git.init ~cyg ()
   @@ Windows.cleanup ()
 
-let gen_opam2_distro ?winget ?(clone_opam_repo=true) ?arch ?labels d =
+let gen_opam2_distro ?winget ?(clone_opam_repo=true) ?arch ?labels ~hash_opam_2_0 ~hash_opam_master d =
   let fn = match D.package_manager d with
-  | `Apk -> apk_opam2 ?labels ?arch d ()
-  | `Apt -> apt_opam2 ?labels ?arch d ()
+  | `Apk -> apk_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_master d ()
+  | `Apt -> apt_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_master d ()
   | `Yum ->
      let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
      let enable_powertools = match d with `CentOS (`V6 | `V7) -> false | `CentOS _ -> true | _ -> false in
-     yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools d ()
-  | `Zypper -> zypper_opam2 ?labels ?arch d ()
-  | `Pacman -> pacman_opam2 ?labels ?arch d ()
-  | `Cygwin -> cygwin_opam2 ?labels ?arch d ()
+     yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~hash_opam_2_0 ~hash_opam_master d ()
+  | `Zypper -> zypper_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_master d ()
+  | `Pacman -> pacman_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_master d ()
+  | `Cygwin -> cygwin_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_master d ()
   | `Windows -> windows_opam2 ?winget ?labels ?arch d ()
   in
   let clone = if clone_opam_repo then
