@@ -1,6 +1,7 @@
 dev
 ---
 
+- Alpine 3.11 to deprecated, add Fedora 34 and Ubuntu 21.04 (@avsm)
 - add `libexecinfo-dev` to Alpine dev packages as it is used
   by multicore OCaml (@avsm)
 - retrieve cygsympathy script from upstream master (@dra27)
