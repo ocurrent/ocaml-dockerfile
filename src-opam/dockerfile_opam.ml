@@ -31,7 +31,7 @@ let personality ?arch distro =
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
 let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
-  run "git clone git://github.com/ocaml/opam /tmp/opam && git checkout %s" hash @@
+  run "git clone git://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
   Linux.run_sh
     "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
     (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch @@
@@ -42,7 +42,7 @@ let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(
 (* Can't satisfy the typechecker... *)
 let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
   let open Dockerfile_windows.Cygwin in
-  run_sh "git clone git://github.com/ocaml/opam /tmp/opam && git checkout %s" hash @@
+  run_sh "git clone git://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
   run_sh
     "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
     (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch
