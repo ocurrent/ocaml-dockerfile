@@ -80,7 +80,7 @@ module Cygwin : sig
   val cygwin_packages : ?extra:string list -> ?flexdll_version:string -> unit
                         -> string list
   (** [cygwin_packages ?extra ()] will install the base development
-     tools for the OCaml Cygwin port. Extra packages may also bep
+     tools for the OCaml Cygwin port. Extra packages may also be
      optionally supplied via [extra]. *)
 
   val mingw_packages : ?extra:string list -> unit -> string list
