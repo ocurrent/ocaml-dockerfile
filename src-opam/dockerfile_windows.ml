@@ -111,7 +111,7 @@ module Cygwin = struct
   let install ?(cyg=default) fmt =
     ksprintf (cygwin ~cyg "--packages %s") fmt
 
-  let setup ?(cyg=default) ?(winsymlinks_native=false) ?(extra=[]) () =
+  let setup ?(cyg=default) ?(winsymlinks_native=true) ?(extra=[]) () =
     (if winsymlinks_native then env [("CYGWIN", "winsymlinks:native")] else empty)
     @@ add ~src:["https://www.cygwin.com/setup-x86_64.exe"] ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
     @@ install_cygsympathy_from_source cyg
@@ -124,19 +124,15 @@ module Cygwin = struct
   let update ?(cyg=default) () =
     run {|%s %s --root %s --site %s --upgrade-also|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site
 
-  let cygwin_packages ?(cyg=default) ?(extra=[]) ?(flexdll_version="0.39-1") () =
-    let packages = "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git"
-                   :: "patch" :: "m4" :: "cygport" :: extra in
-    let t =
-      (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
-      add ~src:["http://mirrors.kernel.org/sourceware/cygwin/x86_64/release/flexdll/flexdll-" ^ flexdll_version ^ ".tar.xz"]
-        ~dst:(cyg.root ^ {|\flexdll.tar.xz|}) ()
-      @@ run_sh ~cyg "cd / && tar -xJf flexdll.tar.xz && rm flexdll.tar.xz"
-    in
-    packages, t
+  let cygwin_packages ?(extra=[]) ?(flexdll_version="0.39-1") () =
+    (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
+    "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git" :: "patch" :: "m4"
+    :: "cygport" :: ("flexdll="^flexdll_version) :: extra
 
-  let mingw_packages ?(extra=[]) () = "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
-  let msvc_packages ?(extra=[]) () = "make" :: "diffutils" :: extra
+  (* GNU ld (found in binutils) 2.36 broke OCaml. Stay with 2.35 until
+     a fix is available in OCaml. *)
+  let mingw_packages ?(extra=[]) () = "mingw64-x86_64-binutils=2.35.2-1" :: "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
+  let msvc_packages ?(extra=[]) () = "mingw64-x86_64-binutils=2.35.2-1" :: "make" :: "diffutils" :: extra
 
   let ocaml_for_windows_packages ?cyg ?(extra=[]) ?(version="0.0.0.2") () =
     let packages = "make" :: "diffutils" :: "mingw64-x86_64-gcc-g++" :: "vim" :: "git"
@@ -156,7 +152,6 @@ end
 
 module Winget = struct
   let winget = "winget-builder"
-  let winget_version = "v-0.2.10771-preview"
 
   let header ?(version=`V20H2) () =
     let tag = match version with
@@ -167,7 +162,7 @@ module Winget = struct
       | `V20H2 -> "20H2"
     in
     parser_directive (`Escape '`')
-    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows/servercore"
+    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows"
     @@ user "ContainerAdministrator"
 
   let footer path =
@@ -176,7 +171,7 @@ module Winget = struct
     @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
     |> crunch
 
-  let build_from_source ?(arch=`X86_64) ?version ?(winget_version=winget_version) ?(vs_version="16") () =
+  let build_from_source ?(arch=`X86_64) ?version ?(winget_version="master") ?(vs_version="16") () =
     header ?version ()
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
@@ -195,11 +190,17 @@ module Winget = struct
     @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
     @@ footer {|src\x64\Release\AppInstallerCLI|}
 
-  let install_from_release ?version ?(winget_version=winget_version) () =
-    let dst = {|C:\TEMP\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.zip|} in
+  let install_from_release ?version ?winget_version () =
+    let file = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe." in
+    let src =
+      let src = "https://github.com/microsoft/winget-cli/releases/" in
+      match winget_version with
+      | None -> src ^ "latest/download/" ^ file ^ "appxbundle"
+      | Some ver -> src ^ "download/" ^ ver ^ "/" ^ file ^ "appxbundle"
+    in
+    let dst = {|C:\TEMP\|} ^ file ^ "zip" in
     header ?version ()
-    @@ add ~src:["https://github.com/microsoft/winget-cli/releases/download/" ^ winget_version ^ "/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.appxbundle"]
-         ~dst ()
+    @@ add ~src:[src] ~dst ()
     @@ run_powershell {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|} dst
     @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.appx AppInstaller_x64.zip|}
     @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}

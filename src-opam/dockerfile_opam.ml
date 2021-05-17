@@ -229,9 +229,10 @@ let pacman_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
 (* Cygwin based Dockerfile *)
 let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   let img, tag = D.base_distro_tag ?arch distro in
+  let cyg = Windows.Cygwin.{ default with args = "--allow-test-packages" :: default.args } in
   header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
+  @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~branch:"2.0" ~hash:hash_opam_2_0 ()
   @@ install_opam_from_source_cygwin ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
@@ -240,7 +241,7 @@ let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
-  @@ Windows.Cygwin.(let extra, t = cygwin_packages () in setup ~extra () @@ t)
+  @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
 
 (* TODO: Compile opam-2.0 and 2.1 instead of downloading binaries,
@@ -248,11 +249,6 @@ let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
    and pass ~hash_opam_2_0 ~hash_opam_master like the cygwin one *)
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
 let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
-  (* GNU Linker 2.36 may be breaking OCaml *)
-  let cyg = { Windows.Cygwin.default with
-              site = "http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/64bit/2021/04/09/072945";
-              args = Windows.Cygwin.default.args @ ["-X"] }
-  in
   let version = match distro with `Windows (_, v) -> v | _ -> assert false in
   (match winget with
   | None -> Windows.Winget.install_from_release ~version ()
@@ -270,13 +266,13 @@ let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
                "Microsoft.VisualStudio.Component.Windows10SDK.18362"]
         | _ -> invalid_arg "Invalid distribution"
       in
-      let extra, t' = Windows.Cygwin.ocaml_for_windows_packages ~cyg ~extra () in
+      let extra, t' = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
       Windows.install_vc_redist () @@ t
-      @@ Windows.Cygwin.setup ~cyg ~extra ~winsymlinks_native:true () @@ t'
+      @@ Windows.Cygwin.setup ~extra () @@ t'
     end
   @@ Windows.Winget.setup ?from:winget ()
   @@ Windows.Winget.dev_packages ~version ()
-  @@ Windows.Cygwin.Git.init ~cyg ()
+  @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 
 let gen_opam2_distro ?winget ?(clone_opam_repo=true) ?arch ?labels ~hash_opam_2_0 ~hash_opam_master d =

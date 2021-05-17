@@ -64,8 +64,9 @@ module Cygwin : sig
   (** The default Cygwin root, mirror, and arguments. *)
 
   val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
-  (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra]
-     Cygwin packages.
+  (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
+     packages. Sets the [CYGWIN=winsymlinks:native] environment
+     variable by default.
      @see <https://github.com/metastack/cygsympathy>
      @see <https://github.com/metastack/msvs-tools> *)
 
@@ -76,10 +77,10 @@ module Cygwin : sig
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages : ?cyg:cyg -> ?extra:string list ->
-                        ?flexdll_version:string -> unit -> string list * t
+  val cygwin_packages : ?extra:string list -> ?flexdll_version:string -> unit
+                        -> string list
   (** [cygwin_packages ?extra ()] will install the base development
-     tools for the OCaml Cygwin port. Extra packages may also bep
+     tools for the OCaml Cygwin port. Extra packages may also be
      optionally supplied via [extra]. *)
 
   val mingw_packages : ?extra:string list -> unit -> string list
@@ -120,12 +121,13 @@ module Winget : sig
   val build_from_source :
     ?arch:Ocaml_version.arch -> ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
-  (** Build winget from source (in a separate Docker image). *)
+  (** Build winget from source (in a separate Docker image). The
+     optional [winget_version] specifies a Git reference. *)
 
   val install_from_release :
     ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] -> ?winget_version:string -> unit -> t
   (** Install winget from a released build (first in a separate Docker
-     image). *)
+     image). The optional [winget_version] specifies a Git tag. *)
 
   val setup : ?from:string -> unit -> t
   (** Setup winget, copied from the [from] Docker image. Disable
