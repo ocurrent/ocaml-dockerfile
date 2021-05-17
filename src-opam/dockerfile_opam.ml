@@ -119,7 +119,9 @@ let apk_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_master distro () =
   @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver:true ~branch:"master" ~hash:hash_opam_master ()
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
-  @@ Linux.Apk.add_repository ~tag:"testing" "http://dl-cdn.alpinelinux.org/alpine/edge/testing"
+  @@ Linux.Apk.add_repository ~tag:"edge" "https://dl-cdn.alpinelinux.org/alpine/edge/main"
+  @@ Linux.Apk.add_repository ~tag:"edgecommunity" "https://dl-cdn.alpinelinux.org/alpine/edge/community"
+  @@ Linux.Apk.add_repository ~tag:"testing" "https://dl-cdn.alpinelinux.org/alpine/edge/testing"
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.1" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
