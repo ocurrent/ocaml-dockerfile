@@ -9,7 +9,8 @@ dev
 - Fixes to the Windows images, smaller images, fix bugs
   (@MisterDA)
 - Introduce a Cygwin image, and move Windows Mingw and Windows Msvc at
-  the distro level. (@MisterDA)
+  the distro level. (@MisterDA #42)
+- Add edge and edgecommunity repositories to the Alpine image (@EwanMellor #48)
 
 v7.1.0 2021-02-25 Cambridge
 ---------------------------
