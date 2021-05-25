@@ -20,7 +20,7 @@ open Astring
 
 type win10_release = [
   | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
-  | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2
+  | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
 ] [@@deriving sexp]
 
 type t = [
@@ -84,7 +84,7 @@ let distros = [
 let distros =
   let win10_releases =
     [ `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1809;
-      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; ] in
+      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; `V21H1 ] in
   List.fold_left (fun distros version ->
       `Cygwin version :: `Windows (`Mingw, version) :: `Windows (`Msvc, version) :: distros)
     distros win10_releases
@@ -103,9 +103,10 @@ let win10_release_status v : win10_release_status = match v with
   | `V1903 -> `Deprecated
   | `V1909
   | `V2004
-  | `V20H2 -> `Active
+  | `V20H2
+  | `V21H1 -> `Active
 
-let win10_latest_release = `V20H2
+let win10_latest_release = `V21H1
 
 type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 
@@ -282,14 +283,14 @@ let win10_release_to_string = function
   | `V1607 -> "1607" | `Ltsc2016 -> "ltsc2016" | `V1703 -> "1703"
   | `V1709 -> "1709" | `V1803 -> "1803" | `V1809 -> "1809"
   | `Ltsc2019 -> "ltsc2019" | `V1903 -> "1903" | `V1909 -> "1909"
-  | `V2004 -> "2004" | `V20H2 -> "20H2"
+  | `V2004 -> "2004" | `V20H2 -> "20H2" | `V21H1 -> "21H1"
 
 let win10_release_of_string v : win10_release option = match v with
   | "1507" -> Some `V1507 | "ltsc2015" -> Some `Ltsc2015 | "1511" -> Some `V1511
   | "1607" -> Some `V1607 | "ltsc2016" -> Some `Ltsc2016 | "1703" -> Some `V1703
   | "1709" -> Some `V1709 | "1803" -> Some `V1803 | "1809" -> Some `V1809
   | "ltsc2019" -> Some `Ltsc2019 | "1903" -> Some `V1903 | "1909" -> Some `V1909
-  | "2004" -> Some `V2004 | "20H2" -> Some `V20H2
+  | "2004" -> Some `V2004 | "20H2" -> Some `V20H2 | "21H1" -> Some `V21H1
   | _ -> None
 
 (* The Docker tag for this distro *)
