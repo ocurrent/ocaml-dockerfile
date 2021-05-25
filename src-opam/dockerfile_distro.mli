@@ -78,6 +78,14 @@ val distros : t list
 val latest_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
 
+val win10_latest_release : win10_release
+(** Latest Windows 10 release. *)
+
+val win10_latest_image : win10_release
+(** Latest Windows 10 Docker image available. May differ from
+   {!win10_latest_release} if the Docker repository hasn't been
+   updated. *)
+
 val master_distro : t
 (** The distribution that is the top-level alias for the [latest] tag
     in the [ocaml/opam2] Docker Hub build. *)

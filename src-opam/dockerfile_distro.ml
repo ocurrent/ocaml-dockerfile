@@ -105,6 +105,8 @@ let win10_release_status v : win10_release_status = match v with
   | `V2004
   | `V20H2 -> `Active
 
+let win10_latest_release = `V20H2
+
 type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 
 (* https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/base-image-lifecycle *)
@@ -122,6 +124,8 @@ let win10_docker_status (base : win10_docker_base_image) v : status =
   | `ServerCore, (`V1607 | `Ltsc2016) -> `Active `Tier3
   | `NanoServer, `V1607 -> `Deprecated
   | _ -> `Not_available
+
+let win10_latest_image = `V20H2
 
 let distro_status (d:t) : status = match d with
   | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12) -> `Deprecated
@@ -160,7 +164,13 @@ let latest_distros =
   [ `Alpine `Latest; `Archlinux `Latest; `CentOS `Latest;
     `Debian `Stable; `OracleLinux `Latest; `OpenSUSE `Latest;
     `Fedora `Latest; `Ubuntu `Latest; `Ubuntu `LTS;
-    `Cygwin `V20H2; `Windows (`Mingw, `V20H2); `Windows (`Msvc, `V20H2)]
+    (* Prefer win10_latest_image to win10_latest_release as
+       latest_distro is used by docker-base-images to fetch tag
+       aliases. *)
+    `Cygwin win10_latest_image;
+    `Windows (`Mingw, win10_latest_image);
+    `Windows (`Msvc, win10_latest_image);
+  ]
 
 let master_distro = `Debian `Stable
 
