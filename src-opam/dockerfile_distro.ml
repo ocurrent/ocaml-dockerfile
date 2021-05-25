@@ -217,7 +217,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V15_2 -> Some "4.05.0"
   |`OracleLinux `V7 -> Some "4.01.0"
   |`OracleLinux `V8 -> Some "4.07.0"
-  |`Cygwin `V20H2 -> Some "4.10.0"
+  |`Cygwin _ -> None
   |`Windows _ -> None
   |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
   |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
