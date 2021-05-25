@@ -18,6 +18,11 @@
 (** Distro selection for various OPAM combinations *)
 open Astring
 
+type win10_release = [
+  | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
+  | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2
+] [@@deriving sexp]
+
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `Latest ]
   | `Archlinux of [ `Latest ]
@@ -27,8 +32,8 @@ type t = [
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `LTS | `Latest ]
-  | `Cygwin of [ `V20H2 ]
-  | `Windows of [`Mingw | `Msvc] * [ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ]
+  | `Cygwin of win10_release
+  | `Windows of [`Mingw | `Msvc] * win10_release
 ] [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -60,6 +65,7 @@ type status = [
   | `Deprecated
   | `Active of [ `Tier1 | `Tier2 | `Tier3 ]
   | `Alias of t
+  | `Not_available
 ] [@@deriving sexp]
 
 let distros = [
@@ -74,10 +80,48 @@ let distros = [
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04; `Ubuntu `V20_10; `Ubuntu `V21_04;
   `Ubuntu `Latest; `Ubuntu `LTS;
-  `Cygwin `V20H2;
-  `Windows (`Mingw, `V1809); `Windows (`Mingw, `V1903); `Windows (`Mingw, `V1909); `Windows (`Mingw, `V2004); `Windows (`Mingw, `V20H2);
-  `Windows (`Msvc, `V1809); `Windows (`Msvc, `V1903); `Windows (`Msvc, `V1909); `Windows (`Msvc, `V2004); `Windows (`Msvc, `V20H2);
 ]
+let distros =
+  let win10_releases =
+    [ `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1809;
+      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; ] in
+  List.fold_left (fun distros version ->
+      `Cygwin version :: `Windows (`Mingw, version) :: `Windows (`Msvc, version) :: distros)
+    distros win10_releases
+
+type win10_release_status = [ `Deprecated | `Active ]
+
+(* https://en.wikipedia.org/wiki/Windows_10_version_history#Channels *)
+let win10_release_status v : win10_release_status = match v with
+  | `V1507 -> `Deprecated | `Ltsc2015 -> `Active
+  | `V1511 -> `Deprecated
+  | `V1607 -> `Deprecated | `Ltsc2016 -> `Active
+  | `V1703
+  | `V1709
+  | `V1803
+  | `V1809 -> `Deprecated | `Ltsc2019 -> `Active
+  | `V1903 -> `Deprecated
+  | `V1909
+  | `V2004
+  | `V20H2 -> `Active
+
+type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
+
+(* https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/base-image-lifecycle *)
+let win10_docker_status (base : win10_docker_base_image) v : status =
+  match base, v with
+  | _, `V20H2
+  | _, `V2004
+  | _, `V1909 -> `Active `Tier3
+  | _, `V1903 -> `Deprecated
+  | `ServerCore, (`V1809 | `Ltsc2019)
+  | `NanoServer, `V1809
+  | `Windows, `V1809 -> `Active `Tier3
+  | (`ServerCore | `NanoServer), `V1803
+  | (`ServerCore | `NanoServer), `V1709 -> `Deprecated
+  | `ServerCore, (`V1607 | `Ltsc2016) -> `Active `Tier3
+  | `NanoServer, `V1607 -> `Deprecated
+  | _ -> `Not_available
 
 let distro_status (d:t) : status = match d with
   | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12) -> `Deprecated
@@ -109,8 +153,8 @@ let distro_status (d:t) : status = match d with
   | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_10)
-  | `Cygwin `V20H2 -> `Active `Tier3
-  | `Windows (_, _) -> `Active `Tier3
+  | `Cygwin v -> win10_docker_status `ServerCore v
+  | `Windows (_, v) -> win10_docker_status `Windows v
 
 let latest_distros =
   [ `Alpine `Latest; `Archlinux `Latest; `CentOS `Latest;
@@ -223,6 +267,21 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
   |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest -> assert false
 
+let win10_release_to_string = function
+  | `V1507 -> "1507" | `Ltsc2015 -> "ltsc2015" | `V1511 -> "1511"
+  | `V1607 -> "1607" | `Ltsc2016 -> "ltsc2016" | `V1703 -> "1703"
+  | `V1709 -> "1709" | `V1803 -> "1803" | `V1809 -> "1809"
+  | `Ltsc2019 -> "ltsc2019" | `V1903 -> "1903" | `V1909 -> "1909"
+  | `V2004 -> "2004" | `V20H2 -> "20H2"
+
+let win10_release_of_string v : win10_release option = match v with
+  | "1507" -> Some `V1507 | "ltsc2015" -> Some `Ltsc2015 | "1511" -> Some `V1511
+  | "1607" -> Some `V1607 | "ltsc2016" -> Some `Ltsc2016 | "1703" -> Some `V1703
+  | "1709" -> Some `V1709 | "1803" -> Some `V1803 | "1809" -> Some `V1809
+  | "ltsc2019" -> Some `Ltsc2019 | "1903" -> Some `V1903 | "1909" -> Some `V1909
+  | "2004" -> Some `V2004 | "20H2" -> Some `V20H2
+  | _ -> None
+
 (* The Docker tag for this distro *)
 let tag_of_distro (d:t) = match d with
   |`Ubuntu `V12_04 -> "ubuntu-12.04"
@@ -291,19 +350,18 @@ let tag_of_distro (d:t) = match d with
   |`OpenSUSE `V15_1 -> "opensuse-15.1"
   |`OpenSUSE `V15_2 -> "opensuse-15.2"
   |`OpenSUSE `Latest -> "opensuse"
-  |`Cygwin `V20H2 -> "cygwin-20H2"
-  |`Windows (`Mingw, `V1809) -> "windows-mingw-1809"
-  |`Windows (`Mingw, `V1903) -> "windows-mingw-1903"
-  |`Windows (`Mingw, `V1909) -> "windows-mingw-1909"
-  |`Windows (`Mingw, `V2004) -> "windows-mingw-2004"
-  |`Windows (`Mingw, `V20H2) -> "windows-mingw-20H2"
-  |`Windows (`Msvc, `V1809) -> "windows-msvc-1809"
-  |`Windows (`Msvc, `V1903) -> "windows-msvc-1903"
-  |`Windows (`Msvc, `V1909) -> "windows-msvc-1909"
-  |`Windows (`Msvc, `V2004) -> "windows-msvc-2004"
-  |`Windows (`Msvc, `V20H2) -> "windows-msvc-20H2"
+  |`Cygwin v -> "cygwin-" ^ (win10_release_to_string v)
+  |`Windows (`Mingw, v) -> "windows-mingw-" ^ (win10_release_to_string v)
+  |`Windows (`Msvc, v) -> "windows-msvc-" ^ (win10_release_to_string v)
 
-let distro_of_tag x : t option = match x with
+let distro_of_tag x : t option =
+  let win10_of_tag affix s f =
+    let stop = String.length affix in
+    match win10_release_of_string (String.(sub ~start:0 ~stop s |> Sub.to_string)) with
+    | Some v -> Some (f v)
+    | None -> None
+  in
+  match x with
   |"ubuntu-12.04" -> Some (`Ubuntu `V12_04)
   |"ubuntu-14.04" -> Some (`Ubuntu `V14_04)
   |"ubuntu-15.04" -> Some (`Ubuntu `V15_04)
@@ -369,17 +427,12 @@ let distro_of_tag x : t option = match x with
   |"opensuse-15.1" -> Some (`OpenSUSE `V15_1)
   |"opensuse-15.2" -> Some (`OpenSUSE `V15_2)
   |"opensuse" -> Some (`OpenSUSE `Latest)
-  |"cygwin-20H2" -> Some (`Cygwin `V20H2)
-  |"windows-mingw-1809" -> Some (`Windows (`Mingw, `V1809))
-  |"windows-mingw-1903" -> Some (`Windows (`Mingw, `V1903))
-  |"windows-mingw-1909" -> Some (`Windows (`Mingw, `V1909))
-  |"windows-mingw-2004" -> Some (`Windows (`Mingw, `V2004))
-  |"windows-mingw-20H2" -> Some (`Windows (`Mingw, `V20H2))
-  |"windows-msvc-1809" -> Some (`Windows (`Msvc, `V1809))
-  |"windows-msvc-1903" -> Some (`Windows (`Msvc, `V1903))
-  |"windows-msvc-1909" -> Some (`Windows (`Msvc, `V1909))
-  |"windows-msvc-2004" -> Some (`Windows (`Msvc, `V2004))
-  |"windows-msvc-20H2" -> Some (`Windows (`Msvc, `V20H2))
+  | s when String.is_prefix ~affix:"cygwin-" s ->
+     win10_of_tag "cygwin-" s (fun v -> `Cygwin v)
+  | s when String.is_prefix ~affix:"windows-mingw-" s ->
+     win10_of_tag "windows-mingw-" s (fun v -> `Windows (`Mingw, v))
+  | s when String.is_prefix ~affix:"windows-msvc-" s ->
+     win10_of_tag "windows-msvc-" s (fun v -> `Windows (`Msvc, v))
   |_ -> None
 
 let rec human_readable_string_of_distro (d:t) =
@@ -444,17 +497,9 @@ let rec human_readable_string_of_distro (d:t) =
   |`OpenSUSE `V15_0 -> "OpenSUSE 15.0 (Leap)"
   |`OpenSUSE `V15_1 -> "OpenSUSE 15.1 (Leap)"
   |`OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
-  |`Cygwin `V20H2 -> "Cygwin 20H2"
-  |`Windows (`Mingw, `V1809) -> "Windows mingw 1809"
-  |`Windows (`Mingw, `V1903) -> "Windows mingw 1903"
-  |`Windows (`Mingw, `V1909) -> "Windows mingw 1909"
-  |`Windows (`Mingw, `V2004) -> "Windows mingw 2004"
-  |`Windows (`Mingw, `V20H2) -> "Windows mingw 20H2"
-  |`Windows (`Msvc, `V1809) -> "Windows mingw 1809"
-  |`Windows (`Msvc, `V1903) -> "Windows mingw 1903"
-  |`Windows (`Msvc, `V1909) -> "Windows mingw 1909"
-  |`Windows (`Msvc, `V2004) -> "Windows mingw 2004"
-  |`Windows (`Msvc, `V20H2) -> "Windows mingw 20H2"
+  |`Cygwin v -> "Cygwin " ^ (win10_release_to_string v)
+  |`Windows (`Mingw, v) -> "Windows mingw " ^ (win10_release_to_string v)
+  |`Windows (`Msvc, v) -> "Windows mingw " ^ (win10_release_to_string v)
   |`Alpine `Latest | `Ubuntu `Latest | `Ubuntu `LTS | `CentOS `Latest | `Fedora `Latest
   |`OracleLinux `Latest | `OpenSUSE `Latest -> alias ()
 
@@ -605,21 +650,9 @@ let base_distro_tag ?(arch=`X86_64) d =
       in
       "opensuse/leap", tag
   | `Cygwin v ->
-     let tag =
-       match v with
-       | `V20H2 -> "20H2"
-     in
-     "mcr.microsoft.com/windows/servercore", tag
+     "mcr.microsoft.com/windows/servercore", win10_release_to_string v
   | `Windows (_, v) ->
-     let tag =
-       match v with
-       | `V1809 -> "1809"
-       | `V1903 -> "1903"
-       | `V1909 -> "1909"
-       | `V2004 -> "2004"
-       | `V20H2 -> "20H2"
-     in
-     "mcr.microsoft.com/windows", tag
+     "mcr.microsoft.com/windows", win10_release_to_string v
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
