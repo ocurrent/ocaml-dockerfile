@@ -158,7 +158,13 @@ let distro_status (d:t) : status = match d with
   | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_10)
+  | `Cygwin `Ltsc2019 -> `Alias (`Cygwin `V1809)
+  | `Cygwin `Ltsc2016 -> `Alias (`Cygwin `V1607)
+  | `Cygwin `Ltsc2015 -> `Alias (`Cygwin `V1507)
   | `Cygwin v -> win10_docker_status `ServerCore v
+  | `Windows (cc, `Ltsc2019) -> `Alias (`Windows (cc, `V1809))
+  | `Windows (cc, `Ltsc2016) -> `Alias (`Windows (cc, `V1607))
+  | `Windows (cc, `Ltsc2015) -> `Alias (`Windows (cc, `V1507))
   | `Windows (_, v) -> win10_docker_status `Windows v
 
 let latest_distros =
@@ -272,6 +278,8 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V15_2 -> Some "4.05.0"
   |`OracleLinux `V7 -> Some "4.01.0"
   |`OracleLinux `V8 -> Some "4.07.0"
+  |`Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)
+  |`Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
   |`Cygwin _ -> None
   |`Windows _ -> None
   |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
@@ -660,8 +668,10 @@ let base_distro_tag ?(arch=`X86_64) d =
         | `Latest -> assert false
       in
       "opensuse/leap", tag
+  | `Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019) -> assert false
   | `Cygwin v ->
      "mcr.microsoft.com/windows/servercore", win10_release_to_string v
+  | `Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
   | `Windows (_, v) ->
      "mcr.microsoft.com/windows", win10_release_to_string v
 
