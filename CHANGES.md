@@ -1,6 +1,7 @@
 dev
 ---
 
+- Improve support for Windows 10 (#50 @MisterDA review by @dra27)
 - Alpine 3.12 and Ubuntu 20.10 to deprecated, add Fedora 34 and Ubuntu 21.04 (@avsm)
 - Deprecate Ubuntu 16.04 as it is now EOL (@kit-ty-kate #44)
 - add `libexecinfo-dev` to Alpine dev packages as it is used

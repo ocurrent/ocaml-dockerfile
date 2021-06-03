@@ -119,13 +119,13 @@ end
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
   val build_from_source :
-    ?arch:Ocaml_version.arch -> ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
+    ?arch:Ocaml_version.arch -> ?version:Dockerfile_distro.win10_release ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
   (** Build winget from source (in a separate Docker image). The
      optional [winget_version] specifies a Git reference. *)
 
   val install_from_release :
-    ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] -> ?winget_version:string -> unit -> t
+    ?version:Dockerfile_distro.win10_release -> ?winget_version:string -> unit -> t
   (** Install winget from a released build (first in a separate Docker
      image). The optional [winget_version] specifies a Git tag. *)
 
@@ -137,7 +137,7 @@ module Winget : sig
   (** [install packages] will install the supplied winget package list. *)
 
   val dev_packages :
-    ?version:[ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ] ->
+    ?version:Dockerfile_distro.win10_release ->
     ?extra:string list -> unit -> t
   (** [dev_packages ?version ?extra ()] will install the base development
      tools. Extra packages may also be optionally supplied via
