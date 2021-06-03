@@ -30,7 +30,7 @@ type t = [
   | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
-  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
+  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `LTS | `Latest ]
   | `Cygwin of win10_release
   | `Windows of [`Mingw | `Msvc] * win10_release
@@ -76,7 +76,7 @@ let distros = [
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
   `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27; `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `V31; `Fedora `V32; `Fedora `V33; `Fedora `V34; `Fedora `Latest;
   `OracleLinux `V7; `OracleLinux `V8; `OracleLinux `Latest;
-  `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `Latest;
+  `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `V15_3; `OpenSUSE `Latest;
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
   `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04; `Ubuntu `V20_10; `Ubuntu `V21_04;
   `Ubuntu `Latest; `Ubuntu `LTS;
@@ -151,13 +151,13 @@ let distro_status (d:t) : status = match d with
   | `OracleLinux (`V7|`V8) -> `Active `Tier3
   | `OracleLinux `Latest -> `Alias (`OracleLinux `V8)
   | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1) -> `Deprecated
-  | `OpenSUSE `V15_2 -> `Active `Tier2
-  | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_2)
+  | `OpenSUSE (`V15_2 | `V15_3) -> `Active `Tier2
+  | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_3)
   | `Ubuntu (`V18_04) -> `Active `Tier3
-  | `Ubuntu (`V20_04|`V20_10 |`V21_04) -> `Active `Tier2
-  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 ) -> `Deprecated
+  | `Ubuntu (`V20_04 | `V21_04) -> `Active `Tier2
+  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
-  | `Ubuntu `Latest -> `Alias (`Ubuntu `V20_10)
+  | `Ubuntu `Latest -> `Alias (`Ubuntu `V21_04)
   | `Cygwin `Ltsc2019 -> `Alias (`Cygwin `V1809)
   | `Cygwin `Ltsc2016 -> `Alias (`Cygwin `V1607)
   | `Cygwin `Ltsc2015 -> `Alias (`Cygwin `V1507)
@@ -276,6 +276,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V15_0 -> Some "4.05.0"
   |`OpenSUSE `V15_1 -> Some "4.05.0"
   |`OpenSUSE `V15_2 -> Some "4.05.0"
+  |`OpenSUSE `V15_3 -> Some "4.05.0"
   |`OracleLinux `V7 -> Some "4.01.0"
   |`OracleLinux `V8 -> Some "4.07.0"
   |`Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)
@@ -368,6 +369,7 @@ let tag_of_distro (d:t) = match d with
   |`OpenSUSE `V15_0 -> "opensuse-15.0"
   |`OpenSUSE `V15_1 -> "opensuse-15.1"
   |`OpenSUSE `V15_2 -> "opensuse-15.2"
+  |`OpenSUSE `V15_3 -> "opensuse-15.3"
   |`OpenSUSE `Latest -> "opensuse"
   |`Cygwin v -> "cygwin-" ^ (win10_release_to_string v)
   |`Windows (`Mingw, v) -> "windows-mingw-" ^ (win10_release_to_string v)
@@ -445,6 +447,7 @@ let distro_of_tag x : t option =
   |"opensuse-15.0" -> Some (`OpenSUSE `V15_0)
   |"opensuse-15.1" -> Some (`OpenSUSE `V15_1)
   |"opensuse-15.2" -> Some (`OpenSUSE `V15_2)
+  |"opensuse-15.3" -> Some (`OpenSUSE `V15_3)
   |"opensuse" -> Some (`OpenSUSE `Latest)
   | s when String.is_prefix ~affix:"cygwin-" s ->
      win10_of_tag "cygwin-" s (fun v -> `Cygwin v)
@@ -516,6 +519,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`OpenSUSE `V15_0 -> "OpenSUSE 15.0 (Leap)"
   |`OpenSUSE `V15_1 -> "OpenSUSE 15.1 (Leap)"
   |`OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
+  |`OpenSUSE `V15_3 -> "OpenSUSE 15.3 (Leap)"
   |`Cygwin v -> "Cygwin " ^ (win10_release_to_string v)
   |`Windows (`Mingw, v) -> "Windows mingw " ^ (win10_release_to_string v)
   |`Windows (`Msvc, v) -> "Windows mingw " ^ (win10_release_to_string v)
@@ -665,6 +669,7 @@ let base_distro_tag ?(arch=`X86_64) d =
         | `V15_0 -> "15.0"
         | `V15_1 -> "15.1"
         | `V15_2 -> "15.2"
+        | `V15_3 -> "15.3"
         | `Latest -> assert false
       in
       "opensuse/leap", tag
