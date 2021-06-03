@@ -22,6 +22,13 @@
 
 (** {2 Known distributions and OCaml variants} *)
 
+type win10_release = [
+  | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
+  | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
+] [@@deriving sexp]
+(** All Windows 10 release versions. LTSC versions are aliased to the
+   semi-annual release they're based on. *)
+
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `Latest ]
   | `Archlinux of [ `Latest ]
@@ -31,8 +38,8 @@ type t = [
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `LTS | `Latest ]
-  | `Cygwin of [ `V20H2 ]
-  | `Windows of [`Mingw | `Msvc] * [ `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 ]
+  | `Cygwin of win10_release
+  | `Windows of [`Mingw | `Msvc] * win10_release
 ] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
@@ -70,6 +77,14 @@ val distros : t list
 
 val latest_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
+
+val win10_latest_release : win10_release
+(** Latest Windows 10 release. *)
+
+val win10_latest_image : win10_release
+(** Latest Windows 10 Docker image available. May differ from
+   {!win10_latest_release} if the Docker repository hasn't been
+   updated. *)
 
 val master_distro : t
 (** The distribution that is the top-level alias for the [latest] tag
@@ -128,6 +143,14 @@ val base_distro_tag : ?arch:Ocaml_version.arch -> t -> string * string
  and other OCaml tool Dockerfiles. [arch] defaults to [x86_64] and can vary
  the base user/repository since some architecture are built elsewhere. *)
 
+val win10_release_to_string : win10_release -> string
+(** [win10_release update] converts a Windows 10 version name to
+   string. *)
+
+val win10_release_of_string : string -> win10_release option
+(** [win10_release_of_string] converts a Windows 10 version name as
+   string to its internal representation. *)
+
 (** {2 CPU architectures} *)
 
 val distro_arches : Ocaml_version.t -> t -> Ocaml_version.arch list
@@ -140,6 +163,14 @@ val distro_supported_on : Ocaml_version.arch -> Ocaml_version.t -> t -> bool
     on the distribution [distro]. *)
 
 (** {2 Opam build infrastructure support} *)
+
+type win10_release_status = [ `Deprecated | `Active ]
+(** Windows 10 release status. *)
+
+val win10_release_status : win10_release -> win10_release_status
+(* [win10_release_status v channel] returns the Microsoft support
+  status of the specified Windows 10 release.
+  @see <https://en.wikipedia.org/wiki/Windows_10_version_history#Channels> *)
 
 val active_distros : Ocaml_version.arch -> t list
 (** [active_distros arch] returns the list of currently supported

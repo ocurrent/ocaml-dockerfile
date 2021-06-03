@@ -153,14 +153,8 @@ end
 module Winget = struct
   let winget = "winget-builder"
 
-  let header ?(version=`V20H2) () =
-    let tag = match version with
-      | `V1809 -> "1809"
-      | `V1903 -> "1903"
-      | `V1909 -> "1909"
-      | `V2004 -> "2004"
-      | `V20H2 -> "20H2"
-    in
+  let header ?(version=Dockerfile_distro.win10_latest_image) () =
+    let tag = Dockerfile_distro.win10_release_to_string version in
     parser_directive (`Escape '`')
     @@ from ~alias:winget ~tag "mcr.microsoft.com/windows"
     @@ user "ContainerAdministrator"
