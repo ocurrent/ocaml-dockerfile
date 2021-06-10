@@ -107,8 +107,22 @@ let string_of_shell_or_exec ~escape (t: shell_or_exec) =
   | `Exec sl -> json_array_of_list sl
 
 
-let string_of_env_list el =
-  String.concat " " (List.map (fun (k, v) -> sprintf "%s=%S" k v) el)
+let string_of_env_list ~escape el =
+  let quote v =
+    let len = String.length v in
+    let buf = Buffer.create len in
+    let j = ref 0 in
+    for i = 0 to len - 1 do
+      if v.[i] = '"' || v.[i] = escape then begin
+        if i - !j > 0 then Buffer.add_substring buf v !j (i - !j);
+        Buffer.add_char buf escape;
+        j := i
+      end
+    done;
+    Buffer.add_substring buf v !j (len - !j);
+    Buffer.contents buf
+  in
+  String.concat " " (List.map (fun (k, v) -> sprintf {|%s="%s"|} k (quote v)) el)
 
 
 let optional name = function
@@ -143,7 +157,7 @@ let rec string_of_line ~escape (t: line) =
   | `Run c -> cmd "RUN" (string_of_shell_or_exec ~escape c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
-  | `Env el -> cmd "ENV" (string_of_env_list el)
+  | `Env el -> cmd "ENV" (string_of_env_list ~escape el)
   | `Add c -> cmd "ADD" (string_of_sources_to_dest c)
   | `Copy c -> cmd "COPY" (string_of_sources_to_dest c)
   | `User u -> cmd "USER" u
