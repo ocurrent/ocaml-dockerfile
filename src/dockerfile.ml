@@ -98,12 +98,12 @@ let json_array_of_list sl =
   sprintf "[ %s ]" (String.concat ", " (List.map quote sl))
 
 
-let string_of_shell_or_exec ~escape:(escape) (t: shell_or_exec) =
+let string_of_shell_or_exec ~escape (t: shell_or_exec) =
   match t with
   | `Shell s -> s
   | `Shells [] -> ""
   | `Shells [s] -> s
-  | `Shells l -> String.concat (" && "^escape^"\n  ") l
+  | `Shells l -> String.concat (" && "^(String.make 1 escape)^"\n  ") l
   | `Exec sl -> json_array_of_list sl
 
 
@@ -127,11 +127,10 @@ let string_of_label_list ls =
   List.map (fun (k, v) -> sprintf "%s=%S" k v) ls |> String.concat " "
 
 
-let rec string_of_line ~escape:(escape) (t: line) =
+let rec string_of_line ~escape (t: line) =
   match t with
   | `ParserDirective (`Escape c) ->
-     let escape = String.make 1 c in
-     cmd "#" ("escape="^escape)
+     cmd "#" ("escape="^(String.make 1 c))
   | `ParserDirective (`Syntax str) -> cmd "#" ("syntax="^str)
   | `Comment c -> cmd "#" c
   | `From {image; tag; alias; platform} ->
@@ -208,7 +207,6 @@ let string_of_t tl =
     | `ParserDirective _ :: tl -> find_escape tl
     | _ -> '\\'
   in
-  let escape = String.make 1 (find_escape tl) in
-  String.concat "\n" (List.map (string_of_line ~escape) tl)
+  String.concat "\n" (List.map (string_of_line ~escape:(find_escape tl)) tl)
 
 let pp ppf tl = Fmt.pf ppf "%s" (string_of_t tl)
