@@ -52,8 +52,8 @@ let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/loc
 
 let install_bubblewrap_from_source ?(prefix="/usr/local") () =
   let rel = "0.4.1" in
-  let file = Fmt.strf "bubblewrap-%s.tar.xz" rel in
-  let url = Fmt.strf "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz" rel rel in
+  let file = Fmt.str "bubblewrap-%s.tar.xz" rel in
+  let url = Fmt.str "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz" rel rel in
   run "curl -fOL %s" url @@
   run "tar xf %s" file @@
   run "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make install" rel prefix @@
@@ -325,7 +325,7 @@ let all_ocaml_compilers hub_id arch distro =
       | `Linux -> run "opam-sandbox-disable"
       | `Windows | `Cygwin -> empty
     in
-    header ~arch ~tag:(Fmt.strf "%s-opam" distro_tag) ~img:hub_id distro
+    header ~arch ~tag:(Fmt.str "%s-opam" distro_tag) ~img:hub_id distro
     @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ sandbox
     @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
@@ -340,7 +340,7 @@ let all_ocaml_compilers hub_id arch distro =
        | `Linux | `Cygwin -> cmd "bash"
        | `Windows -> cmd_exec ["cmd.exe"]
   in
-  (Fmt.strf "%s" distro_tag, d)
+  (Fmt.str "%s" distro_tag, d)
 
 let tag_of_ocaml_version ov =
   Ocaml_version.with_patch ov None |>
@@ -366,7 +366,7 @@ let separate_ocaml_compilers hub_id arch distro =
            let sandbox = match os_family with
              | `Linux -> run "opam-sandbox-disable"
              | `Windows | `Cygwin -> empty in
-           header ~arch ~tag:(Fmt.strf "%s-opam" distro_tag) ~img:hub_id distro
+           header ~arch ~tag:(Fmt.str "%s-opam" distro_tag) ~img:hub_id distro
            @@ workdir "/home/opam/opam-repository"
            @@ sandbox
            @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
@@ -382,7 +382,7 @@ let separate_ocaml_compilers hub_id arch distro =
               | `Linux | `Cygwin -> cmd "bash"
               | `Windows -> cmd_exec ["cmd.exe"]
          in
-         (Fmt.strf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )
+         (Fmt.str "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d) )
 
 
 let deprecated =
@@ -393,10 +393,10 @@ let multiarch_manifest ~target ~platforms =
   let ms =
     List.map
       (fun (image, arch) ->
-        Fmt.strf
+        Fmt.str
           "  -\n    image: %s\n    platform:\n      architecture: %s\n      os: linux"
           image arch)
       platforms
     |> String.concat "\n"
   in
-  Fmt.strf "image: %s\nmanifests:\n%s" target ms
+  Fmt.str "image: %s\nmanifests:\n%s" target ms

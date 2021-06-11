@@ -66,7 +66,7 @@ let generate_dockerfiles_in_git_branches ?readme ?(crunch=true) output_dir d =
         Cmd.(git % "add" % "README.md") |> OS.Cmd.run
     end >>= fun () ->
     Cmd.(git % "add" % "Dockerfile") |> OS.Cmd.run >>= fun () ->
-    let msg = Fmt.strf "update %s Dockerfile" name in
+    let msg = Fmt.str "update %s Dockerfile" name in
     Cmd.(git % "commit" % "-q" % "-m" % msg % "-a") |> OS.Cmd.run_status >>= fun _ ->
     Ok ()
   ) d >>= fun () ->

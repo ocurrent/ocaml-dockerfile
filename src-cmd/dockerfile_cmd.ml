@@ -54,9 +54,9 @@ let run_log ?(ok_to_fail=true) ?env log_dir name cmd =
   let path = Fpath.(log_dir / (name ^ ".sxp")) in
   OS.File.write path (Sexplib.Sexp.to_string_hum (sexp_of_cmd_log cmd_log)) >>= fun () ->
   match status with
-  |`Signaled n -> if ok_to_fail then Ok () else R.error_msg (Fmt.strf "Signal %d" n)
+  |`Signaled n -> if ok_to_fail then Ok () else R.error_msg (Fmt.str "Signal %d" n)
   |`Exited 0 -> Ok ()
-  |`Exited code -> if ok_to_fail then Ok () else R.error_msg (Fmt.strf "Exit code %d" code)
+  |`Exited code -> if ok_to_fail then Ok () else R.error_msg (Fmt.str "Exit code %d" code)
 
 (** Docker *)
 module Docker = struct
@@ -111,9 +111,9 @@ module Docker = struct
 
   let run_cmd ?(mounts=[]) ?(volumes=[]) ?(rm=true) img cmd =
     let rm = if rm then Cmd.(v "--rm") else Cmd.empty in
-    let mounts = List.map (fun (src,dst) -> ["--mount"; Fmt.strf "source=%s,destination=%s" src dst]) mounts |> List.flatten |> Cmd.of_list in
+    let mounts = List.map (fun (src,dst) -> ["--mount"; Fmt.str "source=%s,destination=%s" src dst]) mounts |> List.flatten |> Cmd.of_list in
     let vols =
-     List.map (fun (src,dst) -> ["-v"; Fmt.strf "%s:%s" src dst]) volumes |> List.flatten |> Cmd.of_list in
+     List.map (fun (src,dst) -> ["-v"; Fmt.str "%s:%s" src dst]) volumes |> List.flatten |> Cmd.of_list in
     Cmd.(bin % "run" %% rm %% mounts %% vols % img %% cmd)
 end
 
