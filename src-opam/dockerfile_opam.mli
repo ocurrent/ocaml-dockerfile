@@ -29,8 +29,8 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 val install_opam_from_source : ?add_default_link:bool ->
   ?prefix:string -> ?enable_0install_solver:bool -> branch:string -> hash:string -> unit -> Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
-    The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.x or [master] for
-    the latest trunk version).
+    The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.0.x or [2.1] for
+    the opam 2.1.x).
     The binaries are installed under [<prefix>/bin/opam-<branch>],
     defaulting to [/usr/local/bin].
     If [add_default_link] is true (the default), then the [opam-<branch>]
@@ -45,11 +45,11 @@ val gen_opam2_distro :
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
   hash_opam_2_0:string ->
-  hash_opam_master:string ->
+  hash_opam_2_1:string ->
   Dockerfile_distro.t
   -> string * Dockerfile.t
-(** [gen_opam2_distro ~hash_opam_2_0 ~hash_opam_master d] will generate a Dockerfile
-   for Linux distribution [d] with opam 2.0 and opam master, per hash given in parameter.
+(** [gen_opam2_distro ~hash_opam_2_0 ~hash_opam_2_1 d] will generate a Dockerfile
+   for Linux distribution [d] with opam 2.0 and opam 2.1, per hash given in parameter.
    @return a tuple of the Docker tag and the Dockerfile.
    If [clone_opam_repo] is true (the default) then the Dockerfile will also git
    clone the official opam-repository into [/home/opam/opam-repository].
