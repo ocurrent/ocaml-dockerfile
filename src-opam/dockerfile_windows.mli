@@ -118,6 +118,11 @@ end
 (** Rules for winget installation.
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
+  val is_supported : Dockerfile_distro.win10_release -> bool
+  (** Winget 1.0.11692 discontinued support for versions older than
+     Windows 10 1809. Older versions of Winget have bugs, don't use
+     them. *)
+
   val build_from_source :
     ?arch:Ocaml_version.arch -> ?version:Dockerfile_distro.win10_release ->
     ?winget_version:string -> ?vs_version:string -> unit -> t

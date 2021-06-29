@@ -251,8 +251,8 @@ let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 distro () =
 let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
   let version = match distro with `Windows (_, v) -> v | _ -> assert false in
   (match winget with
-  | None -> Windows.Winget.install_from_release ~version ()
-  | Some _ -> empty)
+  | None when Windows.Winget.is_supported version -> Windows.Winget.install_from_release ~version ()
+  | _ -> empty)
   @@ header ?arch distro @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ begin
@@ -270,8 +270,10 @@ let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
       Windows.install_vc_redist () @@ t
       @@ Windows.Cygwin.setup ~extra () @@ t'
     end
-  @@ Windows.Winget.setup ?from:winget ()
-  @@ Windows.Winget.dev_packages ~version ()
+  @@ begin if Windows.Winget.is_supported version then
+      Windows.Winget.setup ?from:winget ()
+      @@ Windows.Winget.dev_packages ~version ()
+    else empty end
   @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 
