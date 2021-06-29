@@ -151,6 +151,9 @@ module Cygwin = struct
 end
 
 module Winget = struct
+  let is_supported version =
+    not (List.mem version [`V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1803])
+
   let winget = "winget-builder"
 
   let header ?(version=Dockerfile_distro.win10_latest_image) () =
@@ -189,14 +192,14 @@ module Winget = struct
     let src =
       let src = "https://github.com/microsoft/winget-cli/releases/" in
       match winget_version with
-      | None -> src ^ "latest/download/" ^ file ^ "appxbundle"
-      | Some ver -> src ^ "download/" ^ ver ^ "/" ^ file ^ "appxbundle"
+      | None -> src ^ "latest/download/" ^ file ^ "msixbundle"
+      | Some ver -> src ^ "download/" ^ ver ^ "/" ^ file ^ "msixbundle"
     in
     let dst = {|C:\TEMP\|} ^ file ^ "zip" in
     header ?version ()
     @@ add ~src:[src] ~dst ()
     @@ run_powershell {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|} dst
-    @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.appx AppInstaller_x64.zip|}
+    @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.msix AppInstaller_x64.zip|}
     @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
     @@ footer ""
 
