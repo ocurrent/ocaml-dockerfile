@@ -13,6 +13,7 @@ dev
 - Introduce a Cygwin image, and move Windows Mingw and Windows Msvc at
   the distro level. (@MisterDA #42)
 - Add edge and edgecommunity repositories to the Alpine image (@EwanMellor #48)
+- Add support for Windows 10 Latest Cumulative Update docker image tags (@dra27 #56)
 
 v7.1.0 2021-02-25 Cambridge
 ---------------------------

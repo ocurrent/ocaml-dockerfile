@@ -80,7 +80,7 @@ let install_bubblewrap_wrappers =
   run "chmod a+x /home/opam/opam-sandbox-enable" @@
   run "sudo mv /home/opam/opam-sandbox-enable /usr/bin/opam-sandbox-enable"
 
-let header ?arch ?maintainer ?img ?tag d =
+let header ?win10_revision ?arch ?maintainer ?img ?tag d =
   let platform =
     match arch with
     | Some `I386 -> Some "386"
@@ -99,7 +99,7 @@ let header ?arch ?maintainer ?img ?tag d =
     | `Windows | `Cygwin -> parser_directive (`Escape '`')
     | _ -> empty in
   let img, tag =
-    let dimg, dtag = D.base_distro_tag ?arch d in
+    let dimg, dtag = D.base_distro_tag ?win10_revision ?arch d in
     let value default = function None -> default | Some str -> str in
     value dimg img, value dtag tag
   in
@@ -227,10 +227,10 @@ let pacman_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 distro () =
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
 (* Cygwin based Dockerfile *)
-let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 distro () =
+let cygwin_opam2 ?win10_revision ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 distro () =
   let img, tag = D.base_distro_tag ?arch distro in
   let cyg = Windows.Cygwin.{ default with args = "--allow-test-packages" :: default.args } in
-  header ?arch distro @@ label (("distro_style", "cygwin") :: labels)
+  header ?win10_revision ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
@@ -248,12 +248,12 @@ let cygwin_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 distro () =
    add an option to enable 0install-solver,
    and pass ~hash_opam_2_0 ~hash_opam_2_1 like the cygwin one *)
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
-let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
+let windows_opam2 ?win10_revision ?winget ?(labels=[]) ?arch distro () =
   let version = match distro with `Windows (_, v) -> v | _ -> assert false in
   (match winget with
-  | None when Windows.Winget.is_supported version -> Windows.Winget.install_from_release ~version ()
+  | None when Windows.Winget.is_supported version -> Windows.Winget.install_from_release ?win10_revision ~version ()
   | _ -> empty)
-  @@ header ?arch distro @@ label (("distro_style", "windows") :: labels)
+  @@ header ?win10_revision ?arch distro @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ begin
       let extra, t = match distro with
@@ -277,7 +277,7 @@ let windows_opam2 ?winget ?(labels=[]) ?arch distro () =
   @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 
-let gen_opam2_distro ?winget ?(clone_opam_repo=true) ?arch ?labels ~hash_opam_2_0 ~hash_opam_2_1 d =
+let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo=true) ?arch ?labels ~hash_opam_2_0 ~hash_opam_2_1 d =
   let fn = match D.package_manager d with
   | `Apk -> apk_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_2_1 d ()
   | `Apt -> apt_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_2_1 d ()
@@ -287,8 +287,8 @@ let gen_opam2_distro ?winget ?(clone_opam_repo=true) ?arch ?labels ~hash_opam_2_
      yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~hash_opam_2_0 ~hash_opam_2_1 d ()
   | `Zypper -> zypper_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_2_1 d ()
   | `Pacman -> pacman_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_2_1 d ()
-  | `Cygwin -> cygwin_opam2 ?labels ?arch ~hash_opam_2_0 ~hash_opam_2_1 d ()
-  | `Windows -> windows_opam2 ?winget ?labels ?arch d ()
+  | `Cygwin -> cygwin_opam2 ?win10_revision ?labels ?arch ~hash_opam_2_0 ~hash_opam_2_1 d ()
+  | `Windows -> windows_opam2 ?win10_revision ?winget ?labels ?arch d ()
   in
   let clone = if clone_opam_repo then
     let url = Dockerfile_distro.(os_family_of_distro d |> opam_repository) in
