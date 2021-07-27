@@ -23,7 +23,7 @@ let run_powershell fmt = ksprintf (run {|powershell -Command "%s"|}) fmt
 let run_vc ~arch fmt =
   let arch = match arch with
     | `I386 -> "x86" | `X86_64 -> "amd64"
-    | `Aarch64 | `Aarch32 | `Ppc64le -> invalid_arg "Unsupported architecture"
+    | `Aarch64 | `Aarch32 | `Ppc64le | `S390x -> invalid_arg "Unsupported architecture"
   in
   ksprintf (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch) fmt
 let run_ocaml_env args fmt = ksprintf (run {|ocaml-env exec %s -- %s|} (String.concat " " args)) fmt
