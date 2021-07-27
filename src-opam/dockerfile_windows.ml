@@ -156,8 +156,8 @@ module Winget = struct
 
   let winget = "winget-builder"
 
-  let header ?(version=Dockerfile_distro.win10_latest_image) () =
-    let tag = Dockerfile_distro.win10_release_to_string version in
+  let header ?win10_revision ?(version=Dockerfile_distro.win10_latest_image) () =
+    let tag = Dockerfile_distro.win10_revision_to_string (version, win10_revision) in
     parser_directive (`Escape '`')
     @@ from ~alias:winget ~tag "mcr.microsoft.com/windows"
     @@ user "ContainerAdministrator"
@@ -168,8 +168,8 @@ module Winget = struct
     @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
     |> crunch
 
-  let build_from_source ?(arch=`X86_64) ?version ?(winget_version="master") ?(vs_version="16") () =
-    header ?version ()
+  let build_from_source ?(arch=`X86_64) ?win10_revision ?version ?(winget_version="master") ?(vs_version="16") () =
+    header ?win10_revision ?version ()
     @@ install_vc_redist ~vs_version ()
     @@ install_visual_studio_build_tools ~vs_version [
            "Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools"; (* .NET desktop build tools *)
@@ -187,7 +187,7 @@ module Winget = struct
     @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
     @@ footer {|src\x64\Release\AppInstallerCLI|}
 
-  let install_from_release ?version ?winget_version () =
+  let install_from_release ?win10_revision ?version ?winget_version () =
     let file = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe." in
     let src =
       let src = "https://github.com/microsoft/winget-cli/releases/" in
@@ -196,7 +196,7 @@ module Winget = struct
       | Some ver -> src ^ "download/" ^ ver ^ "/" ^ file ^ "msixbundle"
     in
     let dst = {|C:\TEMP\|} ^ file ^ "zip" in
-    header ?version ()
+    header ?win10_revision ?version ()
     @@ add ~src:[src] ~dst ()
     @@ run_powershell {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|} dst
     @@ run {|ren C:\TEMP\winget-cli\AppInstaller_x64.msix AppInstaller_x64.zip|}

@@ -17,11 +17,59 @@
 
 (** Distro selection for various OPAM combinations *)
 open Astring
+open Sexplib.Conv
 
 type win10_release = [
   | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
   | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
 ] [@@deriving sexp]
+
+type win10_lcu = [
+  | `LCU
+  | `LCU20210713 | `LCU20210608
+] [@@deriving sexp]
+
+let win10_current_lcu = `LCU20210713
+
+type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
+
+let win10_lcus = [
+  `LCU20210713, 5004237, [`V2004; `V20H2; `V21H1];
+  `LCU20210713, 5004245, [`V1909];
+  `LCU20210713, 5004244, [`V1809; `Ltsc2019];
+  `LCU20210713, 5004238, [`V1607; `Ltsc2016];
+  `LCU20210713, 5004249, [`V1507; `Ltsc2015];
+  `LCU20210608, 5003637, [`V2004; `V20H2; `V21H1];
+  `LCU20210608, 5003635, [`V1909];
+  `LCU20210608, 5003646, [`V1809; `Ltsc2019];
+  `LCU20210608, 5003638, [`V1607; `Ltsc2016];
+  `LCU20210608, 5003687, [`V1507; `Ltsc2015];
+]
+
+let win10_lcu_to_kb =
+  let t = Hashtbl.create 63 in
+  let f (lcu, kb, vs) =
+    let g v =
+      if lcu = win10_current_lcu then
+        Hashtbl.add t (`LCU, v) (Some kb);
+      Hashtbl.add t (lcu, v) (Some kb)
+    in
+    List.iter g vs in
+  List.iter f win10_lcus; t
+
+let win10_kb_to_lcu =
+  let t = Hashtbl.create 63 in
+  let f (lcu, kb, vs) = List.iter (fun v -> Hashtbl.add t (kb, v) (Some lcu)) vs in
+  List.iter f win10_lcus; t
+
+let win10_lcu_kb_number v lcu =
+  try Hashtbl.find win10_lcu_to_kb (lcu, v)
+  with Not_found -> None
+
+let win10_kb_number_to_lcu v kb =
+  match Hashtbl.find win10_kb_to_lcu (kb, v) with
+  | lcu -> Some (v, lcu)
+  | exception Not_found -> None
 
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `Latest ]
@@ -68,7 +116,7 @@ type status = [
   | `Not_available
 ] [@@deriving sexp]
 
-let distros = [
+let distros : t list = [
   `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10; `Alpine `V3_11; `Alpine `V3_12; `Alpine `V3_13; `Alpine `Latest;
   `Archlinux `Latest;
   `CentOS `V6; `CentOS `V7; `CentOS `V8; `CentOS `Latest;
@@ -294,13 +342,39 @@ let win10_release_to_string = function
   | `Ltsc2019 -> "ltsc2019" | `V1903 -> "1903" | `V1909 -> "1909"
   | `V2004 -> "2004" | `V20H2 -> "20H2" | `V21H1 -> "21H1"
 
-let win10_release_of_string v : win10_release option = match v with
+let win10_release_of_string v : win10_release option =
+  let v = match String.cut ~sep:"-KB" v with
+  | Some (v, kb) -> if String.for_all Char.Ascii.is_digit kb then v else ""
+  | None -> v
+  in
+  match v with
   | "1507" -> Some `V1507 | "ltsc2015" -> Some `Ltsc2015 | "1511" -> Some `V1511
   | "1607" -> Some `V1607 | "ltsc2016" -> Some `Ltsc2016 | "1703" -> Some `V1703
   | "1709" -> Some `V1709 | "1803" -> Some `V1803 | "1809" -> Some `V1809
   | "ltsc2019" -> Some `Ltsc2019 | "1903" -> Some `V1903 | "1909" -> Some `V1909
   | "2004" -> Some `V2004 | "20H2" -> Some `V20H2 | "21H1" -> Some `V21H1
   | _ -> None
+
+let rec win10_revision_to_string = function
+| (v, None) -> win10_release_to_string v
+| (v, Some `LCU) -> win10_revision_to_string (v, Some win10_current_lcu)
+| (v, Some lcu) ->
+    match win10_lcu_kb_number v lcu with
+    | Some kb -> Printf.sprintf "%s-KB%d" (win10_release_to_string v) kb
+    | None -> invalid_arg "No KB for this Win10 revision"
+
+let win10_revision_of_string v =
+  let v, lcu =
+    match String.cut ~sep:"-KB" v with
+    | Some (v, lcu) when String.for_all Char.Ascii.is_digit lcu ->
+        (v, Some (int_of_string lcu))
+    | _ ->
+        (v, None)
+  in
+  match win10_release_of_string v, lcu with
+  | None, _ -> None
+  | Some v, None -> Some (v, None)
+  | Some v, Some lcu -> win10_kb_number_to_lcu v lcu
 
 (* The Docker tag for this distro *)
 let tag_of_distro (d:t) = match d with
@@ -569,7 +643,7 @@ let package_manager (t:t) =
   |`Cygwin _ -> `Cygwin
   |`Windows _ -> `Windows
 
-let base_distro_tag ?(arch=`X86_64) d =
+let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
   match resolve_alias d with
   | `Alpine v -> begin
       let tag =
@@ -675,10 +749,10 @@ let base_distro_tag ?(arch=`X86_64) d =
       "opensuse/leap", tag
   | `Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019) -> assert false
   | `Cygwin v ->
-     "mcr.microsoft.com/windows/servercore", win10_release_to_string v
+     "mcr.microsoft.com/windows/servercore", win10_revision_to_string (v, win10_revision)
   | `Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
   | `Windows (_, v) ->
-     "mcr.microsoft.com/windows", win10_release_to_string v
+     "mcr.microsoft.com/windows", win10_revision_to_string (v, win10_revision)
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)

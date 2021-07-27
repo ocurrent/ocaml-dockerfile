@@ -124,12 +124,14 @@ module Winget : sig
      them. *)
 
   val build_from_source :
-    ?arch:Ocaml_version.arch -> ?version:Dockerfile_distro.win10_release ->
+    ?arch:Ocaml_version.arch -> ?win10_revision:Dockerfile_distro.win10_lcu ->
+    ?version:Dockerfile_distro.win10_release ->
     ?winget_version:string -> ?vs_version:string -> unit -> t
   (** Build winget from source (in a separate Docker image). The
      optional [winget_version] specifies a Git reference. *)
 
   val install_from_release :
+    ?win10_revision:Dockerfile_distro.win10_lcu ->
     ?version:Dockerfile_distro.win10_release -> ?winget_version:string -> unit -> t
   (** Install winget from a released build (first in a separate Docker
      image). The optional [winget_version] specifies a Git tag. *)

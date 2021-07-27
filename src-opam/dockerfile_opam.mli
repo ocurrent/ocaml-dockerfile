@@ -40,6 +40,7 @@ val install_opam_from_source : ?add_default_link:bool ->
     solver should be accessible in the resulting opam binary. *)
 
 val gen_opam2_distro :
+  ?win10_revision:Dockerfile_distro.win10_lcu ->
   ?winget:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->

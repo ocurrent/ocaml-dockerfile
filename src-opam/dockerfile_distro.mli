@@ -29,6 +29,22 @@ type win10_release = [
 (** All Windows 10 release versions. LTSC versions are aliased to the
    semi-annual release they're based on. *)
 
+type win10_lcu = [
+  | `LCU
+  | `LCU20210713
+  | `LCU20210608
+] [@@deriving sexp]
+(** Windows 10 Latest Cumulative Update. Out-of-band LCUs are not included
+    as they aren't released with Docker images. [`LCU] always refers to the
+    most recent LCU. *)
+
+val win10_current_lcu : win10_lcu
+(** Current Windows 10 Latest Cumulative Update; value used when [`LCU] is
+    specified. *)
+
+type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
+(** A Windows 10 version optionally with an LCU. *)
+
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `Latest ]
   | `Archlinux of [ `Latest ]
@@ -135,7 +151,7 @@ val latest_tag_of_distro : t -> string
   regularly rewritten to point to any new releases of the
   distribution. *)
 
-val base_distro_tag : ?arch:Ocaml_version.arch -> t -> string * string
+val base_distro_tag : ?win10_revision:win10_lcu -> ?arch:Ocaml_version.arch -> t -> string * string
 (** [base_distro_tag ?arch t] will return a tuple of a Docker Hub
  user/repository and tag for which the base image of a distribution
  can be found (e.g. [opensuse/leap],[15.0] which maps to [opensuse/leap:15.0]
@@ -144,12 +160,16 @@ val base_distro_tag : ?arch:Ocaml_version.arch -> t -> string * string
  the base user/repository since some architecture are built elsewhere. *)
 
 val win10_release_to_string : win10_release -> string
-(** [win10_release update] converts a Windows 10 version name to
+(** [win10_release_to_string update] converts a Windows 10 version name to
    string. *)
 
 val win10_release_of_string : string -> win10_release option
 (** [win10_release_of_string] converts a Windows 10 version name as
-   string to its internal representation. *)
+   string to its internal representation. Ignores any KB number. *)
+
+val win10_revision_to_string : win10_revision -> string
+
+val win10_revision_of_string : string -> win10_revision option
 
 (** {2 CPU architectures} *)
 
