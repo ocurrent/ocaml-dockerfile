@@ -1,6 +1,7 @@
 dev
 ---
 
+- Add support for S390x architecture builds for Debian (@avsm)
 - Add OpenSUSE 15.3 (#53 @avsm)
 - Improve support for Windows 10 (#50 @MisterDA review by @dra27)
 - Alpine 3.12 and Ubuntu 20.10 to deprecated, add Fedora 34 and Ubuntu 21.04 (@avsm)
