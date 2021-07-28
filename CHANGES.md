@@ -1,5 +1,5 @@
-dev
----
+v7.2.0 2021-07-28 Cambridge
+--------------------------
 
 - Add support for S390x architecture builds for Debian (@avsm)
 - Add OpenSUSE 15.3 (#53 @avsm)
