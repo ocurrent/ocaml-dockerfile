@@ -111,9 +111,9 @@ module Docker = struct
 
   let run_cmd ?(mounts=[]) ?(volumes=[]) ?(rm=true) img cmd =
     let rm = if rm then Cmd.(v "--rm") else Cmd.empty in
-    let mounts = List.map (fun (src,dst) -> ["--mount"; Fmt.str "source=%s,destination=%s" src dst]) mounts |> List.flatten |> Cmd.of_list in
+    let mounts = List.map (fun (src,dst) -> ["--mount"; Printf.sprintf "source=%s,destination=%s" src dst]) mounts |> List.flatten |> Cmd.of_list in
     let vols =
-     List.map (fun (src,dst) -> ["-v"; Fmt.str "%s:%s" src dst]) volumes |> List.flatten |> Cmd.of_list in
+     List.map (fun (src,dst) -> ["-v"; Printf.sprintf "%s:%s" src dst]) volumes |> List.flatten |> Cmd.of_list in
     Cmd.(bin % "run" %% rm %% mounts %% vols % img %% cmd)
 end
 
