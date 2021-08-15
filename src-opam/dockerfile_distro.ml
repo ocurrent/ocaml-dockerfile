@@ -80,7 +80,7 @@ type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `Latest ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
-  | `Debian of [ `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `Latest ]
@@ -125,7 +125,7 @@ let distros : t list = [
   `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10; `Alpine `V3_11; `Alpine `V3_12; `Alpine `V3_13; `Alpine `Latest;
   `Archlinux `Latest;
   `CentOS `V6; `CentOS `V7; `CentOS `V8; `CentOS `Latest;
-  `Debian `V10; `Debian `V9; `Debian `V8; `Debian `V7;
+  `Debian `V11; `Debian `V10; `Debian `V9; `Debian `V8; `Debian `V7;
   `Debian `Stable; `Debian `Testing; `Debian `Unstable;
   `Fedora `V23; `Fedora `V24; `Fedora `V25; `Fedora `V26; `Fedora `V27; `Fedora `V28; `Fedora `V29; `Fedora `V30; `Fedora `V31; `Fedora `V32; `Fedora `V33; `Fedora `V34; `Fedora `Latest;
   `OracleLinux `V7; `OracleLinux `V8; `OracleLinux `Latest;
@@ -190,11 +190,10 @@ let distro_status (d:t) : status = match d with
   | `CentOS `V7 -> `Active `Tier3
   | `CentOS `V6 -> `Deprecated
   | `CentOS `Latest -> `Alias (`CentOS `V8)
-  | `Debian `V7 -> `Deprecated
-  | `Debian `V8  -> `Deprecated
-  | `Debian `V9 -> `Deprecated
-  | `Debian `V10 -> `Active `Tier1
-  | `Debian `Stable -> `Alias (`Debian `V10)
+  | `Debian (`V7|`V8|`V9) -> `Deprecated
+  | `Debian `V10 -> `Active `Tier2
+  | `Debian `V11 -> `Active `Tier1
+  | `Debian `Stable -> `Alias (`Debian `V11)
   | `Debian `Testing -> `Active `Tier3
   | `Debian `Unstable -> `Active `Tier3
   | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32) -> `Deprecated
@@ -243,6 +242,7 @@ module OV = Ocaml_version
 
 let distro_arches ov (d:t) =
   match resolve_alias d, ov with
+  | `Debian `V11, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
   | `Debian `V10, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
   | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Alpine (`V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
@@ -279,6 +279,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`Debian `V8 -> Some "4.01.0"
   |`Debian `V9 -> Some "4.02.3"
   |`Debian `V10 -> Some "4.05.0"
+  |`Debian `V11 -> Some "4.11.1"
   |`Ubuntu `V12_04 -> Some "3.12.1"
   |`Ubuntu `V14_04 -> Some "4.01.0"
   |`Ubuntu `V15_04 -> Some "4.01.0"
@@ -403,6 +404,7 @@ let tag_of_distro (d:t) = match d with
   |`Debian `Stable -> "debian-stable"
   |`Debian `Unstable -> "debian-unstable"
   |`Debian `Testing -> "debian-testing"
+  |`Debian `V11 -> "debian-11"
   |`Debian `V10 -> "debian-10"
   |`Debian `V9 -> "debian-9"
   |`Debian `V8 -> "debian-8"
@@ -482,6 +484,7 @@ let distro_of_tag x : t option =
   |"debian-stable" -> Some (`Debian `Stable)
   |"debian-unstable" -> Some (`Debian `Unstable)
   |"debian-testing" -> Some (`Debian `Testing)
+  |"debian-11" -> Some (`Debian `V11)
   |"debian-10" -> Some (`Debian `V10)
   |"debian-9" -> Some (`Debian `V9)
   |"debian-8" -> Some (`Debian `V8)
@@ -557,6 +560,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Debian `Stable -> "Debian Stable"
   |`Debian `Unstable -> "Debian Unstable"
   |`Debian `Testing -> "Debian Testing"
+  |`Debian `V11 -> "Debian 11 (Bullseye)"
   |`Debian `V10 -> "Debian 10 (Buster)"
   |`Debian `V9 -> "Debian 9 (Stretch)"
   |`Debian `V8 -> "Debian 8 (Jessie)"
@@ -678,7 +682,8 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V7 -> "7"
         | `V8 -> "8"
         | `V9 -> "9"
-        | `V10 -> "buster"
+        | `V10 -> "10"
+        | `V11 -> "11"
         | `Testing -> "testing"
         | `Unstable -> "unstable"
         | `Stable -> assert false
