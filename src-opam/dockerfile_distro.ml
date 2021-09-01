@@ -148,8 +148,8 @@ let win10_release_status v : win10_release_status = match v with
   | `V1709
   | `V1803
   | `V1809 -> `Deprecated | `Ltsc2019 -> `Active
-  | `V1903 -> `Deprecated
-  | `V1909
+  | `V1903
+  | `V1909 -> `Deprecated
   | `V2004
   | `V20H2
   | `V21H1 -> `Active
@@ -162,8 +162,8 @@ type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 let win10_docker_status (base : win10_docker_base_image) v : status =
   match base, v with
   | _, `V20H2
-  | _, `V2004
-  | _, `V1909 -> `Active `Tier3
+  | _, `V2004 -> `Active `Tier3
+  | _, `V1909
   | _, `V1903 -> `Deprecated
   | `ServerCore, (`V1809 | `Ltsc2019)
   | `NanoServer, `V1809
