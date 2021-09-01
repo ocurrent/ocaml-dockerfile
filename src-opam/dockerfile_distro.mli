@@ -31,6 +31,7 @@ type win10_release = [
 
 type win10_lcu = [
   | `LCU
+  | `LCU20210810
   | `LCU20210713
   | `LCU20210608
 ] [@@deriving sexp]
