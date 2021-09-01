@@ -129,10 +129,8 @@ module Cygwin = struct
     "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git" :: "patch" :: "m4"
     :: "cygport" :: ("flexdll="^flexdll_version) :: extra
 
-  (* GNU ld (found in binutils) 2.36 broke OCaml. Stay with 2.35 until
-     a fix is available in OCaml. *)
-  let mingw_packages ?(extra=[]) () = "mingw64-x86_64-binutils=2.35.2-1" :: "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
-  let msvc_packages ?(extra=[]) () = "mingw64-x86_64-binutils=2.35.2-1" :: "make" :: "diffutils" :: extra
+  let mingw_packages ?(extra=[]) () = "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
+  let msvc_packages ?(extra=[]) () = "make" :: "diffutils" :: extra
 
   let ocaml_for_windows_packages ?cyg ?(extra=[]) ?(version="0.0.0.2") () =
     let packages = "make" :: "diffutils" :: "mingw64-x86_64-gcc-g++" :: "vim" :: "git"
