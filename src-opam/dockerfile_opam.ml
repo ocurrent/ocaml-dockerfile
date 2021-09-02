@@ -268,6 +268,7 @@ let windows_opam2 ?win10_revision ?winget ?(labels=[]) ?arch distro () =
       in
       let extra, t' = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
       Windows.install_vc_redist () @@ t
+      @@ Windows.sanitize_reg_path ()
       @@ Windows.Cygwin.setup ~extra () @@ t'
     end
   @@ begin if Windows.Winget.is_supported version then

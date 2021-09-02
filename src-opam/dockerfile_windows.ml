@@ -50,6 +50,11 @@ let install_visual_studio_build_tools ?(vs_version="16") components =
   @@ add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/vs_buildtools.exe"] ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
   @@ install
 
+let sanitize_reg_path () =
+  run {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "\\$"') do `
+          for /f "delims=" %%l in ('cmd /v:on /c "set v=%%c&& echo !v:~0,-1!"') do `
+            reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%%l"|}
+
 let prepend_path paths =
   let paths = String.concat ";" paths in
   run {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `

@@ -33,6 +33,11 @@ val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
 (** [run_ocaml_env args fmt] will execute [fmt] in the evironment
    loaded by [ocaml-env exec] with [args]. *)
 
+val sanitize_reg_path : unit -> t
+(** [sanitize_reg_path ()] adds the command necessary to remove a trailing
+    backaslash from the Path value stored in the registry and must be called
+    before any further manipulation of this variable is done by Dockerfile. *)
+
 val install_vc_redist : ?vs_version:string -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
    @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
