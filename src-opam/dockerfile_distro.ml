@@ -34,7 +34,7 @@ let win10_current_lcu = `LCU20210914
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
-let win10_lcus = [
+let win10_lcus : ('a * int * win10_release list) list = [
   `LCU20210914, 5005575, [`Ltsc2022];
   `LCU20210914, 5005565, [`V2004; `V20H2; `V21H1];
   `LCU20210914, 5005566, [`V1909];
@@ -59,7 +59,7 @@ let win10_lcus = [
   `LCU20210608, 5003687, [`V1507; `Ltsc2015];
 ]
 
-let win10_lcu_to_kb =
+let win10_lcu_to_kb : ((win10_lcu * win10_release), int option) Hashtbl.t =
   let t = Hashtbl.create 63 in
   let f (lcu, kb, vs) =
     let g v =
@@ -79,7 +79,7 @@ let win10_lcu_kb_number v lcu =
   try Hashtbl.find win10_lcu_to_kb (lcu, v)
   with Not_found -> None
 
-let win10_kb_number_to_lcu v kb =
+let win10_kb_number_to_lcu (v:win10_release) kb =
   match Hashtbl.find win10_kb_to_lcu (kb, v) with
   | lcu -> Some (v, lcu)
   | exception Not_found -> None
@@ -385,7 +385,7 @@ let rec win10_revision_to_string = function
 | (v, Some lcu) ->
     match win10_lcu_kb_number v lcu with
     | Some kb -> Printf.sprintf "%s-KB%d" (win10_release_to_string v) kb
-    | None -> invalid_arg "No KB for this Win10 revision"
+    | None -> Fmt.invalid_arg "No KB for this Win10 %s revision" (win10_release_to_string v)
 
 let win10_revision_of_string v =
   let v, lcu =
