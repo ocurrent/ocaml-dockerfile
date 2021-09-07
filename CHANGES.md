@@ -10,7 +10,7 @@ unreleased
 - Ensure stray double-quotes don't end up in PATH on Windows images (@dra27 #62)
 - Stop pinning binutils to 2.35 in Windows builds as that no longer works with
   GCC 11. (@dra27 #61)
-
+- Introduce Windows 10 LTSC 2022 and Windows Server image (@MisterDA #63)
 
 v7.2.0 2021-07-28 Cambridge
 ---------------------------

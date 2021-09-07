@@ -25,6 +25,7 @@
 type win10_release = [
   | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
   | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
+  | `Ltsc2022
 ] [@@deriving sexp]
 (** All Windows 10 release versions. LTSC versions are aliased to the
    semi-annual release they're based on. *)
