@@ -1,5 +1,13 @@
+unreleased
+----------
+
+- Ensure stray double-quotes don't end up in PATH on Windows images (@dra27 #62)
+- Stop pinning binutils to 2.35 in Windows builds as that no longer works with
+  GCC 11. (@dra27 #61)
+
+
 v7.2.0 2021-07-28 Cambridge
---------------------------
+---------------------------
 
 - Add support for S390x architecture builds for Debian (@avsm)
 - Add OpenSUSE 15.3 (#53 @avsm)
