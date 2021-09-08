@@ -159,9 +159,9 @@ module Winget = struct
   let winget = "winget-builder"
 
   let header ?win10_revision ?(version=Dockerfile_distro.win10_latest_image) () =
-    let tag = Dockerfile_distro.win10_revision_to_string (version, win10_revision) in
+    let img, tag = Dockerfile_distro.win10_base_tag ?win10_revision `Windows version in
     parser_directive (`Escape '`')
-    @@ from ~alias:winget ~tag "mcr.microsoft.com/windows"
+    @@ from ~alias:winget ~tag img
     @@ user "ContainerAdministrator"
 
   let footer path =
