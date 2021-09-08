@@ -11,6 +11,9 @@ unreleased
 - Stop pinning binutils to 2.35 in Windows builds as that no longer works with
   GCC 11. (@dra27 #61)
 - Introduce Windows 10 LTSC 2022 and Windows Server image (@MisterDA #63)
+- Expose `Dockerfile_distro.win10_docker_base_image` and
+  `Dockerfile_distro.win10_base_tag` to get the Windows container base
+  image and tags. (@MisterDA #63)
 
 v7.2.0 2021-07-28 Cambridge
 ---------------------------

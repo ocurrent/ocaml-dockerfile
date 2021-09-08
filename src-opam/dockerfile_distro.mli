@@ -154,6 +154,22 @@ val latest_tag_of_distro : t -> string
   regularly rewritten to point to any new releases of the
   distribution. *)
 
+type win10_docker_base_image = [
+  | `NanoServer (** Windows Nano Server *)
+  | `ServerCore (** Windows Server Core *)
+  | `Windows    (** Windows Server "with Desktop Experience" *)
+]
+(** Windows containers base images.
+    @see <https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images> *)
+
+val win10_base_tag : ?win10_revision:win10_lcu -> win10_docker_base_image -> win10_release -> string * string
+(** [win10_base_tag base_image release] will return a tuple of Windows
+   container base image and tag for which the base image of a Windows
+   base image can be found (e.g.
+   [mcr.microsoft.com/windows/servercore],[ltsc2022] which maps to
+   [mcr.microsoft.com/windows/servercore:ltsc2022] on the Microsoft
+   Container Registry). *)
+
 val base_distro_tag : ?win10_revision:win10_lcu -> ?arch:Ocaml_version.arch -> t -> string * string
 (** [base_distro_tag ?arch t] will return a tuple of a Docker Hub
  user/repository and tag for which the base image of a distribution

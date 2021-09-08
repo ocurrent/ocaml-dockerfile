@@ -676,6 +676,14 @@ let package_manager (t:t) =
   |`Cygwin _ -> `Cygwin
   |`Windows _ -> `Windows
 
+let win10_base_tag ?win10_revision (base:win10_docker_base_image) v =
+  let base = match base with
+    | `NanoServer -> "mcr.microsoft.com/windows/nanoserver"
+    | `ServerCore -> "mcr.microsoft.com/windows/servercore"
+    | `Windows when v = `Ltsc2022 -> "mcr.microsoft.com/windows/server"
+    | `Windows -> "mcr.microsoft.com/windows" in
+  base, win10_revision_to_string (v, win10_revision)
+
 let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
   match resolve_alias d with
   | `Alpine v -> begin
@@ -784,13 +792,9 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
       in
       "opensuse/leap", tag
   | `Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019) -> assert false
-  | `Cygwin v ->
-     "mcr.microsoft.com/windows/servercore", win10_revision_to_string (v, win10_revision)
+  | `Cygwin v -> win10_base_tag ?win10_revision `ServerCore v
   | `Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
-  | `Windows (_, (`Ltsc2022 as v)) ->
-    "mcr.microsoft.com/windows/server", win10_revision_to_string (v, win10_revision)
-  | `Windows (_, v) ->
-     "mcr.microsoft.com/windows", win10_revision_to_string (v, win10_revision)
+  | `Windows (_, v) -> win10_base_tag ?win10_revision `Windows v
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
