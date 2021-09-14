@@ -86,7 +86,7 @@ module Cygwin = struct
 
   let default = {
       root = {|C:\cygwin64|};
-      site = "http://mirrors.kernel.org/sourceware/cygwin/";
+      site = "https://mirrors.kernel.org/sourceware/cygwin/";
       args = ["--quiet-mode"; "--no-shortcuts"; "--no-startmenu"; "--no-desktop";
               "--only-site"; "--local-package-dir"; cygcache];
     }
