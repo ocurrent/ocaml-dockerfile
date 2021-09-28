@@ -1,6 +1,8 @@
 unreleased
 ----------
 
+- Asssume Windows x64 is an active distro even when it doesn't have the latest
+  release (@dra27 #66; #68)
 - Ensure stray double-quotes don't end up in PATH on Windows images (@dra27 #62)
 - Stop pinning binutils to 2.35 in Windows builds as that no longer works with
   GCC 11. (@dra27 #61)
