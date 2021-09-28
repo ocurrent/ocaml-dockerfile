@@ -250,7 +250,6 @@ let distro_arches ov (d:t) =
   | `Fedora (`V33|`V34), ov when OV.(compare Releases.v4_08_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
-  | `Windows (_, _), ov when OV.(compare ov Releases.v4_13_0) >= 0 -> []
   | _ -> [ `X86_64 ]
 
 
