@@ -1,8 +1,12 @@
 unreleased
 ----------
 
+- Add Alpine 3.14 and Ubuntu 21.10 (@avsm)
+- Move Fedora 33 and OpenSUSE 15.2 to deprecated and Alpine 3.13 to Tier 2. (@avsm)
+- Latest Fedora is now Fedora 34 (@avsm)
 - Asssume Windows x64 is an active distro even when it doesn't have the latest
   release (@dra27 #66; #68)
+- Latest base distro is now Debian 11 (from Debian 10) (@kit-ty-kate #59)
 - Ensure stray double-quotes don't end up in PATH on Windows images (@dra27 #62)
 - Stop pinning binutils to 2.35 in Windows builds as that no longer works with
   GCC 11. (@dra27 #61)
