@@ -250,27 +250,33 @@ let distro_arches ov (d:t) =
   | `Fedora (`V33|`V34), ov when OV.(compare Releases.v4_08_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
+  | `Windows (_, _), ov when OV.(compare ov Releases.v4_13_0) >= 0 -> []
   | _ -> [ `X86_64 ]
 
 
 let distro_supported_on a ov (d:t) =
   List.mem a (distro_arches ov d)
 
+let distro_active_for arch (d:t) =
+  match arch, d with
+  | `X86_64, `Windows _ -> true
+  | _ -> distro_supported_on arch OV.Releases.latest d
+
 let active_distros arch =
   List.filter (fun d -> match distro_status d with `Active _ -> true | _ -> false ) distros |>
-  List.filter (distro_supported_on arch OV.Releases.latest)
+  List.filter (distro_active_for arch)
 
 let active_tier1_distros arch =
   List.filter (fun d -> match distro_status d with `Active `Tier1 -> true | _ -> false ) distros |>
-  List.filter (distro_supported_on arch OV.Releases.latest)
+  List.filter (distro_active_for arch)
 
 let active_tier2_distros arch =
   List.filter (fun d -> match distro_status d with `Active `Tier2 -> true | _ -> false ) distros |>
-  List.filter (distro_supported_on arch OV.Releases.latest)
+  List.filter (distro_active_for arch)
 
 let active_tier3_distros arch =
   List.filter (fun d -> match distro_status d with `Active `Tier3 -> true | _ -> false ) distros |>
-  List.filter (distro_supported_on arch OV.Releases.latest)
+  List.filter (distro_active_for arch)
 
 (* The distro-supplied version of OCaml *)
 let builtin_ocaml_of_distro (d:t) : string option =
