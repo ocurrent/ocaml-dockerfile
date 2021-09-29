@@ -42,8 +42,7 @@ let install_visual_studio_build_tools ?(vs_version="16") components =
                    acc ^ " `\n        --add " ^ component) "" components)
   in
   (* https://docs.microsoft.com/en-us/visualstudio/install/advanced-build-tools-container?view=vs-2019#install-script *)
-  (* FIXME: don't download from here? *)
-  add ~src:["https://raw.githubusercontent.com/MisterDA/Windows-OCaml-Docker/images/Install.cmd"]
+  add ~src:["https://raw.githubusercontent.com/avsm/ocaml-dockerfile/master/src-opam/Install.cmd"]
     ~dst:{|C:\TEMP\|} ()
   @@ add ~src:["https://aka.ms/vscollect.exe"] ~dst:{|C:\TEMP\collect.exe|} ()
   @@ add ~src:["https://aka.ms/vs/" ^ vs_version ^ "/release/channel"] ~dst:{|C:\TEMP\VisualStudio.chman|} ()
