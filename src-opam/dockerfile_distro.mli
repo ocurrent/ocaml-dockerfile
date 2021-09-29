@@ -25,6 +25,7 @@
 type win10_release = [
   | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
   | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
+  | `Ltsc2022
 ] [@@deriving sexp]
 (** All Windows 10 release versions. LTSC versions are aliased to the
    semi-annual release they're based on. *)
@@ -152,6 +153,22 @@ val latest_tag_of_distro : t -> string
   release of a particular distribution.  This tag will be
   regularly rewritten to point to any new releases of the
   distribution. *)
+
+type win10_docker_base_image = [
+  | `NanoServer (** Windows Nano Server *)
+  | `ServerCore (** Windows Server Core *)
+  | `Windows    (** Windows Server "with Desktop Experience" *)
+]
+(** Windows containers base images.
+    @see <https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images> *)
+
+val win10_base_tag : ?win10_revision:win10_lcu -> win10_docker_base_image -> win10_release -> string * string
+(** [win10_base_tag base_image release] will return a tuple of Windows
+   container base image and tag for which the base image of a Windows
+   base image can be found (e.g.
+   [mcr.microsoft.com/windows/servercore],[ltsc2022] which maps to
+   [mcr.microsoft.com/windows/servercore:ltsc2022] on the Microsoft
+   Container Registry). *)
 
 val base_distro_tag : ?win10_revision:win10_lcu -> ?arch:Ocaml_version.arch -> t -> string * string
 (** [base_distro_tag ?arch t] will return a tuple of a Docker Hub

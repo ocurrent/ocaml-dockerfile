@@ -22,6 +22,7 @@ open Sexplib.Conv
 type win10_release = [
   | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
   | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
+  | `Ltsc2022
 ] [@@deriving sexp]
 
 type win10_lcu = [
@@ -33,12 +34,14 @@ let win10_current_lcu = `LCU20210914
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
-let win10_lcus = [
+let win10_lcus : ('a * int * win10_release list) list = [
+  `LCU20210914, 5005575, [`Ltsc2022];
   `LCU20210914, 5005565, [`V2004; `V20H2; `V21H1];
   `LCU20210914, 5005566, [`V1909];
   `LCU20210914, 5005568, [`V1809; `Ltsc2019];
   `LCU20210914, 5005573, [`V1607; `Ltsc2016];
   `LCU20210914, 5005569, [`V1507; `Ltsc2015];
+  `LCU20210810, 5005039, [`Ltsc2022];
   `LCU20210810, 5005033, [`V2004; `V20H2; `V21H1];
   `LCU20210810, 5005031, [`V1909];
   `LCU20210810, 5005030, [`V1809; `Ltsc2019];
@@ -56,7 +59,7 @@ let win10_lcus = [
   `LCU20210608, 5003687, [`V1507; `Ltsc2015];
 ]
 
-let win10_lcu_to_kb =
+let win10_lcu_to_kb : ((win10_lcu * win10_release), int option) Hashtbl.t =
   let t = Hashtbl.create 63 in
   let f (lcu, kb, vs) =
     let g v =
@@ -76,7 +79,7 @@ let win10_lcu_kb_number v lcu =
   try Hashtbl.find win10_lcu_to_kb (lcu, v)
   with Not_found -> None
 
-let win10_kb_number_to_lcu v kb =
+let win10_kb_number_to_lcu (v:win10_release) kb =
   match Hashtbl.find win10_kb_to_lcu (kb, v) with
   | lcu -> Some (v, lcu)
   | exception Not_found -> None
@@ -142,7 +145,7 @@ let distros : t list = [
 let distros =
   let win10_releases =
     [ `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1809;
-      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; `V21H1 ] in
+      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; `V21H1; `Ltsc2022 ] in
   List.fold_left (fun distros version ->
       `Cygwin version :: `Windows (`Mingw, version) :: `Windows (`Msvc, version) :: distros)
     distros win10_releases
@@ -162,7 +165,7 @@ let win10_release_status v : win10_release_status = match v with
   | `V1909 -> `Deprecated
   | `V2004
   | `V20H2
-  | `V21H1 -> `Active
+  | `V21H1 | `Ltsc2022 -> `Active
 
 let win10_latest_release = `V21H1
 
@@ -171,6 +174,7 @@ type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 (* https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/base-image-lifecycle *)
 let win10_docker_status (base : win10_docker_base_image) v : status =
   match base, v with
+  | _, `Ltsc2022
   | _, `V20H2
   | _, `V2004 -> `Active `Tier3
   | _, `V1909
@@ -184,7 +188,7 @@ let win10_docker_status (base : win10_docker_base_image) v : status =
   | `NanoServer, `V1607 -> `Deprecated
   | _ -> `Not_available
 
-let win10_latest_image = `V20H2
+let win10_latest_image = `Ltsc2022
 
 let distro_status (d:t) : status = match d with
   | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12) -> `Deprecated
@@ -359,6 +363,7 @@ let win10_release_to_string = function
   | `V1709 -> "1709" | `V1803 -> "1803" | `V1809 -> "1809"
   | `Ltsc2019 -> "ltsc2019" | `V1903 -> "1903" | `V1909 -> "1909"
   | `V2004 -> "2004" | `V20H2 -> "20H2" | `V21H1 -> "21H1"
+  | `Ltsc2022 -> "ltsc2022"
 
 let win10_release_of_string v : win10_release option =
   let v = match String.cut ~sep:"-KB" v with
@@ -371,6 +376,7 @@ let win10_release_of_string v : win10_release option =
   | "1709" -> Some `V1709 | "1803" -> Some `V1803 | "1809" -> Some `V1809
   | "ltsc2019" -> Some `Ltsc2019 | "1903" -> Some `V1903 | "1909" -> Some `V1909
   | "2004" -> Some `V2004 | "20H2" -> Some `V20H2 | "21H1" -> Some `V21H1
+  | "ltsc2022" -> Some `Ltsc2022
   | _ -> None
 
 let rec win10_revision_to_string = function
@@ -379,7 +385,7 @@ let rec win10_revision_to_string = function
 | (v, Some lcu) ->
     match win10_lcu_kb_number v lcu with
     | Some kb -> Printf.sprintf "%s-KB%d" (win10_release_to_string v) kb
-    | None -> invalid_arg "No KB for this Win10 revision"
+    | None -> Fmt.invalid_arg "No KB for this Win10 %s revision" (win10_release_to_string v)
 
 let win10_revision_of_string v =
   let v, lcu =
@@ -670,6 +676,14 @@ let package_manager (t:t) =
   |`Cygwin _ -> `Cygwin
   |`Windows _ -> `Windows
 
+let win10_base_tag ?win10_revision (base:win10_docker_base_image) v =
+  let base = match base with
+    | `NanoServer -> "mcr.microsoft.com/windows/nanoserver"
+    | `ServerCore -> "mcr.microsoft.com/windows/servercore"
+    | `Windows when v = `Ltsc2022 -> "mcr.microsoft.com/windows/server"
+    | `Windows -> "mcr.microsoft.com/windows" in
+  base, win10_revision_to_string (v, win10_revision)
+
 let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
   match resolve_alias d with
   | `Alpine v -> begin
@@ -778,11 +792,9 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
       in
       "opensuse/leap", tag
   | `Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019) -> assert false
-  | `Cygwin v ->
-     "mcr.microsoft.com/windows/servercore", win10_revision_to_string (v, win10_revision)
+  | `Cygwin v -> win10_base_tag ?win10_revision `ServerCore v
   | `Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
-  | `Windows (_, v) ->
-     "mcr.microsoft.com/windows", win10_revision_to_string (v, win10_revision)
+  | `Windows (_, v) -> win10_base_tag ?win10_revision `Windows v
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)
