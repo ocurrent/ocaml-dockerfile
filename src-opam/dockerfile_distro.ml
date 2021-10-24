@@ -167,7 +167,7 @@ let distros : t list = [
   `OracleLinux `V7; `OracleLinux `V8; `OracleLinux `Latest;
   `OpenSUSE `V42_1; `OpenSUSE `V42_2; `OpenSUSE `V42_3; `OpenSUSE `V15_0; `OpenSUSE `V15_1; `OpenSUSE `V15_2; `OpenSUSE `V15_3; `OpenSUSE `Latest;
   `Ubuntu `V12_04; `Ubuntu `V14_04; `Ubuntu `V15_04; `Ubuntu `V15_10;
-  `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04; `Ubuntu `V20_10; `Ubuntu `V21_04; (*`Ubuntu `V21_10;*)
+  `Ubuntu `V16_04; `Ubuntu `V16_10; `Ubuntu `V17_04; `Ubuntu `V17_10; `Ubuntu `V18_04; `Ubuntu `V18_10; `Ubuntu `V19_04; `Ubuntu `V19_10; `Ubuntu `V20_04; `Ubuntu `V20_10; `Ubuntu `V21_04; `Ubuntu `V21_10;
   `Ubuntu `Latest; `Ubuntu `LTS;
 ]
 let distros =
@@ -243,7 +243,7 @@ let distro_status (d:t) : status = match d with
   | `OpenSUSE `V15_3 -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_3)
   | `Ubuntu (`V18_04) -> `Active `Tier3
-  | `Ubuntu (`V20_04 | `V21_04 |`V21_10) -> `Active `Tier2
+  | `Ubuntu (`V20_04 | `V21_04 | `V21_10) -> `Active `Tier2
   | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
   | `Ubuntu `Latest -> `Alias (`Ubuntu `V21_04)
@@ -286,7 +286,7 @@ let distro_arches ov (d:t) =
   | `Debian `V10, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
   | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Alpine (`V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
-  | `Ubuntu (`V18_04|`V20_04|`V20_10|`V21_04 |`V21_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64; `Ppc64le ]
+  | `Ubuntu (`V18_04|`V20_04|`V20_10|`V21_04|`V21_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64; `Ppc64le ]
   | `Fedora (`V33|`V34), ov when OV.(compare Releases.v4_08_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
