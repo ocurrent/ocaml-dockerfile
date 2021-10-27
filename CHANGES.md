@@ -1,7 +1,7 @@
 unreleased
 ----------
 
-- Add Ubuntu 21.10, but excluded from distro list until Docker issues resolved (@avsm)
+- Fix dependencies of dockerfile-cmd: result now correctly used (@dra27 #72)
 - Add Alpine 3.14 and Ubuntu 21.10 (@avsm)
 - Move Fedora 33 and OpenSUSE 15.2 to deprecated and Alpine 3.13 to Tier 2. (@avsm)
 - Latest Fedora is now Fedora 34 (@avsm)
