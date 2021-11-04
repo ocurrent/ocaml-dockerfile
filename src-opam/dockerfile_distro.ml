@@ -120,8 +120,8 @@ let os_family_to_string (os:os_family) =
 
 let opam_repository (os:os_family) =
   match os with
-  | `Cygwin | `Linux -> "git://github.com/ocaml/opam-repository.git"
-  | `Windows -> "git://github.com/fdopen/opam-repository-mingw.git#opam2"
+  | `Cygwin | `Linux -> "https://github.com/ocaml/opam-repository.git"
+  | `Windows -> "https://github.com/fdopen/opam-repository-mingw.git#opam2"
 
 let personality os_family arch =
   match os_family with

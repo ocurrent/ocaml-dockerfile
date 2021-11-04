@@ -31,7 +31,7 @@ let personality ?arch distro =
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
 let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
-  run "git clone git://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
+  run "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
   Linux.run_sh
     "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
     (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch @@
@@ -42,7 +42,7 @@ let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(
 (* Can't satisfy the typechecker... *)
 let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
   let open Dockerfile_windows.Cygwin in
-  run_sh "git clone git://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
+  run_sh "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
   run_sh
     "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
     (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch
@@ -317,7 +317,7 @@ let all_ocaml_compilers hub_id arch distro =
     List.filter (fun ov -> D.distro_supported_on arch ov distro) |> fun ovs ->
     let add_beta_remote =
       if List.exists OV.Releases.is_dev ovs then
-         run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
+         run "opam repo add beta git+https://github.com/ocaml/ocaml-beta-repository --set-default"
       else empty in
     add_beta_remote @@@ List.map (create_switch ~arch distro) ovs
   in
@@ -357,7 +357,7 @@ let separate_ocaml_compilers hub_id arch distro =
   |> List.map (fun ov ->
          let add_remote =
            if OV.Releases.is_dev ov then
-             run "opam repo add beta git://github.com/ocaml/ocaml-beta-repository --set-default"
+             run "opam repo add beta git+https://github.com/ocaml/ocaml-beta-repository --set-default"
            else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
