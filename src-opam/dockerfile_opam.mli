@@ -47,9 +47,10 @@ val gen_opam2_distro :
   ?labels:(string * string) list ->
   hash_opam_2_0:string ->
   hash_opam_2_1:string ->
+  hash_opam_master:string ->
   Dockerfile_distro.t
   -> string * Dockerfile.t
-(** [gen_opam2_distro ~hash_opam_2_0 ~hash_opam_2_1 d] will generate a Dockerfile
+(** [gen_opam2_distro ~hash_opam_2_0 ~hash_opam_2_1 ~hash_opam_master d] will generate a Dockerfile
    for Linux distribution [d] with opam 2.0 and opam 2.1, per hash given in parameter.
    @return a tuple of the Docker tag and the Dockerfile.
    If [clone_opam_repo] is true (the default) then the Dockerfile will also git
