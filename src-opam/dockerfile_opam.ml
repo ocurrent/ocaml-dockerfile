@@ -125,6 +125,7 @@ let apk_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 ~hash_opam_master
   @@ Linux.Apk.add_repository ~tag:"testing" "https://dl-cdn.alpinelinux.org/alpine/edge/testing"
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.1"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.2" () (* TODO: Change when opam 2.2 is branched *)
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-dev" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ Linux.Apk.dev_packages ()
@@ -146,6 +147,7 @@ let apt_opam2 ?(labels=[]) ?arch distro ~hash_opam_2_0 ~hash_opam_2_1 ~hash_opam
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.1"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.2" () (* TODO: Change when opam 2.2 is branched *)
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-dev" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
@@ -189,6 +191,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~hash_opam_
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-2.1"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-2.2" () (* TODO: Change when opam 2.2 is branched *)
   @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-dev" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ run
@@ -212,6 +215,7 @@ let zypper_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 ~hash_opam_mas
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/bin/opam-2.1"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-2.2" () (* TODO: Change when opam 2.2 is branched *)
   @@ copy ~from:"0" ~src:["/usr/bin/opam-master"] ~dst:"/usr/bin/opam-dev" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
@@ -230,6 +234,7 @@ let pacman_opam2 ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_1 ~hash_opam_mas
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.1"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.2" () (* TODO: Change when opam 2.2 is branched *)
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-dev" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ Linux.Pacman.dev_packages ()
@@ -251,6 +256,7 @@ let cygwin_opam2 ?win10_revision ?(labels=[]) ?arch ~hash_opam_2_0 ~hash_opam_2_
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.0"] ~dst:"/usr/bin/opam-2.0" ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-2.1"] ~dst:"/usr/bin/opam-2.1" ()
+  @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-2.2" () (* TODO: Change when opam 2.2 is branched *)
   @@ copy ~from:"0" ~src:["/usr/local/bin/opam-master"] ~dst:"/usr/bin/opam-dev" ()
   @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
   @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
