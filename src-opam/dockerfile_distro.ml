@@ -98,7 +98,7 @@ let win10_kb_number_to_lcu (v:win10_release) kb =
   | exception Not_found -> None
 
 type t = [
-  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `Latest ]
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `Latest ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
@@ -143,7 +143,7 @@ type status = [
 ] [@@deriving sexp]
 
 let distros : t list = [
-  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10; `Alpine `V3_11; `Alpine `V3_12; `Alpine `V3_13; `Alpine `V3_14; `Alpine `Latest;
+  `Alpine `V3_3; `Alpine `V3_4; `Alpine `V3_5; `Alpine `V3_6; `Alpine `V3_7; `Alpine `V3_8; `Alpine `V3_9; `Alpine `V3_10; `Alpine `V3_11; `Alpine `V3_12; `Alpine `V3_13; `Alpine `V3_14; `Alpine `V3_15; `Alpine `Latest;
   `Archlinux `Latest;
   `CentOS `V6; `CentOS `V7; `CentOS `V8; `CentOS `Latest;
   `Debian `V11; `Debian `V10; `Debian `V9; `Debian `V8; `Debian `V7;
@@ -204,10 +204,10 @@ let win10_docker_status (base : win10_docker_base_image) v : status =
 let win10_latest_image = `Ltsc2022
 
 let distro_status (d:t) : status = match d with
-  | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12) -> `Deprecated
-  | `Alpine `V3_13 -> `Active `Tier2
-  | `Alpine `V3_14 -> `Active `Tier1
-  | `Alpine `Latest -> `Alias (`Alpine `V3_14)
+  | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 |`V3_13) -> `Deprecated
+  | `Alpine `V3_14 -> `Active `Tier2
+  | `Alpine `V3_15 -> `Active `Tier1
+  | `Alpine `Latest -> `Alias (`Alpine `V3_15)
   | `Archlinux `Latest -> `Active `Tier3
   | `CentOS `V8 -> `Active `Tier2
   | `CentOS `V7 -> `Active `Tier3
@@ -267,7 +267,7 @@ let distro_arches ov (d:t) =
   | `Debian `V11, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
   | `Debian `V10, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Ppc64le; `Aarch32; `S390x ]
   | `Debian `V9, ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Aarch32 ]
-  | `Alpine (`V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 |`V3_14), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
+  | `Alpine (`V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
   | `Ubuntu (`V18_04|`V20_04|`V20_10|`V21_04 |`V21_10), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64; `Ppc64le ]
   | `Fedora (`V33|`V34), ov when OV.(compare Releases.v4_08_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
@@ -335,6 +335,7 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`Alpine `V3_12 -> Some "4.08.1"
   |`Alpine `V3_13 -> Some "4.08.1"
   |`Alpine `V3_14 -> Some "4.12.0"
+  |`Alpine `V3_15 -> Some "4.13.1"
   |`Archlinux `Latest -> Some "4.11.1"
   |`Fedora `V21 -> Some "4.01.0"
   |`Fedora `V22 -> Some "4.02.0"
@@ -475,6 +476,7 @@ let tag_of_distro (d:t) = match d with
   |`Alpine `V3_12 -> "alpine-3.12"
   |`Alpine `V3_13 -> "alpine-3.13"
   |`Alpine `V3_14 -> "alpine-3.14"
+  |`Alpine `V3_15 -> "alpine-3.15"
   |`Alpine `Latest -> "alpine"
   |`Archlinux `Latest -> "archlinux"
   |`OpenSUSE `V42_1 -> "opensuse-42.1"
@@ -556,6 +558,7 @@ let distro_of_tag x : t option =
   |"alpine-3.12" -> Some (`Alpine `V3_12)
   |"alpine-3.13" -> Some (`Alpine `V3_13)
   |"alpine-3.14" -> Some (`Alpine `V3_14)
+  |"alpine-3.15" -> Some (`Alpine `V3_15)
   |"alpine" -> Some (`Alpine `Latest)
   |"archlinux" -> Some (`Archlinux `Latest)
   |"opensuse-42.1" -> Some (`OpenSUSE `V42_1)
@@ -632,6 +635,7 @@ let rec human_readable_string_of_distro (d:t) =
   |`Alpine `V3_12 -> "Alpine 3.12"
   |`Alpine `V3_13 -> "Alpine 3.13"
   |`Alpine `V3_14 -> "Alpine 3.14"
+  |`Alpine `V3_15 -> "Alpine 3.15"
   |`Archlinux `Latest -> "Archlinux"
   |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
   |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
@@ -714,6 +718,7 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V3_12 -> "3.12"
         | `V3_13 -> "3.13"
         | `V3_14 -> "3.14"
+        | `V3_15 -> "3.15"
         | `Latest -> assert false
       in
       match arch with
