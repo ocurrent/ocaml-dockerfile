@@ -148,8 +148,8 @@ let create_opam_branches opam_hashes =
       branch = "master";
       hash = opam_master_hash;
       enable_0install_solver = true;
-      public_name = "opam-2.2"; (* TODO: Change when opam 2.2 is branched *)
-      aliases = ["opam-dev"];
+      public_name = "opam-dev";
+      aliases = ["opam-2.2"]; (* TODO: Remove/update when opam 2.2 is branched *)
     };
   ]
 
