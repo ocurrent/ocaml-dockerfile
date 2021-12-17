@@ -119,7 +119,8 @@ type opam_branch = {
   branch : string;
   hash : string;
   enable_0install_solver : bool;
-  public_names : string list;
+  public_name : string;
+  aliases : string list;
 }
 
 let create_opam_branches opam_hashes =
@@ -133,21 +134,38 @@ let create_opam_branches opam_hashes =
       branch = "2.0";
       hash = opam_2_0_hash;
       enable_0install_solver = false;
-      public_names = ["2.0"];
+      public_name = "opam-2.0";
+      aliases = ["opam"]; (* Default *)
     };
     {
       branch = "2.1";
       hash = opam_2_1_hash;
       enable_0install_solver = true;
-      public_names = ["2.1"];
+      public_name = "opam-2.1";
+      aliases = [];
     };
     {
       branch = "master";
       hash = opam_master_hash;
       enable_0install_solver = true;
-      public_names = ["2.2"; "dev"]; (* TODO: Change when opam 2.2 is branched *)
+      public_name = "opam-2.2"; (* TODO: Change when opam 2.2 is branched *)
+      aliases = ["opam-dev"];
     };
   ]
+
+let install_opams ?prefix f opam_branches =
+  List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
+      let add_default_link = Some false in
+      let enable_0install_solver = Some enable_0install_solver in
+      acc @@ f ?add_default_link ?prefix ?enable_0install_solver ~branch ~hash ()
+    ) empty opam_branches
+
+let copy_opams ~src ~dst opam_branches =
+  List.fold_left (fun acc {branch; public_name; aliases; _} ->
+      acc @@
+      copy ~from:"0" ~src:[src^branch] ~dst:(dst^public_name) () @@@
+      List.map (fun alias -> run "ln %s/%s %s/%s" dst public_name dst alias) aliases
+    ) empty opam_branches
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
@@ -156,20 +174,13 @@ let apk_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
   header ?arch distro @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
   @@ Linux.Git.init ()
-  @@ List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
-      acc @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver ~branch ~hash ()
-    ) empty opam_branches
+  @@ install_opams install_opam_from_source opam_branches
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ Linux.Apk.add_repository ~tag:"edge" "https://dl-cdn.alpinelinux.org/alpine/edge/main"
   @@ Linux.Apk.add_repository ~tag:"edgecommunity" "https://dl-cdn.alpinelinux.org/alpine/edge/community"
   @@ Linux.Apk.add_repository ~tag:"testing" "https://dl-cdn.alpinelinux.org/alpine/edge/testing"
-  @@ List.fold_left (fun acc {branch; public_names; _} ->
-      List.fold_left (fun acc public_name ->
-        acc @@ copy ~from:"0" ~src:["/usr/local/bin/opam-"^branch] ~dst:("/usr/bin/opam-"^public_name) ()
-      ) acc public_names
-    ) empty opam_branches
-  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ copy_opams ~src:"/usr/local/bin" ~dst:"/usr/bin" opam_branches
   @@ Linux.Apk.dev_packages ()
   @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
@@ -183,17 +194,10 @@ let apt_opam2 ?(labels=[]) ?arch distro ~opam_hashes () =
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
-      acc @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver ~branch ~hash ()
-    ) empty opam_branches
+  @@ install_opams install_opam_from_source opam_branches
   @@ from ~tag img
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
-  @@ List.fold_left (fun acc {branch; public_names; _} ->
-      List.fold_left (fun acc public_name ->
-        acc @@ copy ~from:"0" ~src:["/usr/local/bin/opam-"^branch] ~dst:("/usr/bin/opam-"^public_name) ()
-      ) acc public_names
-    ) empty opam_branches
-  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ copy_opams ~src:"/usr/local/bin" ~dst:"/usr/bin" opam_branches
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ Linux.Apt.dev_packages ()
   @@ run "echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections"
@@ -224,9 +228,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashe
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
-      acc @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver ~branch ~hash ()
-    ) empty opam_branches
+  @@ install_opams ~prefix:"/usr" install_opam_from_source opam_branches
   @@ from ~tag img
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
@@ -234,12 +236,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashe
   @@ Linux.RPM.dev_packages ()
   @@ (if enable_powertools then run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update else empty)
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
-  @@ List.fold_left (fun acc {branch; public_names; _} ->
-      List.fold_left (fun acc public_name ->
-        acc @@ copy ~from:"0" ~src:["/usr/bin/opam-"^branch] ~dst:("/usr/bin/opam-"^public_name) ()
-      ) acc public_names
-    ) empty opam_branches
-  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
   @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
@@ -254,18 +251,11 @@ let zypper_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
   @@ Linux.Zypper.dev_packages ()
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
-  @@ List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
-      acc @@ install_opam_from_source ~prefix:"/usr" ~add_default_link:false ~enable_0install_solver ~branch ~hash ()
-    ) empty opam_branches
+  @@ install_opams ~prefix:"/usr" install_opam_from_source opam_branches
   @@ from ~tag img
   @@ Linux.Zypper.dev_packages ()
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
-  @@ List.fold_left (fun acc {branch; public_names; _} ->
-      List.fold_left (fun acc public_name ->
-        acc @@ copy ~from:"0" ~src:["/usr/bin/opam-"^branch] ~dst:("/usr/bin/opam-"^public_name) ()
-      ) acc public_names
-    ) empty opam_branches
-  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ Linux.Zypper.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
@@ -276,17 +266,10 @@ let pacman_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
   header ?arch distro @@ label (("distro_style", "pacman") :: labels)
   @@ Linux.Pacman.dev_packages ()
   @@ Linux.Git.init ()
-  @@ List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
-      acc @@ install_opam_from_source ~add_default_link:false ~enable_0install_solver ~branch ~hash ()
-    ) empty opam_branches
+  @@ install_opams install_opam_from_source opam_branches
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
-  @@ List.fold_left (fun acc {branch; public_names; _} ->
-      List.fold_left (fun acc public_name ->
-        acc @@ copy ~from:"0" ~src:["/usr/local/bin/opam-"^branch] ~dst:("/usr/bin/opam-"^public_name) ()
-      ) acc public_names
-    ) empty opam_branches
-  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ copy_opams ~src:"/usr/local/bin" ~dst:"/usr/bin" opam_branches
   @@ Linux.Pacman.dev_packages ()
   @@ Linux.Pacman.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
@@ -300,17 +283,10 @@ let cygwin_opam2 ?win10_revision ?(labels=[]) ?arch ~opam_hashes distro () =
   @@ user "ContainerAdministrator"
   @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
-  @@ List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
-      acc @@ install_opam_from_source_cygwin ~add_default_link:false ~enable_0install_solver ~branch ~hash ()
-    ) empty opam_branches
+  @@ install_opams install_opam_from_source_cygwin opam_branches
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
-  @@ List.fold_left (fun acc {branch; public_names; _} ->
-      List.fold_left (fun acc public_name ->
-        acc @@ copy ~from:"0" ~src:["/usr/local/bin/opam-"^branch] ~dst:("/usr/bin/opam-"^public_name) ()
-      ) acc public_names
-    ) empty opam_branches
-  @@ run "ln /usr/bin/opam-2.0 /usr/bin/opam"
+  @@ copy_opams ~src:"/usr/local/bin" ~dst:"/usr/bin" opam_branches
   @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
 
