@@ -163,7 +163,7 @@ let install_opams ?prefix f opam_branches =
 let copy_opams ~src ~dst opam_branches =
   List.fold_left (fun acc {branch; public_name; aliases; _} ->
       acc @@
-      copy ~from:"0" ~src:[src^branch] ~dst:(dst^public_name) () @@@
+      copy ~from:"0" ~src:[src^"/opam-"^branch] ~dst:(dst^"/"^public_name) () @@@
       List.map (fun alias -> run "ln %s/%s %s/%s" dst public_name dst alias) aliases
     ) empty opam_branches
 
