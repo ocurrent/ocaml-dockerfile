@@ -39,18 +39,24 @@ val install_opam_from_source : ?add_default_link:bool ->
     If [enable_0install_solver] is true (false by default), then the [builtin-0install]
     solver should be accessible in the resulting opam binary. *)
 
+type opam_hashes = {
+  opam_2_0_hash : string;
+  opam_2_1_hash : string;
+  opam_master_hash : string;
+}
+
 val gen_opam2_distro :
   ?win10_revision:Dockerfile_distro.win10_lcu ->
   ?winget:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
-  hash_opam_2_0:string ->
-  hash_opam_2_1:string ->
+  opam_hashes:opam_hashes ->
   Dockerfile_distro.t
   -> string * Dockerfile.t
-(** [gen_opam2_distro ~hash_opam_2_0 ~hash_opam_2_1 d] will generate a Dockerfile
-   for Linux distribution [d] with opam 2.0 and opam 2.1, per hash given in parameter.
+(** [gen_opam2_distro ~opam_hashes d] will generate a Dockerfile
+   for Linux distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master,
+   per hash given in parameter.
    @return a tuple of the Docker tag and the Dockerfile.
    If [clone_opam_repo] is true (the default) then the Dockerfile will also git
    clone the official opam-repository into [/home/opam/opam-repository].
