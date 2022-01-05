@@ -355,17 +355,23 @@ let create_switch ~arch distro t =
   | _ ->
     create_switch switch (Ocaml_version.Opam.V2.name switch)
 
+let add_beta_remote ovs =
+  if List.exists OV.Releases.is_dev ovs then
+    run "opam repo add beta git+https://github.com/ocaml/ocaml-beta-repository --set-default"
+  else empty
+
+let add_overlay_remote os_family =
+  if os_family = `Windows then
+    run "opam repo add ocurrent-overlay git+https://github.com/ocurrent/opam-repository-mingw#overlay --set-default"
+  else empty
+
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
   let os_family = Dockerfile_distro.os_family_of_distro distro in
   let compilers =
     OV.Releases.recent |>
     List.filter (fun ov -> D.distro_supported_on arch ov distro) |> fun ovs ->
-    let add_beta_remote =
-      if List.exists OV.Releases.is_dev ovs then
-         run "opam repo add beta git+https://github.com/ocaml/ocaml-beta-repository --set-default"
-      else empty in
-    add_beta_remote @@@ List.map (create_switch ~arch distro) ovs
+    add_beta_remote ovs @@ add_overlay_remote os_family @@@ List.map (create_switch ~arch distro) ovs
   in
   let d =
     let pers = match personality ~arch distro with
@@ -401,10 +407,6 @@ let separate_ocaml_compilers hub_id arch distro =
   let os_family = Dockerfile_distro.os_family_of_distro distro in
   OV.Releases.recent_with_dev |> List.filter (fun ov -> D.distro_supported_on arch ov distro)
   |> List.map (fun ov ->
-         let add_remote =
-           if OV.Releases.is_dev ov then
-             run "opam repo add beta git+https://github.com/ocaml/ocaml-beta-repository --set-default"
-           else empty in
          let default_switch_name = OV.(with_patch (with_variant ov None) None |> to_string) in
          let variants =
            empty @@@ List.map (create_switch ~arch distro) (OV.Opam.V2.switches arch ov)
@@ -420,7 +422,8 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ sandbox
            @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
                 (if os_family = `Windows then "--disable-sandboxing" else "")
-           @@ add_remote
+           @@ add_beta_remote [ov]
+           @@ add_overlay_remote os_family
            @@ variants
            @@ run "opam switch %s" default_switch_name
            @@ run "opam install -y depext%s"
