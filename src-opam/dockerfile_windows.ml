@@ -110,7 +110,7 @@ module Cygwin = struct
     @@ run_sh ~cyg {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin|} version version
 
   let cygwin ?(cyg=default) fmt =
-    ksprintf (run {|%s %s --root %s --site %s %s|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site) fmt
+    ksprintf (run {|%s %s --root %s --site %s --symlink-type=wsl %s|} cygsetup (String.concat " " cyg.args) cyg.root cyg.site) fmt
 
   let install ?(cyg=default) fmt =
     ksprintf (cygwin ~cyg "--packages %s") fmt
