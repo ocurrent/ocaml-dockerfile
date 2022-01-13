@@ -27,14 +27,21 @@ type win10_release = [
 
 type win10_lcu = [
   | `LCU
-  | `LCU20211214 | `LCU20211109 | `LCU20211012 | `LCU20210914 | `LCU20210810 | `LCU20210713 | `LCU20210608
+  | `LCU20220111 | `LCU20211214 | `LCU20211109 | `LCU20211012 | `LCU20210914 | `LCU20210810 | `LCU20210713 | `LCU20210608
 ] [@@deriving sexp]
 
-let win10_current_lcu = `LCU20211214
+let win10_current_lcu = `LCU20220111
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
 let win10_lcus : ('a * int * win10_release list) list = [
+
+  `LCU20220111, 5009555, [`Ltsc2022];
+  `LCU20220111, 5009543, [`V20H2; `V21H1];
+  `LCU20220111, 5009545, [`V1909];
+  `LCU20220111, 5009557, [`V1809; `Ltsc2019];
+  `LCU20220111, 5009546, [`V1607; `Ltsc2016];
+  `LCU20220111, 5009585, [`V1507; `Ltsc2015];
 
   `LCU20211214, 5008223, [`Ltsc2022];
   `LCU20211214, 5008212, [`V2004; `V20H2; `V21H1];
@@ -184,7 +191,7 @@ let win10_release_status v : win10_release_status = match v with
   | `V1809 -> `Deprecated | `Ltsc2019 -> `Active
   | `V1903
   | `V1909 -> `Deprecated
-  | `V2004
+  | `V2004 -> `Deprecated
   | `V20H2
   | `V21H1 | `Ltsc2022 -> `Active
 
@@ -196,8 +203,8 @@ type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 let win10_docker_status (base : win10_docker_base_image) v : status =
   match base, v with
   | _, `Ltsc2022
-  | _, `V20H2
-  | _, `V2004 -> `Active `Tier3
+  | _, `V20H2 -> `Active `Tier3
+  | _, `V2004
   | _, `V1909
   | _, `V1903 -> `Deprecated
   | `ServerCore, (`V1809 | `Ltsc2019)
