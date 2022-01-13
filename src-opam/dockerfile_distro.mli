@@ -32,6 +32,7 @@ type win10_release = [
 
 type win10_lcu = [
   | `LCU
+  | `LCU20220111
   | `LCU20211214
   | `LCU20211109
   | `LCU20211012
