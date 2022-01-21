@@ -6,6 +6,7 @@ unreleased
 - Switch all GitHub access from git:// to https:// in advance of insecure protocol
   sunset (@kit-ty-kate #73)
 - Fix dependencies of dockerfile-cmd: result now correctly used (@dra27 #72)
+- Move Ubuntu 21.04 to deprecated (@dra27 #71)
 - Add Ubuntu 22.04 (@dra27 #71)
 - Add Alpine 3.14 and Ubuntu 21.10 (@avsm)
 - Move Fedora 33 and OpenSUSE 15.2 to deprecated and Alpine 3.13 to Tier 2. (@avsm)

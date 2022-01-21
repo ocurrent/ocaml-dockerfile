@@ -243,10 +243,10 @@ let distro_status (d:t) : status = match d with
   | `OpenSUSE `V15_3 -> `Active `Tier2
   | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_3)
   | `Ubuntu (`V18_04) -> `Active `Tier3
-  | `Ubuntu (`V20_04 | `V21_04 | `V21_10 | `V22_04) -> `Active `Tier2
-  | `Ubuntu ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10) -> `Deprecated
+  | `Ubuntu (`V20_04 | `V21_10 | `V22_04) -> `Active `Tier2
+  | `Ubuntu (`V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04) -> `Deprecated
   | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
-  | `Ubuntu `Latest -> `Alias (`Ubuntu `V21_04)
+  | `Ubuntu `Latest -> `Alias (`Ubuntu `V21_10)
   | `Cygwin `Ltsc2019 -> `Alias (`Cygwin `V1809)
   | `Cygwin `Ltsc2016 -> `Alias (`Cygwin `V1607)
   | `Cygwin `Ltsc2015 -> `Alias (`Cygwin `V1507)
