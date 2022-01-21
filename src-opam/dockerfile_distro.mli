@@ -57,7 +57,7 @@ type t = [
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
-  | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `Latest ]
+  | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `V35 | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `Latest ]
   | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `LTS | `Latest ]
