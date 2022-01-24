@@ -221,10 +221,16 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashe
       @@ Linux.RPM.install "yum-plugin-ovl"
     else empty
   in
+  let repo_or_update, extra =
+    match distro with
+    | `CentOS `V7 -> Linux.RPM.install "centos-release-scl", Some "devtoolset-7"
+    | `OracleLinux `V7 -> Linux.RPM.install "oracle-softwarecollection-release-el7", Some "devtoolset-7"
+    | _ -> Linux.RPM.update, None
+  in
   header ?arch distro @@ label (("distro_style", "rpm") :: labels)
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
-  @@ Linux.RPM.update
+  @@ repo_or_update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ Linux.Git.init ()
   @@ install_bubblewrap_from_source ()
@@ -233,7 +239,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashe
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
   @@ Linux.RPM.update
-  @@ Linux.RPM.dev_packages ()
+  @@ Linux.RPM.dev_packages ?extra ()
   @@ (if enable_powertools then run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update else empty)
   @@ copy ~from:"0" ~src:["/usr/local/bin/bwrap"] ~dst:"/usr/bin/bwrap" ()
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
