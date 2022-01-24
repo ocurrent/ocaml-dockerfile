@@ -23,12 +23,20 @@
 (** {2 Known distributions and OCaml variants} *)
 
 type win10_release = [
-  | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
-  | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
-  | `Ltsc2022
+  | `V1507 | `V1511 | `V1607
+  | `V1703 | `V1709 | `V1803 | `V1809 | `V1903 | `V1909
+  | `V2004 | `V20H2 | `V21H1 | `V21H2
 ] [@@deriving sexp]
-(** All Windows 10 release versions. LTSC versions are aliased to the
-   semi-annual release they're based on. *)
+(** All Windows 10 release versions. *)
+
+type win10_ltsc = [
+  `Ltsc2015 | `Ltsc2016 | `Ltsc2019 | `Ltsc2022
+] [@@deriving sexp]
+(** All Windows Long-Term Service Branch releases. LTSC versions are aliased to
+    the semi-annual release they're based on. *)
+
+type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
+(** All Windows 10/11 release versions and LTSC names *)
 
 type win10_lcu = [
   | `LCU
@@ -52,6 +60,20 @@ val win10_current_lcu : win10_lcu
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 (** A Windows 10 version optionally with an LCU. *)
 
+type distro = [
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 ]
+  | `Archlinux of [ `Latest ]
+  | `CentOS of [ `V6 | `V7 | `V8 ]
+  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
+  | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `V35 ]
+  | `OracleLinux of [ `V7 | `V8 ]
+  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 ]
+  | `Cygwin of win10_release
+  | `Windows of [`Mingw | `Msvc] * win10_release
+] [@@deriving sexp]
+(** Supported Docker container distributions distributions *)
+
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `Latest ]
   | `Archlinux of [ `Latest ]
@@ -60,9 +82,9 @@ type t = [
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `V35 | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `Latest ]
-  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `LTS | `Latest ]
-  | `Cygwin of win10_release
-  | `Windows of [`Mingw | `Msvc] * win10_release
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `Latest | `LTS ]
+  | `Cygwin of win_all
+  | `Windows of [`Mingw | `Msvc] * win_all
 ] [@@deriving sexp]
 (** Supported Docker container distributions *)
 
@@ -91,7 +113,7 @@ val is_same_distro : t -> t -> bool
 val compare : t -> t -> int
 (** [compare a b] is a lexical comparison function for {!t}. *)
 
-val resolve_alias : t -> t
+val resolve_alias : t -> distro
 (** [resolve_alias t] will resolve [t] into a concrete version. This removes
    versions such as [Latest]. *)
 
@@ -166,7 +188,7 @@ type win10_docker_base_image = [
 (** Windows containers base images.
     @see <https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/container-base-images> *)
 
-val win10_base_tag : ?win10_revision:win10_lcu -> win10_docker_base_image -> win10_release -> string * string
+val win10_base_tag : ?win10_revision:win10_lcu -> win10_docker_base_image -> win_all -> string * string
 (** [win10_base_tag base_image release] will return a tuple of Windows
    container base image and tag for which the base image of a Windows
    base image can be found (e.g.
@@ -186,7 +208,7 @@ val win10_release_to_string : win10_release -> string
 (** [win10_release_to_string update] converts a Windows 10 version name to
    string. *)
 
-val win10_release_of_string : string -> win10_release option
+val win10_release_of_string : string -> win_all option
 (** [win10_release_of_string] converts a Windows 10 version name as
    string to its internal representation. Ignores any KB number. *)
 
@@ -210,7 +232,7 @@ val distro_supported_on : Ocaml_version.arch -> Ocaml_version.t -> t -> bool
 type win10_release_status = [ `Deprecated | `Active ]
 (** Windows 10 release status. *)
 
-val win10_release_status : win10_release -> win10_release_status
+val win10_release_status : win_all -> win10_release_status
 (* [win10_release_status v channel] returns the Microsoft support
   status of the specified Windows 10 release.
   @see <https://en.wikipedia.org/wiki/Windows_10_version_history#Channels> *)

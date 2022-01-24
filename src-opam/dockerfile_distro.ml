@@ -20,9 +20,12 @@ open Astring
 open Sexplib.Conv
 
 type win10_release = [
-  | `V1507 | `Ltsc2015 | `V1511 | `V1607 | `Ltsc2016 | `V1703 | `V1709
-  | `V1803 | `V1809 | `Ltsc2019 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1
-  | `Ltsc2022
+  | `V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809
+  | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2
+] [@@deriving sexp]
+
+type win10_ltsc = [
+  `Ltsc2015 | `Ltsc2016 | `Ltsc2019 | `Ltsc2022
 ] [@@deriving sexp]
 
 type win10_lcu = [
@@ -30,61 +33,63 @@ type win10_lcu = [
   | `LCU20220111 | `LCU20211214 | `LCU20211109 | `LCU20211012 | `LCU20210914 | `LCU20210810 | `LCU20210713 | `LCU20210608
 ] [@@deriving sexp]
 
+type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
+
 let win10_current_lcu = `LCU20220111
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
 let win10_lcus : ('a * int * win10_release list) list = [
 
-  `LCU20220111, 5009555, [`Ltsc2022];
+  `LCU20220111, 5009555, [`V21H2];
   `LCU20220111, 5009543, [`V20H2; `V21H1];
   `LCU20220111, 5009545, [`V1909];
-  `LCU20220111, 5009557, [`V1809; `Ltsc2019];
-  `LCU20220111, 5009546, [`V1607; `Ltsc2016];
-  `LCU20220111, 5009585, [`V1507; `Ltsc2015];
+  `LCU20220111, 5009557, [`V1809];
+  `LCU20220111, 5009546, [`V1607];
+  `LCU20220111, 5009585, [`V1507];
 
-  `LCU20211214, 5008223, [`Ltsc2022];
+  `LCU20211214, 5008223, [`V21H2];
   `LCU20211214, 5008212, [`V2004; `V20H2; `V21H1];
   `LCU20211214, 5008206, [`V1909];
-  `LCU20211214, 5008218, [`V1809; `Ltsc2019];
-  `LCU20211214, 5008207, [`V1607; `Ltsc2016];
-  `LCU20211214, 5008230, [`V1507; `Ltsc2015];
+  `LCU20211214, 5008218, [`V1809];
+  `LCU20211214, 5008207, [`V1607];
+  `LCU20211214, 5008230, [`V1507];
 
-  `LCU20211109, 5007205, [`Ltsc2022];
+  `LCU20211109, 5007205, [`V21H2];
   `LCU20211109, 5007186, [`V2004; `V20H2; `V21H1];
   `LCU20211109, 5007189, [`V1909];
-  `LCU20211109, 5007206, [`V1809; `Ltsc2019];
-  `LCU20211109, 5007192, [`V1607; `Ltsc2016];
-  `LCU20211109, 5007207, [`V1507; `Ltsc2015];
+  `LCU20211109, 5007206, [`V1809];
+  `LCU20211109, 5007192, [`V1607];
+  `LCU20211109, 5007207, [`V1507];
 
-  `LCU20211012, 5006699, [`Ltsc2022];
+  `LCU20211012, 5006699, [`V21H2];
   `LCU20211012, 5006670, [`V2004; `V20H2; `V21H1];
   `LCU20211012, 5006667, [`V1909];
-  `LCU20211012, 5006672, [`V1809; `Ltsc2019];
-  `LCU20211012, 5006669, [`V1607; `Ltsc2016];
-  `LCU20211012, 5006675, [`V1507; `Ltsc2015];
-  `LCU20210914, 5005575, [`Ltsc2022];
+  `LCU20211012, 5006672, [`V1809];
+  `LCU20211012, 5006669, [`V1607];
+  `LCU20211012, 5006675, [`V1507];
+  `LCU20210914, 5005575, [`V21H2];
   `LCU20210914, 5005565, [`V2004; `V20H2; `V21H1];
   `LCU20210914, 5005566, [`V1909];
-  `LCU20210914, 5005568, [`V1809; `Ltsc2019];
-  `LCU20210914, 5005573, [`V1607; `Ltsc2016];
-  `LCU20210914, 5005569, [`V1507; `Ltsc2015];
-  `LCU20210810, 5005039, [`Ltsc2022];
+  `LCU20210914, 5005568, [`V1809];
+  `LCU20210914, 5005573, [`V1607];
+  `LCU20210914, 5005569, [`V1507];
+  `LCU20210810, 5005039, [`V21H2];
   `LCU20210810, 5005033, [`V2004; `V20H2; `V21H1];
   `LCU20210810, 5005031, [`V1909];
-  `LCU20210810, 5005030, [`V1809; `Ltsc2019];
-  `LCU20210810, 5005043, [`V1607; `Ltsc2016];
-  `LCU20210810, 5005040, [`V1507; `Ltsc2015];
+  `LCU20210810, 5005030, [`V1809];
+  `LCU20210810, 5005043, [`V1607];
+  `LCU20210810, 5005040, [`V1507];
   `LCU20210713, 5004237, [`V2004; `V20H2; `V21H1];
   `LCU20210713, 5004245, [`V1909];
-  `LCU20210713, 5004244, [`V1809; `Ltsc2019];
-  `LCU20210713, 5004238, [`V1607; `Ltsc2016];
-  `LCU20210713, 5004249, [`V1507; `Ltsc2015];
+  `LCU20210713, 5004244, [`V1809];
+  `LCU20210713, 5004238, [`V1607];
+  `LCU20210713, 5004249, [`V1507];
   `LCU20210608, 5003637, [`V2004; `V20H2; `V21H1];
   `LCU20210608, 5003635, [`V1909];
-  `LCU20210608, 5003646, [`V1809; `Ltsc2019];
-  `LCU20210608, 5003638, [`V1607; `Ltsc2016];
-  `LCU20210608, 5003687, [`V1507; `Ltsc2015];
+  `LCU20210608, 5003646, [`V1809];
+  `LCU20210608, 5003638, [`V1607];
+  `LCU20210608, 5003687, [`V1507];
 ]
 
 let win10_lcu_to_kb : ((win10_lcu * win10_release), int option) Hashtbl.t =
@@ -112,6 +117,19 @@ let win10_kb_number_to_lcu (v:win10_release) kb =
   | lcu -> Some (v, lcu)
   | exception Not_found -> None
 
+type distro = [
+  | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 ]
+  | `Archlinux of [ `Latest ]
+  | `CentOS of [ `V6 | `V7 | `V8 ]
+  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
+  | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `V35 ]
+  | `OracleLinux of [ `V7 | `V8 ]
+  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 ]
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 ]
+  | `Cygwin of win10_release
+  | `Windows of [`Mingw | `Msvc] * win10_release
+] [@@deriving sexp]
+
 type t = [
   | `Alpine of [ `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `Latest ]
   | `Archlinux of [ `Latest ]
@@ -120,9 +138,9 @@ type t = [
   | `Fedora of [ `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `V35 | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `Latest ]
-  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `LTS | `Latest ]
-  | `Cygwin of win10_release
-  | `Windows of [`Mingw | `Msvc] * win10_release
+  | `Ubuntu of [ `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `Latest | `LTS ]
+  | `Cygwin of win_all
+  | `Windows of [`Mingw | `Msvc] * win_all
 ] [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -153,7 +171,7 @@ let personality os_family arch =
 type status = [
   | `Deprecated
   | `Active of [ `Tier1 | `Tier2 | `Tier3 ]
-  | `Alias of t
+  | `Alias
   | `Not_available
 ] [@@deriving sexp]
 
@@ -173,15 +191,23 @@ let distros : t list = [
 let distros =
   let win10_releases =
     [ `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1809;
-      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; `V21H1; `Ltsc2022 ] in
+      `Ltsc2019; `V1903; `V1909; `V2004; `V20H2; `V21H1; `V21H2; `Ltsc2022 ] in
   List.fold_left (fun distros version ->
       `Cygwin version :: `Windows (`Mingw, version) :: `Windows (`Msvc, version) :: distros)
     distros win10_releases
 
 type win10_release_status = [ `Deprecated | `Active ]
 
+let resolve_ltsc v =
+  match v with
+  | `Ltsc2022 -> `V21H2
+  | `Ltsc2019 -> `V1809
+  | `Ltsc2016 -> `V1607
+  | `Ltsc2015 -> `V1507
+  | #win10_release as v -> v
+
 (* https://en.wikipedia.org/wiki/Windows_10_version_history#Channels *)
-let win10_release_status v : win10_release_status = match v with
+let win10_release_status v : win10_release_status = match resolve_ltsc v with
   | `V1507 -> `Deprecated | `Ltsc2015 -> `Active
   | `V1511 -> `Deprecated
   | `V1607 -> `Deprecated | `Ltsc2016 -> `Active
@@ -193,67 +219,81 @@ let win10_release_status v : win10_release_status = match v with
   | `V1909 -> `Deprecated
   | `V2004 -> `Deprecated
   | `V20H2
-  | `V21H1 | `Ltsc2022 -> `Active
+  | `V21H1 | `V21H2 | `Ltsc2022 -> `Active
 
-let win10_latest_release = `V21H1
+let win10_latest_release = `V21H2
 
 type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 
 (* https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/base-image-lifecycle *)
 let win10_docker_status (base : win10_docker_base_image) v : status =
   match base, v with
-  | _, `Ltsc2022
-  | _, `V20H2 -> `Active `Tier3
+  | _, (`V20H2 | `V21H2) -> `Active `Tier3
   | _, `V2004
   | _, `V1909
   | _, `V1903 -> `Deprecated
-  | `ServerCore, (`V1809 | `Ltsc2019)
+  | `ServerCore, `V1809
   | `NanoServer, `V1809
   | `Windows, `V1809 -> `Active `Tier3
   | (`ServerCore | `NanoServer), `V1803
   | (`ServerCore | `NanoServer), `V1709 -> `Deprecated
-  | `ServerCore, (`V1607 | `Ltsc2016) -> `Active `Tier3
+  | `ServerCore, `V1607 -> `Active `Tier3
   | `NanoServer, `V1607 -> `Deprecated
   | _ -> `Not_available
 
-let win10_latest_image = `Ltsc2022
+let win10_latest_image = `V21H2
 
-let distro_status (d:t) : status = match d with
-  | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 |`V3_13) -> `Deprecated
-  | `Alpine `V3_14 -> `Active `Tier2
-  | `Alpine `V3_15 -> `Active `Tier1
-  | `Alpine `Latest -> `Alias (`Alpine `V3_15)
-  | `Archlinux `Latest -> `Active `Tier3
-  | `CentOS `V7 -> `Active `Tier3
-  | `CentOS (`V6 | `V8) -> `Deprecated
-  | `CentOS `Latest -> `Alias (`CentOS `V7)
-  | `Debian (`V7|`V8|`V9) -> `Deprecated
-  | `Debian `V10 -> `Active `Tier2
-  | `Debian `V11 -> `Active `Tier1
-  | `Debian `Stable -> `Alias (`Debian `V11)
-  | `Debian `Testing -> `Active `Tier3
-  | `Debian `Unstable -> `Active `Tier3
-  | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33) -> `Deprecated
-  | `Fedora (`V34 | `V35) -> `Active `Tier2
-  | `Fedora `Latest -> `Alias (`Fedora `V35)
-  | `OracleLinux (`V7|`V8) -> `Active `Tier3
-  | `OracleLinux `Latest -> `Alias (`OracleLinux `V8)
-  | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2) -> `Deprecated
-  | `OpenSUSE `V15_3 -> `Active `Tier2
-  | `OpenSUSE `Latest -> `Alias (`OpenSUSE `V15_3)
-  | `Ubuntu (`V18_04) -> `Active `Tier3
-  | `Ubuntu (`V20_04 | `V21_10 | `V22_04) -> `Active `Tier2
-  | `Ubuntu (`V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04) -> `Deprecated
-  | `Ubuntu `LTS -> `Alias (`Ubuntu `V20_04)
-  | `Ubuntu `Latest -> `Alias (`Ubuntu `V21_10)
-  | `Cygwin `Ltsc2019 -> `Alias (`Cygwin `V1809)
-  | `Cygwin `Ltsc2016 -> `Alias (`Cygwin `V1607)
-  | `Cygwin `Ltsc2015 -> `Alias (`Cygwin `V1507)
-  | `Cygwin v -> win10_docker_status `ServerCore v
-  | `Windows (cc, `Ltsc2019) -> `Alias (`Windows (cc, `V1809))
-  | `Windows (cc, `Ltsc2016) -> `Alias (`Windows (cc, `V1607))
-  | `Windows (cc, `Ltsc2015) -> `Alias (`Windows (cc, `V1507))
-  | `Windows (_, v) -> win10_docker_status `Windows v
+let resolve_alias (d:t) : distro =
+  match d with
+  | `Alpine `Latest -> `Alpine `V3_15
+  | `CentOS `Latest -> `CentOS `V7
+  | `Debian `Stable -> `Debian `V11
+  | `Fedora `Latest -> `Fedora `V35
+  | `OracleLinux `Latest -> `OracleLinux `V8
+  | `OpenSUSE `Latest -> `OpenSUSE `V15_3
+  | `Ubuntu `Latest -> `Ubuntu `V21_10
+  | `Ubuntu `LTS -> `Ubuntu `V20_04
+  | `Cygwin (#win10_ltsc as v) -> `Cygwin (resolve_ltsc v)
+  | `Windows (cc, (#win10_ltsc as v)) -> `Windows (cc, resolve_ltsc v)
+  | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15)
+  | `Archlinux `Latest
+  | `CentOS (`V6 | `V7 | `V8)
+  | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `Testing | `Unstable)
+  | `Fedora (`V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33 | `V34 | `V35)
+  | `OracleLinux (`V7 | `V8)
+  | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3)
+  | `Ubuntu (`V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04)
+  | `Cygwin (`V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2)
+  | `Windows (_, (`V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809 | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2)) as d ->
+      d
+
+let distro_status (d:t) : status =
+  let resolved = resolve_alias d in
+  if (resolved : distro :> t) <> d then
+    `Alias
+  else
+    match resolve_alias d with
+    | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 |`V3_13) -> `Deprecated
+    | `Alpine `V3_14 -> `Active `Tier2
+    | `Alpine `V3_15 -> `Active `Tier1
+    | `Archlinux `Latest -> `Active `Tier3
+    | `CentOS `V7 -> `Active `Tier3
+    | `CentOS (`V6|`V8) -> `Deprecated
+    | `Debian (`V7|`V8|`V9) -> `Deprecated
+    | `Debian `V10 -> `Active `Tier2
+    | `Debian `V11 -> `Active `Tier1
+    | `Debian `Testing -> `Active `Tier3
+    | `Debian `Unstable -> `Active `Tier3
+    | `Fedora ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30 | `V31 | `V32 | `V33) -> `Deprecated
+    | `Fedora (`V34 | `V35) -> `Active `Tier2
+    | `OracleLinux (`V7|`V8) -> `Active `Tier3
+    | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2) -> `Deprecated
+    | `OpenSUSE `V15_3 -> `Active `Tier2
+    | `Ubuntu (`V18_04) -> `Active `Tier3
+    | `Ubuntu (`V20_04 | `V21_10 | `V22_04) -> `Active `Tier2
+    | `Ubuntu (`V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04 | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04) -> `Deprecated
+    | `Cygwin v -> win10_docker_status `ServerCore v
+    | `Windows (_, v) -> win10_docker_status `Windows v
 
 let latest_distros =
   [ `Alpine `Latest; `Archlinux `Latest; `CentOS `Latest;
@@ -268,11 +308,6 @@ let latest_distros =
   ]
 
 let master_distro = `Debian `Stable
-
-let resolve_alias d =
-  match distro_status d with
-  | `Alias x -> x
-  | _ -> d
 
 module OV = Ocaml_version
 
@@ -384,13 +419,9 @@ let builtin_ocaml_of_distro (d:t) : string option =
   |`OpenSUSE `V15_3 -> Some "4.05.0"
   |`OracleLinux `V7 -> Some "4.01.0"
   |`OracleLinux `V8 -> Some "4.07.0"
-  |`Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)
-  |`Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
   |`Cygwin _ -> None
   |`Windows _ -> None
-  |`Alpine `Latest |`CentOS `Latest |`OracleLinux `Latest
-  |`OpenSUSE `Latest |`Ubuntu `LTS | `Ubuntu `Latest
-  |`Debian (`Testing | `Unstable | `Stable) |`Fedora `Latest -> assert false
+  |`Debian (`Testing | `Unstable) -> assert false
 
 let win10_release_to_string = function
   | `V1507 -> "1507" | `Ltsc2015 -> "ltsc2015" | `V1511 -> "1511"
@@ -398,9 +429,9 @@ let win10_release_to_string = function
   | `V1709 -> "1709" | `V1803 -> "1803" | `V1809 -> "1809"
   | `Ltsc2019 -> "ltsc2019" | `V1903 -> "1903" | `V1909 -> "1909"
   | `V2004 -> "2004" | `V20H2 -> "20H2" | `V21H1 -> "21H1"
-  | `Ltsc2022 -> "ltsc2022"
+  | `Ltsc2022 -> "ltsc2022" | `V21H2 -> "21H2"
 
-let win10_release_of_string v : win10_release option =
+let win10_release_of_string v : win_all option =
   let v = match String.cut ~sep:"-KB" v with
   | Some (v, kb) -> if String.for_all Char.Ascii.is_digit kb then v else ""
   | None -> v
@@ -418,7 +449,7 @@ let rec win10_revision_to_string = function
 | (v, None) -> win10_release_to_string v
 | (v, Some `LCU) -> win10_revision_to_string (v, Some win10_current_lcu)
 | (v, Some lcu) ->
-    match win10_lcu_kb_number v lcu with
+    match win10_lcu_kb_number (resolve_ltsc v) lcu with
     | Some kb -> Printf.sprintf "%s-KB%d" (win10_release_to_string v) kb
     | None -> Fmt.invalid_arg "No KB for this Win10 %s revision" (win10_release_to_string v)
 
@@ -430,10 +461,13 @@ let win10_revision_of_string v =
     | _ ->
         (v, None)
   in
-  match win10_release_of_string v, lcu with
-  | None, _ -> None
-  | Some v, None -> Some (v, None)
-  | Some v, Some lcu -> win10_kb_number_to_lcu v lcu
+  match win10_release_of_string v with
+  | None -> None
+  | Some v ->
+      let v = resolve_ltsc v in
+      match lcu with
+      | None -> Some (v, None)
+      | Some lcu -> win10_kb_number_to_lcu v lcu
 
 (* The Docker tag for this distro *)
 let tag_of_distro (d:t) = match d with
@@ -602,80 +636,79 @@ let distro_of_tag x : t option =
      win10_of_tag "windows-msvc-" s (fun v -> `Windows (`Msvc, v))
   |_ -> None
 
-let rec human_readable_string_of_distro (d:t) =
-  let alias () = human_readable_string_of_distro (resolve_alias d) in
-  match d with
-  |`Ubuntu `V12_04 -> "Ubuntu 12.04"
-  |`Ubuntu `V14_04 -> "Ubuntu 14.04"
-  |`Ubuntu `V15_04 -> "Ubuntu 15.04"
-  |`Ubuntu `V15_10 -> "Ubuntu 15.10"
-  |`Ubuntu `V16_04 -> "Ubuntu 16.04"
-  |`Ubuntu `V16_10 -> "Ubuntu 16.10"
-  |`Ubuntu `V17_04 -> "Ubuntu 17.04"
-  |`Ubuntu `V17_10 -> "Ubuntu 17.10"
-  |`Ubuntu `V18_04 -> "Ubuntu 18.04"
-  |`Ubuntu `V18_10 -> "Ubuntu 18.10"
-  |`Ubuntu `V19_04 -> "Ubuntu 19.04"
-  |`Ubuntu `V19_10 -> "Ubuntu 19.10"
-  |`Ubuntu `V20_04 -> "Ubuntu 20.04"
-  |`Ubuntu `V20_10 -> "Ubuntu 20.10"
-  |`Ubuntu `V21_04 -> "Ubuntu 21.04"
-  |`Ubuntu `V21_10 -> "Ubuntu 21.10"
-  |`Ubuntu `V22_04 -> "Ubuntu 22.04"
-  |`Debian `Stable -> "Debian Stable"
-  |`Debian `Unstable -> "Debian Unstable"
-  |`Debian `Testing -> "Debian Testing"
-  |`Debian `V11 -> "Debian 11 (Bullseye)"
-  |`Debian `V10 -> "Debian 10 (Buster)"
-  |`Debian `V9 -> "Debian 9 (Stretch)"
-  |`Debian `V8 -> "Debian 8 (Jessie)"
-  |`Debian `V7 -> "Debian 7 (Wheezy)"
-  |`CentOS `V6 -> "CentOS 6"
-  |`CentOS `V7 -> "CentOS 7"
-  |`CentOS `V8 -> "CentOS 8"
-  |`Fedora `V21 -> "Fedora 21"
-  |`Fedora `V22 -> "Fedora 22"
-  |`Fedora `V23 -> "Fedora 23"
-  |`Fedora `V24 -> "Fedora 24"
-  |`Fedora `V25 -> "Fedora 25"
-  |`Fedora `V26 -> "Fedora 26"
-  |`Fedora `V27 -> "Fedora 27"
-  |`Fedora `V28 -> "Fedora 28"
-  |`Fedora `V29 -> "Fedora 29"
-  |`Fedora `V30 -> "Fedora 30"
-  |`Fedora `V31 -> "Fedora 31"
-  |`Fedora `V32 -> "Fedora 32"
-  |`Fedora `V33 -> "Fedora 33"
-  |`Fedora `V34 -> "Fedora 34"
-  |`Fedora `V35 -> "Fedora 35"
-  |`OracleLinux `V7 -> "OracleLinux 7"
-  |`OracleLinux `V8 -> "OracleLinux 8"
-  |`Alpine `V3_3 -> "Alpine 3.3"
-  |`Alpine `V3_4 -> "Alpine 3.4"
-  |`Alpine `V3_5 -> "Alpine 3.5"
-  |`Alpine `V3_6 -> "Alpine 3.6"
-  |`Alpine `V3_7 -> "Alpine 3.7"
-  |`Alpine `V3_8 -> "Alpine 3.8"
-  |`Alpine `V3_9 -> "Alpine 3.9"
-  |`Alpine `V3_10 -> "Alpine 3.10"
-  |`Alpine `V3_11 -> "Alpine 3.11"
-  |`Alpine `V3_12 -> "Alpine 3.12"
-  |`Alpine `V3_13 -> "Alpine 3.13"
-  |`Alpine `V3_14 -> "Alpine 3.14"
-  |`Alpine `V3_15 -> "Alpine 3.15"
-  |`Archlinux `Latest -> "Archlinux"
-  |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
-  |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
-  |`OpenSUSE `V42_3 -> "OpenSUSE 42.3"
-  |`OpenSUSE `V15_0 -> "OpenSUSE 15.0 (Leap)"
-  |`OpenSUSE `V15_1 -> "OpenSUSE 15.1 (Leap)"
-  |`OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
-  |`OpenSUSE `V15_3 -> "OpenSUSE 15.3 (Leap)"
-  |`Cygwin v -> "Cygwin " ^ (win10_release_to_string v)
-  |`Windows (`Mingw, v) -> "Windows mingw " ^ (win10_release_to_string v)
-  |`Windows (`Msvc, v) -> "Windows mingw " ^ (win10_release_to_string v)
-  |`Alpine `Latest | `Ubuntu `Latest | `Ubuntu `LTS | `CentOS `Latest | `Fedora `Latest
-  |`OracleLinux `Latest | `OpenSUSE `Latest -> alias ()
+let human_readable_string_of_distro (d:t) =
+  if d = `Debian `Stable then
+    "Debian Stable"
+  else
+    match resolve_alias d with
+    |`Ubuntu `V12_04 -> "Ubuntu 12.04"
+    |`Ubuntu `V14_04 -> "Ubuntu 14.04"
+    |`Ubuntu `V15_04 -> "Ubuntu 15.04"
+    |`Ubuntu `V15_10 -> "Ubuntu 15.10"
+    |`Ubuntu `V16_04 -> "Ubuntu 16.04"
+    |`Ubuntu `V16_10 -> "Ubuntu 16.10"
+    |`Ubuntu `V17_04 -> "Ubuntu 17.04"
+    |`Ubuntu `V17_10 -> "Ubuntu 17.10"
+    |`Ubuntu `V18_04 -> "Ubuntu 18.04"
+    |`Ubuntu `V18_10 -> "Ubuntu 18.10"
+    |`Ubuntu `V19_04 -> "Ubuntu 19.04"
+    |`Ubuntu `V19_10 -> "Ubuntu 19.10"
+    |`Ubuntu `V20_04 -> "Ubuntu 20.04"
+    |`Ubuntu `V20_10 -> "Ubuntu 20.10"
+    |`Ubuntu `V21_04 -> "Ubuntu 21.04"
+    |`Ubuntu `V21_10 -> "Ubuntu 21.10"
+    |`Ubuntu `V22_04 -> "Ubuntu 22.04"
+    |`Debian `Unstable -> "Debian Unstable"
+    |`Debian `Testing -> "Debian Testing"
+    |`Debian `V11 -> "Debian 11 (Bullseye)"
+    |`Debian `V10 -> "Debian 10 (Buster)"
+    |`Debian `V9 -> "Debian 9 (Stretch)"
+    |`Debian `V8 -> "Debian 8 (Jessie)"
+    |`Debian `V7 -> "Debian 7 (Wheezy)"
+    |`CentOS `V6 -> "CentOS 6"
+    |`CentOS `V7 -> "CentOS 7"
+    |`CentOS `V8 -> "CentOS 8"
+    |`Fedora `V21 -> "Fedora 21"
+    |`Fedora `V22 -> "Fedora 22"
+    |`Fedora `V23 -> "Fedora 23"
+    |`Fedora `V24 -> "Fedora 24"
+    |`Fedora `V25 -> "Fedora 25"
+    |`Fedora `V26 -> "Fedora 26"
+    |`Fedora `V27 -> "Fedora 27"
+    |`Fedora `V28 -> "Fedora 28"
+    |`Fedora `V29 -> "Fedora 29"
+    |`Fedora `V30 -> "Fedora 30"
+    |`Fedora `V31 -> "Fedora 31"
+    |`Fedora `V32 -> "Fedora 32"
+    |`Fedora `V33 -> "Fedora 33"
+    |`Fedora `V34 -> "Fedora 34"
+    |`Fedora `V35 -> "Fedora 35"
+    |`OracleLinux `V7 -> "OracleLinux 7"
+    |`OracleLinux `V8 -> "OracleLinux 8"
+    |`Alpine `V3_3 -> "Alpine 3.3"
+    |`Alpine `V3_4 -> "Alpine 3.4"
+    |`Alpine `V3_5 -> "Alpine 3.5"
+    |`Alpine `V3_6 -> "Alpine 3.6"
+    |`Alpine `V3_7 -> "Alpine 3.7"
+    |`Alpine `V3_8 -> "Alpine 3.8"
+    |`Alpine `V3_9 -> "Alpine 3.9"
+    |`Alpine `V3_10 -> "Alpine 3.10"
+    |`Alpine `V3_11 -> "Alpine 3.11"
+    |`Alpine `V3_12 -> "Alpine 3.12"
+    |`Alpine `V3_13 -> "Alpine 3.13"
+    |`Alpine `V3_14 -> "Alpine 3.14"
+    |`Alpine `V3_15 -> "Alpine 3.15"
+    |`Archlinux `Latest -> "Archlinux"
+    |`OpenSUSE `V42_1 -> "OpenSUSE 42.1"
+    |`OpenSUSE `V42_2 -> "OpenSUSE 42.2"
+    |`OpenSUSE `V42_3 -> "OpenSUSE 42.3"
+    |`OpenSUSE `V15_0 -> "OpenSUSE 15.0 (Leap)"
+    |`OpenSUSE `V15_1 -> "OpenSUSE 15.1 (Leap)"
+    |`OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
+    |`OpenSUSE `V15_3 -> "OpenSUSE 15.3 (Leap)"
+    |`Cygwin v -> "Cygwin " ^ (win10_release_to_string v)
+    |`Windows (`Mingw, v) -> "Windows mingw " ^ (win10_release_to_string v)
+    |`Windows (`Msvc, v) -> "Windows mingw " ^ (win10_release_to_string v)
 
 let human_readable_short_string_of_distro (t:t) =
   match t with
@@ -721,11 +754,11 @@ let package_manager (t:t) =
   |`Windows _ -> `Windows
 
 let win10_base_tag ?win10_revision (base:win10_docker_base_image) v =
-  let base = match base with
-    | `NanoServer -> "mcr.microsoft.com/windows/nanoserver"
-    | `ServerCore -> "mcr.microsoft.com/windows/servercore"
-    | `Windows when v = `Ltsc2022 -> "mcr.microsoft.com/windows/server"
-    | `Windows -> "mcr.microsoft.com/windows" in
+  let base, v = match base, resolve_ltsc v with
+    | `NanoServer, _ -> "mcr.microsoft.com/windows/nanoserver", v
+    | `ServerCore, _ -> "mcr.microsoft.com/windows/servercore", v
+    | `Windows, `V21H2 -> "mcr.microsoft.com/windows/server", `Ltsc2022
+    | `Windows, _ -> "mcr.microsoft.com/windows", v in
   base, win10_revision_to_string (v, win10_revision)
 
 let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
@@ -746,7 +779,6 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V3_13 -> "3.13"
         | `V3_14 -> "3.14"
         | `V3_15 -> "3.15"
-        | `Latest -> assert false
       in
       match arch with
       | `I386 -> "i386/alpine", tag
@@ -764,7 +796,6 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V11 -> "11"
         | `Testing -> "testing"
         | `Unstable -> "unstable"
-        | `Stable -> assert false
       in
       match arch with
       | `I386 -> "i386/debian", tag
@@ -791,11 +822,10 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V21_04 -> "hirsute"
         | `V21_10 -> "impish"
         | `V22_04 -> "jammy"
-        | `Latest | `LTS -> assert false
       in
       "ubuntu", tag
   | `CentOS v ->
-      let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" | _ -> assert false in
+      let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" in
       "centos", tag
   | `Fedora v ->
       let tag =
@@ -815,15 +845,13 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V33 -> "33"
         | `V34 -> "34"
         | `V35 -> "35"
-        | `Latest -> assert false
       in
       "fedora", tag
   | `OracleLinux v ->
       let tag =
         match v with
         | `V7 -> "7"
-        | `V8 -> "8"
-        | _ -> assert false in
+        | `V8 -> "8" in
       "oraclelinux", tag
   | `OpenSUSE v ->
       let tag =
@@ -835,13 +863,10 @@ let base_distro_tag ?win10_revision ?(arch=`X86_64) d =
         | `V15_1 -> "15.1"
         | `V15_2 -> "15.2"
         | `V15_3 -> "15.3"
-        | `Latest -> assert false
       in
       "opensuse/leap", tag
-  | `Cygwin (`Ltsc2015 | `Ltsc2016 | `Ltsc2019) -> assert false
-  | `Cygwin v -> win10_base_tag ?win10_revision `ServerCore v
-  | `Windows (_, (`Ltsc2015 | `Ltsc2016 | `Ltsc2019)) -> assert false
-  | `Windows (_, v) -> win10_base_tag ?win10_revision `Windows v
+  | `Cygwin v -> win10_base_tag ?win10_revision `ServerCore (v : win10_release :> [> win10_release])
+  | `Windows (_, v) -> win10_base_tag ?win10_revision `Windows (v : win10_release :> [> win10_release])
 
 let compare a b =
   String.compare (human_readable_string_of_distro a) (human_readable_string_of_distro b)

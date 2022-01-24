@@ -1,6 +1,12 @@
-unreleased
-----------
+v8.0.0 unreleased
+-----------------
 
+- Change types for aliasing of distributions. The return type of
+  `Dockerfile_distro.resolve_alias` is guaranteed not to include an alias but
+  may require coercing back to `Dockerfile_distro.t` in some code. Similarly
+  affects uses of some of the Windows functions in `Dockerfile_distro`
+  (@dra27 #85)
+- Move CentOS 8 to deprecated and change CentOS latest to V7! (@kit-ty-kate #88)
 - Add OCaml 5.00 support (@dra27 #84)
 - Add Alpine 3.15 (3.14 is now tier 2 and 3.13 is deprecated) (@talex5)
 - Switch all GitHub access from git:// to https:// in advance of insecure protocol
