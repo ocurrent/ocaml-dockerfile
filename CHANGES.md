@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add OCaml 5.00 support (@dra27 #84)
 - Add Alpine 3.15 (3.14 is now tier 2 and 3.13 is deprecated) (@talex5)
 - Switch all GitHub access from git:// to https:// in advance of insecure protocol
   sunset (@kit-ty-kate #73)
