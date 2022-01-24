@@ -1,6 +1,8 @@
 v8.0.0 unreleased
 -----------------
 
+- Only compile bubblewrap from sources if the OS either doesn't distribute it or
+  it's too old (@dra27 #85)
 - Add `Dockerfile_distro.bubblewrap_version` to return the version of bubblewrap
   package in a given release (@dra27 #85)
 - Change types for aliasing of distributions. The return type of
