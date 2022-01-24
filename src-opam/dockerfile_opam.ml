@@ -30,25 +30,24 @@ let personality ?arch distro =
 
 let run_as_opam fmt = Linux.run_as_user "opam" fmt
 
-let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
-  run "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
-  Linux.run_sh
-    "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
-    (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch @@
+let maybe_link_opam add_default_link prefix branch =
   if add_default_link then
     run "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
   else empty
 
-(* Can't satisfy the typechecker... *)
-let install_opam_from_source_cygwin ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
-  let open Dockerfile_windows.Cygwin in
-  run_sh "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
-  run_sh
-    "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
-    (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch
-  @@ if add_default_link then
-       run_sh "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
-     else empty
+(* Build opam in a separate worktree from an already cloned opam *)
+let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
+  run
+    "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && \
+     cd ../opam-build-%s && git checkout %s && \
+     ln -s ../opam/src_ext/archives src_ext/archives && \
+     env PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" ./configure --enable-cold-check%s && \
+     env PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" make lib-ext all && \
+     mkdir -p %s/bin && cp /tmp/opam-build-%s/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && \
+     rm -rf /tmp/opam-build-%s"
+    branch branch hash (if enable_0install_solver then " --with-0install-solver" else "")
+    prefix branch prefix branch prefix branch branch @@
+  maybe_link_opam add_default_link prefix branch
 
 let bubblewrap_minimum = (0, 4, 1)
 
@@ -151,6 +150,7 @@ let create_opam_branches opam_hashes =
     opam_2_1_hash;
     opam_master_hash;
   } = opam_hashes in
+  opam_master_hash,
   [
     {
       branch = "2.0";
@@ -175,11 +175,16 @@ let create_opam_branches opam_hashes =
     };
   ]
 
-let install_opams ?prefix f opam_branches =
+let install_opams ?prefix opam_master_hash opam_branches =
+  run "git clone https://github.com/ocaml/opam /tmp/opam && \
+       cd /tmp/opam && cp -P -R -p . ../opam-sources && \
+       git checkout %s && \
+       env MAKE='make -j' shell/bootstrap-ocaml.sh && \
+       make -C src_ext cache-archives" opam_master_hash @@
   List.fold_left (fun acc {branch; hash; enable_0install_solver; _} ->
       let add_default_link = Some false in
       let enable_0install_solver = Some enable_0install_solver in
-      acc @@ f ?add_default_link ?prefix ?enable_0install_solver ~branch ~hash ()
+      acc @@ install_opam_from_source ?add_default_link ?prefix ?enable_0install_solver ~branch ~hash ()
     ) empty opam_branches
 
 let copy_opams ~src ~dst opam_branches =
@@ -191,13 +196,13 @@ let copy_opams ~src ~dst opam_branches =
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
-  let opam_branches = create_opam_branches opam_hashes in
+  let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "apk") :: labels)
   @@ Linux.Apk.install "build-base bzip2 git tar curl ca-certificates openssl"
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
-  @@ install_opams install_opam_from_source opam_branches
+  @@ install_opams opam_master_hash opam_branches
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ Linux.Apk.add_repository ~tag:"edge" "https://dl-cdn.alpinelinux.org/alpine/edge/main"
@@ -211,13 +216,13 @@ let apk_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
 
 (* Debian based Dockerfile *)
 let apt_opam2 ?(labels=[]) ?arch distro ~opam_hashes () =
-  let opam_branches = create_opam_branches opam_hashes in
+  let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
-  @@ install_opams install_opam_from_source opam_branches
+  @@ install_opams opam_master_hash opam_branches
   @@ from ~tag img
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ bubblewrap_and_dev_packages distro
@@ -235,7 +240,7 @@ let apt_opam2 ?(labels=[]) ?arch distro ~opam_hashes () =
    [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
    This is needed to get most of *-devel packages frequently used by opam packages. *)
 let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashes distro () =
-  let opam_branches = create_opam_branches opam_hashes in
+  let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
   let workaround =
     if yum_workaround then
@@ -250,7 +255,7 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashe
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
-  @@ install_opams ~prefix:"/usr" install_opam_from_source opam_branches
+  @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
   @@ from ~tag img
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
@@ -263,16 +268,15 @@ let yum_opam2 ?(labels= []) ?arch ~yum_workaround ~enable_powertools ~opam_hashe
   @@ Linux.RPM.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-
 (* Zypper based Dockerfile *)
 let zypper_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
-  let opam_branches = create_opam_branches opam_hashes in
+  let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "zypper") :: labels)
   @@ Linux.Zypper.dev_packages ()
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
-  @@ install_opams ~prefix:"/usr" install_opam_from_source opam_branches
+  @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
   @@ from ~tag img
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
@@ -281,13 +285,13 @@ let zypper_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
 
 (* Pacman based Dockerfile *)
 let pacman_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
-  let opam_branches = create_opam_branches opam_hashes in
+  let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
   header ?arch distro @@ label (("distro_style", "pacman") :: labels)
   @@ Linux.Pacman.dev_packages ()
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
-  @@ install_opams install_opam_from_source opam_branches
+  @@ install_opams opam_master_hash opam_branches
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ bubblewrap_and_dev_packages distro
@@ -297,14 +301,14 @@ let pacman_opam2 ?(labels=[]) ?arch ~opam_hashes distro () =
 
 (* Cygwin based Dockerfile *)
 let cygwin_opam2 ?win10_revision ?(labels=[]) ?arch ~opam_hashes distro () =
-  let opam_branches = create_opam_branches opam_hashes in
+  let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
   let cyg = Windows.Cygwin.{ default with args = "--allow-test-packages" :: default.args } in
   header ?win10_revision ?arch distro @@ label (("distro_style", "cygwin") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.Cygwin.(setup ~cyg ~extra:(cygwin_packages ()) ())
   @@ Windows.Cygwin.Git.init ()
-  @@ install_opams install_opam_from_source_cygwin opam_branches
+  @@ install_opams opam_master_hash opam_branches
   @@ run "strip /usr/local/bin/opam*"
   @@ from ~tag img
   @@ copy_opams ~src:"/usr/local/bin" ~dst:"/usr/bin" opam_branches
@@ -470,3 +474,11 @@ let multiarch_manifest ~target ~platforms =
     |> String.concat "\n"
   in
   Printf.sprintf "image: %s\nmanifests:\n%s" target ms
+
+(* Clone and build opam from source (legacy function) *)
+let install_opam_from_source ?(add_default_link=true) ?(prefix= "/usr/local") ?(enable_0install_solver=false) ~branch ~hash () =
+  run "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git checkout %s" hash @@
+  Linux.run_sh
+    "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
+    (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver" else "") prefix prefix branch prefix branch @@
+  maybe_link_opam add_default_link prefix branch

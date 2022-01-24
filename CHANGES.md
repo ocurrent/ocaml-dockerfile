@@ -1,6 +1,11 @@
 v8.0.0 unreleased
 -----------------
 
+- When compiling opam, build OCaml once using `make compiler` on the master
+  branch of opam and then share this compiler with the release branches.
+  Simultaneously circumvents the `sigaltstack` problems with OCaml < 4.13 on new
+  releases, improves the build time of opam and reduces the carbon footprint of
+  the base image builder! (@dra27 #85)
 - Only compile bubblewrap from sources if the OS either doesn't distribute it or
   it's too old (@dra27 #85)
 - Add `Dockerfile_distro.bubblewrap_version` to return the version of bubblewrap
