@@ -1,6 +1,8 @@
 v8.0.0 unreleased
 -----------------
 
+- Add `Dockerfile_distro.bubblewrap_version` to return the version of bubblewrap
+  package in a given release (@dra27 #85)
 - Change types for aliasing of distributions. The return type of
   `Dockerfile_distro.resolve_alias` is guaranteed not to include an alias but
   may require coercing back to `Dockerfile_distro.t` in some code. Similarly

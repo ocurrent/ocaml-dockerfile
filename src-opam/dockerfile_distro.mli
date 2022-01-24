@@ -164,6 +164,10 @@ val package_manager : t -> package_manager
  by that distribution.  Many derived distributions (such as OracleLinux)
  share the same package manager from a base distribution (such as CentOS). *)
 
+val bubblewrap_version : t -> (int * int * int) option
+(** [bubblewrap_version t] returns the version of bubblewrap available on that
+ distribution. *)
+
 (** {2 Docker Hub addresses} *)
 
 val tag_of_distro : t -> string

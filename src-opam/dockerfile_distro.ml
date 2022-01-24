@@ -753,6 +753,75 @@ let package_manager (t:t) =
   |`Cygwin _ -> `Cygwin
   |`Windows _ -> `Windows
 
+let rec bubblewrap_version (t:t) =
+  match resolve_alias t with
+  | `Ubuntu `V12_04 -> None
+  | `Ubuntu `V14_04 -> None
+  | `Ubuntu `V15_04 -> None
+  | `Ubuntu `V15_10 -> None
+  | `Ubuntu `V16_04 -> None
+  | `Ubuntu `V16_10 -> None (* Not actually checked *)
+  | `Ubuntu `V17_04 -> None (* Not actually checked *)
+  | `Ubuntu `V17_10 -> None (* Not actually checked *)
+  | `Ubuntu `V18_04 -> Some (0, 2, 1)
+  | `Ubuntu `V18_10 -> Some (0, 2, 1) (* Not actually checked *)
+  | `Ubuntu `V19_04 -> Some (0, 2, 1) (* Not actually checked *)
+  | `Ubuntu `V19_10 -> Some (0, 2, 1) (* Not actually checked *)
+  | `Ubuntu `V20_04 -> Some (0, 4, 0)
+  | `Ubuntu `V20_10 -> Some (0, 4, 0) (* Not actually checked *)
+  | `Ubuntu `V21_04 -> Some (0, 4, 1)
+  | `Ubuntu `V21_10 -> Some (0, 4, 1)
+  | `Ubuntu `V22_04 -> Some (0, 5, 0)
+  | `Debian `V7 -> None (* Not actually checked *)
+  | `Debian `V8 -> None (* Not actually checked *)
+  | `Debian `V9 -> Some (0, 3, 1)
+  | `Debian `V10 -> Some (0, 3, 1)
+  | `Debian `V11 -> Some (0, 4, 1)
+  | `Debian `Testing ->  Some (0, 5, 0)
+  | `Debian `Unstable -> Some (0, 5, 0)
+  | `CentOS `V6 -> None
+  | `CentOS `V7 -> None
+  | `CentOS `V8 -> Some (0, 4, 0)
+  | `Fedora `V21 -> None (* Not actually checked *)
+  | `Fedora `V22 -> None (* Not actually checked *)
+  | `Fedora `V23 -> None (* Not actually checked *)
+  | `Fedora `V24 -> None (* Not actually checked *)
+  | `Fedora `V25 -> None (* Not actually checked *)
+  | `Fedora `V26 -> Some (0, 2, 0)
+  | `Fedora `V27 -> Some (0, 2, 1)
+  | `Fedora `V28 -> Some (0, 3, 0)
+  | `Fedora `V29 -> Some (0, 3, 1)
+  | `Fedora `V30 -> Some (0, 3, 3)
+  | `Fedora `V31 -> Some (0, 4, 1)
+  | `Fedora `V32 -> Some (0, 4, 1)
+  | `Fedora `V33 -> Some (0, 4, 1)
+  | `Fedora `V34 -> Some (0, 4, 1)
+  | `Fedora `V35 -> Some (0, 5, 0)
+  | `OracleLinux (`V7|`V8 as v) -> bubblewrap_version (`CentOS v)
+  | `Alpine `V3_3 -> None (* Not actually checked *)
+  | `Alpine `V3_4 -> None (* Not actually checked *)
+  | `Alpine `V3_5 -> None (* Not actually checked *)
+  | `Alpine `V3_6 -> None (* Not actually checked *)
+  | `Alpine `V3_7 -> None (* Not actually checked *)
+  | `Alpine `V3_8 -> Some (0, 2, 0)
+  | `Alpine `V3_9 -> Some (0, 3, 1)
+  | `Alpine `V3_10 -> Some (0, 3, 3)
+  | `Alpine `V3_11 -> Some (0, 4, 1)
+  | `Alpine `V3_12 -> Some (0, 4, 1)
+  | `Alpine `V3_13 -> Some (0, 4, 1)
+  | `Alpine `V3_14 -> Some (0, 4, 1)
+  | `Alpine `V3_15 -> Some (0, 5, 0)
+  | `Archlinux `Latest -> Some (0, 5, 0)
+  | `OpenSUSE `V42_1 -> None (* Not actually checked *)
+  | `OpenSUSE `V42_2 -> None (* Not actually checked *)
+  | `OpenSUSE `V42_3 -> None (* Not actually checked *)
+  | `OpenSUSE `V15_0 -> Some (0, 2, 0)
+  | `OpenSUSE `V15_1 -> Some (0, 3, 3)
+  | `OpenSUSE `V15_2 -> Some (0, 4, 1)
+  | `OpenSUSE `V15_3 -> Some (0, 4, 1)
+  | `Cygwin _ -> None
+  | `Windows _ -> None
+
 let win10_base_tag ?win10_revision (base:win10_docker_base_image) v =
   let base, v = match base, resolve_ltsc v with
     | `NanoServer, _ -> "mcr.microsoft.com/windows/nanoserver", v
