@@ -324,7 +324,7 @@ let windows_opam2 ?win10_revision ?winget ?(labels=[]) ?arch distro () =
   @@ Windows.Cygwin.Git.init ()
   @@ Windows.cleanup ()
 
-let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo=true) ?arch ?labels ~opam_hashes d =
+let gen_opam2_distro ?win10_revision ?winget ?arch ?labels ~opam_hashes d =
   let fn = match D.package_manager d with
   | `Apk -> apk_opam2 ?labels ?arch ~opam_hashes d ()
   | `Apt -> apt_opam2 ?labels ?arch ~opam_hashes d ()
@@ -337,13 +337,9 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo=true) ?arch ?labe
   | `Cygwin -> cygwin_opam2 ?win10_revision ?labels ?arch ~opam_hashes d ()
   | `Windows -> windows_opam2 ?win10_revision ?winget ?labels ?arch d ()
   in
-  let clone = if clone_opam_repo then
-    let url = Dockerfile_distro.(os_family_of_distro d |> opam_repository) in
-    run "git clone %S /home/opam/opam-repository" url
-  else empty in
   let pers = match personality ?arch d with
     | None -> empty | Some pers -> entrypoint_exec [pers] in
-  (D.tag_of_distro d, fn @@ clone @@ pers)
+  (D.tag_of_distro d, fn @@ pers)
 
 let create_switch ~arch distro t =
   let create_switch switch pkg = run "opam switch create %s %s" (OV.to_string switch) pkg in
@@ -375,9 +371,9 @@ let all_ocaml_compilers hub_id arch distro =
       | `Windows | `Cygwin -> empty
     in
     header ~arch ~tag:(Printf.sprintf "%s-opam" distro_tag) ~img:hub_id distro
-    @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
     @@ sandbox
-    @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
+    @@ run "opam init -k git -a %s --bare%s"
+         (Dockerfile_distro.opam_repository (Dockerfile_distro.os_family_of_distro distro))
          (if os_family = `Windows then " --disable-sandboxing" else "")
     @@ compilers
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
@@ -416,9 +412,9 @@ let separate_ocaml_compilers hub_id arch distro =
              | `Linux -> run "opam-sandbox-disable"
              | `Windows | `Cygwin -> empty in
            header ~arch ~tag:(Printf.sprintf "%s-opam" distro_tag) ~img:hub_id distro
-           @@ workdir "/home/opam/opam-repository"
            @@ sandbox
-           @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
+           @@ run "opam init -k git -a %s --bare%s"
+                (Dockerfile_distro.opam_repository (Dockerfile_distro.os_family_of_distro distro))
                 (if os_family = `Windows then "--disable-sandboxing" else "")
            @@ add_remote
            @@ variants
