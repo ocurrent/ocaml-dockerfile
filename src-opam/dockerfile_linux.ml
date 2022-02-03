@@ -58,7 +58,7 @@ module RPM = struct
 
   let dev_packages ?extra () =
     groupinstall "\"Development Tools\"" @@
-    install "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel bubblewrap which m4 diffutils findutils%s"
+    install "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel which m4 diffutils findutils%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let install_system_ocaml =
@@ -107,7 +107,7 @@ module Apk = struct
   let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
 
   let dev_packages ?extra () =
-    install "build-base patch tar ca-certificates git rsync curl sudo bash libx11-dev nano bubblewrap coreutils xz libexecinfo-dev ncurses-dev%s"
+    install "build-base patch tar ca-certificates git rsync curl sudo bash libx11-dev nano coreutils xz libexecinfo-dev ncurses-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
@@ -184,7 +184,7 @@ module Pacman = struct
     (* Workaround taken from: https://github.com/actions/virtual-environments/issues/2658#issuecomment-785410168 *)
     run "patched_glibc=glibc-linux4-2.33-4-x86_64.pkg.tar.zst && curl -LO \"https://repo.archlinuxcn.org/x86_64/$patched_glibc\" && bsdtar -C / -xvf \"$patched_glibc\" && echo 'IgnorePkg = glibc' >> /etc/pacman.conf" @@
     (* END: tmp workaround *)
-    install "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano bubblewrap coreutils xz ncurses diffutils unzip%s"
+    install "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano coreutils xz ncurses diffutils unzip%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo=false) username =
