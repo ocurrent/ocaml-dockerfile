@@ -71,7 +71,7 @@ let bubblewrap_and_dev_packages distro =
   | `Yum -> Linux.RPM.dev_packages
   | `Zypper -> Linux.Zypper.dev_packages
   | `Pacman -> Linux.Pacman.dev_packages
-  | _ -> assert false
+  | `Cygwin | `Windows -> assert false
   in
   match D.bubblewrap_version distro with
   | Some version when version >= bubblewrap_minimum ->
