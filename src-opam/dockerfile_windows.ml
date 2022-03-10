@@ -166,7 +166,8 @@ module Winget = struct
 
   let footer path =
     run {|mkdir "C:\Program Files\winget-cli"|}
-    @@ run {|move "C:\TEMP\winget-cli\%s\AppInstallerCLI.exe" "C:\Program Files\winget-cli\winget.exe"|} path
+    @@ run {|move "C:\TEMP\winget-cli\%s\winget.exe" "C:\Program Files\winget-cli\"|} path
+    @@ run {|move "C:\TEMP\winget-cli\%s\WindowsPackageManager.dll" "C:\Program Files\winget-cli\"|} path
     @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
     |> crunch
 
