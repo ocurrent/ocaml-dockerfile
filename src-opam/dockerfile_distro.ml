@@ -30,6 +30,7 @@ type win10_ltsc = [
 
 type win10_lcu = [
   | `LCU
+  | `LCU20220510
   | `LCU20220412
   | `LCU20220308
   | `LCU20220208
@@ -45,11 +46,18 @@ type win10_lcu = [
 
 type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
 
-let win10_current_lcu = `LCU20220412
+let win10_current_lcu = `LCU20220510
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
 let win10_lcus : ('a * int * win10_release list) list = [
+
+  `LCU20220510, 5013944, [`V21H2];
+  `LCU20220510, 5013942, [`V20H2; `V21H1];
+  `LCU20220510, 5013945, [`V1909];
+  `LCU20220510, 5013941, [`V1809];
+  `LCU20220510, 5013952, [`V1607];
+  `LCU20220510, 5013963, [`V1507];
 
   `LCU20220412, 5012604, [`V21H2];
   `LCU20220412, 5012599, [`V20H2; `V21H1];
