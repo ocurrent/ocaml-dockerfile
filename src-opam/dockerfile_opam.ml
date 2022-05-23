@@ -400,7 +400,11 @@ let all_ocaml_compilers hub_id arch distro =
       | `Windows | `Cygwin -> empty
     in
     header ~arch ~tag:(Printf.sprintf "%s-opam" distro_tag) ~img:hub_id distro
-    @@ workdir "/home/opam/opam-repository" @@ run "git pull origin master"
+    @@ workdir "/home/opam/opam-repository"
+    @@ run "git pull origin %s"
+         (match os_family with
+          | `Linux | `Cygwin -> "master"
+          | `Windows -> "opam2")
     @@ sandbox
     @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
          (if os_family = `Windows then " --disable-sandboxing" else "")
