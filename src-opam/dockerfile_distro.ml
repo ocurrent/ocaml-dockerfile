@@ -290,8 +290,8 @@ let resolve_alias (d:t) : distro =
   | `Fedora `Latest -> `Fedora `V35
   | `OracleLinux `Latest -> `OracleLinux `V8
   | `OpenSUSE `Latest -> `OpenSUSE `V15_3
-  | `Ubuntu `Latest -> `Ubuntu `V21_10
-  | `Ubuntu `LTS -> `Ubuntu `V20_04
+  | `Ubuntu `Latest -> `Ubuntu `V22_04
+  | `Ubuntu `LTS -> `Ubuntu `V22_04
   | `Cygwin (#win10_ltsc as v) -> `Cygwin (resolve_ltsc v)
   | `Windows (cc, (#win10_ltsc as v)) -> `Windows (cc, resolve_ltsc v)
   | `Alpine (`V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15)
