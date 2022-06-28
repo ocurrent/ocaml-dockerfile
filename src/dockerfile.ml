@@ -230,6 +230,8 @@ let copy ?link ?chown ?from ~src ~dst () : t = [`Copy (`From from, `Src src, `Ds
 
 let copy_heredoc ?chown ~src ~dst () : t = [`Copy_heredoc (`Chown chown, src, dst)]
 
+let copy_heredoc ?chown ~src ~dst () : t = [`Copy_heredoc (`Chown chown, src, dst)]
+
 let user fmt = ksprintf (fun u -> [`User u]) fmt
 
 let onbuild t = List.map (fun l -> `Onbuild l) t
