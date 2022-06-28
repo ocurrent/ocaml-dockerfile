@@ -35,6 +35,16 @@ type parser_directive =
   [ `Syntax of string | `Escape of char ]
   [@@deriving sexp]
 
+type heredoc = {
+  here_document: string;
+  word: string;
+  delimiter: string;
+  strip: bool } [@@deriving sexp]
+
+type heredocs_to_dest =
+  [`Chown of string option] * heredoc list * string
+  [@@deriving sexp]
+
 type line =
   [ `ParserDirective of parser_directive
   | `Comment of string
@@ -46,6 +56,7 @@ type line =
   | `Env of (string * string) list
   | `Add of sources_to_dest
   | `Copy of sources_to_dest
+  | `Copy_heredoc of heredocs_to_dest
   | `Entrypoint of shell_or_exec
   | `Shell of string list
   | `Volume of string list
@@ -140,6 +151,18 @@ let string_of_sources_to_dest (t: sources_to_dest) =
 let string_of_label_list ls =
   List.map (fun (k, v) -> sprintf "%s=%S" k v) ls |> String.concat " "
 
+let string_of_copy_heredoc (t: heredocs_to_dest) =
+  let `Chown chown, heredocs, dst = t in
+  let header, docs =
+    List.fold_left (fun (header, docs) t ->
+        (sprintf "<<%s%s" (if t.strip then "-" else "") t.word) :: header,
+        sprintf "%s\n%s\n%s" docs t.here_document t.delimiter)
+      ([], "") heredocs in
+  String.concat " " (
+      optional "--chown" chown
+      @ (List.rev header)
+      @ [dst])
+  ^ docs
 
 let rec string_of_line ~escape (t: line) =
   match t with
@@ -160,6 +183,7 @@ let rec string_of_line ~escape (t: line) =
   | `Env el -> cmd "ENV" (string_of_env_list ~escape el)
   | `Add c -> cmd "ADD" (string_of_sources_to_dest c)
   | `Copy c -> cmd "COPY" (string_of_sources_to_dest c)
+  | `Copy_heredoc c -> cmd "COPY" (string_of_copy_heredoc c)
   | `User u -> cmd "USER" u
   | `Volume vl -> cmd "VOLUME" (json_array_of_list vl)
   | `Entrypoint el -> cmd "ENTRYPOINT" (string_of_shell_or_exec ~escape el)
@@ -171,6 +195,9 @@ let rec string_of_line ~escape (t: line) =
 
 (* Function interface *)
 let parser_directive pd : t = [`ParserDirective pd]
+
+let heredoc ?(strip=false) ?(word="EOF") ?(delimiter=word) fmt =
+  ksprintf (fun here_document -> { here_document; strip; word; delimiter; }) fmt
 
 let from ?alias ?tag ?platform image =
   [`From { image; tag; alias; platform }]
@@ -196,6 +223,8 @@ let env e : t = [`Env e]
 let add ?chown ?from ~src ~dst () : t = [`Add (`From from, `Src src, `Dst dst, `Chown chown)]
 
 let copy ?chown ?from ~src ~dst () : t = [`Copy (`From from, `Src src, `Dst dst, `Chown chown)]
+
+let copy_heredoc ?chown ~src ~dst () : t = [`Copy_heredoc (`Chown chown, src, dst)]
 
 let user fmt = ksprintf (fun u -> [`User u]) fmt
 

@@ -64,6 +64,24 @@ val parser_directive : parser_directive -> t
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
 
+type heredoc
+(** Build here-document values with {!val:heredoc}. *)
+
+val heredoc : ?strip:bool -> ?word:string -> ?delimiter:string -> ('a, unit, string, heredoc) format4 -> 'a
+(** [heredoc ~word here_document] creates a {!type:heredoc} value with
+    [here_document] as content and [word] () as opening delimiter. If
+    [word] is quoted, then [delimiter] (unquoted [word]) needs to be
+    specified. Quoting affects expansion in the here-document.
+    Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
+
+    @param strip Whether to strip leading tab characters. Defaults to false.
+    @param word The opening delimiter, possibly quoted. Defaults to [EOF].
+    @param delimiter The closing delimiter, unquoted. Defaults to the
+      content of [word].
+
+    @see <https://pubs.opengroup.org/onlinepubs/9699919799/utilities/V3_chap02.html#tag_18_07_04> POSIX 2.7.4 Here-Document
+    @see <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#here-documents> BuildKit Here-Documents *)
+
 val from : ?alias:string -> ?tag:string -> ?platform:string -> string -> t
 (** The [from] instruction sets the base image for subsequent instructions.
 
@@ -168,6 +186,12 @@ val copy : ?chown:string -> ?from:string -> src:string list -> dst:string -> uni
 (** [copy ?from ~src ~dst ()] copies new files or directories from [src] and
   adds them to the filesystem of the container at the path [dst]. See
   {!add} for more detailed documentation. *)
+
+val copy_heredoc : ?chown:string -> src:(heredoc list) -> dst:string -> unit -> t
+(** [copy_heredoc src dst] creates the file [dst] using the content of
+    the here-documents [src]. Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
+
+    @see <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#here-documents> *)
 
 val user : ('a, unit, string, t) format4 -> 'a
 (** [user fmt] sets the user name or UID to use when running the image

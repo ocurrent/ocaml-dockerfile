@@ -1,6 +1,8 @@
 unreleased
 ----------
 
+- Support BuildKit 1.4 syntax of here-documents in `COPY` instructions. (@MisterDA #99)
+
 v8.0.0 2022-07-27 Sydney
 ------------------------
 
