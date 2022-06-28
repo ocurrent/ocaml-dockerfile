@@ -59,7 +59,7 @@ type parser_directive =
 val parser_directive : parser_directive -> t
 (** A parser directive. If used, needs to be the first line of the
    Dockerfile.
-   @see <https://docs.docker.com/engine/reference/builder/#parser-directives>. *)
+   @see <https://docs.docker.com/engine/reference/builder/#parser-directives> *)
 
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
@@ -112,16 +112,16 @@ val cmd : ('a, unit, string, t) format4 -> 'a
   you must specify an {!entrypoint} as well.  The string result of formatting
   [arg] will be passed as a [/bin/sh -c] invocation.
 
-  There can only be one [cmd] in a Dockerfile. If you list more than one 
+  There can only be one [cmd] in a Dockerfile. If you list more than one
   then only the last [cmd] will take effect. *)
 
 val cmd_exec : string list -> t
 (** [cmd_exec args] provides defaults for an executing container. These defaults
   can include an executable, or they can omit the executable, in which case
   you must specify an {!entrypoint} as well.  The first argument to the [args]
-  list must be the full path to the executable. 
+  list must be the full path to the executable.
 
-  There can only be one [cmd] in a Dockerfile. If you list more than one 
+  There can only be one [cmd] in a Dockerfile. If you list more than one
   then only the last [cmd] will take effect. *)
 
 val expose_port : int -> t
@@ -148,7 +148,7 @@ val add : ?chown:string -> ?from:string -> src:string list -> dst:string -> unit
   is being built (the context of the build).
 
   Each [src] may contain wildcards and matching will be done using
-  Go's filepath.Match rules. 
+  Go's filepath.Match rules.
 
   All new files and directories are created with a UID and GID of 0.
   In the case where [src] is a remote file URL, the destination will
@@ -160,8 +160,8 @@ val add : ?chown:string -> ?from:string -> src:string list -> dst:string -> unit
   should be updated.
 
   The [?from] parameter allows artefacts to be retrieved from multiple
-  {!commands}. It can either be an integer number (starting with 0 for the
-  first {!from} command, or a named stage (supplied via [?alias] to the
+  stages. It can either be an integer number (starting with 0 for the
+  first {!from} stage, or a named stage (supplied via [?alias] to the
   {!from} command). *)
 
 val copy : ?chown:string -> ?from:string -> src:string list -> dst:string -> unit -> t
