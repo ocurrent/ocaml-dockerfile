@@ -22,7 +22,7 @@ type shell_or_exec =
   [@@deriving sexp]
 
 type sources_to_dest =
-  [`From of string option] * [`Src of string list] * [`Dst of string] * [`Chown of string option]
+  [`From of string option] * [`Src of string list] * [`Dst of string] * [`Chown of string option] * [`Link of bool option]
   [@@deriving sexp]
 
 type from = {
@@ -140,11 +140,15 @@ let optional name = function
   | None -> []
   | Some value -> [sprintf "%s=%s" name value]
 
+let optional_flag name = function
+  | Some true -> [name]
+  | Some false | None -> []
 
 let string_of_sources_to_dest (t: sources_to_dest) =
-  let `From frm, `Src sl, `Dst d, `Chown chown = t in
+  let `From frm, `Src sl, `Dst d, `Chown chown, `Link link = t in
   String.concat " " (
-      optional "--chown" chown
+      optional_flag "--link" link
+      @ optional "--chown" chown
       @ optional "--from" frm
       @ [json_array_of_list (sl @ [d])])
 
@@ -220,9 +224,9 @@ let expose_ports p : t = [`Expose p]
 
 let env e : t = [`Env e]
 
-let add ?chown ?from ~src ~dst () : t = [`Add (`From from, `Src src, `Dst dst, `Chown chown)]
+let add ?link ?chown ?from ~src ~dst () : t = [`Add (`From from, `Src src, `Dst dst, `Chown chown, `Link link)]
 
-let copy ?chown ?from ~src ~dst () : t = [`Copy (`From from, `Src src, `Dst dst, `Chown chown)]
+let copy ?link ?chown ?from ~src ~dst () : t = [`Copy (`From from, `Src src, `Dst dst, `Chown chown, `Link link)]
 
 let copy_heredoc ?chown ~src ~dst () : t = [`Copy_heredoc (`Chown chown, src, dst)]
 
