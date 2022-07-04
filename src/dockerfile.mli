@@ -216,12 +216,6 @@ val copy_heredoc : ?chown:string -> src:(heredoc list) -> dst:string -> unit -> 
 
     @see <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#here-documents> *)
 
-val copy_heredoc : ?chown:string -> src:(heredoc list) -> dst:string -> unit -> t
-(** [copy_heredoc src dst] creates the file [dst] using the content of
-    the here-documents [src]. Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
-
-    @see <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#here-documents> *)
-
 val user : ('a, unit, string, t) format4 -> 'a
 (** [user fmt] sets the user name or UID to use when running the image
   and for any {!run}, {!cmd}, {!entrypoint} commands that follow it in
