@@ -1,6 +1,7 @@
 v8.0.0 unreleased
 -----------------
 
+- Added RISCV64 (@mtelvers #178)
 - Ubuntu LTS and current release is 22.04 (@dra27 #97)
 - When compiling opam, build OCaml once using `make compiler` on the master
   branch of opam and then share this compiler with the release branches.
