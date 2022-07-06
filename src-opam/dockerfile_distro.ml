@@ -367,7 +367,13 @@ let distro_arches ov (d:t) =
   | `Debian `V10, ov when OV.(compare Releases.v4_02_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Aarch32]
   | `Debian `V9, ov when OV.(compare Releases.v4_03_0 ov) = -1 -> [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Alpine (`V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15), ov when OV.(compare Releases.v4_05_0 ov) = -1 -> [ `X86_64; `Aarch64 ]
-  | `Ubuntu (`V18_04|`V20_04|`V20_10|`V21_04|`V21_10|`V22_04), ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64; `Ppc64le; `Riscv64 ]
+  | `Ubuntu `V18_04, ov when OV.(compare Releases.v4_05_0 ov) = -1  -> [ `X86_64; `Aarch64; `Ppc64le ]
+  | `Ubuntu (`V20_04|`V20_10|`V21_04|`V21_10|`V22_04), ov when OV.(compare Releases.v4_05_0 ov) = -1  ->
+    let base = [ `X86_64; `Aarch64; `Ppc64le ] in
+    if OV.(compare Releases.v4_11_0 ov) <= 0 then
+      `Riscv64 :: base
+    else
+      base
   | `Fedora (`V33|`V34|`V35), ov when OV.(compare Releases.v4_08_0 ov) = -1  -> [ `X86_64; `Aarch64 ]
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
