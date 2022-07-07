@@ -28,6 +28,9 @@ depends: [
   "sexplib"
   "fmt"
 ]
+pin-depends: [
+  [ "ocaml-version.dev" "git+https://github.com/mtelvers/ocaml-version#fb3b6e449611c36ad524daf219c3b14f181d667b" ]
+]
 build: [
   ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
