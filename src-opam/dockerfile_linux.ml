@@ -43,7 +43,7 @@ module RPM = struct
     | false -> empty
     | true ->
         let sudofile = "/etc/sudoers.d/"^username in
-        run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+        copy_heredoc ~src:[heredoc ~strip:true "\t%s %s" username sudo_nopasswd] ~dst:sudofile () @@
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile @@
         run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
@@ -72,7 +72,7 @@ module Apt = struct
 
   let dev_packages ?extra () =
     update @@
-    run "echo 'Acquire::Retries \"5\";' > /etc/apt/apt.conf.d/mirror-retry" @@
+    copy_heredoc ~src:[heredoc ~strip:true "\tAcquire::Retries \"5\";"] ~dst:"/etc/apt/apt.conf.d/mirror-retry" () @@
     install "build-essential curl git rsync sudo unzip nano libcap-dev libx11-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
@@ -84,7 +84,7 @@ module Apt = struct
     | false -> empty
     | true ->
         let sudofile = "/etc/sudoers.d/"^username in
-        run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+        copy_heredoc ~src:[heredoc ~strip:true "\t%s %s" username sudo_nopasswd] ~dst:sudofile () @@
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile) @@
     run "adduser %s%s--disabled-password --gecos '' %s" uid gid username @@
@@ -123,7 +123,7 @@ module Apk = struct
     | false -> empty
     | true ->
         let sudofile = "/etc/sudoers.d/"^username in
-        run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+        copy_heredoc ~src:[heredoc ~strip:true "\t%s %s" username sudo_nopasswd] ~dst:sudofile () @@
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile @@
         run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers") @@
@@ -136,9 +136,15 @@ module Apk = struct
     run "apk add ocaml camlp4"
 
   let add_repository ?tag url =
-    match tag with
-    | None -> run "echo '%s' >> /etc/apk/repositories" url
-    | Some tag -> run "echo '@%s %s' >> /etc/apk/repositories" tag url
+    run "<<-EOF cat >> /etc/apk/repositories\n\t%s\nEOF"
+      (match tag with None -> url | Some tag -> sprintf "@%s %s" tag url)
+
+  let add_repositories repos =
+    let repos =
+      String.concat ""
+        (List.map (function None, url -> url | Some tag, url -> sprintf "\n\t@%s %s" tag url) repos) in
+    run "<<-EOF cat >> /etc/apk/repositories%s\nEOF" repos
+
 end
 
 (* Zypper (opensuse) rules *)
@@ -161,7 +167,7 @@ module Zypper = struct
     | false -> empty
     | true ->
         let sudofile = "/etc/sudoers.d/"^username in
-        run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+        copy_heredoc ~src:[heredoc ~strip:true "\t%s %s" username sudo_nopasswd] ~dst:sudofile () @@
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile) @@
     user "%s" username @@
@@ -192,7 +198,7 @@ module Pacman = struct
     | false -> empty
     | true ->
         let sudofile = "/etc/sudoers.d/"^username in
-        run "echo '%s %s' > %s" username sudo_nopasswd sudofile @@
+        copy_heredoc ~src:[heredoc ~strip:true "\t%s %s" username sudo_nopasswd] ~dst:sudofile () @@
         run "chmod 440 %s" sudofile @@
         run "chown root:root %s" sudofile) @@
     user "%s" username @@
