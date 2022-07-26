@@ -1,7 +1,10 @@
-v8.0.0 unreleased
+v8.0.0 2022-07-27 Sydney
 -----------------
 
-- Added RISCV64 (@mtelvers #178)
+- Deprecate Ubuntu 21.10 (@tmcgilchrist #104)
+- Various LCU Updates (@mtelvers #103 #98 #95 #93 #91 #89 #83)
+- Add IBM-Z Docker images for Ubuntu (@mtelvers #102)
+- Added RISCV64 (@mtelvers #100)
 - Ubuntu LTS and current release is 22.04 (@dra27 #97)
 - When compiling opam, build OCaml once using `make compiler` on the master
   branch of opam and then share this compiler with the release branches.
