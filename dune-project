@@ -36,7 +36,7 @@
 "\| awk/sed-style assembly.
  )
  (depends
-  (ocaml (>= "4.02.3"))
+  (ocaml (>= "4.08"))
   (fmt (>= "0.8.7"))
   (ppx_sexp_conv (>= "v0.9.0"))
   sexplib)
@@ -61,7 +61,6 @@
   (fmt (>= "0.8.7"))
   logs
   (ppx_sexp_conv (>= "v0.9.0"))
-  result
   sexplib)
  (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-cmd/")
  (tags ("org:mirage" "org:ocamllabs")))

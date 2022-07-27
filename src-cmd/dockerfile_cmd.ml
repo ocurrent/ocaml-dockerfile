@@ -16,11 +16,11 @@
  *)
 
 open Sexplib.Conv
-open Rresult
 open Bos
 open Astring
-open R.Infix
 module OC = OS.Cmd
+
+let (>>=) = Result.bind
 
 let rec iter fn l =
   match l with
@@ -54,9 +54,9 @@ let run_log ?(ok_to_fail=true) ?env log_dir name cmd =
   let path = Fpath.(log_dir / (name ^ ".sxp")) in
   OS.File.write path (Sexplib.Sexp.to_string_hum (sexp_of_cmd_log cmd_log)) >>= fun () ->
   match status with
-  |`Signaled n -> if ok_to_fail then Ok () else R.error_msg (Fmt.str "Signal %d" n)
+  |`Signaled n -> if ok_to_fail then Ok () else Fmt.error_msg "Signal %d" n
   |`Exited 0 -> Ok ()
-  |`Exited code -> if ok_to_fail then Ok () else R.error_msg (Fmt.str "Exit code %d" code)
+  |`Exited code -> if ok_to_fail then Ok () else Fmt.error_msg "Exit code %d" code
 
 (** Docker *)
 module Docker = struct
@@ -64,10 +64,9 @@ module Docker = struct
   let info = Cmd.(bin % "info")
 
   let exists () =
-    OS.Cmd.run_out info |> OS.Cmd.out_string |> R.is_ok |>
-    function
-    | true -> Logs.info (fun l -> l "Docker is running"); true
-    | false -> Logs.err (fun l -> l "Docker not running"); false
+    match OS.Cmd.run_out info |> OS.Cmd.out_string with
+    | Ok _ -> Logs.info (fun l -> l "Docker is running"); true
+    | Error (`Msg msg) -> Logs.err (fun l -> l "Docker not running: %s" msg); false
 
   let build_cmd ?(squash=false) ?(pull=true) ?(cache=true) ?dockerfile ?tag path =
     let open Cmd in
@@ -91,12 +90,12 @@ module Docker = struct
       | hd::tl when String.is_prefix ~affix:"Successfully tagged " hd -> find_id tl
       | hd::_ when String.is_prefix ~affix:"Successfully built " hd -> begin
          match String.cut ~sep:"Successfully built " hd with
-         | Some ("", id) -> R.ok id
-         | Some _ -> R.error_msg "Unexpected internal error in build_id"
-         | None -> R.error_msg "Malformed successfully built log"
+         | Some ("", id) -> Ok id
+         | Some _ -> Fmt.error_msg "Unexpected internal error in build_id"
+         | None -> Fmt.error_msg "Malformed successfully built log"
       end
-      | _hd::_tl -> R.error_msg "Unexpected lines at end of log"
-      | [] -> R.error_msg "Unable to find container id in log" in
+      | _hd::_tl -> Fmt.error_msg "Unexpected lines at end of log"
+      | [] -> Fmt.error_msg "Unable to find container id in log" in
     OS.File.read_lines log >>= fun lines ->
     List.rev lines |> fun lines ->
     find_id lines
@@ -125,8 +124,8 @@ module Opam = struct
     OS.Env.current () >>= fun env ->
     String.Map.add "OPAMROOT" (Cmd.p root) env |>
     String.Map.add "OPAMYES" "1" |>
-    String.Map.add "OPAMJOBS" (string_of_int jobs) |> fun env ->
-    R.return env
+    String.Map.add "OPAMJOBS" (string_of_int jobs) |>
+    Result.ok
 end
 
 open Cmdliner
