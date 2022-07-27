@@ -134,14 +134,14 @@ end
 (** Rules for winget installation.
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
 module Winget : sig
-  val is_supported : Dockerfile_distro.win_all -> bool
+  val is_supported : Distro.win_all -> bool
   (** Winget 1.0.11692 discontinued support for versions older than
      Windows 10 1809. Older versions of Winget have bugs, don't use
      them. *)
 
   val install_from_release :
-    ?win10_revision:Dockerfile_distro.win10_lcu ->
-    ?version:Dockerfile_distro.win_all ->
+    ?win10_revision:Distro.win10_lcu ->
+    ?version:Distro.win_all ->
     ?winget_version:string ->
     unit ->
     t
@@ -155,8 +155,7 @@ module Winget : sig
   val install : string list -> t
   (** [install packages] will install the supplied winget package list. *)
 
-  val dev_packages :
-    ?version:Dockerfile_distro.win_all -> ?extra:string list -> unit -> t
+  val dev_packages : ?version:Distro.win_all -> ?extra:string list -> unit -> t
   (** [dev_packages ?version ?extra ()] will install the base development
      tools. Extra packages may also be optionally supplied via
      [extra]. Using [?version] may change the set of installed packages. *)

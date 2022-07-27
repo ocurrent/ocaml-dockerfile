@@ -22,6 +22,10 @@
    there change, so please contact [anil@recoil.org] if you depend on these
    functions for your own infrastructure. *)
 
+module Distro = Distro
+module Linux = Linux
+module Windows = Windows
+
 val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 (** [run_as_opam fmt] runs the command specified by the [fmt]
     format string as the [opam] user. *)
@@ -52,13 +56,13 @@ type opam_hashes = {
 }
 
 val gen_opam2_distro :
-  ?win10_revision:Dockerfile_distro.win10_lcu ->
+  ?win10_revision:Distro.win10_lcu ->
   ?winget:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
   opam_hashes:opam_hashes ->
-  Dockerfile_distro.t ->
+  Distro.t ->
   string * Dockerfile.t
 (** [gen_opam2_distro ~opam_hashes d] will generate a Dockerfile
    for Linux distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master,
@@ -74,16 +78,13 @@ val gen_opam2_distro :
    winget will be pulled from the [winget] external image. *)
 
 val all_ocaml_compilers :
-  string -> Ocaml_version.arch -> Dockerfile_distro.t -> string * Dockerfile.t
+  string -> Ocaml_version.arch -> Distro.t -> string * Dockerfile.t
 (** [all_ocaml_compilers hub_id arch distro] will generate an opam2
   container that has all the recent OCaml compilers installed into a
   distribution [distro] on architecture [arch]. *)
 
 val separate_ocaml_compilers :
-  string ->
-  Ocaml_version.arch ->
-  Dockerfile_distro.t ->
-  (string * Dockerfile.t) list
+  string -> Ocaml_version.arch -> Distro.t -> (string * Dockerfile.t) list
 (** [separate_ocaml_compilers hub_id arch distro] will install a list of
   Dockerfiles that build individual OCaml compiler versions and their
   variants (e.g. flambda) in separate containers. *)

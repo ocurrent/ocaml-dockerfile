@@ -92,3 +92,7 @@ val setup_logs : unit -> unit Cmdliner.Term.t
 
 val iter : ('a -> (unit, 'b) result) -> 'a list -> (unit, 'b) result
 val map : ('a -> ('b, 'c) result) -> 'a list -> ('b list, 'c) result
+
+(** {2 Generate Dockerfiles} *)
+
+module Gen = Gen

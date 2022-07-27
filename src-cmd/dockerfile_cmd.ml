@@ -38,6 +38,8 @@ let map fn l =
   | Ok v -> Ok (List.rev v)
   | e -> e
 
+module Gen = Gen
+
 type cmd_log = {
   command : string;
   stdout : string;
