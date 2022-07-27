@@ -17,9 +17,11 @@
 
 open Dockerfile
 open Bos
-module U = Dockerfile_cmd
 
 let ( >>= ) = Result.bind
+
+let rec iter fn l =
+  match l with hd :: tl -> fn hd >>= fun () -> iter fn tl | [] -> Ok ()
 
 let write_dockerfile ~crunch file dfile =
   Logs.debug (fun l -> l "Writing Dockerfile to %a" Fpath.pp file);
@@ -33,7 +35,7 @@ let generate_dockerfile ?(fname = "Dockerfile") ?(crunch = true) output_dir d =
   write_dockerfile ~crunch file d
 
 let generate_dockerfiles_in_directories ?(crunch = true) output_dir =
-  U.iter (fun (name, dockerfile) ->
+  iter (fun (name, dockerfile) ->
       let dir = Fpath.(output_dir / name) in
       let file = Fpath.(dir / "Dockerfile") in
       Logs.info (fun l -> l "Generating %a" Fpath.pp file);
@@ -41,7 +43,7 @@ let generate_dockerfiles_in_directories ?(crunch = true) output_dir =
       write_dockerfile ~crunch file dockerfile)
 
 let generate_dockerfiles ?(crunch = true) output_dir =
-  U.iter (fun (name, dockerfile) ->
+  iter (fun (name, dockerfile) ->
       let file = Fpath.(output_dir / ("Dockerfile." ^ name)) in
       Logs.info (fun l -> l "Generating: %a" Fpath.pp file);
       write_dockerfile ~crunch file dockerfile)
@@ -49,7 +51,7 @@ let generate_dockerfiles ?(crunch = true) output_dir =
 let generate_dockerfiles_in_git_branches ?readme ?(crunch = true) output_dir d =
   (* TODO move git to dockerfile_cmd *)
   let git = Cmd.(v "git" % "-C" % p output_dir) in
-  U.iter
+  iter
     (fun (name, docker) ->
       Logs.info (fun l ->
           l "Switching to branch %s in %a\n%!" name Fpath.pp output_dir);

@@ -15,6 +15,8 @@
  *
  *)
 
+(** Utility functions to generate Dockerfiles. *)
+
 val generate_dockerfile :
   ?fname:string ->
   ?crunch:bool ->

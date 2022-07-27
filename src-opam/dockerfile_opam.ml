@@ -18,9 +18,10 @@
 (** OPAM-specific Dockerfile rules *)
 
 open Dockerfile
-module Linux = Dockerfile_linux
-module Windows = Dockerfile_windows
-module D = Dockerfile_distro
+module Distro = Distro
+module Linux = Linux
+module Windows = Windows
+module D = Distro
 module OV = Ocaml_version
 
 let personality ?arch distro =
@@ -428,7 +429,7 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
   in
   let clone =
     if clone_opam_repo then
-      let url = Dockerfile_distro.(os_family_of_distro d |> opam_repository) in
+      let url = Distro.(os_family_of_distro d |> opam_repository) in
       run "git clone %S /home/opam/opam-repository" url
     else empty
   in
@@ -446,15 +447,13 @@ let create_switch ~arch distro t =
   let switch = OV.with_patch t None in
   match distro with
   | `Windows (port, _) ->
-      let pn, pv =
-        Dockerfile_windows.ocaml_for_windows_package_exn ~port ~arch ~switch
-      in
+      let pn, pv = Windows.ocaml_for_windows_package_exn ~port ~arch ~switch in
       create_switch switch (pv ^ pn)
   | _ -> create_switch switch (Ocaml_version.Opam.V2.name switch)
 
 let all_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
-  let os_family = Dockerfile_distro.os_family_of_distro distro in
+  let os_family = Distro.os_family_of_distro distro in
   let compilers =
     OV.Releases.recent
     |> List.filter (fun ov -> D.distro_supported_on arch ov distro)
@@ -503,7 +502,7 @@ let tag_of_ocaml_version ov =
 
 let separate_ocaml_compilers hub_id arch distro =
   let distro_tag = D.tag_of_distro distro in
-  let os_family = Dockerfile_distro.os_family_of_distro distro in
+  let os_family = Distro.os_family_of_distro distro in
   OV.Releases.recent_with_dev
   |> List.filter (fun ov -> D.distro_supported_on arch ov distro)
   |> List.map (fun ov ->
