@@ -8,9 +8,9 @@ maintainer: "Anil Madhavapeddy <anil@recoil.org>"
 authors: "Anil Madhavapeddy <anil@recoil.org>"
 license: "ISC"
 tags: ["org:mirage" "org:ocamllabs"]
-homepage: "https://github.com/avsm/ocaml-dockerfile"
-doc: "https://avsm.github.io/ocaml-dockerfile/doc"
-bug-reports: "https://github.com/avsm/ocaml-dockerfile/issues"
+homepage: "https://github.com/ocurrent/ocaml-dockerfile"
+doc: "https://ocurrent.github.io/ocaml-dockerfile/doc"
+bug-reports: "https://github.com/ocurrent/ocaml-dockerfile/issues"
 depends: [
   "ocaml" {>= "4.02.3"}
   "dune" {>= "2.0.0"}
@@ -22,4 +22,4 @@ build: [
   ["dune" "subst"] {dev}
   ["dune" "build" "-p" name "-j" jobs]
 ]
-dev-repo: "git+https://github.com/avsm/ocaml-dockerfile.git"
+dev-repo: "git+https://github.com/ocurrent/ocaml-dockerfile.git"

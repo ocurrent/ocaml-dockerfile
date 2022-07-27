@@ -16,8 +16,8 @@ awk/sed-style assembly.
 ocaml-dockerfile is distributed under the ISC license.
 
 - **HTML Documentation**: <http://anil-code.recoil.org/ocaml-dockerfile>
-- **Source:**: <https://github.com/avsm/ocaml-dockerfile>
-- **Issues**: <https://github.com/avsm/ocaml-dockerfile/issues>
+- **Source:**: <https://github.com/ocurrent/ocaml-dockerfile>
+- **Issues**: <https://github.com/ocurrent/ocaml-dockerfile/issues>
 - **Email**: <anil@recoil.org>
 
 ## Installation
