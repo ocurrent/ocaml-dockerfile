@@ -17,9 +17,9 @@
 
 open Dockerfile
 open Bos
-open Rresult
-open R.Infix
 module U = Dockerfile_cmd
+
+let (>>=) = Result.bind
 
 let write_dockerfile ~crunch file dfile =
   Logs.debug (fun l -> l "Writing Dockerfile to %a" Fpath.pp file);
@@ -34,7 +34,7 @@ let generate_dockerfile ?(fname="Dockerfile") ?(crunch=true) output_dir d =
 
 let generate_dockerfiles_in_directories ?(crunch=true) output_dir =
   U.iter (fun (name, dockerfile) ->
-    let dir = Fpath.(output_dir / name) in 
+    let dir = Fpath.(output_dir / name) in
     let file = Fpath.(dir / "Dockerfile") in
     Logs.info (fun l -> l "Generating %a" Fpath.pp file);
     OS.Dir.create ~path:true output_dir >>= fun _ ->

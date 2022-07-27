@@ -35,8 +35,8 @@ val run_log :
   ?ok_to_fail:bool ->
   ?env:Bos.OS.Env.t ->
   Fpath.t ->
-  string -> Bos.Cmd.t -> (unit, [> Rresult.R.msg ]) result
-(** [runlog log_dir name cmd] will run [cmd] with label [name] 
+  string -> Bos.Cmd.t -> (unit, [> `Msg of string ]) result
+(** [runlog log_dir name cmd] will run [cmd] with label [name]
    and log the results in [<log_dir>/<name>.sxp]. *)
 
 (** Docker command invocation *)
@@ -57,7 +57,7 @@ module Docker : sig
 
   val push_cmd : string -> Bos.Cmd.t
 
-  val build_id : Fpath.t -> (string, [> Rresult.R.msg ]) result
+  val build_id : Fpath.t -> (string, [> `Msg of string ]) result
 
   val run_cmd :
     ?mounts:(string * string) list ->
@@ -77,17 +77,15 @@ module Opam : sig
 
   val opam_env :
     root:Fpath.t ->
-    jobs:int -> (string Astring.String.map, [> Rresult.R.msg ]) result
+    jobs:int -> (string Astring.String.map, [> `Msg of string ]) result
 
 end
 
 (** {2 Utility functions} *)
 
-val setup_logs : unit -> unit Cmdliner.Term.t 
+val setup_logs : unit -> unit Cmdliner.Term.t
 (** [setup_logs ()] initialises a {!Logs} environment. *)
 
 val iter : ('a -> (unit, 'b) result) -> 'a list -> (unit, 'b) result
 
 val map : ('a -> ('b, 'c) result) -> 'a list -> ('b list, 'c) result
-
-

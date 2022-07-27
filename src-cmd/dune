@@ -8,4 +8,4 @@
   (per_module
    ((pps ppx_sexp_conv)
     dockerfile_cmd)))
- (libraries dockerfile cmdliner bos fmt.tty logs.cli fmt.cli logs.fmt result))
+ (libraries dockerfile cmdliner bos fmt.tty logs.cli fmt.cli logs.fmt))

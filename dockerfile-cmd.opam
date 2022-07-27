@@ -42,7 +42,6 @@ depends: [
   "fmt" {>= "0.8.7"}
   "logs"
   "ppx_sexp_conv" {>= "v0.9.0"}
-  "result"
   "sexplib"
   "odoc" {with-doc}
 ]
