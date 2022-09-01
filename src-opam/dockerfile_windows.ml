@@ -148,7 +148,10 @@ module Cygwin = struct
   module Git = struct
     let init ?(cyg=default) ?(name="Docker") ?(email="docker@example.com") () =
       env ["HOME", cyg.root ^ {|\home\opam|}]
-      @@ run_sh ~cyg "git config --global user.email '%s' && git config --global user.name '%s' && git config --system core.longpaths true" email name
+      @@ run_sh ~cyg "git config --global user.email '%s' && \
+                      git config --global user.name '%s' && \
+                      git config --system core.longpaths true && \
+                      git config --global --add safe.directory /home/opam/opam-repository" email name
   end
 end
 
@@ -228,6 +231,9 @@ module Winget = struct
 
   module Git = struct
     let init ?(name="Docker") ?(email="docker@example.com") () =
-      run "git config --global user.email %S && git config --global user.name %S && git config --system core.longpaths true" email name
+      run "git config --global user.email %S && \
+           git config --global user.name %S && \
+           git config --system core.longpaths true && \
+           git config --global --add safe.directory C:/cygwin64/home/opam/opam-repository" email name
   end
 end
