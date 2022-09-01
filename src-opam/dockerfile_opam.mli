@@ -48,7 +48,6 @@ type opam_hashes = {
 val gen_opam2_distro :
   ?win10_revision:Dockerfile_distro.win10_lcu ->
   ?winget:string ->
-  ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
   opam_hashes:opam_hashes ->
@@ -58,8 +57,6 @@ val gen_opam2_distro :
    for Linux distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master,
    per hash given in parameter.
    @return a tuple of the Docker tag and the Dockerfile.
-   If [clone_opam_repo] is true (the default) then the Dockerfile will also git
-   clone the official opam-repository into [/home/opam/opam-repository].
    If [arch] is not specified, it defaults to the base image that is assumed
    to be multiarch (the main exception to this is i386, which requires different
    base images from amd64).
