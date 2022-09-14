@@ -57,7 +57,7 @@ type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 let win10_lcus : ('a * int * win10_release list) list = [
 
   `LCU20220913, 5017316, [`V21H2];
-  `LCU20220913, 5017308, [`V20H2; `V21H1];
+  `LCU20220913, 5017308, [`V21H1];
   `LCU20220913, 5017315, [`V1809];
   `LCU20220913, 5017305, [`V1607];
   `LCU20220913, 5017327, [`V1507];
@@ -285,7 +285,7 @@ let win10_release_status v : win10_release_status = match resolve_ltsc v with
   | `V1903
   | `V1909 -> `Deprecated
   | `V2004 -> `Deprecated
-  | `V20H2
+  | `V20H2 -> `Deprecated
   | `V21H1 | `V21H2 | `Ltsc2022 -> `Active
 
 let win10_latest_release = `V21H2
@@ -295,7 +295,8 @@ type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
 (* https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/base-image-lifecycle *)
 let win10_docker_status (base : win10_docker_base_image) v : status =
   match base, v with
-  | _, (`V20H2 | `V21H2) -> `Active `Tier3
+  | _, `V21H2 -> `Active `Tier3
+  | _, `V20H2
   | _, `V2004
   | _, `V1909
   | _, `V1903 -> `Deprecated
