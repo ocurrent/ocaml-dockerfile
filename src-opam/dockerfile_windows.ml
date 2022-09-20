@@ -174,25 +174,6 @@ module Winget = struct
     @@ run {|move "C:\TEMP\winget-cli\%s\resources.pri" "C:\Program Files\winget-cli\"|} path
     |> crunch
 
-  let build_from_source ?(arch=`X86_64) ?win10_revision ?version ?(winget_version="master") ?(vs_version="16") () =
-    header ?win10_revision ?version ()
-    @@ install_vc_redist ~vs_version ()
-    @@ install_visual_studio_build_tools ~vs_version [
-           "Microsoft.VisualStudio.Workload.ManagedDesktopBuildTools"; (* .NET desktop build tools *)
-           "Microsoft.VisualStudio.Workload.VCTools"; (* C++ build tools *)
-           "Microsoft.VisualStudio.Workload.UniversalBuildTools"; (* Universal Windows Platform build tools *)
-           "Microsoft.VisualStudio.Workload.MSBuildTools"; (* MSBuild Tools *)
-           "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"; (* VS 2019 C++ x64/x86 build tools *)
-           "Microsoft.VisualStudio.Component.Windows10SDK.18362"; (* Windows 10 SDK (10.0.18362.0) *)
-         ]
-    @@ add ~src:["https://github.com/microsoft/winget-cli/archive/" ^ winget_version ^ ".zip"]
-         ~dst:{|C:\TEMP\winget-cli.zip|} ()
-    @@ run_powershell {|Expand-Archive -LiteralPath C:\TEMP\winget-cli.zip -DestinationPath C:\TEMP\ -Force|}
-    @@ run {|cd C:\TEMP && rename winget-cli-%s winget-cli|} winget_version
-    @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -t:restore -m -p:RestorePackagesConfig=true -p:Configuration=Release src\AppInstallerCLI.sln|}
-    @@ run_vc ~arch {|cd C:\TEMP\winget-cli && msbuild -p:Configuration=Release src\AppInstallerCLI.sln|}
-    @@ footer {|src\x64\Release\AppInstallerCLI|}
-
   let install_from_release ?win10_revision ?version ?winget_version () =
     let file = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe." in
     let src =
