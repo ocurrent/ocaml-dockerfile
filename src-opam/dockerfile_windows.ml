@@ -19,7 +19,7 @@ open Dockerfile
 open Printf
 
 let run_cmd fmt = ksprintf (run "cmd /S /C %s") fmt
-let run_powershell fmt = ksprintf (run {|powershell -Command "%s"|}) fmt
+let run_powershell ?(escape=Fun.id) fmt = ksprintf (fun s -> run {|powershell -Command "%s"|} (escape s)) fmt
 let run_vc ~arch fmt =
   let arch = match arch with
     | `I386 -> "x86" | `X86_64 -> "amd64"
@@ -210,15 +210,10 @@ module Winget = struct
     @@ footer ""
 
   let setup ?(from=winget) () =
+    let escape s = String.(concat {|""""|} (split_on_char '"' s)) in
     copy ~from ~src:[{|C:\Program Files\winget-cli|}] ~dst:{|C:\Program Files\winget-cli|} ()
     @@ prepend_path [{|C:\Program Files\winget-cli|}]
-    (* The json parser in Powershell 5 doesn't support comments. *)
-    @@ run_powershell {|winget settings ; `
-        $path=""""${Env:LocalAppData}\Microsoft\WinGet\Settings\settings.json"""" ; `
-        $json=(Get-Content -Encoding ascii $path | Select -SkipLast 1) -Join """"`n"""" ; `
-        $json=($json, '    """"telemetry"""": { """"disable"""": true },', """"}"""") -Join """"`n"""" ; `
-        $json | Set-Content -Encoding ascii -NoNewLine $path ; `
-        winget settings|}
+    @@ run_powershell ~escape {|$path=(Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState'); New-Item $path -ItemType Directory -Force; '{ "$schema": "https://aka.ms/winget-settings.schema.json", "telemetry": { "disable": "true" } }' | Out-File -encoding ASCII (Join-Path $path 'settings.json')|}
 
   let install pkgs =
     List.fold_left (fun acc pkg -> acc @@ run "winget install --exact --accept-source-agreements --accept-package-agreements %s" pkg) empty pkgs
