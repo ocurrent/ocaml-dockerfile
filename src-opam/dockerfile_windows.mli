@@ -22,8 +22,14 @@ open Dockerfile
 val run_cmd : ('a, unit, string, t) format4 -> 'a
 (** [run_cmd fmt] will execute [cmd /S /C fmt]. *)
 
-val run_powershell : ('a, unit, string, t) format4 -> 'a
-(** [run_powershell fmt] will execute [powershell -Command "fmt"]. *)
+val run_powershell : ?escape:(string -> string) ->
+                     ('a, unit, string, t) format4 -> 'a
+(** [run_powershell fmt] will execute [powershell -Command "fmt"].
+
+    @param escape (defaults to {!Fun.id}) allows to escape [fmt]
+      because the calling shell (usually {v cmd v}) might interpret
+      unwanted things in [fmt]. This might help embedding readable
+      powershell code. *)
 
 val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
 (** [run_vc ~arch fmt] will execute [run fmt] with Visual
@@ -35,8 +41,8 @@ val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
 
 val sanitize_reg_path : unit -> t
 (** [sanitize_reg_path ()] adds the command necessary to remove a trailing
-    backaslash from the Path value stored in the registry and must be called
-    before any further manipulation of this variable is done by Dockerfile. *)
+    backslash from the {v PATH v} value stored in the registry and must be called
+    before any further manipulation of this variable is done in the Dockerfile. *)
 
 val install_vc_redist : ?vs_version:string -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
