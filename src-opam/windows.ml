@@ -100,6 +100,15 @@ let ocaml_for_windows_package_exn ~switch ~port ~arch =
 
 let cleanup () = run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
 
+let git_init ~name ~email ~opam_repository =
+  String.concat " && "
+    [
+      sprintf "git config --global user.email '%s'" email;
+      sprintf "git config --global user.name '%s'" name;
+      "git config --system core.longpaths true";
+      sprintf "git config --global --add safe.directory %s" opam_repository;
+    ]
+
 module Cygwin = struct
   type cyg = { root : string; site : string; args : string list }
 
@@ -230,11 +239,8 @@ module Cygwin = struct
     let init ?(cyg = default) ?(name = "Docker") ?(email = "docker@example.com")
         () =
       env [ ("HOME", cyg.root ^ {|\home\opam|}) ]
-      @@ run_sh ~cyg
-           "git config --global user.email '%s' && git config --global \
-            user.name '%s' && git config --system core.longpaths true && git \
-            config --global --add safe.directory /home/opam/opam-repository"
-           email name
+      @@ run_sh ~cyg "%s"
+           (git_init ~email ~name ~opam_repository:"/home/opam/opam-repository")
   end
 end
 
@@ -316,10 +322,8 @@ module Winget = struct
 
   module Git = struct
     let init ?(name = "Docker") ?(email = "docker@example.com") () =
-      run
-        "git config --global user.email %S && git config --global user.name %S \
-         && git config --system core.longpaths true && git config --global \
-         --add safe.directory C:/cygwin64/home/opam/opam-repository"
-        email name
+      run "%s"
+        (git_init ~email ~name
+           ~opam_repository:"C:/cygwin64/home/opam/opam-repository")
   end
 end
