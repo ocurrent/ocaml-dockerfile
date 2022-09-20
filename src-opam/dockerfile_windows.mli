@@ -134,13 +134,6 @@ module Winget : sig
      Windows 10 1809. Older versions of Winget have bugs, don't use
      them. *)
 
-  val build_from_source :
-    ?arch:Ocaml_version.arch -> ?win10_revision:Dockerfile_distro.win10_lcu ->
-    ?version:Dockerfile_distro.win_all ->
-    ?winget_version:string -> ?vs_version:string -> unit -> t
-  (** Build winget from source (in a separate Docker image). The
-     optional [winget_version] specifies a Git reference. *)
-
   val install_from_release :
     ?win10_revision:Dockerfile_distro.win10_lcu ->
     ?version:Dockerfile_distro.win_all -> ?winget_version:string -> unit -> t
