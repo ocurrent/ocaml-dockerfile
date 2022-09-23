@@ -21,8 +21,8 @@
 
 (** {2 Core combinators and serializers} *)
 
-(** [t] is a list of Dockerfile lines *)
 type t
+(** [t] is a list of Dockerfile lines *)
 
 val sexp_of_t : t -> Sexplib.Sexp.t
 (** [sexp_of_t t] converts a Dockerfile into a s-expression representation. *)
@@ -52,9 +52,8 @@ val maybe : ('a -> t) -> 'a option -> t
 
 (** {2 Dockerfile commands} *)
 
-type parser_directive =
-  [ `Syntax of string | `Escape of char ]
-  [@@deriving sexp]
+type parser_directive = [ `Syntax of string | `Escape of char ]
+[@@deriving sexp]
 
 val parser_directive : parser_directive -> t
 (** A parser directive. If used, needs to be the first line of the
@@ -67,7 +66,12 @@ val comment : ('a, unit, string, t) format4 -> 'a
 type heredoc
 (** Build here-document values with {!val:heredoc}. *)
 
-val heredoc : ?strip:bool -> ?word:string -> ?delimiter:string -> ('a, unit, string, heredoc) format4 -> 'a
+val heredoc :
+  ?strip:bool ->
+  ?word:string ->
+  ?delimiter:string ->
+  ('a, unit, string, heredoc) format4 ->
+  'a
 (** [heredoc ~word here_document] creates a {!type:heredoc} value with
     [here_document] as content and [word] () as opening delimiter. If
     [word] is quoted, then [delimiter] (unquoted [word]) needs to be
@@ -156,7 +160,14 @@ val env : (string * string) list -> t
   instructions. This is functionally equivalent to prefixing a shell
   command with [<key>=<value>]. *)
 
-val add : ?link:bool -> ?chown:string -> ?from:string -> src:string list -> dst:string -> unit -> t
+val add :
+  ?link:bool ->
+  ?chown:string ->
+  ?from:string ->
+  src:string list ->
+  dst:string ->
+  unit ->
+  t
 (** [add ?link ?chown ?from ~src ~dst ()] copies new files,
     directories or remote file URLs from [src] and adds them to the
     filesystem of the container at the [dst] path.
@@ -191,7 +202,14 @@ val add : ?link:bool -> ?chown:string -> ?from:string -> src:string list -> dst:
     the first {!from} stage, or a named stage (supplied via [?alias]
     to the {!from} command). *)
 
-val copy : ?link:bool -> ?chown:string -> ?from:string -> src:string list -> dst:string -> unit -> t
+val copy :
+  ?link:bool ->
+  ?chown:string ->
+  ?from:string ->
+  src:string list ->
+  dst:string ->
+  unit ->
+  t
 (** [copy ?link ?chown ?from ~src ~dst ()] copies new files or
     directories from [src] and adds them to the filesystem of the
     container at the path [dst]. See {!add} for more detailed
@@ -210,7 +228,7 @@ val copy : ?link:bool -> ?chown:string -> ?from:string -> src:string list -> dst
     the first {!from} stage, or a named stage (supplied via [?alias]
     to the {!from} command). *)
 
-val copy_heredoc : ?chown:string -> src:(heredoc list) -> dst:string -> unit -> t
+val copy_heredoc : ?chown:string -> src:heredoc list -> dst:string -> unit -> t
 (** [copy_heredoc src dst] creates the file [dst] using the content of
     the here-documents [src]. Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
 

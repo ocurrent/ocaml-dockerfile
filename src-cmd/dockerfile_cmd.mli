@@ -24,49 +24,53 @@
     Feel free to contribute more functions if you need them. *)
 
 type cmd_log = {
-  command: string;
-  stdout: string;
-  success: bool;
-  status: [ `Signaled of int | `Exited of int ]
-} [@@deriving sexp]
+  command : string;
+  stdout : string;
+  success : bool;
+  status : [ `Signaled of int | `Exited of int ];
+}
+[@@deriving sexp]
 (** Results of a command invocation *)
 
 val run_log :
   ?ok_to_fail:bool ->
   ?env:Bos.OS.Env.t ->
   Fpath.t ->
-  string -> Bos.Cmd.t -> (unit, [> `Msg of string ]) result
+  string ->
+  Bos.Cmd.t ->
+  (unit, [> `Msg of string ]) result
 (** [runlog log_dir name cmd] will run [cmd] with label [name]
    and log the results in [<log_dir>/<name>.sxp]. *)
 
 (** Docker command invocation *)
 module Docker : sig
   val bin : Bos.Cmd.t
-
   val info : Bos.Cmd.t
-
   val exists : unit -> bool
 
   val build_cmd :
     ?squash:bool ->
     ?pull:bool ->
     ?cache:bool ->
-    ?dockerfile:Fpath.t -> ?tag:string -> Fpath.t -> Bos.Cmd.t
+    ?dockerfile:Fpath.t ->
+    ?tag:string ->
+    Fpath.t ->
+    Bos.Cmd.t
 
   val volume_cmd : Bos.Cmd.t
-
   val push_cmd : string -> Bos.Cmd.t
-
   val build_id : Fpath.t -> (string, [> `Msg of string ]) result
 
   val run_cmd :
     ?mounts:(string * string) list ->
     ?volumes:(string * string) list ->
-    ?rm:bool -> string -> Bos.Cmd.t -> Bos.Cmd.t
+    ?rm:bool ->
+    string ->
+    Bos.Cmd.t ->
+    Bos.Cmd.t
 
   val manifest_push_cli :
-    platforms:string list ->
-    template:string -> target:string -> Bos.Cmd.t
+    platforms:string list -> template:string -> target:string -> Bos.Cmd.t
 
   val manifest_push_file : Fpath.t -> Bos.Cmd.t
 end
@@ -77,8 +81,8 @@ module Opam : sig
 
   val opam_env :
     root:Fpath.t ->
-    jobs:int -> (string Astring.String.map, [> `Msg of string ]) result
-
+    jobs:int ->
+    (string Astring.String.map, [> `Msg of string ]) result
 end
 
 (** {2 Utility functions} *)
@@ -87,5 +91,4 @@ val setup_logs : unit -> unit Cmdliner.Term.t
 (** [setup_logs ()] initialises a {!Logs} environment. *)
 
 val iter : ('a -> (unit, 'b) result) -> 'a list -> (unit, 'b) result
-
 val map : ('a -> ('b, 'c) result) -> 'a list -> ('b list, 'c) result

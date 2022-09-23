@@ -15,7 +15,12 @@
  *
  *)
 
-val generate_dockerfile : ?fname:string -> ?crunch:bool -> Fpath.t -> Dockerfile.t -> (unit, [> `Msg of string ]) result
+val generate_dockerfile :
+  ?fname:string ->
+  ?crunch:bool ->
+  Fpath.t ->
+  Dockerfile.t ->
+  (unit, [> `Msg of string ]) result
 (** [generate_dockerfile output_dir docker] will output Dockerfile inside
     the [output_dir] subdirectory.
 
@@ -23,8 +28,11 @@ val generate_dockerfile : ?fname:string -> ?crunch:bool -> Fpath.t -> Dockerfile
     optimisation to reduce the number of layers; disable it if you really want
     more layers. *)
 
-val generate_dockerfiles : ?crunch:bool -> Fpath.t ->
-  (string * Dockerfile.t) list -> (unit, [> `Msg of string ]) result
+val generate_dockerfiles :
+  ?crunch:bool ->
+  Fpath.t ->
+  (string * Dockerfile.t) list ->
+  (unit, [> `Msg of string ]) result
 (** [generate_dockerfiles output_dir (name * docker)] will
     output a list of Dockerfiles inside the [output_dir/] subdirectory,
     with each Dockerfile named as [Dockerfile.<release>].
@@ -33,8 +41,11 @@ val generate_dockerfiles : ?crunch:bool -> Fpath.t ->
     optimisation to reduce the number of layers; disable it if you really want
     more layers. *)
 
-val generate_dockerfiles_in_directories : ?crunch:bool -> Fpath.t ->
-  (string * Dockerfile.t) list -> (unit, [> `Msg of string ]) result
+val generate_dockerfiles_in_directories :
+  ?crunch:bool ->
+  Fpath.t ->
+  (string * Dockerfile.t) list ->
+  (unit, [> `Msg of string ]) result
 (** [generate_dockerfiles_in_directories output_dir (name * docker)] will
     output a list of Dockerfiles inside the [output_dir/name] subdirectory,
     with each directory containing the Dockerfile specified by [docker].
@@ -43,8 +54,12 @@ val generate_dockerfiles_in_directories : ?crunch:bool -> Fpath.t ->
     optimisation to reduce the number of layers; disable it if you really want
     more layers. *)
 
-val generate_dockerfiles_in_git_branches : ?readme:string -> ?crunch:bool ->
-  Fpath.t -> (string * Dockerfile.t) list -> (unit, [> `Msg of string ]) result
+val generate_dockerfiles_in_git_branches :
+  ?readme:string ->
+  ?crunch:bool ->
+  Fpath.t ->
+  (string * Dockerfile.t) list ->
+  (unit, [> `Msg of string ]) result
 (** [generate_dockerfiles_in_git_branches output_dir (name * docker)] will
     output a set of git branches in the [output_dir] Git repository.
     Each branch will be named [name] and contain a single [docker] file.

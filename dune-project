@@ -1,7 +1,6 @@
 (lang dune 3.0)
 (name dockerfile)
 
-(formatting (enabled_for dune))
 (generate_opam_files true)
 
 (source (github ocurrent/ocaml-dockerfile))

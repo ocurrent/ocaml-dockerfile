@@ -22,8 +22,8 @@ open Dockerfile
 val run_cmd : ('a, unit, string, t) format4 -> 'a
 (** [run_cmd fmt] will execute [cmd /S /C fmt]. *)
 
-val run_powershell : ?escape:(string -> string) ->
-                     ('a, unit, string, t) format4 -> 'a
+val run_powershell :
+  ?escape:(string -> string) -> ('a, unit, string, t) format4 -> 'a
 (** [run_powershell fmt] will execute [powershell -Command "fmt"].
 
     @param escape (defaults to {!Fun.id}) allows to escape [fmt]
@@ -53,8 +53,10 @@ val install_visual_studio_build_tools : ?vs_version:string -> string list -> t
    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
 
 val ocaml_for_windows_package_exn :
-  switch:Ocaml_version.t -> port:[`Mingw | `Msvc] -> arch:Ocaml_version.arch ->
-  (string * string)
+  switch:Ocaml_version.t ->
+  port:[ `Mingw | `Msvc ] ->
+  arch:Ocaml_version.arch ->
+  string * string
 (** [ocaml_for_windows_variant ~port ~arch] returns the
    [(package_name, package_version)] of the OCaml compiler
    package in OCaml for Windows, if applicable. *)
@@ -65,16 +67,18 @@ val cleanup : unit -> t
 (** Rules for Cygwin-based installation *)
 module Cygwin : sig
   type cyg = {
-      root : string; (** Root installation directory *)
-      site : string; (** Download site URL *)
-      args : string list; (** List of arguments to give to Cygwin's
+    root : string;  (** Root installation directory *)
+    site : string;  (** Download site URL *)
+    args : string list;
+        (** List of arguments to give to Cygwin's
                              setup, except [--root] and [--site]. *)
-    }
+  }
 
   val default : cyg
   (** The default Cygwin root, mirror, and arguments. *)
 
-  val setup : ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
+  val setup :
+    ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
   (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
      packages. Sets the [CYGWIN=winsymlinks:native] environment
      variable by default.
@@ -88,8 +92,8 @@ module Cygwin : sig
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages : ?extra:string list -> ?flexdll_version:string -> unit
-                        -> string list
+  val cygwin_packages :
+    ?extra:string list -> ?flexdll_version:string -> unit -> string list
   (** [cygwin_packages ?extra ()] will install the base development
      tools for the OCaml Cygwin port. Extra packages may also be
      optionally supplied via [extra]. *)
@@ -104,8 +108,8 @@ module Cygwin : sig
      tools for the OCaml MSVC port. Extra packages may also be
      optionally supplied via [extra]. *)
 
-  val ocaml_for_windows_packages : ?cyg:cyg -> ?extra:string list -> ?version:string -> unit
-                                   -> string list * t
+  val ocaml_for_windows_packages :
+    ?cyg:cyg -> ?extra:string list -> ?version:string -> unit -> string list * t
   (** [ocaml_for_windows_packages ?extra ()] returns the list of
      Cygwin packages dependencies, and the installation instructions.
      Extra packages may also be optionally supplied via [extra].
@@ -115,7 +119,8 @@ module Cygwin : sig
   (** [run_sh ?cyg fmt] will execute in the Cygwin root
      [\bin\bash.exe --login -c "fmt"]. *)
 
-  val run_sh_ocaml_env : ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
+  val run_sh_ocaml_env :
+    ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
   (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the evironment
      loaded by [ocaml-env cygwin exec] with [args]. *)
 
@@ -136,7 +141,10 @@ module Winget : sig
 
   val install_from_release :
     ?win10_revision:Dockerfile_distro.win10_lcu ->
-    ?version:Dockerfile_distro.win_all -> ?winget_version:string -> unit -> t
+    ?version:Dockerfile_distro.win_all ->
+    ?winget_version:string ->
+    unit ->
+    t
   (** Install winget from a released build (first in a separate Docker
      image). The optional [winget_version] specifies a Git tag. *)
 
@@ -148,8 +156,7 @@ module Winget : sig
   (** [install packages] will install the supplied winget package list. *)
 
   val dev_packages :
-    ?version:Dockerfile_distro.win_all ->
-    ?extra:string list -> unit -> t
+    ?version:Dockerfile_distro.win_all -> ?extra:string list -> unit -> t
   (** [dev_packages ?version ?extra ()] will install the base development
      tools. Extra packages may also be optionally supplied via
      [extra]. Using [?version] may change the set of installed packages. *)
