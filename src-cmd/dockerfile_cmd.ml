@@ -20,43 +20,46 @@ open Bos
 open Astring
 module OC = OS.Cmd
 
-let (>>=) = Result.bind
+let ( >>= ) = Result.bind
 
 let rec iter fn l =
-  match l with
-  | hd::tl -> fn hd >>= fun () -> iter fn tl
-  | [] -> Ok ()
+  match l with hd :: tl -> fn hd >>= fun () -> iter fn tl | [] -> Ok ()
 
 let map fn l =
-  List.map fn l |>
-  List.fold_left (fun acc b ->
-    match acc, b with
-    | Ok acc, Ok v -> Ok (v :: acc)
-    | Ok _acc, Error v -> Error v
-    | Error _ as e, _ -> e
-  ) (Ok [])  |> function
+  List.map fn l
+  |> List.fold_left
+       (fun acc b ->
+         match (acc, b) with
+         | Ok acc, Ok v -> Ok (v :: acc)
+         | Ok _acc, Error v -> Error v
+         | (Error _ as e), _ -> e)
+       (Ok [])
+  |> function
   | Ok v -> Ok (List.rev v)
   | e -> e
 
 type cmd_log = {
-  command: string;
-  stdout: string;
-  success: bool;
-  status: [ `Signaled of int | `Exited of int ]
-} [@@deriving sexp]
+  command : string;
+  stdout : string;
+  success : bool;
+  status : [ `Signaled of int | `Exited of int ];
+}
+[@@deriving sexp]
 
-let run_log ?(ok_to_fail=true) ?env log_dir name cmd =
+let run_log ?(ok_to_fail = true) ?env log_dir name cmd =
   let command = Cmd.to_string cmd in
-  OS.Cmd.(run_out ?env ~err:err_run_out) cmd |>
-  OS.Cmd.out_string >>= fun (stdout, (_,status)) ->
+  OS.Cmd.(run_out ?env ~err:err_run_out) cmd |> OS.Cmd.out_string
+  >>= fun (stdout, (_, status)) ->
   let success = status = `Exited 0 in
   let cmd_log = { command; stdout; success; status } in
   let path = Fpath.(log_dir / (name ^ ".sxp")) in
-  OS.File.write path (Sexplib.Sexp.to_string_hum (sexp_of_cmd_log cmd_log)) >>= fun () ->
+  OS.File.write path (Sexplib.Sexp.to_string_hum (sexp_of_cmd_log cmd_log))
+  >>= fun () ->
   match status with
-  |`Signaled n -> if ok_to_fail then Ok () else Fmt.error_msg "Signal %d" n
-  |`Exited 0 -> Ok ()
-  |`Exited code -> if ok_to_fail then Ok () else Fmt.error_msg "Exit code %d" code
+  | `Signaled n -> if ok_to_fail then Ok () else Fmt.error_msg "Signal %d" n
+  | `Exited 0 -> Ok ()
+  | `Exited code ->
+      if ok_to_fail then Ok () else Fmt.error_msg "Exit code %d" code
 
 (** Docker *)
 module Docker = struct
@@ -65,54 +68,68 @@ module Docker = struct
 
   let exists () =
     match OS.Cmd.run_out info |> OS.Cmd.out_string with
-    | Ok _ -> Logs.info (fun l -> l "Docker is running"); true
-    | Error (`Msg msg) -> Logs.err (fun l -> l "Docker not running: %s" msg); false
+    | Ok _ ->
+        Logs.info (fun l -> l "Docker is running");
+        true
+    | Error (`Msg msg) ->
+        Logs.err (fun l -> l "Docker not running: %s" msg);
+        false
 
-  let build_cmd ?(squash=false) ?(pull=true) ?(cache=true) ?dockerfile ?tag path =
+  let build_cmd ?(squash = false) ?(pull = true) ?(cache = true) ?dockerfile
+      ?tag path =
     let open Cmd in
     let cache = if cache then empty else v "--no-cache" in
     let pull = if pull then v "--pull" else empty in
     let squash = if squash then v "--squash" else empty in
-    let dfile = match dockerfile with None -> empty | Some d -> v "-f" % p d in
+    let dfile =
+      match dockerfile with None -> empty | Some d -> v "-f" % p d
+    in
     let tag = match tag with None -> empty | Some t -> v "-t" % t in
-    bin % "build" %% tag %% cache %% pull %% squash %% dfile  % p path
+    bin % "build" %% tag %% cache %% pull %% squash %% dfile % p path
 
-  let volume_cmd =
-    Cmd.(bin % "volume")
-
-  let push_cmd tag =
-    Cmd.(bin % "push" % tag)
+  let volume_cmd = Cmd.(bin % "volume")
+  let push_cmd tag = Cmd.(bin % "push" % tag)
 
   (* Find the image id that we just built *)
   let build_id log =
-    let rec find_id =
-      function
-      | hd::tl when String.is_prefix ~affix:"Successfully tagged " hd -> find_id tl
-      | hd::_ when String.is_prefix ~affix:"Successfully built " hd -> begin
-         match String.cut ~sep:"Successfully built " hd with
-         | Some ("", id) -> Ok id
-         | Some _ -> Fmt.error_msg "Unexpected internal error in build_id"
-         | None -> Fmt.error_msg "Malformed successfully built log"
-      end
-      | _hd::_tl -> Fmt.error_msg "Unexpected lines at end of log"
-      | [] -> Fmt.error_msg "Unable to find container id in log" in
+    let rec find_id = function
+      | hd :: tl when String.is_prefix ~affix:"Successfully tagged " hd ->
+          find_id tl
+      | hd :: _ when String.is_prefix ~affix:"Successfully built " hd -> (
+          match String.cut ~sep:"Successfully built " hd with
+          | Some ("", id) -> Ok id
+          | Some _ -> Fmt.error_msg "Unexpected internal error in build_id"
+          | None -> Fmt.error_msg "Malformed successfully built log")
+      | _hd :: _tl -> Fmt.error_msg "Unexpected lines at end of log"
+      | [] -> Fmt.error_msg "Unable to find container id in log"
+    in
     OS.File.read_lines log >>= fun lines ->
-    List.rev lines |> fun lines ->
-    find_id lines
+    List.rev lines |> fun lines -> find_id lines
 
   let manifest_push_cli ~platforms ~template ~target =
     let platforms = String.concat ~sep:"," platforms in
-    Cmd.(v "manifest-tool" % "push" % "from-args" % "--platforms" % platforms
-         % "--template" % template % "--target" % target)
+    Cmd.(
+      v "manifest-tool" % "push" % "from-args" % "--platforms" % platforms
+      % "--template" % template % "--target" % target)
 
   let manifest_push_file file =
-     Cmd.(v "manifest-tool" % "push" % "from-spec" % p file)
+    Cmd.(v "manifest-tool" % "push" % "from-spec" % p file)
 
-  let run_cmd ?(mounts=[]) ?(volumes=[]) ?(rm=true) img cmd =
+  let run_cmd ?(mounts = []) ?(volumes = []) ?(rm = true) img cmd =
     let rm = if rm then Cmd.(v "--rm") else Cmd.empty in
-    let mounts = List.map (fun (src,dst) -> ["--mount"; Printf.sprintf "source=%s,destination=%s" src dst]) mounts |> List.flatten |> Cmd.of_list in
+    let mounts =
+      List.map
+        (fun (src, dst) ->
+          [ "--mount"; Printf.sprintf "source=%s,destination=%s" src dst ])
+        mounts
+      |> List.flatten |> Cmd.of_list
+    in
     let vols =
-     List.map (fun (src,dst) -> ["-v"; Printf.sprintf "%s:%s" src dst]) volumes |> List.flatten |> Cmd.of_list in
+      List.map
+        (fun (src, dst) -> [ "-v"; Printf.sprintf "%s:%s" src dst ])
+        volumes
+      |> List.flatten |> Cmd.of_list
+    in
     Cmd.(bin % "run" %% rm %% mounts %% vols % img %% cmd)
 end
 
@@ -122,19 +139,22 @@ module Opam = struct
 
   let opam_env ~root ~jobs =
     OS.Env.current () >>= fun env ->
-    String.Map.add "OPAMROOT" (Cmd.p root) env |>
-    String.Map.add "OPAMYES" "1" |>
-    String.Map.add "OPAMJOBS" (string_of_int jobs) |>
-    Result.ok
+    String.Map.add "OPAMROOT" (Cmd.p root) env
+    |> String.Map.add "OPAMYES" "1"
+    |> String.Map.add "OPAMJOBS" (string_of_int jobs)
+    |> Result.ok
 end
 
 open Cmdliner
+
 let setup_logs () =
   let setup_log style_renderer level =
     Fmt_tty.setup_std_outputs ?style_renderer ();
     Logs.set_level level;
-    Logs.set_reporter (Logs_fmt.reporter ()) in
+    Logs.set_reporter (Logs_fmt.reporter ())
+  in
   let global_option_section = "COMMON OPTIONS" in
-  Term.(const setup_log
+  Term.(
+    const setup_log
     $ Fmt_cli.style_renderer ~docs:global_option_section ()
     $ Logs_cli.level ~docs:global_option_section ())

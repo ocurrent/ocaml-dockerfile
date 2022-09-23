@@ -26,8 +26,14 @@ val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 (** [run_as_opam fmt] runs the command specified by the [fmt]
     format string as the [opam] user. *)
 
-val install_opam_from_source : ?add_default_link:bool ->
-  ?prefix:string -> ?enable_0install_solver:bool -> branch:string -> hash:string -> unit -> Dockerfile.t
+val install_opam_from_source :
+  ?add_default_link:bool ->
+  ?prefix:string ->
+  ?enable_0install_solver:bool ->
+  branch:string ->
+  hash:string ->
+  unit ->
+  Dockerfile.t
 (** Commands to install OPAM via a source code checkout from GitHub.
     The [branch] can be a git tag or branch (e.g. [2.0] for opam 2.0.x or [2.1] for
     the opam 2.1.x).
@@ -52,8 +58,8 @@ val gen_opam2_distro :
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
   opam_hashes:opam_hashes ->
-  Dockerfile_distro.t
-  -> string * Dockerfile.t
+  Dockerfile_distro.t ->
+  string * Dockerfile.t
 (** [gen_opam2_distro ~opam_hashes d] will generate a Dockerfile
    for Linux distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master,
    per hash given in parameter.
@@ -74,8 +80,10 @@ val all_ocaml_compilers :
   distribution [distro] on architecture [arch]. *)
 
 val separate_ocaml_compilers :
-  string -> Ocaml_version.arch -> Dockerfile_distro.t
-  -> (string * Dockerfile.t) list
+  string ->
+  Ocaml_version.arch ->
+  Dockerfile_distro.t ->
+  (string * Dockerfile.t) list
 (** [separate_ocaml_compilers hub_id arch distro] will install a list of
   Dockerfiles that build individual OCaml compiler versions and their
   variants (e.g. flambda) in separate containers. *)
@@ -85,6 +93,7 @@ val deprecated : Dockerfile.t
    is used to replace unsupported containers on the Hub rather than leaving an
    unmaintained distribution lying around with possible security holes. *)
 
-val multiarch_manifest : target:string -> platforms:(string * string) list -> string
+val multiarch_manifest :
+  target:string -> platforms:(string * string) list -> string
 (** [multiarch_manifest ~target ~platforms] will generate a manifest-tool compliant yaml file to
   build a [target] on the given multiarch [platforms]. *)
