@@ -3,6 +3,7 @@ unreleased
 
 - Support BuildKit 1.4 syntax of here-documents in `COPY` instructions. (@MisterDA #99)
 - Support BuildKit 1.4 `--link` flag in `ADD` and `COPY` instructions. (@MisterDA #99)
+- Generate opam images using BuildKit 1.4 syntax for Dockerfiles. (@MisterDA #105)
 
 v8.0.0 2022-07-27 Sydney
 ------------------------
