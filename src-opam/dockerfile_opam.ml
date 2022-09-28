@@ -415,6 +415,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ sandbox
     @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
          (if os_family = `Windows then " --disable-sandboxing" else "")
+    @@ run "sed -i.bak -e '/^jobs: /d' /home/opam/.opam/config && rm /home/opam/.opam/config.bak"
     @@ compilers
     @@ run "opam switch %s" (OV.(to_string (with_patch OV.Releases.latest None)))
     @@ entrypoint_exec (pers @ ["opam"; "config"; "exec"; "--"])
@@ -456,6 +457,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ sandbox
            @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
                 (if os_family = `Windows then "--disable-sandboxing" else "")
+           @@ run "sed -i.bak -e '/^jobs: /d' /home/opam/.opam/config && rm /home/opam/.opam/config.bak"
            @@ add_remote
            @@ variants
            @@ run "opam switch %s" default_switch_name
