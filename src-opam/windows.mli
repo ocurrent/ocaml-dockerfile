@@ -61,8 +61,13 @@ val ocaml_for_windows_package_exn :
    [(package_name, package_version)] of the OCaml compiler
    package in OCaml for Windows, if applicable. *)
 
-val cleanup : unit -> t
-(** Cleanup caches. *)
+val header :
+  alias:string ->
+  ?win10_revision:Distro.win10_lcu ->
+  ?version:Distro.win_all ->
+  unit ->
+  t
+(** A Dockerfile header for multi-staged builds. *)
 
 (** Rules for Cygwin-based installation. *)
 module Cygwin : sig
@@ -77,15 +82,18 @@ module Cygwin : sig
   val default : cyg
   (** The default Cygwin root, mirror, and arguments. *)
 
-  val setup :
-    ?cyg:cyg -> ?winsymlinks_native:bool -> ?extra:string list -> unit -> t
-  (** Setup Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
-     packages. Sets the [CYGWIN=winsymlinks:native] environment
-     variable by default.
+  val install_from_release :
+    ?cyg:cyg -> ?extra:string list -> unit -> Dockerfile.t
+  (** Install Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
+     packages (first in a separate Docker image). Sets the
+     [CYGWIN=winsymlinks:native] environment variable.
      @see <https://github.com/metastack/cygsympathy>
      @see <https://github.com/metastack/msvs-tools> *)
 
-  val install : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
+  val setup : ?cyg:cyg -> ?from:string -> unit -> t
+  (** Setup winget, optionally copied from the [from] Docker image.  *)
+
+  val install : ?cyg:cyg -> string list -> Dockerfile.t
   (** Install the supplied Cygwin package list. The packages should be
      comma-separated. *)
 
@@ -139,18 +147,13 @@ module Winget : sig
      Windows 10 1809. Older versions of Winget have bugs, don't use
      them. *)
 
-  val install_from_release :
-    ?win10_revision:Distro.win10_lcu ->
-    ?version:Distro.win_all ->
-    ?winget_version:string ->
-    unit ->
-    t
+  val install_from_release : ?winget_version:string -> unit -> t
   (** Install winget from a released build (first in a separate Docker
      image). The optional [winget_version] specifies a Git tag. *)
 
   val setup : ?from:string -> unit -> t
-  (** Setup winget, copied from the [from] Docker image. Disable
-     winget telemetry. *)
+  (** Setup winget, optionally copied from the [from] Docker
+      image. Disable winget telemetry. *)
 
   val install : string list -> t
   (** [install packages] will install the supplied winget package list. *)

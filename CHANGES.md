@@ -1,6 +1,10 @@
 unreleased
 ----------
 
+- Refactor to be able to install Cygwin and OCaml for Windows in a
+  separate multistage build image, then copy. Docker Engine 20.10.18
+  for Windows is currently buggy and doesn't allow it.
+  (@MisterDA #114)
 - Support `ARG` Dockerfile instruction (@MisterDA #116 #117)
 - Bump to OCaml 4.08 and remove dependencies on result and rresult (@MisterDA #106)
 - Wrap libraries:

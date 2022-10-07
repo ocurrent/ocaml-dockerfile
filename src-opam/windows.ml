@@ -38,12 +38,15 @@ let run_vc ~arch fmt =
 let run_ocaml_env args fmt =
   ksprintf (run {|ocaml-env exec %s -- %s|} (String.concat " " args)) fmt
 
+let cleanup t = t @@ run_powershell {|Remove-Item 'C:\TEMP' -Recurse|} |> crunch
+
 let install_vc_redist ?(vs_version = "16") () =
   add
     ~src:[ "https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe" ]
     ~dst:{|C:\TEMP\|} ()
   @@ run
        {|C:\TEMP\vc_redist.x64.exe /install /passive /norestart /log C:\TEMP\vc_redist.log|}
+  |> cleanup
 
 let install_visual_studio_build_tools ?(vs_version = "16") components =
   let install =
@@ -74,6 +77,14 @@ let install_visual_studio_build_tools ?(vs_version = "16") components =
        ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
   @@ install
 
+let header ~alias ?win10_revision
+    ?(version =
+      (Distro.win10_latest_image : Distro.win10_release :> Distro.win_all)) () =
+  let img, tag = Distro.win10_base_tag ?win10_revision `Windows version in
+  parser_directive (`Escape '`')
+  @@ from ~alias ~tag img
+  @@ user "ContainerAdministrator"
+
 let sanitize_reg_path () =
   run
     {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "\\$"') do `
@@ -87,6 +98,16 @@ let prepend_path paths =
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "%s;%%c"|}
     paths
 
+let remove_system_attribute ?(recurse = true) path =
+  run_powershell
+    {|Foreach($file in Get-ChildItem -Path '%s' %s -force) { `
+        If (((Get-ItemProperty -Path $file.fullname).attributes -band [io.fileattributes]::System)) { `
+            Set-ItemProperty -Path $file.fullname -Name attributes -Value ((Get-ItemProperty $file.fullname).attributes -BXOR [io.fileattributes]::System) `
+        } `
+     } #end Foreach|}
+    path
+    (if recurse then "-Recurse" else "")
+
 let ocaml_for_windows_package_exn ~switch ~port ~arch =
   let variant =
     let bitness = if Ocaml_version.arch_is_32bit arch then "32" else "64" in
@@ -97,8 +118,6 @@ let ocaml_for_windows_package_exn ~switch ~port ~arch =
   in
   let _, pkgver = Ocaml_version.Opam.V2.package switch in
   ("ocaml-variants", pkgver ^ "+" ^ variant)
-
-let cleanup () = run_powershell {|Remove-Item 'C:\TEMP' -Recurse|}
 
 let git_init ~name ~email ~opam_repository =
   String.concat " && "
@@ -112,7 +131,6 @@ let git_init ~name ~email ~opam_repository =
 module Cygwin = struct
   type cyg = { root : string; site : string; args : string list }
 
-  let cygsetup = {|C:\cygwin-setup-x86_64.exe|}
   let cygcache = {|C:\TEMP\cache|}
 
   let default =
@@ -175,35 +193,48 @@ module Cygwin = struct
          {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin|}
          version version
 
-  let cygwin ?(cyg = default) fmt =
+  let cygsetup ?(cyg = default) ?(upgrade = false) fmt =
     ksprintf
-      (run {|%s %s --root %s --site %s --symlink-type=native %s|} cygsetup
+      (run
+         {|%s\setup-x86_64.exe %s --root %s --site %s --symlink-type=native %s%s|}
+         cyg.root
          (String.concat " " cyg.args)
-         cyg.root cyg.site)
+         cyg.root cyg.site
+         (if upgrade then " --upgrade-also" else ""))
       fmt
 
-  let install ?(cyg = default) fmt = ksprintf (cygwin ~cyg "--packages %s") fmt
+  let install ?(cyg = default) pkgs =
+    cygsetup ~cyg "--packages %s"
+      (pkgs |> List.sort_uniq String.compare |> String.concat ",")
+    |> cleanup
 
-  let setup ?(cyg = default) ?(winsymlinks_native = true) ?(extra = []) () =
-    (if winsymlinks_native then env [ ("CYGWIN", "winsymlinks:native") ]
-    else empty)
+  let update ?(cyg = default) () = cygsetup ~cyg ~upgrade:true "" |> cleanup
+
+  let setup_env ~cyg =
+    env [ ("CYGWIN", "winsymlinks:native") ]
+    @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
+
+  let install_from_release ?(cyg = default) ?(extra = []) () =
+    setup_env ~cyg
     @@ add
          ~src:[ "https://www.cygwin.com/setup-x86_64.exe" ]
-         ~dst:{|C:\cygwin-setup-x86_64.exe|} ()
+         ~dst:(cyg.root ^ {|\setup-x86_64.exe|})
+         ()
     @@ install_cygsympathy_from_source cyg
-    @@ cygwin ~cyg "--packages %s"
-         (extra |> List.sort_uniq String.compare |> String.concat ",")
+    @@ install ~cyg extra
     @@ install_msvs_tools_from_source cyg
-    @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
          cyg.root
-    @@ workdir {|%s\home\opam|} cyg.root
+    @@ remove_system_attribute (cyg.root ^ {|\dev|})
 
-  let update ?(cyg = default) () =
-    run {|%s %s --root %s --site %s --upgrade-also|} cygsetup
-      (String.concat " " cyg.args)
-      cyg.root cyg.site
+  let setup ?(cyg = default) ?from () =
+    (match from with
+    | Some from ->
+        copy ~from ~src:[ default.root ] ~dst:default.root () @@ setup_env ~cyg
+        |> cleanup
+    | None -> empty)
+    @@ workdir {|%s\home\opam|} cyg.root
 
   let cygwin_packages ?(extra = []) ?(flexdll_version = "0.39-1") () =
     (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
@@ -252,17 +283,6 @@ module Winget = struct
            `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1803;
          ])
 
-  let winget = "winget-builder"
-
-  let header ?win10_revision
-      ?(version =
-        (Distro.win10_latest_image : Distro.win10_release :> Distro.win_all)) ()
-      =
-    let img, tag = Distro.win10_base_tag ?win10_revision `Windows version in
-    parser_directive (`Escape '`')
-    @@ from ~alias:winget ~tag img
-    @@ user "ContainerAdministrator"
-
   let footer path =
     run {|mkdir "C:\Program Files\winget-cli"|}
     @@ run
@@ -276,7 +296,7 @@ module Winget = struct
          path
     |> crunch
 
-  let install_from_release ?win10_revision ?version ?winget_version () =
+  let install_from_release ?winget_version () =
     let file = "Microsoft.DesktopAppInstaller_8wekyb3d8bbwe." in
     let src =
       let src = "https://github.com/microsoft/winget-cli/releases/" in
@@ -285,8 +305,7 @@ module Winget = struct
       | Some ver -> src ^ "download/" ^ ver ^ "/" ^ file ^ "msixbundle"
     in
     let dst = {|C:\TEMP\|} ^ file ^ "zip" in
-    header ?win10_revision ?version ()
-    @@ add ~src:[ src ] ~dst ()
+    add ~src:[ src ] ~dst ()
     @@ run_powershell
          {|Expand-Archive -LiteralPath %s -DestinationPath C:\TEMP\winget-cli -Force|}
          dst
@@ -295,11 +314,14 @@ module Winget = struct
          {|Expand-Archive -LiteralPath C:\TEMP\winget-cli\AppInstaller_x64.zip -DestinationPath C:\TEMP\winget-cli\ -Force|}
     @@ footer ""
 
-  let setup ?(from = winget) () =
+  let setup ?from () =
     let escape s = String.(concat {|""""|} (split_on_char '"' s)) in
-    copy ~from
-      ~src:[ {|C:\Program Files\winget-cli|} ]
-      ~dst:{|C:\Program Files\winget-cli|} ()
+    (match from with
+    | Some from ->
+        copy ~from
+          ~src:[ {|C:\Program Files\winget-cli|} ]
+          ~dst:{|C:\Program Files\winget-cli|} ()
+    | None -> empty)
     @@ prepend_path [ {|C:\Program Files\winget-cli|} ]
     @@ run_powershell ~escape
          {|$path=(Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState'); New-Item $path -ItemType Directory -Force; '{ "$schema": "https://aka.ms/winget-settings.schema.json", "telemetry": { "disable": "true" } }' | Out-File -encoding ASCII (Join-Path $path 'settings.json')|}

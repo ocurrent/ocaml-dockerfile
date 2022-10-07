@@ -350,36 +350,41 @@ let pacman_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
 let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch distro () =
   let version = match distro with `Windows (_, v) -> v | _ -> assert false in
-  (match winget with
-  | None when Windows.Winget.is_supported version ->
-      Windows.Winget.install_from_release ?win10_revision ~version ()
-  | _ -> empty)
+  let winget_image, winget_setup =
+    match winget with
+    | None when Windows.Winget.is_supported version ->
+        ( Windows.header ~alias:"winget-builder" ?win10_revision ~version ()
+          @@ Windows.Winget.install_from_release (),
+          Windows.Winget.setup ~from:"winget-builder" ()
+          @@ Windows.Winget.dev_packages ~version () )
+    | _ -> (empty, empty)
+  in
+  (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
+     C:\cygwin64, so we cannot build Cygwin in a separate image. *)
+  let ocaml_for_windows =
+    let extra, vs_build_tools =
+      match distro with
+      | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages (), empty)
+      | `Windows (`Msvc, _) ->
+          ( Windows.Cygwin.msvc_packages (),
+            Windows.install_visual_studio_build_tools
+              [
+                "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
+                "Microsoft.VisualStudio.Component.Windows10SDK.18362";
+              ] )
+      | _ -> invalid_arg "Invalid distribution"
+    in
+    let extra, pkgs = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
+    Windows.Cygwin.install_from_release ~extra () @@ vs_build_tools @@ pkgs
+  in
+  winget_image
   @@ header ?win10_revision ?arch distro
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
-  @@ (let extra, t =
-        match distro with
-        | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages (), empty)
-        | `Windows (`Msvc, _) ->
-            ( Windows.Cygwin.msvc_packages (),
-              Windows.install_visual_studio_build_tools
-                [
-                  "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
-                  "Microsoft.VisualStudio.Component.Windows10SDK.18362";
-                ] )
-        | _ -> invalid_arg "Invalid distribution"
-      in
-      let extra, t' = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
-      Windows.install_vc_redist ()
-      @@ t
-      @@ Windows.sanitize_reg_path ()
-      @@ Windows.Cygwin.setup ~extra ()
-      @@ t')
-  @@ (if Windows.Winget.is_supported version then
-      Windows.Winget.setup ?from:winget ()
-      @@ Windows.Winget.dev_packages ~version ()
-     else empty)
-  @@ Windows.Cygwin.Git.init () @@ Windows.cleanup ()
+  @@ Windows.install_vc_redist ()
+  @@ Windows.sanitize_reg_path ()
+  @@ winget_setup @@ ocaml_for_windows @@ Windows.Cygwin.setup ()
+  @@ Windows.Cygwin.Git.init ()
 
 let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
     ?labels ~opam_hashes d =
