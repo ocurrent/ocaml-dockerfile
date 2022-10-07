@@ -6,7 +6,7 @@ unreleased
   + `Dockerfile_gen` from the `dockerfile-cmd` package becomes `Dockerfile_cmd.Gen`;
   + `Dockerfile_distro`, `Dockerfile_linux`, `Dockerfile_windows` from the
     `dockerfile_opam` package respectively become `Dockerfile_opam.Distro`,
-    `Dockerfile_opam.Linux`, `Dockerfile_opam.Windows`. (@MisterDA #106)
+    `Dockerfile_opam.Linux`, `Dockerfile_opam.Windows`. (@MisterDA #106, #113)
 - Generate opam images using BuildKit 1.4 syntax for Dockerfiles. (@MisterDA #105)
 - Support BuildKit 1.4 syntax of here-documents in `COPY` instructions. (@MisterDA #99)
 - Support BuildKit 1.4 `--link` flag in `ADD` and `COPY` instructions. (@MisterDA #99)

@@ -15,12 +15,7 @@
  *
  *)
 
-(** OPAM-specific Dockerfile rules *)
-
 open Dockerfile
-module Distro = Distro
-module Linux = Linux
-module Windows = Windows
 module D = Distro
 module OV = Ocaml_version
 
