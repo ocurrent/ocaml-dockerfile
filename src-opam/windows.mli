@@ -15,7 +15,7 @@
  *
  *)
 
-(** Windows specific Dockerfile utility functions *)
+(** Windows specific Dockerfile utility functions. *)
 
 open Dockerfile
 
@@ -27,7 +27,7 @@ val run_powershell :
 (** [run_powershell fmt] will execute [powershell -Command "fmt"].
 
     @param escape (defaults to {!Fun.id}) allows to escape [fmt]
-      because the calling shell (usually {v cmd v}) might interpret
+      because the calling shell (usually [cmd]) might interpret
       unwanted things in [fmt]. This might help embedding readable
       powershell code. *)
 
@@ -41,7 +41,7 @@ val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
 
 val sanitize_reg_path : unit -> t
 (** [sanitize_reg_path ()] adds the command necessary to remove a trailing
-    backslash from the {v PATH v} value stored in the registry and must be called
+    backslash from the [PATH] value stored in the registry and must be called
     before any further manipulation of this variable is done in the Dockerfile. *)
 
 val install_vc_redist : ?vs_version:string -> unit -> t
@@ -64,14 +64,14 @@ val ocaml_for_windows_package_exn :
 val cleanup : unit -> t
 (** Cleanup caches. *)
 
-(** Rules for Cygwin-based installation *)
+(** Rules for Cygwin-based installation. *)
 module Cygwin : sig
   type cyg = {
     root : string;  (** Root installation directory *)
     site : string;  (** Download site URL *)
     args : string list;
-        (** List of arguments to give to Cygwin's
-                             setup, except [--root] and [--site]. *)
+        (** List of arguments to give to Cygwin's setup, except
+           [--root] and [--site]. *)
   }
 
   val default : cyg
@@ -124,7 +124,7 @@ module Cygwin : sig
   (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the evironment
      loaded by [ocaml-env cygwin exec] with [args]. *)
 
-  (** Rules for Git *)
+  (** Rules for Git. *)
   module Git : sig
     val init : ?cyg:cyg -> ?name:string -> ?email:string -> unit -> t
     (** Configure the git name and email variables to sensible defaults *)
@@ -132,7 +132,7 @@ module Cygwin : sig
 end
 
 (** Rules for winget installation.
-    @see <https://docs.microsoft.com/en-us/windows/package-manager/winget>/ *)
+    @see <https://docs.microsoft.com/en-us/windows/package-manager/winget> *)
 module Winget : sig
   val is_supported : Distro.win_all -> bool
   (** Winget 1.0.11692 discontinued support for versions older than
@@ -157,10 +157,10 @@ module Winget : sig
 
   val dev_packages : ?version:Distro.win_all -> ?extra:string list -> unit -> t
   (** [dev_packages ?version ?extra ()] will install the base development
-     tools. Extra packages may also be optionally supplied via
-     [extra]. Using [?version] may change the set of installed packages. *)
+      tools. Extra packages may also be optionally supplied via [extra].
+      Using [?version] may change the set of installed packages. *)
 
-  (** Rules for Git *)
+  (** Rules for Git. *)
   module Git : sig
     val init : ?name:string -> ?email:string -> unit -> t
     (** Configure the git name and email variables to sensible defaults *)

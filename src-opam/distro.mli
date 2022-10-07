@@ -45,7 +45,7 @@ type win10_ltsc = [ `Ltsc2015 | `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
     the semi-annual release they're based on. *)
 
 type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
-(** All Windows 10/11 release versions and LTSC names *)
+(** All Windows 10/11 release versions and LTSC names. *)
 
 type win10_lcu =
   [ `LCU
@@ -134,7 +134,7 @@ type distro =
   | `Cygwin of win10_release
   | `Windows of [ `Mingw | `Msvc ] * win10_release ]
 [@@deriving sexp]
-(** Supported Docker container distributions distributions *)
+(** Supported Docker container distributions distributions. *)
 
 type t =
   [ `Alpine of
@@ -198,7 +198,7 @@ type t =
   | `Cygwin of win_all
   | `Windows of [ `Mingw | `Msvc ] * win_all ]
 [@@deriving sexp]
-(** Supported Docker container distributions *)
+(** Supported Docker container distributions. *)
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
 (** The operating system family a distro belongs to. *)
@@ -230,7 +230,7 @@ val resolve_alias : t -> distro
    versions such as [Latest]. *)
 
 val distros : t list
-(** Enumeration of the supported Docker container distributions *)
+(** Enumeration of the supported Docker container distributions. *)
 
 val latest_distros : t list
 (** Enumeration of the latest stable (ideally LTS) supported distributions. *)
@@ -267,7 +267,7 @@ type package_manager =
   | `Zypper  (** OpenSUSE Zypper *)
   | `Pacman  (** Archlinux Pacman *)
   | `Cygwin  (** Cygwin package manager *)
-  | `Windows  (** Native Windows, WinGet, Cygwin  *) ]
+  | `Windows  (** Native Windows, WinGet, Cygwin *) ]
 [@@deriving sexp]
 (** The package manager used by a distro. *)
 
@@ -352,7 +352,7 @@ type win10_release_status = [ `Deprecated | `Active ]
 (** Windows 10 release status. *)
 
 val win10_release_status : win_all -> win10_release_status
-(* [win10_release_status v channel] returns the Microsoft support
+(** [win10_release_status v channel] returns the Microsoft support
    status of the specified Windows 10 release.
    @see <https://en.wikipedia.org/wiki/Windows_10_version_history#Channels> *)
 
