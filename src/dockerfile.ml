@@ -59,6 +59,7 @@ type line =
   | `Run of shell_or_exec
   | `Cmd of shell_or_exec
   | `Expose of int list
+  | `Arg of string * string option
   | `Env of (string * string) list
   | `Add of sources_to_dest
   | `Copy of sources_to_dest
@@ -117,22 +118,28 @@ let string_of_shell_or_exec ~escape (t : shell_or_exec) =
   | `Shells l -> String.concat (" && " ^ String.make 1 escape ^ "\n  ") l
   | `Exec sl -> json_array_of_list sl
 
+let quote_env_var ~escape v =
+  let len = String.length v in
+  let buf = Buffer.create len in
+  let j = ref 0 in
+  for i = 0 to len - 1 do
+    if v.[i] = '"' || v.[i] = escape then (
+      if i - !j > 0 then Buffer.add_substring buf v !j (i - !j);
+      Buffer.add_char buf escape;
+      j := i)
+  done;
+  Buffer.add_substring buf v !j (len - !j);
+  Buffer.contents buf
+
+let string_of_env_var ~escape (name, value) =
+  sprintf {|%s="%s"|} name (quote_env_var ~escape value)
+
 let string_of_env_list ~escape el =
-  let quote v =
-    let len = String.length v in
-    let buf = Buffer.create len in
-    let j = ref 0 in
-    for i = 0 to len - 1 do
-      if v.[i] = '"' || v.[i] = escape then (
-        if i - !j > 0 then Buffer.add_substring buf v !j (i - !j);
-        Buffer.add_char buf escape;
-        j := i)
-    done;
-    Buffer.add_substring buf v !j (len - !j);
-    Buffer.contents buf
-  in
-  String.concat " "
-    (List.map (fun (k, v) -> sprintf {|%s="%s"|} k (quote v)) el)
+  List.map (string_of_env_var ~escape) el |> String.concat " "
+
+let string_of_arg ~escape = function
+  | name, Some value -> string_of_env_var ~escape (name, value)
+  | name, None -> name
 
 let optional name = function
   | None -> []
@@ -184,6 +191,7 @@ let rec string_of_line ~escape (t : line) =
   | `Run c -> cmd "RUN" (string_of_shell_or_exec ~escape c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
+  | `Arg a -> cmd "ARG" (string_of_arg ~escape a)
   | `Env el -> cmd "ENV" (string_of_env_list ~escape el)
   | `Add c -> cmd "ADD" (string_of_sources_to_dest c)
   | `Copy c -> cmd "COPY" (string_of_sources_to_dest c)
@@ -211,6 +219,7 @@ let cmd fmt = ksprintf (fun b -> [ `Cmd (`Shell b) ]) fmt
 let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
 let expose_port p : t = [ `Expose [ p ] ]
 let expose_ports p : t = [ `Expose p ]
+let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
 let add ?link ?chown ?from ~src ~dst () : t =

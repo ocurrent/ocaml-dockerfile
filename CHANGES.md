@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support `ARG` Dockerfile instruction (@MisterDA #116 #117)
 - Bump to OCaml 4.08 and remove dependencies on result and rresult (@MisterDA #106)
 - Wrap libraries:
   + `Dockerfile_gen` from the `dockerfile-cmd` package becomes `Dockerfile_cmd.Gen`;
