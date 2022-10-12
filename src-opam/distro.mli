@@ -49,6 +49,7 @@ type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
 
 type win10_lcu =
   [ `LCU
+  | `LCU20221011
   | `LCU20220913
   | `LCU20220809
   | `LCU20220712
