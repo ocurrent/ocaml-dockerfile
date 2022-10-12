@@ -177,7 +177,7 @@ module Cygwin = struct
 
   let cygwin ?(cyg = default) fmt =
     ksprintf
-      (run {|%s %s --root %s --site %s --symlink-type=wsl %s|} cygsetup
+      (run {|%s %s --root %s --site %s --symlink-type=native %s|} cygsetup
          (String.concat " " cyg.args)
          cyg.root cyg.site)
       fmt
