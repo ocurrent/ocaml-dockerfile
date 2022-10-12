@@ -15,9 +15,9 @@
  *
  *)
 
-open Astring
-(** Distro selection for various OPAM combinations *)
+(** Distro selection for various OPAM combinations. *)
 
+open Astring
 open Sexplib.Conv
 
 type win10_release =
