@@ -40,6 +40,7 @@ let run_ocaml_env args fmt =
 
 let cleanup t = t @@ run_powershell {|Remove-Item 'C:\TEMP' -Recurse|} |> crunch
 
+(* VC redist is needed to run WinGet. *)
 let install_vc_redist ?(vs_version = "16") () =
   add
     ~src:[ "https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe" ]
