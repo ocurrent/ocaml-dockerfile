@@ -1,6 +1,10 @@
 unreleased
 ----------
 
+- Various LCU Updates, deprecate Windows 10 20H2
+  (@mtelvers #115 #109 #107)
+- Update to bubblewrap 0.6.2 when building from source in a distro
+  packaging an outdated version (@MisterDA #120)
 - Add Alpine 3.16 (3.15 is now tier 2 and 3.14 is deprecated)
   (@raphael-proust #119)
 - Refactor to be able to install Cygwin and OCaml for Windows in a
