@@ -536,8 +536,7 @@ let separate_ocaml_compilers hub_id arch distro =
            let sandbox =
              match os_family with
              | `Linux -> run "opam-sandbox-disable"
-             | `Macos -> run "opam-sandbox-disable" (* TODO Not sure about this? *)
-             | `Windows | `Cygwin -> empty
+             | `Windows | `Cygwin | `Macos -> empty
            in
            header ~arch
              ~tag:(Printf.sprintf "%s-opam" distro_tag)
