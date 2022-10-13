@@ -1281,7 +1281,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
   | `Windows (_, v) ->
       win10_base_tag ?win10_revision `Windows
         (v : win10_release :> [> win10_release ])
-  | `Macos `Macos_monterey -> ("macos/monterey", "12.6") (* TODO There is no docker image for this yet! *)
+  | `Macos `Macos_monterey -> ("macos/monterey", "12") (* TODO There is no docker image for this yet! *)
      
 let compare a b =
   String.compare
