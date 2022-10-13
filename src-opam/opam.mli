@@ -15,16 +15,7 @@
  *
  *)
 
-(** Rules for generating Dockerfiles involving OPAM.
-
-   These are deployed at {{:https://hub.docker.com/r/ocaml/opam}ocaml/opam}
-   on the Docker Hub. The interfaces here may change as the production deployments
-   there change, so please contact [anil@recoil.org] if you depend on these
-   functions for your own infrastructure. *)
-
-module Distro = Distro
-module Linux = Linux
-module Windows = Windows
+(** OPAM-specific Dockerfile rules. *)
 
 val run_as_opam : ('a, unit, string, Dockerfile.t) format4 -> 'a
 (** [run_as_opam fmt] runs the command specified by the [fmt]
