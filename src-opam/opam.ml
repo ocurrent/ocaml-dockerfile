@@ -48,17 +48,18 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
   @@ maybe_link_opam add_default_link prefix branch
 
 let bubblewrap_minimum = (0, 4, 1)
+let bubblewrap_latest = (0, 6, 2)
 
 let maybe_build_bubblewrap_from_source ?(prefix = "/usr/local") distro =
-  let major, minor, revision = bubblewrap_minimum in
   match D.bubblewrap_version distro with
   | Some release when release >= bubblewrap_minimum -> empty
   | _ ->
+      let major, minor, revision = bubblewrap_latest in
       let rel = Printf.sprintf "%d.%d.%d" major minor revision in
       let file = Printf.sprintf "bubblewrap-%s.tar.xz" rel in
       let url =
         Printf.sprintf
-          "https://github.com/projectatomic/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz"
+          "https://github.com/containers/bubblewrap/releases/download/v%s/bubblewrap-%s.tar.xz"
           rel rel
       in
       run "curl -fOL %s" url @@ run "tar xf %s" file
