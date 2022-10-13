@@ -1,6 +1,8 @@
 unreleased
 ----------
 
+- Add Alpine 3.16 (3.15 is now tier 2 and 3.14 is deprecated)
+  (@raphael-proust #119)
 - Refactor to be able to install Cygwin and OCaml for Windows in a
   separate multistage build image, then copy. Docker Engine 20.10.18
   for Windows is currently buggy and doesn't allow it.
