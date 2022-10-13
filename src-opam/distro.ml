@@ -187,7 +187,7 @@ let win10_kb_number_to_lcu (v : win10_release) kb =
   | lcu -> Some (v, lcu)
   | exception Not_found -> None
 
-type macos_all = [ `Latest | `Macos_monterey ]
+type macos_all = [ `Latest | `V12 ]
 
 type distro =
   [ `Alpine of
