@@ -879,7 +879,7 @@ let tag_of_distro (d : t) =
   | `Cygwin v -> "cygwin-" ^ win10_release_to_string v
   | `Windows (`Mingw, v) -> "windows-mingw-" ^ win10_release_to_string v
   | `Windows (`Msvc, v) -> "windows-msvc-" ^ win10_release_to_string v
-  | `Macos (`Latest | `Macos_monterey) -> "macos-homebrew-12.6"
+  | `Macos (`Latest | `Macos_monterey) -> "macos-homebrew-12"
 
 let distro_of_tag x : t option =
   let win10_of_tag affix s f =
