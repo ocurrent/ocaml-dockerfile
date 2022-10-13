@@ -154,6 +154,12 @@ val expose_ports : int list -> t
 (** [expose_ports] informs Docker that the container will listen on the specified
   network ports at runtime. *)
 
+val arg : ?default:string -> string -> t
+(** [arg ~default name] defines a variable that users can pass at
+    build-time to the builder with the docker build command using the
+    [--build-arg <varname>=<value>] flag. It can optionally include a
+    default value. *)
+
 val env : (string * string) list -> t
 (** [env] sets the list of environment variables supplied with the
   (<key>, <value>) tuple. This value will be passed to all future {!run}
