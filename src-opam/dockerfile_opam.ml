@@ -81,7 +81,7 @@ let bubblewrap_and_dev_packages distro =
     | `Yum -> Linux.RPM.dev_packages
     | `Zypper -> Linux.Zypper.dev_packages
     | `Pacman -> Linux.Pacman.dev_packages
-    | `Cygwin | `Windows -> assert false
+    | `Cygwin | `Windows | `Homebrew -> assert false
   in
   match D.bubblewrap_version distro with
   | Some version when version >= bubblewrap_minimum ->
@@ -406,6 +406,9 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch distro () =
      else empty)
   @@ Windows.Cygwin.Git.init () @@ Windows.cleanup ()
 
+let macos_opam2 =
+  header ~arch:(`X86_64)
+
 let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
     ?labels ~opam_hashes d =
   let fn =
@@ -426,6 +429,7 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()
     | `Cygwin -> cygwin_opam2 ?win10_revision ?labels ?arch ~opam_hashes d ()
     | `Windows -> windows_opam2 ?win10_revision ?winget ?labels ?arch d ()
+    | `Homebrew -> macos_opam2 d
   in
   let clone =
     if clone_opam_repo then
@@ -474,7 +478,7 @@ let all_ocaml_compilers hub_id arch distro =
     let sandbox =
       match os_family with
       | `Linux -> run "opam-sandbox-disable"
-      | `Windows | `Cygwin -> empty
+      | `Windows | `Cygwin | `Macos -> empty
     in
     header ~arch ~tag:(Printf.sprintf "%s-opam" distro_tag) ~img:hub_id distro
     @@ workdir "/home/opam/opam-repository"
@@ -490,7 +494,7 @@ let all_ocaml_compilers hub_id arch distro =
     @@ env [ ("OPAMYES", "1") ]
     @@
     match os_family with
-    | `Linux | `Cygwin -> cmd "bash"
+    | `Linux | `Cygwin | `Macos -> cmd "bash" (* TODO Should we use zsh since that is the default now in MacOS? *)
     | `Windows -> cmd_exec [ "cmd.exe" ]
   in
   (distro_tag, d)
@@ -532,6 +536,7 @@ let separate_ocaml_compilers hub_id arch distro =
            let sandbox =
              match os_family with
              | `Linux -> run "opam-sandbox-disable"
+             | `Macos -> run "opam-sandbox-disable" (* TODO Not sure about this? *)
              | `Windows | `Cygwin -> empty
            in
            header ~arch
@@ -549,7 +554,7 @@ let separate_ocaml_compilers hub_id arch distro =
            @@ entrypoint_exec (pers @ [ "opam"; "config"; "exec"; "--" ])
            @@
            match os_family with
-           | `Linux | `Cygwin -> cmd "bash"
+           | `Linux | `Cygwin | `Macos -> cmd "bash"
            | `Windows -> cmd_exec [ "cmd.exe" ]
          in
          (Printf.sprintf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d))

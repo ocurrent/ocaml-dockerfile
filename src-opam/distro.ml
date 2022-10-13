@@ -187,6 +187,8 @@ let win10_kb_number_to_lcu (v : win10_release) kb =
   | lcu -> Some (v, lcu)
   | exception Not_found -> None
 
+type macos_all = [ `Latest | `Macos_monterey ]
+
 type distro =
   [ `Alpine of
     [ `V3_3
@@ -242,7 +244,10 @@ type distro =
     | `V21_10
     | `V22_04 ]
   | `Cygwin of win10_release
-  | `Windows of [ `Mingw | `Msvc ] * win10_release ]
+  | `Windows of [ `Mingw | `Msvc ] * win10_release 
+  | `Macos of [ `Macos_monterey ]
+]
+
 [@@deriving sexp]
 
 type t =
@@ -305,10 +310,11 @@ type t =
     | `Latest
     | `LTS ]
   | `Cygwin of win_all
-  | `Windows of [ `Mingw | `Msvc ] * win_all ]
+  | `Windows of [ `Mingw | `Msvc ] * win_all 
+  | `Macos of macos_all ]
 [@@deriving sexp]
 
-type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
+type os_family = [ `Cygwin | `Linux | `Windows | `Macos] [@@deriving sexp]
 
 let os_family_of_distro (t : t) : os_family =
   match t with
@@ -317,16 +323,18 @@ let os_family_of_distro (t : t) : os_family =
       `Linux
   | `Cygwin _ -> `Cygwin
   | `Windows _ -> `Windows
+  | `Macos _ -> `Macos
 
 let os_family_to_string (os : os_family) =
   match os with
   | `Linux -> "linux"
   | `Windows -> "windows"
   | `Cygwin -> "cygwin"
+  | `Macos -> "macos"
 
 let opam_repository (os : os_family) =
   match os with
-  | `Cygwin | `Linux -> "https://github.com/ocaml/opam-repository.git"
+  | `Cygwin | `Linux | `Macos -> "https://github.com/ocaml/opam-repository.git"
   | `Windows -> "https://github.com/fdopen/opam-repository-mingw.git#opam2"
 
 let personality os_family arch =
@@ -523,7 +531,8 @@ let resolve_alias (d : t) : distro =
         ( _,
           ( `V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809
           | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2 ) ) ) as d ->
-      d
+     d
+  | `Macos (`Latest | `Macos_monterey ) -> `Macos `Macos_monterey
 
 let distro_status (d : t) : status =
   let resolved = resolve_alias d in
@@ -562,6 +571,7 @@ let distro_status (d : t) : status =
         `Deprecated
     | `Cygwin v -> win10_docker_status `ServerCore v
     | `Windows (_, v) -> win10_docker_status `Windows v
+    | `Macos _ -> `Active `Tier3 (** TODO What does this Tier level mean? Matches Windows Tier3 *)
 
 let latest_distros =
   [
@@ -718,6 +728,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OracleLinux `V8 -> Some "4.07.0"
   | `Cygwin _ -> None
   | `Windows _ -> None
+  | `Macos _ -> None
   | `Debian (`Testing | `Unstable) -> assert false
 
 let win10_release_to_string = function
@@ -868,6 +879,7 @@ let tag_of_distro (d : t) =
   | `Cygwin v -> "cygwin-" ^ win10_release_to_string v
   | `Windows (`Mingw, v) -> "windows-mingw-" ^ win10_release_to_string v
   | `Windows (`Msvc, v) -> "windows-msvc-" ^ win10_release_to_string v
+  | `Macos (`Latest | `Macos_monterey) -> "macos-homebrew-12.6"
 
 let distro_of_tag x : t option =
   let win10_of_tag affix s f =
@@ -1031,6 +1043,7 @@ let human_readable_string_of_distro (d : t) =
     | `Cygwin v -> "Cygwin " ^ win10_release_to_string v
     | `Windows (`Mingw, v) -> "Windows mingw " ^ win10_release_to_string v
     | `Windows (`Msvc, v) -> "Windows mingw " ^ win10_release_to_string v
+    | `Macos (`Macos_monterey) -> "MacOS Monterey homebrew"
 
 let human_readable_short_string_of_distro (t : t) =
   match t with
@@ -1045,6 +1058,7 @@ let human_readable_short_string_of_distro (t : t) =
   | `Cygwin _ -> "Cygwin"
   | `Windows (`Mingw, _) -> "Windows mingw"
   | `Windows (`Msvc, _) -> "Windows mvsc"
+  | `Macos (`Latest | `Macos_monterey) -> "MacOS Monterey"
 
 let is_same_distro (d1 : t) (d2 : t) =
   match (d1, d2) with
@@ -1059,6 +1073,7 @@ let is_same_distro (d1 : t) (d2 : t) =
   | `Cygwin _, `Cygwin _ ->
       true
   | `Windows (p1, _), `Windows (p2, _) when p1 = p2 -> true
+  | `Macos x, `Macos y  when x = y -> true
   | _ -> false
 
 (* The alias tag for the latest stable version of this distro *)
@@ -1067,7 +1082,7 @@ let latest_tag_of_distro (t : t) =
   tag_of_distro latest
 
 type package_manager =
-  [ `Apt | `Yum | `Apk | `Zypper | `Pacman | `Cygwin | `Windows ]
+  [ `Apt | `Yum | `Apk | `Zypper | `Pacman | `Cygwin | `Windows | `Homebrew ]
 [@@deriving sexp]
 
 let package_manager (t : t) =
@@ -1082,6 +1097,7 @@ let package_manager (t : t) =
   | `OpenSUSE _ -> `Zypper
   | `Cygwin _ -> `Cygwin
   | `Windows _ -> `Windows
+  | `Macos (`Latest | `Macos_monterey) -> `Homebrew
 
 let rec bubblewrap_version (t : t) =
   match resolve_alias t with
@@ -1151,6 +1167,7 @@ let rec bubblewrap_version (t : t) =
   | `OpenSUSE `V15_3 -> Some (0, 4, 1)
   | `Cygwin _ -> None
   | `Windows _ -> None
+  | `Macos _ -> None
 
 let win10_base_tag ?win10_revision (base : win10_docker_base_image) v =
   let base, v =
@@ -1264,7 +1281,8 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
   | `Windows (_, v) ->
       win10_base_tag ?win10_revision `Windows
         (v : win10_release :> [> win10_release ])
-
+  | `Macos `Macos_monterey -> ("macos/monterey", "12.6") (* TODO There is no docker image for this yet! *)
+     
 let compare a b =
   String.compare
     (human_readable_string_of_distro a)

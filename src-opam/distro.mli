@@ -77,6 +77,8 @@ val win10_current_lcu : win10_lcu
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 (** A Windows 10 version optionally with an LCU. *)
 
+type macos_all = [ `Latest | `Macos_monterey ]
+
 type distro =
   [ `Alpine of
     [ `V3_3
@@ -132,7 +134,8 @@ type distro =
     | `V21_10
     | `V22_04 ]
   | `Cygwin of win10_release
-  | `Windows of [ `Mingw | `Msvc ] * win10_release ]
+  | `Windows of [ `Mingw | `Msvc ] * win10_release 
+  | `Macos of [`Macos_monterey]]
 [@@deriving sexp]
 (** Supported Docker container distributions distributions. *)
 
@@ -196,11 +199,11 @@ type t =
     | `Latest
     | `LTS ]
   | `Cygwin of win_all
-  | `Windows of [ `Mingw | `Msvc ] * win_all ]
-[@@deriving sexp]
+  | `Windows of [ `Mingw | `Msvc ] * win_all 
+  | `Macos of macos_all ] [@@deriving sexp eq]
 (** Supported Docker container distributions. *)
 
-type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
+type os_family = [ `Cygwin | `Linux | `Windows | `Macos ] [@@deriving sexp]
 (** The operating system family a distro belongs to. *)
 
 val os_family_of_distro : t -> os_family
@@ -267,7 +270,9 @@ type package_manager =
   | `Zypper  (** OpenSUSE Zypper *)
   | `Pacman  (** Archlinux Pacman *)
   | `Cygwin  (** Cygwin package manager *)
-  | `Windows  (** Native Windows, WinGet, Cygwin *) ]
+  | `Windows  (** Native Windows, WinGet, Cygwin *) 
+  | `Homebrew (** MacOS homebrew *)
+]
 [@@deriving sexp]
 (** The package manager used by a distro. *)
 

@@ -81,6 +81,7 @@
   (fmt (>= "0.8.7"))
   (ocaml-version (>= "3.2.0"))
   (ppx_sexp_conv (>= "v0.9.0"))
+  (ppx_deriving (>= "5.2.1"))
   sexplib)
  (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-opam/")
  (tags ("org:mirage" "org:ocamllabs")))
