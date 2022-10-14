@@ -82,7 +82,8 @@ type line =
   | `Workdir of string
   | `Onbuild of line
   | `Label of (string * string) list
-  | `Healthcheck of healthcheck ]
+  | `Healthcheck of healthcheck
+  | `Stopsignal of string ]
 [@@deriving sexp]
 
 type t = line list [@@deriving sexp]
@@ -219,6 +220,7 @@ let rec string_of_line ~escape (t : line) =
   | `Workdir wd -> cmd "WORKDIR" wd
   | `Onbuild t -> cmd "ONBUILD" (string_of_line ~escape t)
   | `Label ls -> cmd "LABEL" (string_of_label_list ls)
+  | `Stopsignal s -> cmd "STOPSIGNAL" s
   | `Healthcheck (`Cmd (opts, c)) ->
       cmd "HEALTHCHECK" (string_of_healthcheck ~escape opts c)
   | `Healthcheck `None -> "HEALTHCHECK NONE"
@@ -267,6 +269,7 @@ let entrypoint fmt = ksprintf (fun e -> [ `Entrypoint (`Shell e) ]) fmt
 let entrypoint_exec e : t = [ `Entrypoint (`Exec e) ]
 let shell s : t = [ `Shell s ]
 let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
+let stopsignal s = [ `Stopsignal s ]
 
 let healthcheck ?interval ?timeout ?start_period ?retries fmt =
   let opts = { interval; timeout; start_period; retries } in

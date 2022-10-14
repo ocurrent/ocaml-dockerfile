@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support STOPSIGNAL instruction. (@MisterDA #121, review by @avsm)
 - Support HEALTHCHECK instruction. (@MisterDA #122, review by @avsm)
 - Various LCU Updates, deprecate Windows 10 20H2
   (@mtelvers #115 #109 #107)
