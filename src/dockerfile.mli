@@ -322,6 +322,49 @@ val label : (string * string) list -> t
 
   To view an image’s labels, use the [docker inspect] command. *)
 
+val healthcheck :
+  ?interval:string ->
+  ?timeout:string ->
+  ?start_period:string ->
+  ?retries:int ->
+  ('a, unit, string, t) format4 ->
+  'a
+(** [healthcheck cmd] checks container health by running a command
+  inside the container. See {!cmd} for additional details.
+
+  @param interval The health check will first run [interval] seconds
+    after the container is started, and then again [interval] seconds
+    after each previous check completes.
+
+  @param timeout If a single run of the check takes longer than
+    [timeout] seconds then the check is considered to have failed.
+
+  @param retries It takes [retries] consecutive failures of the health
+    check for the container to be considered {i unhealthy}.
+
+  @param start_period provides initialization time for containers that
+    need time to bootstrap. Probe failure during that period will not
+    be counted towards the maximum number of retries. However, if a
+    health check succeeds during the start period, the container is
+    considered started and all consecutive failures will be counted
+    towards the maximum number of retries.  *)
+
+val healthcheck_exec :
+  ?interval:string ->
+  ?timeout:string ->
+  ?start_period:string ->
+  ?retries:int ->
+  string list ->
+  t
+(** [healthcheck_exec cmd] checks container health by running a
+  command inside the container. See {!cmd_exe} and {!healthcheck}
+  for additional details.
+*)
+
+val healthcheck_none : unit -> t
+(** [healthcheck_none] disables any healthcheck inherited from the
+  base image. *)
+
 val crunch : t -> t
 (** [crunch t] will reduce coincident {!run} commands into a single
   one that is chained using the shell [&&] operator. This reduces the

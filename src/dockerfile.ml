@@ -51,6 +51,17 @@ type heredoc = {
 type heredocs_to_dest = [ `Chown of string option ] * heredoc list * string
 [@@deriving sexp]
 
+type healthcheck_options = {
+  interval : string option;
+  timeout : string option;
+  start_period : string option;
+  retries : int option;
+}
+[@@deriving sexp]
+
+type healthcheck = [ `Cmd of healthcheck_options * shell_or_exec | `None ]
+[@@deriving sexp]
+
 type line =
   [ `ParserDirective of parser_directive
   | `Comment of string
@@ -70,7 +81,8 @@ type line =
   | `User of string
   | `Workdir of string
   | `Onbuild of line
-  | `Label of (string * string) list ]
+  | `Label of (string * string) list
+  | `Healthcheck of healthcheck ]
 [@@deriving sexp]
 
 type t = line list [@@deriving sexp]
@@ -145,6 +157,10 @@ let optional name = function
   | None -> []
   | Some value -> [ sprintf "%s=%s" name value ]
 
+let optional_int name = function
+  | None -> []
+  | Some value -> [ sprintf "%s=%d" name value ]
+
 let optional_flag name = function
   | Some true -> [ name ]
   | Some false | None -> []
@@ -203,6 +219,17 @@ let rec string_of_line ~escape (t : line) =
   | `Workdir wd -> cmd "WORKDIR" wd
   | `Onbuild t -> cmd "ONBUILD" (string_of_line ~escape t)
   | `Label ls -> cmd "LABEL" (string_of_label_list ls)
+  | `Healthcheck (`Cmd (opts, c)) ->
+      cmd "HEALTHCHECK" (string_of_healthcheck ~escape opts c)
+  | `Healthcheck `None -> "HEALTHCHECK NONE"
+
+and string_of_healthcheck ~escape options c =
+  String.concat " "
+    (optional "--interval" options.interval
+    @ optional "--timeout" options.timeout
+    @ optional "--start-period" options.start_period
+    @ optional_int "--retries" options.retries)
+  ^ sprintf " %c\n  %s" escape (string_of_line ~escape (`Cmd c))
 
 (* Function interface *)
 let parser_directive pd : t = [ `ParserDirective pd ]
@@ -240,6 +267,16 @@ let entrypoint fmt = ksprintf (fun e -> [ `Entrypoint (`Shell e) ]) fmt
 let entrypoint_exec e : t = [ `Entrypoint (`Exec e) ]
 let shell s : t = [ `Shell s ]
 let workdir fmt = ksprintf (fun wd -> [ `Workdir wd ]) fmt
+
+let healthcheck ?interval ?timeout ?start_period ?retries fmt =
+  let opts = { interval; timeout; start_period; retries } in
+  ksprintf (fun b -> [ `Healthcheck (`Cmd (opts, `Shell b)) ]) fmt
+
+let healthcheck_exec ?interval ?timeout ?start_period ?retries cmds : t =
+  let opts = { interval; timeout; start_period; retries } in
+  [ `Healthcheck (`Cmd (opts, `Exec cmds)) ]
+
+let healthcheck_none () : t = [ `Healthcheck `None ]
 
 let string_of_t tl =
   let rec find_escape = function
