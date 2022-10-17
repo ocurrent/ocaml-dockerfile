@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support HEALTHCHECK instruction. (@MisterDA #122, review by @avsm)
 - Various LCU Updates, deprecate Windows 10 20H2
   (@mtelvers #115 #109 #107)
 - Update to bubblewrap 0.6.2 when building from source in a distro
