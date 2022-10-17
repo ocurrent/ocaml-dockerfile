@@ -160,7 +160,6 @@ let header ?win10_revision ?arch ?maintainer ?img ?tag d =
   @@ from ?platform ~tag img @@ maintainer @@ shell
 
 type opam_hashes = {
-  opam_2_0_hash : string;
   opam_2_1_hash : string;
   opam_master_hash : string;
 }
@@ -174,23 +173,16 @@ type opam_branch = {
 }
 
 let create_opam_branches opam_hashes =
-  let { opam_2_0_hash; opam_2_1_hash; opam_master_hash } = opam_hashes in
+  let { opam_2_1_hash; opam_master_hash } = opam_hashes in
   ( opam_master_hash,
     [
-      {
-        branch = "2.0";
-        hash = opam_2_0_hash;
-        enable_0install_solver = false;
-        public_name = "opam-2.0";
-        aliases = [ "opam" ];
-        (* Default *)
-      };
       {
         branch = "2.1";
         hash = opam_2_1_hash;
         enable_0install_solver = true;
         public_name = "opam-2.1";
-        aliases = [];
+        aliases = [ "opam" ];
+        (* Default *)
       };
       {
         branch = "master";

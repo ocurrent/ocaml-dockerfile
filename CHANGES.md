@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Remove opam 2.0 definition, defaults to opam 2.1. (@MisterDA, #123)
 - Support STOPSIGNAL instruction. (@MisterDA #121, review by @avsm)
 - Support HEALTHCHECK instruction. (@MisterDA #122, review by @avsm)
 - Various LCU Updates, deprecate Windows 10 20H2
