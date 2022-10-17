@@ -365,6 +365,10 @@ val healthcheck_none : unit -> t
 (** [healthcheck_none] disables any healthcheck inherited from the
   base image. *)
 
+val stopsignal : string -> t
+(** [stopsignal signal] sets the system call signal that will be
+    sent to the container to exit. *)
+
 val crunch : t -> t
 (** [crunch t] will reduce coincident {!run} commands into a single
   one that is chained using the shell [&&] operator. This reduces the
