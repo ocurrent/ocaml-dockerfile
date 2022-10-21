@@ -58,7 +58,7 @@ v8.0.0 2022-07-27 Sydney
 - Add Alpine 3.14 and Ubuntu 21.10 (@avsm)
 - Move Fedora 33 and OpenSUSE 15.2 to deprecated and Alpine 3.13 to Tier 2. (@avsm)
 - Latest Fedora is now Fedora 34 (@avsm)
-- Asssume Windows x64 is an active distro even when it doesn't have the latest
+- Assume Windows x64 is an active distro even when it doesn't have the latest
   release (@dra27 #66; #68)
 - Latest base distro is now Debian 11 (from Debian 10) (@kit-ty-kate #59)
 - Ensure stray double-quotes don't end up in PATH on Windows images (@dra27 #62)
@@ -453,7 +453,7 @@ v1.2.0
   repeated `RUN` commands.
 * Set Debian `apt-get` commands to `noninteractive`.
 * Add support for Ubuntu 12.04 LTS and also bleeding edge 16.04.
-* Add sexplib convertors for `Dockerfile.t`.
+* Add sexplib converters for `Dockerfile.t`.
 * Add `Dockerfile_distro` module to handle supported online distributions.
 * Add `Dockerfile.label` to support Docker 1.6 metadata labels.
 * Add `generate_dockerfiles_in_git_branches` to make it easier

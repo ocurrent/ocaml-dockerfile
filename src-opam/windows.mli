@@ -36,7 +36,7 @@ val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
    Compiler for [~arch] loaded in the environment. *)
 
 val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
-(** [run_ocaml_env args fmt] will execute [fmt] in the evironment
+(** [run_ocaml_env args fmt] will execute [fmt] in the environment
    loaded by [ocaml-env exec] with [args]. *)
 
 val sanitize_reg_path : unit -> t
@@ -129,7 +129,7 @@ module Cygwin : sig
 
   val run_sh_ocaml_env :
     ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
-  (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the evironment
+  (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the environment
      loaded by [ocaml-env cygwin exec] with [args]. *)
 
   (** Rules for Git. *)

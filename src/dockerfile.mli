@@ -357,7 +357,7 @@ val healthcheck_exec :
   string list ->
   t
 (** [healthcheck_exec cmd] checks container health by running a
-  command inside the container. See {!cmd_exe} and {!healthcheck}
+  command inside the container. See {!cmd_exec} and {!healthcheck}
   for additional details.
 *)
 
