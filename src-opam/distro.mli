@@ -132,7 +132,8 @@ type distro =
     | `V20_10
     | `V21_04
     | `V21_10
-    | `V22_04 ]
+    | `V22_04
+    | `V22_10 ]
   | `Cygwin of win10_release
   | `Windows of [ `Mingw | `Msvc ] * win10_release ]
 [@@deriving sexp]
@@ -196,6 +197,7 @@ type t =
     | `V21_04
     | `V21_10
     | `V22_04
+    | `V22_10
     | `Latest
     | `LTS ]
   | `Cygwin of win_all
