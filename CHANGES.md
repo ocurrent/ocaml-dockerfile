@@ -1,7 +1,7 @@
 unreleased
 ----------
 
-- Add Fedora 36. (@MisterDA #125)
+- Add Fedora 36 and 37 and deprecate 34 and 35. (@MisterDA #125, #126)
 - Add Ubuntu 22.10. (@MisterDA #124)
 - Support STOPSIGNAL instruction. (@MisterDA #121, review by @avsm)
 - Support HEALTHCHECK instruction. (@MisterDA #122, review by @avsm)
