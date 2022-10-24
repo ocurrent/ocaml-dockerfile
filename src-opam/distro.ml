@@ -227,7 +227,8 @@ type distro =
     | `V32
     | `V33
     | `V34
-    | `V35 ]
+    | `V35
+    | `V36 ]
   | `OracleLinux of [ `V7 | `V8 ]
   | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 ]
   | `Ubuntu of
@@ -289,6 +290,7 @@ type t =
     | `V33
     | `V34
     | `V35
+    | `V36
     | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of
@@ -394,6 +396,7 @@ let distros : t list =
     `Fedora `V33;
     `Fedora `V34;
     `Fedora `V35;
+    `Fedora `V36;
     `Fedora `Latest;
     `OracleLinux `V7;
     `OracleLinux `V8;
@@ -506,7 +509,7 @@ let resolve_alias (d : t) : distro =
   | `Alpine `Latest -> `Alpine `V3_16
   | `CentOS `Latest -> `CentOS `V7
   | `Debian `Stable -> `Debian `V11
-  | `Fedora `Latest -> `Fedora `V35
+  | `Fedora `Latest -> `Fedora `V36
   | `OracleLinux `Latest -> `OracleLinux `V8
   | `OpenSUSE `Latest -> `OpenSUSE `V15_3
   | `Ubuntu `Latest -> `Ubuntu `V22_10
@@ -521,7 +524,7 @@ let resolve_alias (d : t) : distro =
     | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `Testing | `Unstable)
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 | `V34 | `V35 )
+        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 )
     | `OracleLinux (`V7 | `V8)
     | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3)
     | `Ubuntu
@@ -558,9 +561,9 @@ let distro_status (d : t) : status =
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 ) ->
+        | `V31 | `V32 | `V33 | `V34 ) ->
         `Deprecated
-    | `Fedora (`V34 | `V35) -> `Active `Tier2
+    | `Fedora (`V35 | `V36) -> `Active `Tier2
     | `OracleLinux (`V7 | `V8) -> `Active `Tier3
     | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2) ->
         `Deprecated
@@ -624,8 +627,8 @@ let distro_arches ov (d : t) =
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
-  | `Fedora (`V33 | `V34 | `V35), ov when OV.(compare Releases.v4_08_0 ov) = -1
-    ->
+  | `Fedora (`V33 | `V34 | `V35 | `V36), ov
+    when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
@@ -718,6 +721,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Fedora `V33 -> Some "4.11.1"
   | `Fedora `V34 -> Some "4.11.1"
   | `Fedora `V35 -> Some "4.12.0"
+  | `Fedora `V36 -> Some "4.13.1"
   | `CentOS `V6 -> Some "3.11.2"
   | `CentOS `V7 -> Some "4.01.0"
   | `CentOS `V8 -> Some "4.07.0"
@@ -854,6 +858,7 @@ let tag_of_distro (d : t) =
   | `Fedora `V33 -> "fedora-33"
   | `Fedora `V34 -> "fedora-34"
   | `Fedora `V35 -> "fedora-35"
+  | `Fedora `V36 -> "fedora-36"
   | `OracleLinux `V7 -> "oraclelinux-7"
   | `OracleLinux `V8 -> "oraclelinux-8"
   | `OracleLinux `Latest -> "oraclelinux"
@@ -940,6 +945,7 @@ let distro_of_tag x : t option =
   | "fedora-33" -> Some (`Fedora `V33)
   | "fedora-34" -> Some (`Fedora `V34)
   | "fedora-35" -> Some (`Fedora `V35)
+  | "fedora-36" -> Some (`Fedora `V36)
   | "fedora" -> Some (`Fedora `Latest)
   | "oraclelinux-7" -> Some (`OracleLinux `V7)
   | "oraclelinux-8" -> Some (`OracleLinux `V8)
@@ -1023,6 +1029,7 @@ let human_readable_string_of_distro (d : t) =
     | `Fedora `V33 -> "Fedora 33"
     | `Fedora `V34 -> "Fedora 34"
     | `Fedora `V35 -> "Fedora 35"
+    | `Fedora `V36 -> "Fedora 36"
     | `OracleLinux `V7 -> "OracleLinux 7"
     | `OracleLinux `V8 -> "OracleLinux 8"
     | `Alpine `V3_3 -> "Alpine 3.3"
@@ -1147,6 +1154,7 @@ let rec bubblewrap_version (t : t) =
   | `Fedora `V33 -> Some (0, 4, 1)
   | `Fedora `V34 -> Some (0, 4, 1)
   | `Fedora `V35 -> Some (0, 5, 0)
+  | `Fedora `V36 -> Some (0, 5, 0)
   | `OracleLinux ((`V7 | `V8) as v) -> bubblewrap_version (`CentOS v)
   | `Alpine `V3_3 -> None (* Not actually checked *)
   | `Alpine `V3_4 -> None (* Not actually checked *)
@@ -1264,6 +1272,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
         | `V33 -> "33"
         | `V34 -> "34"
         | `V35 -> "35"
+        | `V36 -> "36"
       in
       ("fedora", tag)
   | `OracleLinux v ->
