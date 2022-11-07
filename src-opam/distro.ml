@@ -1093,16 +1093,16 @@ let latest_tag_of_distro (t : t) =
   tag_of_distro latest
 
 type package_manager =
-  [ `Apt | `Yum | `Apk | `Zypper | `Pacman | `Cygwin | `Windows ]
+  [ `Apt | `Dnf | `Apk | `Zypper | `Pacman | `Cygwin | `Windows ]
 [@@deriving sexp]
 
 let package_manager (t : t) =
   match t with
   | `Ubuntu _ -> `Apt
   | `Debian _ -> `Apt
-  | `CentOS _ -> `Yum
-  | `Fedora _ -> `Yum
-  | `OracleLinux _ -> `Yum
+  | `CentOS _ -> `Dnf
+  | `Fedora _ -> `Dnf
+  | `OracleLinux _ -> `Dnf
   | `Alpine _ -> `Apk
   | `Archlinux _ -> `Pacman
   | `OpenSUSE _ -> `Zypper

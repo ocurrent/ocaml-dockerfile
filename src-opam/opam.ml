@@ -74,7 +74,7 @@ let bubblewrap_and_dev_packages distro =
     match D.package_manager distro with
     | `Apk -> Linux.Apk.dev_packages
     | `Apt -> Linux.Apt.dev_packages
-    | `Yum -> Linux.RPM.dev_packages
+    | `Dnf -> Linux.RPM.dev_packages
     | `Zypper -> Linux.Zypper.dev_packages
     | `Pacman -> Linux.Pacman.dev_packages
     | `Cygwin | `Windows -> assert false
@@ -281,7 +281,7 @@ let apt_opam2 ?(labels = []) ?arch distro ~opam_hashes () =
 
    [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
    This is needed to get most of *-devel packages frequently used by opam packages. *)
-let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
+let dnf_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
     ~opam_hashes distro () =
   let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let img, tag = D.base_distro_tag ?arch distro in
@@ -292,19 +292,17 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   in
   header ?arch distro
   @@ label (("distro_style", "rpm") :: labels)
-  @@ run "yum --version || dnf install -y yum"
   @@ workaround @@ Linux.RPM.update
   @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
   @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
   @@ from ~tag img
-  @@ run "yum --version || dnf install -y yum"
   @@ workaround @@ Linux.RPM.update
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (if enable_powertools then
-      run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update
+      run "dnf config-manager --set-enabled powertools" @@ Linux.RPM.update
      else empty)
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \
@@ -393,7 +391,7 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
     match D.package_manager d with
     | `Apk -> apk_opam2 ?labels ?arch ~opam_hashes d ()
     | `Apt -> apt_opam2 ?labels ?arch ~opam_hashes d ()
-    | `Yum ->
+    | `Dnf ->
         let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
         let enable_powertools =
           match d with
@@ -401,7 +399,7 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
           | `CentOS _ -> true
           | _ -> false
         in
-        yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~opam_hashes
+        dnf_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~opam_hashes
           d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()

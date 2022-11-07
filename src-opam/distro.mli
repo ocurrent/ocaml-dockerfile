@@ -270,7 +270,7 @@ val human_readable_short_string_of_distro : t -> string
 type package_manager =
   [ `Apk  (** Alpine Apk *)
   | `Apt  (** Debian Apt *)
-  | `Yum  (** Fedora Yum *)
+  | `Dnf  (** Fedora DNF *)
   | `Zypper  (** OpenSUSE Zypper *)
   | `Pacman  (** Archlinux Pacman *)
   | `Cygwin  (** Cygwin package manager *)

@@ -31,13 +31,13 @@ val run_as_user : string -> ('a, unit, string, t) format4 -> 'a
 (** Rules for RPM-based distributions *)
 module RPM : sig
   val update : t
-  (** [update] will run [yum update -y] *)
+  (** [update] will run [dnf update -y] *)
 
   val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will run [yum install] on the supplied package list. *)
+  (** [install fmt] will run [dnf install] on the supplied package list. *)
 
   val groupinstall : ('a, unit, string, t) format4 -> 'a
-  (** [groupinstall fmt] will run [yum groupinstall] on the supplied package list. *)
+  (** [groupinstall fmt] will run [dnf groupinstall] on the supplied package list. *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
   (** [add_user username] will install a new user with name [username] and a locked
@@ -49,7 +49,7 @@ module RPM : sig
       [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
 
   val install_system_ocaml : t
-  (** Install the system OCaml packages via Yum *)
+  (** Install the system OCaml packages via DNF *)
 end
 
 (** Rules for Apt-based distributions *)
