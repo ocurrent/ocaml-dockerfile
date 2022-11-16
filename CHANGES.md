@@ -1,6 +1,9 @@
+
 unreleased
 ----------
 
+v8.1.0 2022-11-17 Sydney
+----------
 - Add Fedora 36 and 37 and deprecate 34 and 35. (@MisterDA #125, #126)
 - Add Ubuntu 22.10. (@MisterDA #124)
 - Support STOPSIGNAL instruction. (@MisterDA #121, review by @avsm)
