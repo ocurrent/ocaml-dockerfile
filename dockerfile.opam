@@ -39,6 +39,10 @@ depends: [
   "sexplib"
   "odoc" {with-doc}
 ]
+conflicts: [
+  "result" {< "1.5"}
+  "rresult" {< "0.7.0"}
+]
 build: [
   ["dune" "subst"] {dev}
   [

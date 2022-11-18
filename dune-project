@@ -39,6 +39,9 @@
   (fmt (>= "0.8.7"))
   (ppx_sexp_conv (>= "v0.9.0"))
   sexplib)
+ (conflicts
+  (result (< 1.5))
+  (rresult (< 0.7.0)))
  (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile/")
  (tags ("org:mirage" "org:ocamllabs")))
 
@@ -54,13 +57,16 @@
 "\| programmatically.
  )
  (depends
-  bos
+  (bos (>= 0.2))
   cmdliner
   (dockerfile-opam (= :version))
   (fmt (>= "0.8.7"))
   logs
   (ppx_sexp_conv (>= "v0.9.0"))
   sexplib)
+ (conflicts
+  (result (< 1.5))
+  (rresult (< 0.7.0)))
  (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-cmd/")
  (tags ("org:mirage" "org:ocamllabs")))
 
@@ -79,8 +85,11 @@
   astring
   (dockerfile (= :version))
   (fmt (>= "0.8.7"))
-  (ocaml-version (>= "3.2.0"))
+  (ocaml-version (>= "3.5.0"))
   (ppx_sexp_conv (>= "v0.9.0"))
   sexplib)
+ (conflicts
+  (result (< 1.5))
+  (rresult (< 0.7.0)))
  (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-opam/")
  (tags ("org:mirage" "org:ocamllabs")))
