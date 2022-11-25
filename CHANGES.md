@@ -1,6 +1,7 @@
-
 unreleased
 ----------
+
+- Add Alpine 3.17 (3.16 is now tier 2 and 3.15 is deprecated). (@MisterDA #129)
 
 v8.1.0 2022-11-17 Sydney
 ----------
