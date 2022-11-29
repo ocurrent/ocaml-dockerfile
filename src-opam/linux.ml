@@ -122,7 +122,7 @@ module Apk = struct
   let dev_packages ?extra () =
     install
       "build-base patch tar ca-certificates git rsync curl sudo bash \
-       libx11-dev nano coreutils xz libexecinfo-dev ncurses-dev%s"
+       libx11-dev nano coreutils xz ncurses-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo = false) username =
