@@ -48,7 +48,7 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
   @@ maybe_link_opam add_default_link prefix branch
 
 let bubblewrap_minimum = (0, 4, 1)
-let bubblewrap_latest = (0, 6, 2)
+let bubblewrap_latest = (0, 7, 0)
 
 let maybe_build_bubblewrap_from_source ?(prefix = "/usr/local") distro =
   match D.bubblewrap_version distro with
