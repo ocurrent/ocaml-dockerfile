@@ -444,8 +444,11 @@ let all_ocaml_compilers hub_id arch distro =
     let add_beta_remote =
       if List.exists OV.Releases.is_dev ovs then
         run
-          "opam repo add beta \
-           git+https://github.com/ocaml/ocaml-beta-repository --set-default"
+          "git clone https://github.com/ocaml/ocaml-beta-repository \
+           /home/opam/ocaml-beta-repository"
+        @@ run
+             "opam repo add beta file:///home/opam/opam-beta-repository \
+              --set-default"
       else empty
     in
     add_beta_remote @@@ List.map (create_switch ~arch distro) ovs
