@@ -6,6 +6,7 @@ unreleased
   libexecinfo-dev from the list of apk packages as it is no longer
   available. Its symbols are only used in OCaml's self tests.
   (@MisterDA #129, #130)
+- Fix location of Debian exotic architecture images (@dra27 #134)
 
 v8.1.0 2022-11-17 Sydney
 ----------
