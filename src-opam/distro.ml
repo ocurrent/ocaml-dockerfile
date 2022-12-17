@@ -1259,8 +1259,6 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
         | `Unstable -> "unstable"
       in
       match (arch, v) with
-      | `I386, `V7 -> ("i386/debian", tag)
-      | `Aarch32, (`V7 | `V8) -> ("arm32v7/debian", tag)
       | `Ppc64le, (`V8 | `V9 | `V10) -> ("ppc64le/debian", tag)
       | `S390x, (`V8 | `V9 | `V10) -> ("s390x/debian", tag)
       | _ -> ("debian", tag))
