@@ -120,18 +120,74 @@ val from : ?alias:string -> ?tag:string -> ?platform:string -> string -> t
 val maintainer : ('a, unit, string, t) format4 -> 'a
 (** [maintainer] sets the author field of the generated images. *)
 
-val run : ('a, unit, string, t) format4 -> 'a
-(** [run fmt] will execute any commands in a new layer on top of the current
-  image and commit the results. The resulting committed image will be used
-  for the next step in the Dockerfile.  The string result of formatting
-  [arg] will be passed as a [/bin/sh -c] invocation. *)
+type mount
 
-val run_exec : string list -> t
-(** [run_exec args] will execute any commands in a new layer on top of the current
-  image and commit the results. The resulting committed image will be used
-  for the next step in the Dockerfile.  The [args] form makes it possible
-  to avoid shell string munging, and to run commands using a base image that
-  does not contain [/bin/sh]. *)
+val run : ?mounts:mount list -> ('a, unit, string, t) format4 -> 'a
+(** [run ?mounts fmt] will execute any commands in a new layer on top of the
+   current image and commit the results. The resulting committed image will be
+   used for the next step in the Dockerfile. The string result of formatting
+   [arg] will be passed as a [/bin/sh -c] invocation.
+
+   @param mounts A list of filesystem mounts that the build can access. Requires
+     BuildKit {{!val:parser_directive}syntax} 1.2. *)
+
+val run_exec : ?mounts:mount list -> string list -> t
+(** [run_exec ?mounts args] will execute any commands in a new layer on top of
+   the current image and commit the results. The resulting committed image will
+   be used for the next step in the Dockerfile. The [args] form makes it
+   possible to avoid shell string munging, and to run commands using a base
+   image that does not contain [/bin/sh].
+
+   @param mounts A list of filesystem mounts that the build can access. Requires
+     BuildKit {{!val:parser_directive}syntax} 1.2. *)
+
+val mount_bind :
+  target:string ->
+  ?source:string ->
+  ?from:string ->
+  ?readwrite:bool ->
+  unit ->
+  mount
+(** Creates a bind mount for {!run}. Requires BuildKit syntax. *)
+
+val mount_cache :
+  ?id:string ->
+  target:string ->
+  ?readonly:bool ->
+  ?sharing:[ `Locked | `Private | `Shared ] ->
+  ?from:string ->
+  ?source:string ->
+  ?mode:int ->
+  ?uid:int ->
+  ?gid:int ->
+  unit ->
+  mount
+(** Creates a cache mount for {!run}. Requires BuildKit syntax. *)
+
+val mount_tmpfs : target:string -> ?size:int -> unit -> mount
+(** Creates a tmpfs mount for {!run}. Requires BuildKit syntax. *)
+
+val mount_secret :
+  ?id:string ->
+  ?target:string ->
+  ?required:bool ->
+  ?mode:int ->
+  ?uid:int ->
+  ?gid:int ->
+  unit ->
+  mount
+(** Creates a secret mount for {!run}. Requires BuildKit syntax. *)
+
+val mount_ssh :
+  ?id:string ->
+  ?target:string ->
+  ?required:bool ->
+  ?mode:int ->
+  ?uid:int ->
+  ?gid:int ->
+  unit ->
+  mount
+(** Creates an ssh mount for {!run}. Requires BuildKit syntax. *)
 
 val cmd : ('a, unit, string, t) format4 -> 'a
 (** [cmd args] provides defaults for an executing container. These defaults
@@ -377,4 +433,6 @@ val stopsignal : string -> t
 val crunch : t -> t
 (** [crunch t] will reduce coincident {!run} commands into a single
   one that is chained using the shell [&&] operator. This reduces the
-  number of layers required for a production image. *)
+  number of layers required for a production image.
+
+  @raise Invalid_argument if mounts differ for each run command. *)

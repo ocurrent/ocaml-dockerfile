@@ -51,6 +51,50 @@ type heredoc = {
 type heredocs_to_dest = [ `Chown of string option ] * heredoc list * string
 [@@deriving sexp]
 
+type mount_bind = {
+  target : string;
+  source : string option;
+  from : string option;
+  readwrite : bool option;
+}
+[@@deriving sexp]
+
+type mount_cache = {
+  id : string option;
+  target : string;
+  readonly : bool option;
+  sharing : [ `Shared | `Private | `Locked ] option;
+  from : string option;
+  source : string option;
+  mode : int option;
+  uid : int option;
+  gid : int option;
+}
+[@@deriving sexp]
+
+type mount_tmpfs = { target : string; size : int option } [@@deriving sexp]
+
+(* secret or ssh *)
+type mount_file = {
+  id : string option;
+  target : string option;
+  required : bool option;
+  mode : int option;
+  uid : int option;
+  gid : int option;
+}
+[@@deriving sexp]
+
+type mount = {
+  typ :
+    [ `Bind of mount_bind
+    | `Cache of mount_cache
+    | `Tmpfs of mount_tmpfs
+    | `Secret of mount_file
+    | `Ssh of mount_file ];
+}
+[@@deriving sexp]
+
 type healthcheck_options = {
   interval : string option;
   timeout : string option;
@@ -67,7 +111,7 @@ type line =
   | `Comment of string
   | `From of from
   | `Maintainer of string
-  | `Run of shell_or_exec
+  | `Run of mount list * shell_or_exec
   | `Cmd of shell_or_exec
   | `Expose of int list
   | `Arg of string * string option
@@ -98,15 +142,18 @@ open Printf
 (* Multiple RUN lines will be compressed into a single one in
    order to reduce the number of layers used *)
 let crunch l =
+  let merge m m' =
+    if m = m' then m else invalid_arg "crunch: at least two mounts list differ."
+  in
   let pack l =
     let rec aux acc = function
       | [] -> acc
-      | `Run (`Shell a) :: `Run (`Shell b) :: tl ->
-          aux (`Run (`Shells [ a; b ]) :: acc) tl
-      | `Run (`Shells a) :: `Run (`Shell b) :: tl ->
-          aux (`Run (`Shells (a @ [ b ])) :: acc) tl
-      | `Run (`Shells a) :: `Run (`Shells b) :: tl ->
-          aux (`Run (`Shells (a @ b)) :: acc) tl
+      | `Run (m, `Shell a) :: `Run (m', `Shell b) :: tl ->
+          aux (`Run (merge m m', `Shells [ a; b ]) :: acc) tl
+      | `Run (m, `Shells a) :: `Run (m', `Shell b) :: tl ->
+          aux (`Run (merge m m', `Shells (a @ [ b ])) :: acc) tl
+      | `Run (m, `Shells a) :: `Run (m', `Shells b) :: tl ->
+          aux (`Run (merge m m', `Shells (a @ b)) :: acc) tl
       | hd :: tl -> aux (hd :: acc) tl
     in
     List.rev (aux [] l)
@@ -162,6 +209,14 @@ let optional_int name = function
   | None -> []
   | Some value -> [ sprintf "%s=%d" name value ]
 
+let optional_int_octal name = function
+  | None -> []
+  | Some value -> [ sprintf "%s=%04o" name value ]
+
+let optional_bool name = function
+  | None -> []
+  | Some value -> [ sprintf "%s=%b" name value ]
+
 let optional_flag name = function
   | Some true -> [ name ]
   | Some false | None -> []
@@ -188,6 +243,52 @@ let string_of_copy_heredoc (t : heredocs_to_dest) =
   String.concat " " (optional "--chown" chown @ List.rev header @ [ dst ])
   ^ docs
 
+let string_of_mount { typ } =
+  match typ with
+  | `Bind { target; source; from; readwrite } ->
+      String.concat ","
+        ([ "--mount=type=bind" ]
+        @ [ sprintf "target=%s" target ]
+        @ optional "source" source @ optional "from" from
+        @ optional_bool "readwrite" readwrite)
+  | `Cache { id; target; readonly; sharing; from; source; mode; uid; gid } ->
+      String.concat ","
+        ([ "--mount=type=cache" ] @ optional "id" id
+        @ [ sprintf "target=%s" target ]
+        @ optional_bool "readonly" readonly
+        @ (match sharing with
+          | None -> []
+          | Some `Shared -> [ "sharing=shared" ]
+          | Some `Private -> [ "sharing=private" ]
+          | Some `Locked -> [ "sharing=locked" ])
+        @ optional "from" from @ optional "source" source
+        @ optional_int_octal "mode" mode
+        @ optional_int "uid" uid @ optional_int "gid" gid)
+  | `Tmpfs { target; size } ->
+      String.concat ","
+        ([ "--mount=type=bind" ]
+        @ [ sprintf "target=%s" target ]
+        @ optional_int "size" size)
+  | `Ssh m | `Secret m ->
+      let typ =
+        match typ with
+        | `Ssh _ -> "ssh"
+        | `Secret _ -> "secret"
+        | _ -> assert false
+      in
+      let { id; target; required; mode; uid; gid } = m in
+      String.concat ","
+        ([ sprintf "--mount=type=%s" typ ]
+        @ optional "id" id @ optional "target" target
+        @ optional_bool "required" required
+        @ optional_int_octal "mode" mode
+        @ optional_int "uid" uid @ optional_int "gid" gid)
+
+let string_of_run ~escape mounts c =
+  let mounts = List.map string_of_mount mounts in
+  let run = string_of_shell_or_exec ~escape c in
+  String.concat " " (mounts @ [ run ])
+
 let rec string_of_line ~escape (t : line) =
   match t with
   | `ParserDirective (`Escape c) -> cmd "#" ("escape=" ^ String.make 1 c)
@@ -205,7 +306,7 @@ let rec string_of_line ~escape (t : line) =
              (match alias with None -> "" | Some a -> " as " ^ a);
            ])
   | `Maintainer m -> cmd "MAINTAINER" m
-  | `Run c -> cmd "RUN" (string_of_shell_or_exec ~escape c)
+  | `Run (mounts, c) -> cmd "RUN" (string_of_run ~escape mounts c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
   | `Arg a -> cmd "ARG" (string_of_arg ~escape a)
@@ -240,11 +341,32 @@ let buildkit_syntax = parser_directive (`Syntax "docker/dockerfile:1")
 let heredoc ?(strip = false) ?(word = "EOF") ?(delimiter = word) fmt =
   ksprintf (fun here_document -> { here_document; strip; word; delimiter }) fmt
 
+let mount_bind ~target ?source ?from ?readwrite () =
+  let m = { target; source; from; readwrite } in
+  { typ = `Bind m }
+
+let mount_cache ?id ~target ?readonly ?sharing ?from ?source ?mode ?uid ?gid ()
+    =
+  let m = { id; target; readonly; sharing; from; source; mode; uid; gid } in
+  { typ = `Cache m }
+
+let mount_tmpfs ~target ?size () =
+  let m = { target; size } in
+  { typ = `Tmpfs m }
+
+let mount_secret ?id ?target ?required ?mode ?uid ?gid () =
+  let m = { id; target; required; mode; uid; gid } in
+  { typ = `Secret m }
+
+let mount_ssh ?id ?target ?required ?mode ?uid ?gid () =
+  let m = { id; target; required; mode; uid; gid } in
+  { typ = `Ssh m }
+
 let from ?alias ?tag ?platform image = [ `From { image; tag; alias; platform } ]
 let comment fmt = ksprintf (fun c -> [ `Comment c ]) fmt
 let maintainer fmt = ksprintf (fun m -> [ `Maintainer m ]) fmt
-let run fmt = ksprintf (fun b -> [ `Run (`Shell b) ]) fmt
-let run_exec cmds : t = [ `Run (`Exec cmds) ]
+let run ?(mounts = []) fmt = ksprintf (fun b -> [ `Run (mounts, `Shell b) ]) fmt
+let run_exec ?(mounts = []) cmds : t = [ `Run (mounts, `Exec cmds) ]
 let cmd fmt = ksprintf (fun b -> [ `Cmd (`Shell b) ]) fmt
 let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
 let expose_port p : t = [ `Expose [ p ] ]
