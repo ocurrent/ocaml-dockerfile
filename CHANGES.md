@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add OpenSUSE 15.4, deprecate OpenSUSE 15.3. (@MisterDA #138)
 - Update to bubblewrap 0.7.0. (@MisterDA #131)
 - Add Alpine 3.17 (3.16 is now tier 2 and 3.15 is deprecated). Remove
   libexecinfo-dev from the list of apk packages as it is no longer
