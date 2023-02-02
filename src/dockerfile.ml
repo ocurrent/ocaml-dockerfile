@@ -106,12 +106,14 @@ type healthcheck_options = {
 type healthcheck = [ `Cmd of healthcheck_options * shell_or_exec | `None ]
 [@@deriving sexp]
 
+type network = [ `Default | `None | `Host ] [@@deriving sexp]
+
 type line =
   [ `ParserDirective of parser_directive
   | `Comment of string
   | `From of from
   | `Maintainer of string
-  | `Run of mount list * shell_or_exec
+  | `Run of mount list * network option * shell_or_exec
   | `Cmd of shell_or_exec
   | `Expose of int list
   | `Arg of string * string option
@@ -148,12 +150,15 @@ let crunch l =
   let pack l =
     let rec aux acc = function
       | [] -> acc
-      | `Run (m, `Shell a) :: `Run (m', `Shell b) :: tl ->
-          aux (`Run (merge m m', `Shells [ a; b ]) :: acc) tl
-      | `Run (m, `Shells a) :: `Run (m', `Shell b) :: tl ->
-          aux (`Run (merge m m', `Shells (a @ [ b ])) :: acc) tl
-      | `Run (m, `Shells a) :: `Run (m', `Shells b) :: tl ->
-          aux (`Run (merge m m', `Shells (a @ b)) :: acc) tl
+      | `Run (m, n, `Shell a) :: `Run (m', n', `Shell b) :: tl ->
+          if n <> n' then invalid_arg "crunch: at least two networks differ.";
+          aux (`Run (merge m m', n, `Shells [ a; b ]) :: acc) tl
+      | `Run (m, n, `Shells a) :: `Run (m', n', `Shell b) :: tl ->
+          if n <> n' then invalid_arg "crunch: at least two networks differ.";
+          aux (`Run (merge m m', n, `Shells (a @ [ b ])) :: acc) tl
+      | `Run (m, n, `Shells a) :: `Run (m', n', `Shells b) :: tl ->
+          if n <> n' then invalid_arg "crunch: at least two networks differ.";
+          aux (`Run (merge m m', n, `Shells (a @ b)) :: acc) tl
       | hd :: tl -> aux (hd :: acc) tl
     in
     List.rev (aux [] l)
@@ -221,6 +226,10 @@ let optional_flag name = function
   | Some true -> [ name ]
   | Some false | None -> []
 
+let optional_enum name string_of_val = function
+  | None -> []
+  | Some value -> [ sprintf "--%s=%s" name (string_of_val value) ]
+
 let string_of_sources_to_dest (t : sources_to_dest) =
   let `From frm, `Src sl, `Dst d, `Chown chown, `Link link = t in
   String.concat " "
@@ -284,10 +293,15 @@ let string_of_mount { typ } =
         @ optional_int_octal "mode" mode
         @ optional_int "uid" uid @ optional_int "gid" gid)
 
-let string_of_run ~escape mounts c =
+let string_of_run ~escape mounts network c =
   let mounts = List.map string_of_mount mounts in
+  let network =
+    optional_enum "network"
+      (function `Default -> "default" | `None -> "none" | `Host -> "host")
+      network
+  in
   let run = string_of_shell_or_exec ~escape c in
-  String.concat " " (mounts @ [ run ])
+  String.concat " " (mounts @ network @ [ run ])
 
 let rec string_of_line ~escape (t : line) =
   match t with
@@ -306,7 +320,8 @@ let rec string_of_line ~escape (t : line) =
              (match alias with None -> "" | Some a -> " as " ^ a);
            ])
   | `Maintainer m -> cmd "MAINTAINER" m
-  | `Run (mounts, c) -> cmd "RUN" (string_of_run ~escape mounts c)
+  | `Run (mounts, network, c) ->
+      cmd "RUN" (string_of_run ~escape mounts network c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
   | `Arg a -> cmd "ARG" (string_of_arg ~escape a)
@@ -365,8 +380,13 @@ let mount_ssh ?id ?target ?required ?mode ?uid ?gid () =
 let from ?alias ?tag ?platform image = [ `From { image; tag; alias; platform } ]
 let comment fmt = ksprintf (fun c -> [ `Comment c ]) fmt
 let maintainer fmt = ksprintf (fun m -> [ `Maintainer m ]) fmt
-let run ?(mounts = []) fmt = ksprintf (fun b -> [ `Run (mounts, `Shell b) ]) fmt
-let run_exec ?(mounts = []) cmds : t = [ `Run (mounts, `Exec cmds) ]
+
+let run ?(mounts = []) ?network fmt =
+  ksprintf (fun b -> [ `Run (mounts, network, `Shell b) ]) fmt
+
+let run_exec ?(mounts = []) ?network cmds : t =
+  [ `Run (mounts, network, `Exec cmds) ]
+
 let cmd fmt = ksprintf (fun b -> [ `Cmd (`Shell b) ]) fmt
 let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
 let expose_port p : t = [ `Expose [ p ] ]

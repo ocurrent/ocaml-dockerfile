@@ -121,25 +121,33 @@ val maintainer : ('a, unit, string, t) format4 -> 'a
 (** [maintainer] sets the author field of the generated images. *)
 
 type mount
+type network = [ `Default | `None | `Host ]
 
-val run : ?mounts:mount list -> ('a, unit, string, t) format4 -> 'a
+val run :
+  ?mounts:mount list -> ?network:network -> ('a, unit, string, t) format4 -> 'a
 (** [run ?mounts fmt] will execute any commands in a new layer on top of the
    current image and commit the results. The resulting committed image will be
    used for the next step in the Dockerfile. The string result of formatting
    [arg] will be passed as a [/bin/sh -c] invocation.
 
    @param mounts A list of filesystem mounts that the build can access. Requires
-     BuildKit {{!val:parser_directive}syntax} 1.2. *)
+     BuildKit {{!val:parser_directive}syntax} 1.2.
 
-val run_exec : ?mounts:mount list -> string list -> t
-(** [run_exec ?mounts args] will execute any commands in a new layer on top of
+   @param network Control which networking environment the command is run in.
+     Requires BuildKit {{!val:parser_directive}syntax} 1.1. *)
+
+val run_exec : ?mounts:mount list -> ?network:network -> string list -> t
+(** [run_exec ?mounts ?network args] will execute any commands in a new layer on top of
    the current image and commit the results. The resulting committed image will
    be used for the next step in the Dockerfile. The [args] form makes it
    possible to avoid shell string munging, and to run commands using a base
    image that does not contain [/bin/sh].
 
    @param mounts A list of filesystem mounts that the build can access. Requires
-     BuildKit {{!val:parser_directive}syntax} 1.2. *)
+     BuildKit {{!val:parser_directive}syntax} 1.2.
+
+   @param network Control which networking environment the command is run in.
+     Requires BuildKit {{!val:parser_directive}syntax} 1.1. *)
 
 val mount_bind :
   target:string ->
@@ -435,4 +443,4 @@ val crunch : t -> t
   one that is chained using the shell [&&] operator. This reduces the
   number of layers required for a production image.
 
-  @raise Invalid_argument if mounts differ for each run command. *)
+  @raise Invalid_argument if mounts or networks differ for each run command. *)
