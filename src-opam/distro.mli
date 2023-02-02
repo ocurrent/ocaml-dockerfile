@@ -120,7 +120,8 @@ type distro =
     | `V36
     | `V37 ]
   | `OracleLinux of [ `V7 | `V8 ]
-  | `OpenSUSE of [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 ]
+  | `OpenSUSE of
+    [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4 ]
   | `Ubuntu of
     [ `V12_04
     | `V14_04
@@ -187,7 +188,15 @@ type t =
     | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `Latest ]
   | `OpenSUSE of
-    [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `Latest ]
+    [ `V42_1
+    | `V42_2
+    | `V42_3
+    | `V15_0
+    | `V15_1
+    | `V15_2
+    | `V15_3
+    | `V15_4
+    | `Latest ]
   | `Ubuntu of
     [ `V12_04
     | `V14_04
