@@ -122,32 +122,48 @@ val maintainer : ('a, unit, string, t) format4 -> 'a
 
 type mount
 type network = [ `Default | `None | `Host ]
+type security = [ `Insecure | `Sandbox ]
 
 val run :
-  ?mounts:mount list -> ?network:network -> ('a, unit, string, t) format4 -> 'a
-(** [run ?mounts fmt] will execute any commands in a new layer on top of the
-   current image and commit the results. The resulting committed image will be
-   used for the next step in the Dockerfile. The string result of formatting
-   [arg] will be passed as a [/bin/sh -c] invocation.
+  ?mounts:mount list ->
+  ?network:network ->
+  ?security:security ->
+  ('a, unit, string, t) format4 ->
+  'a
+(** [run ?mounts ?network ?security fmt] will execute any commands in a new
+   layer on top of the current image and commit the results. The resulting
+   committed image will be used for the next step in the Dockerfile. The string
+   result of formatting [arg] will be passed as a [/bin/sh -c] invocation.
 
    @param mounts A list of filesystem mounts that the build can access. Requires
      BuildKit {{!val:parser_directive}syntax} 1.2.
 
    @param network Control which networking environment the command is run in.
-     Requires BuildKit {{!val:parser_directive}syntax} 1.1. *)
+     Requires BuildKit {{!val:parser_directive}syntax} 1.1.
 
-val run_exec : ?mounts:mount list -> ?network:network -> string list -> t
-(** [run_exec ?mounts ?network args] will execute any commands in a new layer on top of
-   the current image and commit the results. The resulting committed image will
-   be used for the next step in the Dockerfile. The [args] form makes it
-   possible to avoid shell string munging, and to run commands using a base
-   image that does not contain [/bin/sh].
+   @param security Control which security mode the command is run in.
+     Requires BuildKit {{!val:parser_directive}syntax} 1-labs. *)
 
-   @param mounts A list of filesystem mounts that the build can access. Requires
-     BuildKit {{!val:parser_directive}syntax} 1.2.
+val run_exec :
+  ?mounts:mount list ->
+  ?network:network ->
+  ?security:security ->
+  string list ->
+  t
+(** [run_exec ?mounts ?network ?security args] will execute any commands in a
+   new layer on top of current image and commit the results. The resulting
+   committed image will be used for the next step in the Dockerfile. The [cmd]
+   form makes it possible to avoid shell string munging, and to run commands
+   using a base image that does not contain [/bin/sh].
 
-   @param network Control which networking environment the command is run in.
-     Requires BuildKit {{!val:parser_directive}syntax} 1.1. *)
+  @param mounts A list of filesystem mounts that the build can access. Requires
+    BuildKit syntax 1.2.
+
+  @param network Control which networking environment the command is run in.
+    Requires BuildKit {{!val:parser_directive}syntax} 1.1.
+
+  @param security Control which security mode the command is run in. Requires
+    BuildKit {{!val:parser_directive}syntax} 1-labs. *)
 
 val mount_bind :
   target:string ->
@@ -443,4 +459,5 @@ val crunch : t -> t
   one that is chained using the shell [&&] operator. This reduces the
   number of layers required for a production image.
 
-  @raise Invalid_argument if mounts or networks differ for each run command. *)
+  @raise Invalid_argument if mounts or networks or security modes differ for
+    each run command. *)
