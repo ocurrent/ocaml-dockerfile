@@ -61,6 +61,10 @@ val ocaml_for_windows_package_exn :
    [(package_name, package_version)] of the OCaml compiler
    package in OCaml for Windows, if applicable. *)
 
+val remove_system_attribute : ?recurse:bool -> string -> t
+(** Remove the system attribute on a path. Might be useful to copy
+    data across images when building Docker images. *)
+
 val header :
   alias:string ->
   ?win10_revision:Distro.win10_lcu ->

@@ -227,7 +227,6 @@ module Cygwin = struct
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
          cyg.root
-    @@ remove_system_attribute (cyg.root ^ {|\dev|})
 
   let setup ?(cyg = default) ?from () =
     (match from with
