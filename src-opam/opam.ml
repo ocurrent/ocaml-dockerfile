@@ -374,7 +374,8 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch distro () =
       | _ -> invalid_arg "Invalid distribution"
     in
     let extra, pkgs = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
-    Windows.Cygwin.install_from_release ~extra () @@ vs_build_tools @@ pkgs
+    Windows.Cygwin.install_from_release ~msvs_tools:true ~extra ()
+    @@ vs_build_tools @@ pkgs
   in
   winget_image
   @@ header ?win10_revision ?arch distro

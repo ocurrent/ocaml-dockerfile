@@ -87,8 +87,8 @@ module Cygwin : sig
   (** The default Cygwin root, mirror, and arguments. *)
 
   val install_from_release :
-    ?cyg:cyg -> ?extra:string list -> unit -> Dockerfile.t
-  (** Install Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
+    ?cyg:cyg -> ?msvs_tools:bool -> ?extra:string list -> unit -> Dockerfile.t
+  (** Install Cygwin with CygSymPathy and optionally msvs-tools, and [extra] Cygwin
      packages (first in a separate Docker image). Sets the
      [CYGWIN=winsymlinks:native] environment variable.
      @see <https://github.com/metastack/cygsympathy>

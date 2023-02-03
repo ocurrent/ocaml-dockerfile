@@ -215,7 +215,8 @@ module Cygwin = struct
     env [ ("CYGWIN", "winsymlinks:native") ]
     @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
 
-  let install_from_release ?(cyg = default) ?(extra = []) () =
+  let install_from_release ?(cyg = default) ?(msvs_tools = false) ?(extra = [])
+      () =
     setup_env ~cyg
     @@ add
          ~src:[ "https://www.cygwin.com/setup-x86_64.exe" ]
@@ -223,7 +224,7 @@ module Cygwin = struct
          ()
     @@ install_cygsympathy_from_source cyg
     @@ install ~cyg extra
-    @@ install_msvs_tools_from_source cyg
+    @@ (if msvs_tools then install_msvs_tools_from_source cyg else empty)
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
          cyg.root
