@@ -120,14 +120,15 @@ let ocaml_for_windows_package_exn ~switch ~port ~arch =
   let _, pkgver = Ocaml_version.Opam.V2.package switch in
   ("ocaml-variants", pkgver ^ "+" ^ variant)
 
-let git_init ~name ~email ~opam_repository =
+let git_init ~name ~email ~repos =
   String.concat " && "
-    [
-      sprintf "git config --global user.email '%s'" email;
-      sprintf "git config --global user.name '%s'" name;
-      "git config --system core.longpaths true";
-      sprintf "git config --global --add safe.directory %s" opam_repository;
-    ]
+    (sprintf "git config --global user.email '%s'" email
+    :: sprintf "git config --global user.name '%s'" name
+    :: "git config --system core.longpaths true"
+    :: List.map
+         (fun repo ->
+           sprintf "git config --global --add safe.directory %s" repo)
+         repos)
 
 module Cygwin = struct
   type cyg = { root : string; site : string; args : string list }
@@ -269,10 +270,9 @@ module Cygwin = struct
 
   module Git = struct
     let init ?(cyg = default) ?(name = "Docker") ?(email = "docker@example.com")
-        () =
+        ?(repos = [ "/home/opam/opam-repository" ]) () =
       env [ ("HOME", cyg.root ^ {|\home\opam|}) ]
-      @@ run_sh ~cyg "%s"
-           (git_init ~email ~name ~opam_repository:"/home/opam/opam-repository")
+      @@ run_sh ~cyg "%s" (git_init ~email ~name ~repos)
   end
 end
 
@@ -344,9 +344,8 @@ module Winget = struct
     | _ -> install [ "Git.Git" ] @@ maybe install extra
 
   module Git = struct
-    let init ?(name = "Docker") ?(email = "docker@example.com") () =
-      run "%s"
-        (git_init ~email ~name
-           ~opam_repository:"C:/cygwin64/home/opam/opam-repository")
+    let init ?(name = "Docker") ?(email = "docker@example.com")
+        ?(repos = [ "C:/cygwin64/home/opam/opam-repository" ]) () =
+      run "%s" (git_init ~email ~name ~repos)
   end
 end

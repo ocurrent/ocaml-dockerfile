@@ -138,8 +138,18 @@ module Cygwin : sig
 
   (** Rules for Git. *)
   module Git : sig
-    val init : ?cyg:cyg -> ?name:string -> ?email:string -> unit -> t
-    (** Configure the git name and email variables to sensible defaults *)
+    val init :
+      ?cyg:cyg ->
+      ?name:string ->
+      ?email:string ->
+      ?repos:string list ->
+      unit ->
+      t
+    (** Configure the git name and email variables to sensible defaults.
+
+       @param repos A list of paths to Git repos to mark as safe
+         directories. Defaults to the default location of the
+         opam-repository. *)
   end
 end
 
@@ -169,7 +179,11 @@ module Winget : sig
 
   (** Rules for Git. *)
   module Git : sig
-    val init : ?name:string -> ?email:string -> unit -> t
-    (** Configure the git name and email variables to sensible defaults *)
+    val init : ?name:string -> ?email:string -> ?repos:string list -> unit -> t
+    (** Configure the git name and email variables to sensible defaults.
+
+       @param repos A list of paths to Git repos to mark as safe
+         directories. Defaults to the default location of the
+         opam-repository. *)
   end
 end
