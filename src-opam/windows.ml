@@ -213,7 +213,7 @@ module Cygwin = struct
   let update ?(cyg = default) () = cygsetup ~cyg ~upgrade:true "" |> cleanup
 
   let setup_env ~cyg =
-    env [ ("CYGWIN", "winsymlinks:native") ]
+    env [ ("CYGWIN", "nodosfilewarning winsymlinks:native") ]
     @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
 
   let install_from_release ?(cyg = default) ?(msvs_tools = false) ?(extra = [])
