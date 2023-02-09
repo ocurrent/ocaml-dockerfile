@@ -104,21 +104,17 @@ module Cygwin : sig
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages :
-    ?extra:string list -> ?flexdll_version:string -> unit -> string list
-  (** [cygwin_packages ?extra ()] will install the base development
-     tools for the OCaml Cygwin port. Extra packages may also be
-     optionally supplied via [extra]. *)
+  val cygwin_packages : ?flexdll_version:string -> unit -> string list
+  (** [cygwin_packages ?extra ()] is the list of the base development
+     tools for the OCaml Cygwin port. *)
 
-  val mingw_packages : ?extra:string list -> unit -> string list
-  (** [mingw_packages ?extra ()] will install the base development
-     tools for the OCaml mingw port. Extra packages may also be
-     optionally supplied via [extra]. *)
+  val mingw_packages : string list
+  (** [mingw_packages] is the list of base development tools for the
+      Caml mingw port. *)
 
-  val msvc_packages : ?extra:string list -> unit -> string list
-  (** [msvc_packages ?extra ()] will install the base development
-     tools for the OCaml MSVC port. Extra packages may also be
-     optionally supplied via [extra]. *)
+  val msvc_packages : string list
+  (** [msvc_packages] is the list of base development tools for the
+      Caml MSVC port. *)
 
   val ocaml_for_windows_packages :
     ?cyg:cyg -> ?extra:string list -> ?version:string -> unit -> string list * t

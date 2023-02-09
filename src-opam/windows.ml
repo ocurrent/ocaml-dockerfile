@@ -238,17 +238,22 @@ module Cygwin = struct
     | None -> empty)
     @@ workdir {|%s\home\opam|} cyg.root
 
-  let cygwin_packages ?(extra = []) ?(flexdll_version = "0.39-1") () =
+  let cygwin_packages ?(flexdll_version = "0.39-1") () =
     (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
-    "make" :: "diffutils" :: "ocaml" :: "gcc-core" :: "git" :: "patch" :: "m4"
-    :: "cygport"
-    :: ("flexdll=" ^ flexdll_version)
-    :: extra
+    [
+      "make";
+      "diffutils";
+      "ocaml";
+      "gcc-core";
+      "git";
+      "patch";
+      "m4";
+      "cygport";
+      "flexdll=" ^ flexdll_version;
+    ]
 
-  let mingw_packages ?(extra = []) () =
-    "make" :: "diffutils" :: "mingw64-x86_64-gcc-core" :: extra
-
-  let msvc_packages ?(extra = []) () = "make" :: "diffutils" :: extra
+  let mingw_packages = [ "make"; "diffutils"; "mingw64-x86_64-gcc-core" ]
+  let msvc_packages = [ "make"; "diffutils" ]
 
   let ocaml_for_windows_packages ?cyg ?(extra = []) ?(version = "0.0.0.2") () =
     let packages =

@@ -438,7 +438,7 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
          install_from_release
            ~extra:
              ("git" :: "patch" :: "mingw64-x86_64-gcc-g++"
-            :: "mingw64-i686-gcc-g++" :: mingw_packages ())
+            :: "mingw64-i686-gcc-g++" :: mingw_packages)
            ())
     @@ install_opams_windows opam_master_hash opam_branches
   in
@@ -447,9 +447,9 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
   let ocaml_for_windows =
     let extra, vs_build_tools =
       match distro with
-      | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages (), empty)
+      | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages, empty)
       | `Windows (`Msvc, _) ->
-          ( Windows.Cygwin.msvc_packages (),
+          ( Windows.Cygwin.msvc_packages,
             Windows.install_visual_studio_build_tools
               [
                 "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
