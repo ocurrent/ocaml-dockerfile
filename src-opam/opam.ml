@@ -31,6 +31,12 @@ let maybe_link_opam add_default_link prefix branch =
     run "ln %s/bin/opam-%s %s/bin/opam" prefix branch prefix
   else empty
 
+let maybe_link_opam_windows ?cyg add_default_link prefix branch =
+  if add_default_link then
+    Windows.Cygwin.run_sh ?cyg "ln %s/bin/opam-%s %s/bin/opam" prefix branch
+      prefix
+  else empty
+
 (* Build opam in a separate worktree from an already cloned opam *)
 let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
     ?(enable_0install_solver = false) ~branch ~hash () =
@@ -46,6 +52,38 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
     (if enable_0install_solver then " --with-0install-solver" else "")
     prefix branch prefix branch prefix branch branch
   @@ maybe_link_opam add_default_link prefix branch
+
+(* Build opam in a separate worktree from an already cloned opam *)
+let install_opam_from_source_windows ?cyg ?(add_default_link = true)
+    ?(prefix = "/usr/local") ?(enable_0install_solver = false) ~branch ~hash ()
+    =
+  let cold_compiler = true and lib_pkg = true in
+  Windows.Cygwin.run_sh ?cyg
+    "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && cd \
+     ../opam-build-%s && git checkout %s && git config --global --add \
+     safe.directory /tmp/opam-build-%s"
+    branch branch hash branch
+  @@ (if cold_compiler then
+      Windows.Cygwin.run_sh ?cyg
+        {|cd /tmp/opam-build-%s && make cold CONFIGURE_ARGS="--enable-cold-check%s"|}
+        branch
+        (if enable_0install_solver then " --with-0install-solver" else "")
+     else
+       Windows.Cygwin.run_sh ?cyg "cd /tmp/opam-build-%s && make compiler"
+         branch
+       @@ (if lib_pkg then
+           Windows.Cygwin.run_sh ?cyg "cd /tmp/opam-build-%s && make lib-pkg"
+             branch
+          else empty)
+       @@ Windows.Cygwin.run_sh ?cyg
+            "cd /tmp/opam-build-%s && ./configure --enable-cold-check%s && make"
+            branch
+            (if enable_0install_solver then " --with-0install-solver" else ""))
+  @@ Windows.Cygwin.run_sh ?cyg
+       "cd /tmp/opam-build-%s && mkdir -p %s/bin && cp /tmp/opam-build-%s/opam \
+        %s/bin/opam-%s && chmod a+x %s/bin/opam-%s"
+       branch prefix branch prefix branch prefix branch
+  @@ maybe_link_opam_windows add_default_link prefix branch
 
 let bubblewrap_minimum = (0, 4, 1)
 let bubblewrap_latest = (0, 7, 0)
@@ -176,6 +214,16 @@ type opam_branch = {
   aliases : string list;
 }
 
+let opam_master_branch opam_master_hash =
+  {
+    branch = "master";
+    hash = opam_master_hash;
+    enable_0install_solver = true;
+    public_name = "opam-dev";
+    aliases = [ "opam-2.2" ];
+    (* TODO: Remove/update when opam 2.2 is branched *)
+  }
+
 let create_opam_branches opam_hashes =
   let { opam_2_0_hash; opam_2_1_hash; opam_master_hash } = opam_hashes in
   ( opam_master_hash,
@@ -195,15 +243,12 @@ let create_opam_branches opam_hashes =
         public_name = "opam-2.1";
         aliases = [];
       };
-      {
-        branch = "master";
-        hash = opam_master_hash;
-        enable_0install_solver = true;
-        public_name = "opam-dev";
-        aliases = [ "opam-2.2" ];
-        (* TODO: Remove/update when opam 2.2 is branched *)
-      };
+      opam_master_branch opam_master_hash;
     ] )
+
+let create_opam_branches_windows opam_hashes =
+  let { opam_master_hash; _ } = opam_hashes in
+  (opam_master_hash, [ opam_master_branch opam_master_hash ])
 
 let install_opams ?prefix opam_master_hash opam_branches =
   run
@@ -213,11 +258,22 @@ let install_opams ?prefix opam_master_hash opam_branches =
     opam_master_hash
   @@ List.fold_left
        (fun acc { branch; hash; enable_0install_solver; _ } ->
-         let add_default_link = Some false in
-         let enable_0install_solver = Some enable_0install_solver in
          acc
-         @@ install_opam_from_source ?add_default_link ?prefix
-              ?enable_0install_solver ~branch ~hash ())
+         @@ install_opam_from_source ~add_default_link:false ?prefix
+              ~enable_0install_solver ~branch ~hash ())
+       empty opam_branches
+
+let install_opams_windows ?cyg ?prefix opam_master_hash opam_branches =
+  Windows.Cygwin.Git.init ?cyg ~repos:[ "/tmp/opam-sources" ] ()
+  @@ Windows.Cygwin.run_sh ?cyg
+       "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && \
+        cp -P -R -p . ../opam-sources && git checkout %s"
+       opam_master_hash
+  @@ List.fold_left
+       (fun acc { branch; hash; enable_0install_solver; _ } ->
+         acc
+         @@ install_opam_from_source_windows ?cyg ~add_default_link:false
+              ?prefix ~enable_0install_solver ~branch ~hash ())
        empty opam_branches
 
 let copy_opams ~src ~dst opam_branches =
@@ -230,6 +286,19 @@ let copy_opams ~src ~dst opam_branches =
            ()
       @@@ List.map
             (fun alias -> run "ln %s/%s %s/%s" dst public_name dst alias)
+            aliases)
+    empty opam_branches
+
+let copy_opams_windows ~src ~dst opam_branches =
+  List.fold_left
+    (fun acc { branch; public_name; aliases; _ } ->
+      acc
+      @@ copy ~from:"opam-builder"
+           ~src:[ src ^ "\\opam-" ^ branch ]
+           ~dst:(dst ^ "\\" ^ public_name)
+           ()
+      @@@ List.map
+            (fun alias -> run "mklink %s\\%s %s\\%s" dst alias dst public_name)
             aliases)
     empty opam_branches
 
@@ -347,7 +416,11 @@ let pacman_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
    add an option to enable 0install-solver,
    and pass ~hash_opam_2_0 ~hash_opam_2_1 like the cygwin one *)
 (* Native Windows, WinGet, Cygwin based Dockerfiles *)
-let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch distro () =
+let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
+    distro () =
+  let opam_master_hash, opam_branches =
+    create_opam_branches_windows opam_hashes
+  in
   let version = match distro with `Windows (_, v) -> v | _ -> assert false in
   let winget_image, winget_setup =
     match winget with
@@ -358,14 +431,25 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch distro () =
           @@ Windows.Winget.dev_packages ~version () )
     | _ -> (empty, empty)
   in
+  let opams_image =
+    Windows.header ~alias:"opam-builder" ?win10_revision ~version ()
+    @@ Windows.sanitize_reg_path ()
+    @@ Windows.Cygwin.(
+         install_from_release
+           ~extra:
+             ("git" :: "patch" :: "mingw64-x86_64-gcc-g++"
+            :: "mingw64-i686-gcc-g++" :: mingw_packages)
+           ())
+    @@ install_opams_windows opam_master_hash opam_branches
+  in
   (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
      C:\cygwin64, so we cannot build Cygwin in a separate image. *)
   let ocaml_for_windows =
     let extra, vs_build_tools =
       match distro with
-      | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages (), empty)
+      | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages, empty)
       | `Windows (`Msvc, _) ->
-          ( Windows.Cygwin.msvc_packages (),
+          ( Windows.Cygwin.msvc_packages,
             Windows.install_visual_studio_build_tools
               [
                 "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
@@ -374,16 +458,21 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch distro () =
       | _ -> invalid_arg "Invalid distribution"
     in
     let extra, pkgs = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
-    Windows.Cygwin.install_from_release ~extra () @@ vs_build_tools @@ pkgs
+    Windows.Cygwin.install_from_release ~msvs_tools:true ~extra ()
+    @@ vs_build_tools @@ pkgs
   in
-  winget_image
+  let cyg_root = Windows.Cygwin.default.root in
+  winget_image @@ opams_image
   @@ header ?win10_revision ?arch distro
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.install_vc_redist ()
   @@ Windows.sanitize_reg_path ()
-  @@ winget_setup @@ ocaml_for_windows @@ Windows.Cygwin.setup ()
-  @@ Windows.Cygwin.Git.init ()
+  @@ winget_setup @@ ocaml_for_windows
+  @@ copy_opams_windows
+       ~src:(cyg_root ^ {|\usr\local\bin|})
+       ~dst:(cyg_root ^ {|\usr\bin|}) opam_branches
+  @@ Windows.Cygwin.setup () @@ Windows.Cygwin.Git.init ()
 
 let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
     ?labels ~opam_hashes d =
@@ -403,7 +492,8 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
           d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()
-    | `Windows -> windows_opam2 ?win10_revision ?winget ?labels ?arch d ()
+    | `Windows ->
+        windows_opam2 ?win10_revision ?winget ?labels ?arch ~opam_hashes d ()
     | `Cygwin ->
         failwith
           "OCaml/opam Docker images with the Cygwin port are not supported."

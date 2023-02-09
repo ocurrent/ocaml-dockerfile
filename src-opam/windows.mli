@@ -61,6 +61,10 @@ val ocaml_for_windows_package_exn :
    [(package_name, package_version)] of the OCaml compiler
    package in OCaml for Windows, if applicable. *)
 
+val remove_system_attribute : ?recurse:bool -> string -> t
+(** Remove the system attribute on a path. Might be useful to copy
+    data across images when building Docker images. *)
+
 val header :
   alias:string ->
   ?win10_revision:Distro.win10_lcu ->
@@ -83,8 +87,8 @@ module Cygwin : sig
   (** The default Cygwin root, mirror, and arguments. *)
 
   val install_from_release :
-    ?cyg:cyg -> ?extra:string list -> unit -> Dockerfile.t
-  (** Install Cygwin with CygSymPathy and msvs-tools, and [extra] Cygwin
+    ?cyg:cyg -> ?msvs_tools:bool -> ?extra:string list -> unit -> Dockerfile.t
+  (** Install Cygwin with CygSymPathy and optionally msvs-tools, and [extra] Cygwin
      packages (first in a separate Docker image). Sets the
      [CYGWIN=winsymlinks:native] environment variable.
      @see <https://github.com/metastack/cygsympathy>
@@ -100,21 +104,17 @@ module Cygwin : sig
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
 
-  val cygwin_packages :
-    ?extra:string list -> ?flexdll_version:string -> unit -> string list
-  (** [cygwin_packages ?extra ()] will install the base development
-     tools for the OCaml Cygwin port. Extra packages may also be
-     optionally supplied via [extra]. *)
+  val cygwin_packages : ?flexdll_version:string -> unit -> string list
+  (** [cygwin_packages ?extra ()] is the list of the base development
+     tools for the OCaml Cygwin port. *)
 
-  val mingw_packages : ?extra:string list -> unit -> string list
-  (** [mingw_packages ?extra ()] will install the base development
-     tools for the OCaml mingw port. Extra packages may also be
-     optionally supplied via [extra]. *)
+  val mingw_packages : string list
+  (** [mingw_packages] is the list of base development tools for the
+      Caml mingw port. *)
 
-  val msvc_packages : ?extra:string list -> unit -> string list
-  (** [msvc_packages ?extra ()] will install the base development
-     tools for the OCaml MSVC port. Extra packages may also be
-     optionally supplied via [extra]. *)
+  val msvc_packages : string list
+  (** [msvc_packages] is the list of base development tools for the
+      Caml MSVC port. *)
 
   val ocaml_for_windows_packages :
     ?cyg:cyg -> ?extra:string list -> ?version:string -> unit -> string list * t
@@ -134,8 +134,18 @@ module Cygwin : sig
 
   (** Rules for Git. *)
   module Git : sig
-    val init : ?cyg:cyg -> ?name:string -> ?email:string -> unit -> t
-    (** Configure the git name and email variables to sensible defaults *)
+    val init :
+      ?cyg:cyg ->
+      ?name:string ->
+      ?email:string ->
+      ?repos:string list ->
+      unit ->
+      t
+    (** Configure the git name and email variables to sensible defaults.
+
+       @param repos A list of paths to Git repos to mark as safe
+         directories. Defaults to the default location of the
+         opam-repository. *)
   end
 end
 
@@ -165,7 +175,11 @@ module Winget : sig
 
   (** Rules for Git. *)
   module Git : sig
-    val init : ?name:string -> ?email:string -> unit -> t
-    (** Configure the git name and email variables to sensible defaults *)
+    val init : ?name:string -> ?email:string -> ?repos:string list -> unit -> t
+    (** Configure the git name and email variables to sensible defaults.
+
+       @param repos A list of paths to Git repos to mark as safe
+         directories. Defaults to the default location of the
+         opam-repository. *)
   end
 end
