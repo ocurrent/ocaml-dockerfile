@@ -639,6 +639,9 @@ module OV = Ocaml_version
 
 let distro_arches ov (d : t) =
   match (resolve_alias d, ov) with
+  (* OCaml for Windows doesn't package OCaml 4.14.1 nor OCaml 5.0.
+     TODO: remove when upstream opam gains OCaml packages on Windows. *)
+  | `Windows _, ov when OV.(compare Releases.v4_14_0 ov) = -1 -> []
   | `Windows (`Msvc, _), ov when OV.major ov >= 5 -> []
   | (`CentOS (`V6 | `V7) | `OracleLinux `V7), ov when OV.major ov >= 5 -> []
   | `Debian `V11, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
