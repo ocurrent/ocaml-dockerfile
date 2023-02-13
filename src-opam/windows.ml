@@ -192,7 +192,7 @@ module Cygwin = struct
         ]
       ~dst:{|C:\TEMP\msvs-tools.tar.gz|} ()
     @@ run_sh ~cyg
-         {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin|}
+         {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin && rm -rf /cygdrive/c/TEMP/msvs-tools/*|}
          version version
 
   let cygsetup ?(cyg = default) ?(upgrade = false) fmt =
