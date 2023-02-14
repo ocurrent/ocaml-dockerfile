@@ -1,7 +1,8 @@
 unreleased
 ----------
 
-- Build and install opam master from source in Windows images. (@MisterDA #140, #142)
+- Build and install opam master from source in Windows images.
+  (@MisterDA #140, #142, #143)
 - Include the ocaml-beta-repository in the images. (@kit-ty-kate #132, review by @MisterDA)
 - Add OpenSUSE 15.4, deprecate OpenSUSE 15.3. (@MisterDA #138)
 - Update to bubblewrap 0.7.0. (@MisterDA #131)
