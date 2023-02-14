@@ -67,7 +67,7 @@ let install_opam_from_source_windows ?cyg ?prefix
   (* Docker doesn't allow copying executables from /usr/local/bin
      (why??), so tar the opam installation. *)
   @@ Windows.Cygwin.run_sh ?cyg
-       {|cd /usr/local/bin && tar -cf /cygdrive/c/TEMP/opam.tar .|}
+       {|cd /usr/local/bin && tar -cf /cygdrive/c/opam.tar .|}
 
 let bubblewrap_minimum = (0, 4, 1)
 let bubblewrap_latest = (0, 7, 0)
@@ -276,8 +276,7 @@ let copy_opams ~src ~dst opam_branches =
 (* FIXME: only support building opam master for now *)
 let copy_opams_windows = function
   | [ { public_name; aliases; _ } ] ->
-      copy ~from:"opam-builder" ~src:[ {|C:\TEMP\opam.tar|} ] ~dst:{|C:\TEMP\|}
-        ()
+      copy ~from:"opam-builder" ~src:[ {|C:\opam.tar|} ] ~dst:{|C:\TEMP\|} ()
       @@ run
            {|C:\cygwin64\bin\tar.exe -xf /cygdrive/c/TEMP/opam.tar -C /usr/local/bin && del C:\TEMP\opam.tar|}
       @@ run
