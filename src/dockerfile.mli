@@ -173,7 +173,17 @@ val mount_bind :
   ?readwrite:bool ->
   unit ->
   mount
-(** Creates a bind mount for {!run}. Requires {!val:buildkit_syntax}. *)
+(** [mount_bind ~target ?source ?from ?readwrite ()] Creates a bind mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    @param target the target of the mount inside the container. Usually a path, but for 'podman' it can also contain SELinux flags like ',z' or ',Z'
+    @param from a build stage to bind mount from (if absent: bind mount host)
+    @param source path to mount. When [from] is absent this is relative to the build context on the host. When [source] is absent it defaults to root of [from].
+    @param readwrite enables writing to the mount (default: read-only). The data written is not persisted, [source] always remains unchanged.
+
+    @see <https://docs.docker.com/engine/ruference/builder/#run---mounttypebind> Docker --mount=type=bind reference
+*)
 
 val mount_cache :
   ?id:string ->
@@ -187,10 +197,42 @@ val mount_cache :
   ?gid:int ->
   unit ->
   mount
-(** Creates a cache mount for {!run}. Requires {!val:buildkit_syntax}. *)
+(** [mount_cache ?id ~target ?readonly ?sharing ?from ?source ?mode ?uid ?gid ()] Creates a cache mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    @param id the cache id: all container builds with same cache id (even from other unrelated builds) will get the same writable directory mounted.
+        Defaults to [target] when absent.
+    @param target where to mount the cache inside the container. The [RUN] 
+        command needs to cope with a completely empty cache, and with files from the 
+        cache being deleted by the container runtime's GC in arbitrary order.
+        E.g. a download cache would be suitable here, an entire git repository wouldn't.
+        Also make sure that your RUN commands doesn't inadvertently wipe the cache
+        (e.g. apt inside a container by default would).
+    @param readonly whether the cache is read-only (by default it is writable)
+    @param sharing how to share the cache between concurrent builds. The default is [`Shared] which doesn't use any locking.
+    @param from the stage to use for the initial contents of the cache.
+    @param source the initial contents of the cache, default is empty.
+    @param mode file mode for cache directory
+    @param uid UID of cache directory, default 0.
+    @param gid GID of cache directory, default 0.
+
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypecache> Docker --mount=type=cache reference
+*)
 
 val mount_tmpfs : target:string -> ?size:int -> unit -> mount
-(** Creates a tmpfs mount for {!run}. Requires {!val:buildkit_syntax}. *)
+(** [mount_tmpfs ~target ?size ())] Creates a tmpfs mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    @param target mounts a [tmpfs] at [target]
+    @param size maximum size of [tmpfs] (only supported by Docker)
+
+    Note that the directory seems to be completely removed from the image, so once you start using [tmpfs] for a dir,
+    it is recommended that all further [RUN] commands use it too to avoid ENOENT errors.
+
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypetmpfs> Docker --mount=type=tmpfs reference
+*)
 
 val mount_secret :
   ?id:string ->
@@ -201,7 +243,12 @@ val mount_secret :
   ?gid:int ->
   unit ->
   mount
-(** Creates a secret mount for {!run}. Requires {!val:buildkit_syntax}. *)
+(** [mount_secret ?id ?target ?required ?mode ?uid ?gid] Creates a secret mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+ @see <https://docs.docker.com/engine/reference/builder/#run---mounttypesecret> Docker --mount=type=secret reference
+*)
 
 val mount_ssh :
   ?id:string ->
@@ -212,7 +259,14 @@ val mount_ssh :
   ?gid:int ->
   unit ->
   mount
-(** Creates an ssh mount for {!run}. Requires {!val:buildkit_syntax}. *)
+(** [mount_ssh ?id ?target ?required ?mode ?uid ?gid] Creates an ssh mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    Seems to be only supported by Docker at the moment.
+
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypessh> Docker --mount=type=ssh reference
+*)
 
 val cmd : ('a, unit, string, t) format4 -> 'a
 (** [cmd args] provides defaults for an executing container. These defaults
