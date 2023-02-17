@@ -235,6 +235,7 @@ and string_of_healthcheck ~escape options c =
 
 (* Function interface *)
 let parser_directive pd : t = [ `ParserDirective pd ]
+let buildkit_syntax = parser_directive (`Syntax "docker/dockerfile:1")
 
 let heredoc ?(strip = false) ?(word = "EOF") ?(delimiter = word) fmt =
   ksprintf (fun here_document -> { here_document; strip; word; delimiter }) fmt

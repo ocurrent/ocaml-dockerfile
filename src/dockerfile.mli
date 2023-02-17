@@ -58,7 +58,12 @@ type parser_directive = [ `Syntax of string | `Escape of char ]
 val parser_directive : parser_directive -> t
 (** A parser directive. If used, needs to be the first line of the
    Dockerfile.
-   @see <https://docs.docker.com/engine/reference/builder/#parser-directives> *)
+   @see <https://docs.docker.com/engine/reference/builder/#parser-directives>
+   @see <https://docs.docker.com/build/buildkit/dockerfile-frontend/> *)
+
+val buildkit_syntax : t
+(** Convenience function, returns the {{!val-parser_directive}parser directive}
+    describing the latest BuildKit syntax. *)
 
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
