@@ -81,7 +81,7 @@ val heredoc :
     [here_document] as content and [word] () as opening delimiter. If
     [word] is quoted, then [delimiter] (unquoted [word]) needs to be
     specified. Quoting affects expansion in the here-document.
-    Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
+    Requires 1.4 {!val:buildkit_syntax}.
 
     @param strip Whether to strip leading tab characters. Defaults to false.
     @param word The opening delimiter, possibly quoted. Defaults to [EOF].
@@ -136,9 +136,10 @@ val run :
    result of formatting [arg] will be passed as a [/bin/sh -c] invocation.
 
    @param mounts A list of filesystem mounts that the build can access. Requires
-     BuildKit {{!val:parser_directive}syntax} 1.2.
+     {!val:buildkit_syntax} 1.2.
 
    @param network Control which networking environment the command is run in.
+     Requires {!val:buildkit_syntax} 1.1.
      Requires BuildKit {{!val:parser_directive}syntax} 1.1.
 
    @param security Control which security mode the command is run in.
@@ -157,10 +158,10 @@ val run_exec :
    using a base image that does not contain [/bin/sh].
 
   @param mounts A list of filesystem mounts that the build can access. Requires
-    BuildKit syntax 1.2.
+    {!val:buildkit_syntax} 1.2.
 
   @param network Control which networking environment the command is run in.
-    Requires BuildKit {{!val:parser_directive}syntax} 1.1.
+    Requires {!val:buildkit_syntax} 1.1.
 
   @param security Control which security mode the command is run in. Requires
     BuildKit {{!val:parser_directive}syntax} 1-labs. *)
@@ -172,7 +173,7 @@ val mount_bind :
   ?readwrite:bool ->
   unit ->
   mount
-(** Creates a bind mount for {!run}. Requires BuildKit syntax. *)
+(** Creates a bind mount for {!run}. Requires {!val:buildkit_syntax}. *)
 
 val mount_cache :
   ?id:string ->
@@ -186,10 +187,10 @@ val mount_cache :
   ?gid:int ->
   unit ->
   mount
-(** Creates a cache mount for {!run}. Requires BuildKit syntax. *)
+(** Creates a cache mount for {!run}. Requires {!val:buildkit_syntax}. *)
 
 val mount_tmpfs : target:string -> ?size:int -> unit -> mount
-(** Creates a tmpfs mount for {!run}. Requires BuildKit syntax. *)
+(** Creates a tmpfs mount for {!run}. Requires {!val:buildkit_syntax}. *)
 
 val mount_secret :
   ?id:string ->
@@ -200,7 +201,7 @@ val mount_secret :
   ?gid:int ->
   unit ->
   mount
-(** Creates a secret mount for {!run}. Requires BuildKit syntax. *)
+(** Creates a secret mount for {!run}. Requires {!val:buildkit_syntax}. *)
 
 val mount_ssh :
   ?id:string ->
@@ -211,7 +212,7 @@ val mount_ssh :
   ?gid:int ->
   unit ->
   mount
-(** Creates an ssh mount for {!run}. Requires BuildKit syntax. *)
+(** Creates an ssh mount for {!run}. Requires {!val:buildkit_syntax}. *)
 
 val cmd : ('a, unit, string, t) format4 -> 'a
 (** [cmd args] provides defaults for an executing container. These defaults
@@ -281,8 +282,8 @@ val add :
 
   @param link Add files with enhanced semantics where your files
     remain independent on their own layer and don’t get invalidated
-    when commands on previous layers are changed. Requires BuildKit
-    1.4 {{!val:parser_directive}syntax}.
+    when commands on previous layers are changed.
+    Requires 1.4 {!val:buildkit_syntax}.
 
   @param chown Specify a given username, groupname, or UID/GID
     combination to request specific ownership of the copied
@@ -308,8 +309,8 @@ val copy :
 
   @param link Copy files with enhanced semantics where your files
     remain independent on their own layer and don’t get invalidated
-    when commands on previous layers are changed. Requires BuildKit
-    1.4 {{!val:parser_directive}syntax}.
+    when commands on previous layers are changed.
+    Requires 1.4 {!val:buildkit_syntax}.
 
   @param chown Specify a given username, groupname, or UID/GID
     combination to request specific ownership of the copied content.
@@ -321,7 +322,8 @@ val copy :
 
 val copy_heredoc : ?chown:string -> src:heredoc list -> dst:string -> unit -> t
 (** [copy_heredoc src dst] creates the file [dst] using the content of
-    the here-documents [src]. Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
+    the here-documents [src].
+    Requires 1.4 {!val:buildkit_syntax}.
 
     @see <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#here-documents> *)
 
