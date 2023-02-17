@@ -109,6 +109,19 @@ type healthcheck = [ `Cmd of healthcheck_options * shell_or_exec | `None ]
 type network = [ `Default | `None | `Host ] [@@deriving sexp]
 type security = [ `Insecure | `Sandbox ] [@@deriving sexp]
 
+let escape_string ~char_to_escape ~escape v =
+  let len = String.length v in
+  let buf = Buffer.create len in
+  let j = ref 0 in
+  for i = 0 to len - 1 do
+    if v.[i] = char_to_escape || v.[i] = escape then (
+      if i - !j > 0 then Buffer.add_substring buf v !j (i - !j);
+      Buffer.add_char buf escape;
+      j := i)
+  done;
+  Buffer.add_substring buf v !j (len - !j);
+  Buffer.contents buf
+
 type line =
   [ `ParserDirective of parser_directive
   | `Comment of string
@@ -187,18 +200,7 @@ let string_of_shell_or_exec ~escape (t : shell_or_exec) =
   | `Shells l -> String.concat (" && " ^ String.make 1 escape ^ "\n  ") l
   | `Exec sl -> json_array_of_list sl
 
-let quote_env_var ~escape v =
-  let len = String.length v in
-  let buf = Buffer.create len in
-  let j = ref 0 in
-  for i = 0 to len - 1 do
-    if v.[i] = '"' || v.[i] = escape then (
-      if i - !j > 0 then Buffer.add_substring buf v !j (i - !j);
-      Buffer.add_char buf escape;
-      j := i)
-  done;
-  Buffer.add_substring buf v !j (len - !j);
-  Buffer.contents buf
+let quote_env_var = escape_string ~char_to_escape:'"'
 
 let string_of_env_var ~escape (name, value) =
   sprintf {|%s="%s"|} name (quote_env_var ~escape value)
@@ -298,7 +300,10 @@ let string_of_mount { typ } =
         @ optional_int "uid" uid @ optional_int "gid" gid)
 
 let string_of_run ~escape mounts network security c =
-  let mounts = List.map string_of_mount mounts in
+  let mounts =
+    mounts |> List.map string_of_mount
+    |> List.map (escape_string ~char_to_escape:' ' ~escape)
+  in
   let network =
     optional_enum "network"
       (function `Default -> "default" | `None -> "none" | `Host -> "host")
