@@ -114,7 +114,8 @@ let escape_string ~char_to_escape ~escape v =
   let buf = Buffer.create len in
   let j = ref 0 in
   for i = 0 to len - 1 do
-    if v.[i] = char_to_escape || v.[i] = escape then (
+    if String.unsafe_get v i = char_to_escape || String.unsafe_get v i = escape
+    then (
       if i - !j > 0 then Buffer.add_substring buf v !j (i - !j);
       Buffer.add_char buf escape;
       j := i)
