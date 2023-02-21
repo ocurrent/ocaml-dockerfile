@@ -40,9 +40,16 @@ val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
    loaded by [ocaml-env exec] with [args]. *)
 
 val sanitize_reg_path : unit -> t
-(** [sanitize_reg_path ()] adds the command necessary to remove a trailing
+  [@@ocaml.doc
+    {|[sanitize_reg_path ()] adds the command necessary to remove a trailing
     backslash from the [PATH] value stored in the registry and must be called
-    before any further manipulation of this variable is done in the Dockerfile. *)
+    before any further manipulation of this variable is done in the Dockerfile.
+    The following error is raised if [PATH] isn't sanitized.
+
+    {v
+/usr/bin/bash: -c: line 0: unexpected EOF while looking for matching `"'
+/usr/bin/bash: -c: line 1: syntax error: unexpected end of file
+    v} |}]
 
 val install_vc_redist : ?vs_version:string -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.

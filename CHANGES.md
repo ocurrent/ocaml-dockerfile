@@ -2,6 +2,9 @@ unreleased
 ----------
 
 - Various LCU Updates (@mtelvers #144 #136 #135)
+- Support mounts, networks, and security parameters in RUN
+  commands, add buildkit_syntax helper function.
+  (@MisterDA, @edwintorok, #137, #139, review by @edwintorok)
 - Build and install opam master from source in Windows images.
   (@MisterDA #140, #142, #143)
 - Include the ocaml-beta-repository in the images. (@kit-ty-kate #132, review by @MisterDA)

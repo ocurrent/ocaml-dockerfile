@@ -58,7 +58,12 @@ type parser_directive = [ `Syntax of string | `Escape of char ]
 val parser_directive : parser_directive -> t
 (** A parser directive. If used, needs to be the first line of the
    Dockerfile.
-   @see <https://docs.docker.com/engine/reference/builder/#parser-directives> *)
+   @see <https://docs.docker.com/engine/reference/builder/#parser-directives>
+   @see <https://docs.docker.com/build/buildkit/dockerfile-frontend/> *)
+
+val buildkit_syntax : t
+(** Convenience function, returns the {{!val-parser_directive}parser directive}
+    describing the latest BuildKit syntax. *)
 
 val comment : ('a, unit, string, t) format4 -> 'a
 (** Adds a comment to the Dockerfile for documentation purposes *)
@@ -76,7 +81,7 @@ val heredoc :
     [here_document] as content and [word] () as opening delimiter. If
     [word] is quoted, then [delimiter] (unquoted [word]) needs to be
     specified. Quoting affects expansion in the here-document.
-    Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
+    Requires 1.4 {!val:buildkit_syntax}.
 
     @param strip Whether to strip leading tab characters. Defaults to false.
     @param word The opening delimiter, possibly quoted. Defaults to [EOF].
@@ -115,18 +120,153 @@ val from : ?alias:string -> ?tag:string -> ?platform:string -> string -> t
 val maintainer : ('a, unit, string, t) format4 -> 'a
 (** [maintainer] sets the author field of the generated images. *)
 
-val run : ('a, unit, string, t) format4 -> 'a
-(** [run fmt] will execute any commands in a new layer on top of the current
-  image and commit the results. The resulting committed image will be used
-  for the next step in the Dockerfile.  The string result of formatting
-  [arg] will be passed as a [/bin/sh -c] invocation. *)
+type mount
+type network = [ `Default | `None | `Host ]
+type security = [ `Insecure | `Sandbox ]
 
-val run_exec : string list -> t
-(** [run_exec args] will execute any commands in a new layer on top of the current
-  image and commit the results. The resulting committed image will be used
-  for the next step in the Dockerfile.  The [args] form makes it possible
-  to avoid shell string munging, and to run commands using a base image that
-  does not contain [/bin/sh]. *)
+val run :
+  ?mounts:mount list ->
+  ?network:network ->
+  ?security:security ->
+  ('a, unit, string, t) format4 ->
+  'a
+(** [run ?mounts ?network ?security fmt] will execute any commands in a new
+   layer on top of the current image and commit the results. The resulting
+   committed image will be used for the next step in the Dockerfile. The string
+   result of formatting [arg] will be passed as a [/bin/sh -c] invocation.
+
+   @param mounts A list of filesystem mounts that the build can access. Requires
+     {!val:buildkit_syntax} 1.2.
+
+   @param network Control which networking environment the command is run in.
+     Requires {!val:buildkit_syntax} 1.1.
+     Requires BuildKit {{!val:parser_directive}syntax} 1.1.
+
+   @param security Control which security mode the command is run in.
+     Requires BuildKit {{!val:parser_directive}syntax} 1-labs. *)
+
+val run_exec :
+  ?mounts:mount list ->
+  ?network:network ->
+  ?security:security ->
+  string list ->
+  t
+(** [run_exec ?mounts ?network ?security args] will execute any commands in a
+   new layer on top of current image and commit the results. The resulting
+   committed image will be used for the next step in the Dockerfile. The [cmd]
+   form makes it possible to avoid shell string munging, and to run commands
+   using a base image that does not contain [/bin/sh].
+
+  @param mounts A list of filesystem mounts that the build can access. Requires
+    {!val:buildkit_syntax} 1.2.
+
+  @param network Control which networking environment the command is run in.
+    Requires {!val:buildkit_syntax} 1.1.
+
+  @param security Control which security mode the command is run in. Requires
+    BuildKit {{!val:parser_directive}syntax} 1-labs. *)
+
+val mount_bind :
+  target:string ->
+  ?source:string ->
+  ?from:string ->
+  ?readwrite:bool ->
+  unit ->
+  mount
+(** [mount_bind ~target ?source ?from ?readwrite ()] Creates a bind mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    @param target the target of the mount inside the container. Usually a path, but for 'podman' it can also contain SELinux flags like ',z' or ',Z'
+    @param from a build stage to bind mount from (if absent: bind mount host)
+    @param source path to mount. When [from] is absent this is relative to the build context on the host. When [source] is absent it defaults to root of [from].
+    @param readwrite enables writing to the mount (default: read-only). The data written is not persisted, [source] always remains unchanged.
+
+    @see <https://docs.docker.com/engine/ruference/builder/#run---mounttypebind> Docker --mount=type=bind reference
+*)
+
+val mount_cache :
+  ?id:string ->
+  target:string ->
+  ?readonly:bool ->
+  ?sharing:[ `Locked | `Private | `Shared ] ->
+  ?from:string ->
+  ?source:string ->
+  ?mode:int ->
+  ?uid:int ->
+  ?gid:int ->
+  unit ->
+  mount
+(** [mount_cache ?id ~target ?readonly ?sharing ?from ?source ?mode ?uid ?gid ()] Creates a cache mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    @param id the cache id: all container builds with same cache id (even from other unrelated builds) will get the same writable directory mounted.
+        Defaults to [target] when absent.
+    @param target where to mount the cache inside the container. The [RUN] 
+        command needs to cope with a completely empty cache, and with files from the 
+        cache being deleted by the container runtime's GC in arbitrary order.
+        E.g. a download cache would be suitable here, an entire git repository wouldn't.
+        Also make sure that your RUN commands doesn't inadvertently wipe the cache
+        (e.g. apt inside a container by default would).
+    @param readonly whether the cache is read-only (by default it is writable)
+    @param sharing how to share the cache between concurrent builds. The default is [`Shared] which doesn't use any locking.
+    @param from the stage to use for the initial contents of the cache.
+    @param source the initial contents of the cache, default is empty.
+    @param mode file mode for cache directory
+    @param uid UID of cache directory, default 0.
+    @param gid GID of cache directory, default 0.
+
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypecache> Docker --mount=type=cache reference
+*)
+
+val mount_tmpfs : target:string -> ?size:int -> unit -> mount
+(** [mount_tmpfs ~target ?size ())] Creates a tmpfs mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    @param target mounts a [tmpfs] at [target]
+    @param size maximum size of [tmpfs] (only supported by Docker)
+
+    Note that the directory seems to be completely removed from the image, so once you start using [tmpfs] for a dir,
+    it is recommended that all further [RUN] commands use it too to avoid ENOENT errors.
+
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypetmpfs> Docker --mount=type=tmpfs reference
+*)
+
+val mount_secret :
+  ?id:string ->
+  ?target:string ->
+  ?required:bool ->
+  ?mode:int ->
+  ?uid:int ->
+  ?gid:int ->
+  unit ->
+  mount
+(** [mount_secret ?id ?target ?required ?mode ?uid ?gid] Creates a secret mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+ @see <https://docs.docker.com/engine/reference/builder/#run---mounttypesecret> Docker --mount=type=secret reference
+*)
+
+val mount_ssh :
+  ?id:string ->
+  ?target:string ->
+  ?required:bool ->
+  ?mode:int ->
+  ?uid:int ->
+  ?gid:int ->
+  unit ->
+  mount
+(** [mount_ssh ?id ?target ?required ?mode ?uid ?gid] Creates an ssh mount for {!run}.
+
+    Requires {!buildkit_syntax}.
+
+    Seems to be only supported by Docker at the moment.
+
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypessh> Docker --mount=type=ssh reference
+*)
 
 val cmd : ('a, unit, string, t) format4 -> 'a
 (** [cmd args] provides defaults for an executing container. These defaults
@@ -196,8 +336,8 @@ val add :
 
   @param link Add files with enhanced semantics where your files
     remain independent on their own layer and don’t get invalidated
-    when commands on previous layers are changed. Requires BuildKit
-    1.4 {{!val:parser_directive}syntax}.
+    when commands on previous layers are changed.
+    Requires 1.4 {!val:buildkit_syntax}.
 
   @param chown Specify a given username, groupname, or UID/GID
     combination to request specific ownership of the copied
@@ -223,8 +363,8 @@ val copy :
 
   @param link Copy files with enhanced semantics where your files
     remain independent on their own layer and don’t get invalidated
-    when commands on previous layers are changed. Requires BuildKit
-    1.4 {{!val:parser_directive}syntax}.
+    when commands on previous layers are changed.
+    Requires 1.4 {!val:buildkit_syntax}.
 
   @param chown Specify a given username, groupname, or UID/GID
     combination to request specific ownership of the copied content.
@@ -236,7 +376,8 @@ val copy :
 
 val copy_heredoc : ?chown:string -> src:heredoc list -> dst:string -> unit -> t
 (** [copy_heredoc src dst] creates the file [dst] using the content of
-    the here-documents [src]. Requires BuildKit 1.4 {{!val:parser_directive}syntax}.
+    the here-documents [src].
+    Requires 1.4 {!val:buildkit_syntax}.
 
     @see <https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md#here-documents> *)
 
@@ -372,4 +513,7 @@ val stopsignal : string -> t
 val crunch : t -> t
 (** [crunch t] will reduce coincident {!run} commands into a single
   one that is chained using the shell [&&] operator. This reduces the
-  number of layers required for a production image. *)
+  number of layers required for a production image.
+
+  @raise Invalid_argument if mounts or networks or security modes differ for
+    each run command. *)
