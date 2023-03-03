@@ -32,10 +32,24 @@ let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"
 (** RPM rules *)
 module RPM = struct
   let update = run "yum update -y"
-  let install fmt = ksprintf (run "yum install -y %s && yum clean all") fmt
+
+  let install fmt =
+    ksprintf
+      (fun s -> update @@ run "yum install -y %s && yum clean all" s |> crunch)
+      fmt
 
   let groupinstall fmt =
-    ksprintf (run "yum groupinstall -y %s && yum clean all") fmt
+    ksprintf (fun s -> run "yum groupinstall -y %s && yum clean all" s) fmt
+
+  let dev_packages ?extra () =
+    let install = ksprintf (run "yum install -y %s") in
+    update
+    @@ install
+         "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz \
+          libX11-devel which m4 diffutils findutils%s"
+         (match extra with None -> "" | Some x -> " " ^ x)
+    @@ groupinstall "\"Development Tools\""
+    |> crunch
 
   let add_user ?uid ?gid ?(sudo = false) username =
     let uid = match uid with Some u -> sprintf "-u %d " u | None -> "" in
@@ -58,33 +72,27 @@ module RPM = struct
     @@ env [ ("HOME", home) ]
     @@ workdir "%s" home @@ run "mkdir .ssh" @@ run "chmod 700 .ssh"
 
-  let dev_packages ?extra () =
-    groupinstall "\"Development Tools\""
-    @@ install
-         "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz \
-          libX11-devel which m4 diffutils findutils%s"
-         (match extra with None -> "" | Some x -> " " ^ x)
-
   let install_system_ocaml = install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"
 end
 
 (** Debian rules *)
 module Apt = struct
   let update =
-    run "apt-get -y update"
-    @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
+    run "apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
 
   let install fmt =
     ksprintf
       (fun s ->
-        update @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y install %s" s)
+        update
+        @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y install %s" s
+        @@ run "rm -rf /var/lib/apt/lists/*"
+        |> crunch)
       fmt
 
   let dev_packages ?extra () =
-    update
-    @@ copy_heredoc
-         ~src:[ heredoc ~strip:true "\tAcquire::Retries \"5\";" ]
-         ~dst:"/etc/apt/apt.conf.d/mirror-retry" ()
+    copy_heredoc
+      ~src:[ heredoc ~strip:true "\tAcquire::Retries \"5\";" ]
+      ~dst:"/etc/apt/apt.conf.d/mirror-retry" ()
     @@ install
          "build-essential curl git rsync sudo unzip nano libcap-dev \
           libx11-dev%s"
@@ -117,7 +125,12 @@ end
 (** Alpine rules *)
 module Apk = struct
   let update = run "apk update && apk upgrade"
-  let install fmt = ksprintf (fun s -> update @@ run "apk add %s" s) fmt
+
+  let install fmt =
+    ksprintf
+      (fun s ->
+        update @@ run "apk add %s && rm -f /var/cache/apk/*" s |> crunch)
+      fmt
 
   let dev_packages ?extra () =
     install
@@ -147,7 +160,7 @@ module Apk = struct
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 
-  let install_system_ocaml = run "apk add ocaml camlp4"
+  let install_system_ocaml = install "ocaml camlp4"
 
   let add_repository ?tag url =
     run "<<-EOF cat >> /etc/apk/repositories\n\t%s\nEOF"
@@ -170,15 +183,25 @@ module Zypper = struct
 
   let install fmt =
     ksprintf
-      (fun s -> update @@ run "zypper install --force-resolution -y %s" s)
+      (fun s ->
+        update
+        @@ run "zypper install --force-resolution -y %s" s
+        @@ run "zypper clean --all"
+        |> crunch)
       fmt
 
   let dev_packages ?extra () =
-    install "-t pattern devel_C_C++"
+    let install fmt =
+      ksprintf (run "zypper install --force-resolution -y %s") fmt
+    in
+    update
+    @@ install "-t pattern devel_C_C++"
     @@ install
          "sudo git unzip curl gcc-c++ libcap-devel xz libX11-devel bzip2 which \
-          rsync gzip"
-    @@ maybe (install "%s") extra
+          rsync gzip%s"
+         (match extra with None -> "" | Some x -> " " ^ x)
+    @@ run "zypper clean --all"
+    |> crunch
 
   let add_user ?uid ?gid ?(sudo = false) username =
     let home = "/home/" ^ username in
@@ -204,7 +227,9 @@ end
 (** Pacman rules *)
 module Pacman = struct
   let update = run "pacman -Syu --noconfirm"
-  let install fmt = ksprintf (fun s -> run "pacman -Syu --noconfirm %s" s) fmt
+
+  let install fmt =
+    ksprintf (fun s -> run "pacman -Syu --noconfirm %s && pacman -Scc" s) fmt
 
   let dev_packages ?extra () =
     install
@@ -230,5 +255,5 @@ module Pacman = struct
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 
-  let install_system_ocaml = run "pacman add ocaml ocaml-compiler-libs"
+  let install_system_ocaml = install "ocaml ocaml-compiler-libs"
 end
