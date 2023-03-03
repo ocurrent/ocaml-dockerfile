@@ -70,7 +70,7 @@ let install_opam_from_source_windows ?cyg ?prefix
        {|cd /usr/local/bin && tar -cf /cygdrive/c/opam.tar .|}
 
 let bubblewrap_minimum = (0, 4, 1)
-let bubblewrap_latest = (0, 7, 0)
+let bubblewrap_latest = (0, 8, 0)
 
 let maybe_build_bubblewrap_from_source ?(prefix = "/usr/local") distro =
   match D.bubblewrap_version distro with
