@@ -1228,7 +1228,7 @@ let rec bubblewrap_version (t : t) =
   | `Alpine `V3_15 -> Some (0, 5, 0)
   | `Alpine `V3_16 -> Some (0, 6, 2)
   | `Alpine `V3_17 -> Some (0, 7, 0)
-  | `Archlinux `Latest -> Some (0, 7, 0)
+  | `Archlinux `Latest -> Some (0, 8, 0)
   | `OpenSUSE `V42_1 -> None (* Not actually checked *)
   | `OpenSUSE `V42_2 -> None (* Not actually checked *)
   | `OpenSUSE `V42_3 -> None (* Not actually checked *)
