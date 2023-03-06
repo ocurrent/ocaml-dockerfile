@@ -1290,7 +1290,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
       | `Ppc64le, (`V8 | `V9 | `V10) -> ("ppc64le/debian", tag)
       | `S390x, (`V8 | `V9 | `V10) -> ("s390x/debian", tag)
       | _ -> ("debian", tag))
-  | `Ubuntu v ->
+  | `Ubuntu v -> (
       let tag =
         match v with
         | `V12_04 -> "precise"
@@ -1312,7 +1312,9 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
         | `V22_04 -> "jammy"
         | `V22_10 -> "kinetic"
       in
-      ("ubuntu", tag)
+      match arch with
+      | `Riscv64 -> ("riscv64/ubuntu", tag)
+      | _ -> ("ubuntu", tag))
   | `CentOS v ->
       let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" in
       ("centos", tag)
