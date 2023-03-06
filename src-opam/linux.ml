@@ -45,6 +45,11 @@ module RPM = struct
        libX11-devel which m4 diffutils findutils%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
+  let ocaml_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      Some "zstd"
+    else None
+
   let add_user ?uid ?gid ?(sudo = false) username =
     let uid = match uid with Some u -> sprintf "-u %d " u | None -> "" in
     let gid = match gid with Some g -> sprintf "-g %d " g | None -> "" in
@@ -90,6 +95,11 @@ module Apt = struct
           libx11-dev%s"
          (match extra with None -> "" | Some x -> " " ^ x)
 
+  let ocaml_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      Some "libzstd-dev"
+    else None
+
   let add_user ?uid ?gid ?(sudo = false) username =
     let uid = match uid with Some u -> sprintf "--uid %d " u | None -> "" in
     let gid = match gid with Some g -> sprintf "--gid %d " g | None -> "" in
@@ -124,6 +134,11 @@ module Apk = struct
       "build-base patch tar ca-certificates git rsync curl sudo bash \
        libx11-dev nano coreutils xz ncurses-dev%s"
       (match extra with None -> "" | Some x -> " " ^ x)
+
+  let ocaml_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      Some "zstd"
+    else None
 
   let add_user ?uid ?gid ?(sudo = false) username =
     let home = "/home/" ^ username in
@@ -180,6 +195,11 @@ module Zypper = struct
           rsync gzip%s"
          (match extra with None -> "" | Some x -> " " ^ x)
 
+  let ocaml_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      Some "zstd"
+    else None
+
   let add_user ?uid ?gid ?(sudo = false) username =
     let home = "/home/" ^ username in
     run "useradd %s%s -d %s -m --user-group %s"
@@ -215,6 +235,11 @@ module Pacman = struct
       "make gcc patch tar ca-certificates git rsync curl sudo bash libx11 nano \
        coreutils xz ncurses diffutils unzip%s"
       (match extra with None -> "" | Some x -> " " ^ x)
+
+  let ocaml_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      Some "zstd"
+    else None
 
   let add_user ?uid ?gid ?(sudo = false) username =
     let home = "/home/" ^ username in

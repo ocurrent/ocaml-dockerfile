@@ -507,6 +507,24 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
   in
   (D.tag_of_distro d, fn @@ clone @@ pers)
 
+let ocaml_depexts distro v =
+  let open Linux in
+  match D.package_manager distro with
+  | `Apk ->
+      Option.fold ~none:empty ~some:(Apk.install "%s") (Apk.ocaml_depexts v)
+  | `Apt ->
+      Option.fold ~none:empty ~some:(Apt.install "%s") (Apt.ocaml_depexts v)
+  | `Yum ->
+      Option.fold ~none:empty ~some:(RPM.install "%s") (RPM.ocaml_depexts v)
+  | `Zypper ->
+      Option.fold ~none:empty ~some:(Zypper.install "%s")
+        (Zypper.ocaml_depexts v)
+  | `Pacman ->
+      Option.fold ~none:empty ~some:(Pacman.install "%s")
+        (Pacman.ocaml_depexts v)
+  | `Windows -> empty
+  | `Cygwin -> empty
+
 let create_switch ~arch distro t =
   let create_switch switch pkg =
     run "opam switch create %s %s" (OV.to_string switch) pkg

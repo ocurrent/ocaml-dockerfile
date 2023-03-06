@@ -1,6 +1,9 @@
 unreleased
 ----------
 
+- Install system packages required by OCaml in the ocaml stage,
+  starting with OCaml 5.1 and libzstd.
+  (@MisterDA #149, review by @kit-ty-kate)
 - Add OracleLinux 9. (@MisterDA #155)
 - Optimize and fix Linux package install.
   (@MisterDA #147, #151, #153, #154, review by @kit-ty-kate)

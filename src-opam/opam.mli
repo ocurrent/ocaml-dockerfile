@@ -68,6 +68,11 @@ val gen_opam2_distro :
    will be build in an prepended build stage. If specified, then
    winget will be pulled from the [winget] external image. *)
 
+val ocaml_depexts : Distro.t -> Ocaml_version.t -> Dockerfile.t
+(** [ocaml_depexts distro version] returns packages that are
+    required under [distro] by the OCaml distribution at version
+    [version].  *)
+
 val all_ocaml_compilers :
   string -> Ocaml_version.arch -> Distro.t -> string * Dockerfile.t
 (** [all_ocaml_compilers hub_id arch distro] will generate an opam2
