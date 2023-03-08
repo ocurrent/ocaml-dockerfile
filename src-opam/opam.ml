@@ -361,8 +361,8 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (if enable_powertools then
-      run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update
-     else empty)
+        run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update
+      else empty)
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \
         \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
@@ -648,6 +648,6 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
        "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam \
         %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
        (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver"
-       else "")
+        else "")
        prefix prefix branch prefix branch
   @@ maybe_link_opam add_default_link prefix branch
