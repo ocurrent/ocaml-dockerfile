@@ -1,7 +1,6 @@
 unreleased
 ----------
 
-- Optimize Linux package install. (@MisterDA #147)
 - Various LCU Updates (@mtelvers #144 #136 #135)
 - Support mounts, networks, and security parameters in RUN
   commands, add buildkit_syntax helper function.
