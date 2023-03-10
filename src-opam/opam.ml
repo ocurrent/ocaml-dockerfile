@@ -350,14 +350,15 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   header ?arch distro
   @@ label (("distro_style", "rpm") :: labels)
   @@ run "yum --version || dnf install -y yum"
-  @@ workaround @@ Linux.RPM.update
-  @@ Linux.RPM.dev_packages ~extra:"which tar curl xz libcap-devel openssl" ()
+  @@ workaround
+  @@ Linux.RPM.install "which tar curl xz libcap-devel openssl sudo"
+  @@ Linux.RPM.groupinstall {|"Development Tools"|}
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
   @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
   @@ from ?arch distro
   @@ run "yum --version || dnf install -y yum"
-  @@ workaround @@ Linux.RPM.update
+  @@ workaround
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (if enable_powertools then
