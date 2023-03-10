@@ -230,5 +230,5 @@ module Pacman = struct
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 
-  let install_system_ocaml = run "pacman add ocaml ocaml-compiler-libs"
+  let install_system_ocaml = install "ocaml ocaml-compiler-libs"
 end
