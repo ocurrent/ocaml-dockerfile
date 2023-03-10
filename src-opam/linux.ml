@@ -177,8 +177,8 @@ module Zypper = struct
     install "-t pattern devel_C_C++"
     @@ install
          "sudo git unzip curl gcc-c++ libcap-devel xz libX11-devel bzip2 which \
-          rsync gzip"
-    @@ maybe (install "%s") extra
+          rsync gzip%s"
+         (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo = false) username =
     let home = "/home/" ^ username in
