@@ -83,10 +83,9 @@ module Apt = struct
       fmt
 
   let dev_packages ?extra () =
-    update
-    @@ copy_heredoc
-         ~src:[ heredoc ~strip:true "\tAcquire::Retries \"5\";" ]
-         ~dst:"/etc/apt/apt.conf.d/mirror-retry" ()
+    copy_heredoc
+      ~src:[ heredoc ~strip:true "\tAcquire::Retries \"5\";" ]
+      ~dst:"/etc/apt/apt.conf.d/mirror-retry" ()
     @@ install
          "build-essential curl git rsync sudo unzip nano libcap-dev \
           libx11-dev%s"
