@@ -147,7 +147,7 @@ module Apk = struct
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 
-  let install_system_ocaml = run "apk add ocaml camlp4"
+  let install_system_ocaml = install "ocaml camlp4"
 
   let add_repository ?tag url =
     run "<<-EOF cat >> /etc/apk/repositories\n\t%s\nEOF"
