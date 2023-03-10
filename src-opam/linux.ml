@@ -204,8 +204,12 @@ end
 
 (** Pacman rules *)
 module Pacman = struct
-  let update = run "pacman -Syu --noconfirm"
-  let install fmt = ksprintf (fun s -> run "pacman -Syu --noconfirm %s" s) fmt
+  let update = run "pacman -Syu --noconfirm && yes | pacman -Scc"
+
+  let install fmt =
+    ksprintf
+      (fun s -> run "pacman -Syu --noconfirm %s && yes | pacman -Scc" s)
+      fmt
 
   let dev_packages ?extra () =
     install
