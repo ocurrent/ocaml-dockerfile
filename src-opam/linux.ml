@@ -39,6 +39,13 @@ module RPM = struct
   let groupinstall fmt =
     ksprintf (fun s -> run "yum groupinstall -y %s && yum clean all" s) fmt
 
+  let dev_packages ?extra () =
+    install
+      "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel \
+       which m4 diffutils findutils%s"
+      (match extra with None -> "" | Some x -> " " ^ x)
+    @@ groupinstall "\"Development Tools\""
+
   let add_user ?uid ?gid ?(sudo = false) username =
     let uid = match uid with Some u -> sprintf "-u %d " u | None -> "" in
     let gid = match gid with Some g -> sprintf "-g %d " g | None -> "" in
@@ -59,13 +66,6 @@ module RPM = struct
     @@ user "%s" username
     @@ env [ ("HOME", home) ]
     @@ workdir "%s" home @@ run "mkdir .ssh" @@ run "chmod 700 .ssh"
-
-  let dev_packages ?extra () =
-    install
-      "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz libX11-devel \
-       which m4 diffutils findutils%s"
-      (match extra with None -> "" | Some x -> " " ^ x)
-    @@ groupinstall "\"Development Tools\""
 
   let install_system_ocaml = install "ocaml ocaml-camlp4-devel ocaml-ocamldoc"
 end

@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Optimize and fix Linux package install (@MisterDA #153)
 - Switch to ocaml-opam/opam-repository-mingw#sunset for Windows images. (@MisterDA #152)
 - Use DockerHub user risvc64/ubuntu. (@MisterDA, #150)
 - Various LCU Updates (@mtelvers #144 #136 #135)
