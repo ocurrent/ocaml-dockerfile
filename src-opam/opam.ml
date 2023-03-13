@@ -351,7 +351,7 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ label (("distro_style", "rpm") :: labels)
   @@ run "yum --version || dnf install -y yum"
   @@ workaround
-  @@ Linux.RPM.install "which tar curl xz libcap-devel openssl sudo"
+  @@ Linux.RPM.install "which tar curl xz libcap-devel openssl sudo bzip2"
   @@ Linux.RPM.groupinstall {|"Development Tools"|}
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
