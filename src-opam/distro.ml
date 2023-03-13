@@ -645,10 +645,6 @@ module OV = Ocaml_version
 
 let distro_arches ov (d : t) =
   match (resolve_alias d, ov) with
-  (* OCaml for Windows doesn't package OCaml 4.14.1 nor OCaml 5.0.
-     TODO: remove when upstream opam gains OCaml packages on Windows. *)
-  | `Windows _, ov when OV.(compare Releases.v4_14_0 ov) = -1 -> []
-  | `Windows (`Msvc, _), ov when OV.major ov >= 5 -> []
   | (`CentOS (`V6 | `V7) | `OracleLinux `V7), ov when OV.major ov >= 5 -> []
   | `Debian `V11, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
@@ -675,6 +671,11 @@ let distro_arches ov (d : t) =
   | `Fedora (`V33 | `V34 | `V35 | `V36 | `V37), ov
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
+  (* OCaml for Windows doesn't package OCaml 5.0.
+     TODO: remove when upstream opam gains OCaml packages on Windows. *)
+  | `Windows (`Mingw, _), ov when OV.major ov >= 5 -> []
+  (* OCaml 5 doesn't support MSVC: https://github.com/ocaml/ocaml/pull/11835. *)
+  | `Windows (`Msvc, _), ov when OV.major ov >= 5 -> []
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
   | _ -> [ `X86_64 ]
