@@ -338,9 +338,12 @@ let apt_opam2 ?(labels = []) ?arch distro ~opam_hashes () =
    for older versions of yum as found in CentOS 7 and earlier
 
    [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
-   This is needed to get most of *-devel packages frequently used by opam packages. *)
+   This is needed to get most of *-devel packages frequently used by opam packages.
+
+   [c_devtools_libs] uses the "C Development Tools and Libraries" package group.
+   If [false], defaults to the "Development Tools" package group. *)
 let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
-    ~opam_hashes distro () =
+    ~c_devtools_libs ~opam_hashes distro () =
   let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let workaround =
     if yum_workaround then
@@ -351,14 +354,20 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ label (("distro_style", "rpm") :: labels)
   @@ run "yum --version || dnf install -y yum"
   @@ workaround @@ Linux.RPM.update
-  @@ Linux.RPM.groupinstall {|"Development Tools"|}
-  @@ Linux.RPM.install "which tar curl xz libcap-devel openssl sudo bzip2"
+  @@ Linux.RPM.groupinstall
+       (if c_devtools_libs then {|"C Development Tools and Libraries"|}
+        else {|"Development Tools"|})
+  @@ Linux.RPM.install
+       "git patch unzip which tar curl xz libcap-devel openssl sudo bzip2"
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
   @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
   @@ from ?arch distro
   @@ run "yum --version || dnf install -y yum"
-  @@ workaround
+  @@ workaround @@ Linux.RPM.update
+  @@ Linux.RPM.groupinstall
+       (if c_devtools_libs then {|"C Development Tools and Libraries"|}
+        else {|"Development Tools"|})
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (if enable_powertools then
@@ -474,8 +483,9 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
           | `CentOS _ -> true
           | _ -> false
         in
-        yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~opam_hashes
-          d ()
+        let c_devtools_libs = match d with `Fedora _ -> true | _ -> false in
+        yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools
+          ~c_devtools_libs ~opam_hashes d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()
     | `Windows ->
