@@ -34,10 +34,12 @@ module RPM = struct
   let update = run "yum update -y"
 
   let install fmt =
-    ksprintf (fun s -> update @@ run "yum install -y %s && yum clean all" s) fmt
+    ksprintf
+      (fun s -> update @@ run "yum install -y %s && yum clean packages" s)
+      fmt
 
   let groupinstall fmt =
-    ksprintf (fun s -> run "yum groupinstall -y %s && yum clean all" s) fmt
+    ksprintf (fun s -> run "yum groupinstall -y %s && yum clean packages" s) fmt
 
   let dev_packages ?extra () =
     install
