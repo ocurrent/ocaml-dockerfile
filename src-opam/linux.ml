@@ -40,12 +40,10 @@ module RPM = struct
     ksprintf (fun s -> run "yum groupinstall -y %s && yum clean packages" s) fmt
 
   let dev_packages ?extra () =
-    update
-    @@ groupinstall {|"Development Tools"|}
-    @@ install
-         "sudo passwd bzip2 patch rsync nano gcc-c++ git tar curl xz \
-          libX11-devel which m4 diffutils findutils%s"
-         (match extra with None -> "" | Some x -> " " ^ x)
+    install
+      "sudo passwd bzip2 unzip patch rsync nano gcc-c++ git tar curl xz \
+       libX11-devel which m4 diffutils findutils%s"
+      (match extra with None -> "" | Some x -> " " ^ x)
 
   let add_user ?uid ?gid ?(sudo = false) username =
     let uid = match uid with Some u -> sprintf "-u %d " u | None -> "" in
