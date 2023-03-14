@@ -255,7 +255,7 @@ type distro =
     | `V35
     | `V36
     | `V37 ]
-  | `OracleLinux of [ `V7 | `V8 ]
+  | `OracleLinux of [ `V7 | `V8 | `V9 ]
   | `OpenSUSE of
     [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4 ]
   | `Ubuntu of
@@ -321,7 +321,7 @@ type t =
     | `V36
     | `V37
     | `Latest ]
-  | `OracleLinux of [ `V7 | `V8 | `Latest ]
+  | `OracleLinux of [ `V7 | `V8 | `V9 | `Latest ]
   | `OpenSUSE of
     [ `V42_1
     | `V42_2
@@ -439,6 +439,7 @@ let distros : t list =
     `Fedora `Latest;
     `OracleLinux `V7;
     `OracleLinux `V8;
+    `OracleLinux `V9;
     `OracleLinux `Latest;
     `OpenSUSE `V42_1;
     `OpenSUSE `V42_2;
@@ -550,7 +551,7 @@ let resolve_alias (d : t) : distro =
   | `CentOS `Latest -> `CentOS `V7
   | `Debian `Stable -> `Debian `V11
   | `Fedora `Latest -> `Fedora `V37
-  | `OracleLinux `Latest -> `OracleLinux `V8
+  | `OracleLinux `Latest -> `OracleLinux `V9
   | `OpenSUSE `Latest -> `OpenSUSE `V15_4
   | `Ubuntu `Latest -> `Ubuntu `V22_10
   | `Ubuntu `LTS -> `Ubuntu `V22_04
@@ -565,7 +566,7 @@ let resolve_alias (d : t) : distro =
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 )
-    | `OracleLinux (`V7 | `V8)
+    | `OracleLinux (`V7 | `V8 | `V9)
     | `OpenSUSE
         (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4)
     | `Ubuntu
@@ -605,7 +606,7 @@ let distro_status (d : t) : status =
         | `V31 | `V32 | `V33 | `V34 | `V35 ) ->
         `Deprecated
     | `Fedora (`V36 | `V37) -> `Active `Tier2
-    | `OracleLinux (`V7 | `V8) -> `Active `Tier3
+    | `OracleLinux (`V7 | `V8 | `V9) -> `Active `Tier3
     | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3)
       ->
         `Deprecated
@@ -783,6 +784,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OpenSUSE `V15_4 -> Some "4.05.0"
   | `OracleLinux `V7 -> Some "4.01.0"
   | `OracleLinux `V8 -> Some "4.07.0"
+  | `OracleLinux `V9 -> Some "4.11.1"
   | `Cygwin _ -> None
   | `Windows _ -> None
   | `Debian (`Testing | `Unstable) -> assert false
@@ -911,6 +913,7 @@ let tag_of_distro (d : t) =
   | `Fedora `V37 -> "fedora-37"
   | `OracleLinux `V7 -> "oraclelinux-7"
   | `OracleLinux `V8 -> "oraclelinux-8"
+  | `OracleLinux `V9 -> "oraclelinux-9"
   | `OracleLinux `Latest -> "oraclelinux"
   | `Alpine `V3_3 -> "alpine-3.3"
   | `Alpine `V3_4 -> "alpine-3.4"
@@ -1001,6 +1004,7 @@ let distro_of_tag x : t option =
   | "fedora" -> Some (`Fedora `Latest)
   | "oraclelinux-7" -> Some (`OracleLinux `V7)
   | "oraclelinux-8" -> Some (`OracleLinux `V8)
+  | "oraclelinux-9" -> Some (`OracleLinux `V9)
   | "oraclelinux" -> Some (`OracleLinux `Latest)
   | "alpine-3.3" -> Some (`Alpine `V3_3)
   | "alpine-3.4" -> Some (`Alpine `V3_4)
@@ -1087,6 +1091,7 @@ let human_readable_string_of_distro (d : t) =
     | `Fedora `V37 -> "Fedora 37"
     | `OracleLinux `V7 -> "OracleLinux 7"
     | `OracleLinux `V8 -> "OracleLinux 8"
+    | `OracleLinux `V9 -> "OracleLinux 9"
     | `Alpine `V3_3 -> "Alpine 3.3"
     | `Alpine `V3_4 -> "Alpine 3.4"
     | `Alpine `V3_5 -> "Alpine 3.5"
@@ -1166,7 +1171,7 @@ let package_manager (t : t) =
   | `Cygwin _ -> `Cygwin
   | `Windows _ -> `Windows
 
-let rec bubblewrap_version (t : t) =
+let bubblewrap_version (t : t) =
   match resolve_alias t with
   | `Ubuntu `V12_04 -> None
   | `Ubuntu `V14_04 -> None
@@ -1213,7 +1218,9 @@ let rec bubblewrap_version (t : t) =
   | `Fedora `V35 -> Some (0, 5, 0)
   | `Fedora `V36 -> Some (0, 5, 0)
   | `Fedora `V37 -> Some (0, 5, 0)
-  | `OracleLinux ((`V7 | `V8) as v) -> bubblewrap_version (`CentOS v)
+  | `OracleLinux `V7 -> None
+  | `OracleLinux `V8 -> Some (0, 4, 0)
+  | `OracleLinux `V9 -> Some (0, 4, 1)
   | `Alpine `V3_3 -> None (* Not actually checked *)
   | `Alpine `V3_4 -> None (* Not actually checked *)
   | `Alpine `V3_5 -> None (* Not actually checked *)
@@ -1342,7 +1349,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
       in
       ("fedora", tag)
   | `OracleLinux v ->
-      let tag = match v with `V7 -> "7" | `V8 -> "8" in
+      let tag = match v with `V7 -> "7" | `V8 -> "8" | `V9 -> "9" in
       ("oraclelinux", tag)
   | `OpenSUSE v ->
       let tag =
