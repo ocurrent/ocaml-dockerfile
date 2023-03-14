@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add OracleLinux 9. (@MisterDA #155)
 - Optimize and fix Linux package install.
   (@MisterDA #147, #151, #153, #154, review by @kit-ty-kate)
 - Switch to ocaml-opam/opam-repository-mingw#sunset for Windows images. (@MisterDA #152)
