@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.2.0 2023-03-23 Berlin
+------------------------
 
 - Install system packages required by OCaml in the ocaml stage,
   starting with OCaml 5.1 and libzstd.
@@ -26,7 +26,7 @@ unreleased
 - Fix passing of --platform to all stages of the Dockerfiles (@dra27 #134)
 
 v8.1.0 2022-11-17 Sydney
-----------
+------------------------
 - Add Fedora 36 and 37 and deprecate 34 and 35. (@MisterDA #125, #126)
 - Add Ubuntu 22.10. (@MisterDA #124)
 - Support STOPSIGNAL instruction. (@MisterDA #121, review by @avsm)
