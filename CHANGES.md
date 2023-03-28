@@ -1,15 +1,22 @@
+unreleased
+----------
+
+- Switch to root and back to opam user when installing OCaml external
+  dependencies in the ocaml stage; fixes depext installation.
+  (@MisterDA #146, #157)
+
 v8.2.0 2023-03-23 Berlin
 ------------------------
 
 - Install system packages required by OCaml in the ocaml stage,
   starting with OCaml 5.1 and libzstd.
-  (@MisterDA #149, review by @kit-ty-kate)
+  (@MisterDA #146, #149, review by @kit-ty-kate)
 - Add OracleLinux 9. (@MisterDA #155)
 - Optimize and fix Linux package install.
   (@MisterDA #147, #151, #153, #154, review by @kit-ty-kate)
 - Switch to ocaml-opam/opam-repository-mingw#sunset for Windows images. (@MisterDA #152)
 - Use DockerHub user risvc64/ubuntu. (@MisterDA, #150)
-- Various LCU Updates (@mtelvers #144 #136 #135)
+- Various LCU Updates (@mtelvers #156 #144 #136 #135)
 - Support mounts, networks, and security parameters in RUN
   commands, add buildkit_syntax helper function.
   (@MisterDA, @edwintorok, #137, #139, review by @edwintorok)
