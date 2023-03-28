@@ -509,19 +509,16 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
 
 let ocaml_depexts distro v =
   let open Linux in
+  let as_root install = function
+    | Some depexts -> user "root" @@ install depexts @@ user "opam"
+    | None -> empty
+  in
   match D.package_manager distro with
-  | `Apk ->
-      Option.fold ~none:empty ~some:(Apk.install "%s") (Apk.ocaml_depexts v)
-  | `Apt ->
-      Option.fold ~none:empty ~some:(Apt.install "%s") (Apt.ocaml_depexts v)
-  | `Yum ->
-      Option.fold ~none:empty ~some:(RPM.install "%s") (RPM.ocaml_depexts v)
-  | `Zypper ->
-      Option.fold ~none:empty ~some:(Zypper.install "%s")
-        (Zypper.ocaml_depexts v)
-  | `Pacman ->
-      Option.fold ~none:empty ~some:(Pacman.install "%s")
-        (Pacman.ocaml_depexts v)
+  | `Apk -> as_root (Apk.install "%s") (Apk.ocaml_depexts v)
+  | `Apt -> as_root (Apt.install "%s") (Apt.ocaml_depexts v)
+  | `Yum -> as_root (RPM.install "%s") (RPM.ocaml_depexts v)
+  | `Zypper -> as_root (Zypper.install "%s") (Zypper.ocaml_depexts v)
+  | `Pacman -> as_root (Pacman.install "%s") (Pacman.ocaml_depexts v)
   | `Windows -> empty
   | `Cygwin -> empty
 
