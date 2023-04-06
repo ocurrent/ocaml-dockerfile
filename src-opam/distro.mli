@@ -223,7 +223,7 @@ type t =
   | `Cygwin of win_all
   | `Windows of [ `Mingw | `Msvc ] * win_all ]
 [@@deriving sexp]
-(** Supported Docker container distributions with aliases such as [Latest]. *)
+(** Supported Docker container distributions with aliases such as [`Latest]. *)
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
 (** The operating system family a distro belongs to. *)
