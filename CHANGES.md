@@ -1,6 +1,9 @@
 unreleased
 ----------
 
+- Correct sexp generation for dockerfile-opam.
+  (@benmandrew #158, review by @MisterDA)
+
 - Switch to root and back to opam user when installing OCaml external
   dependencies in the ocaml stage; fixes depext installation.
   (@MisterDA #146, #157)
