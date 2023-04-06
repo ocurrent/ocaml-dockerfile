@@ -57,9 +57,9 @@ type parser_directive = [ `Syntax of string | `Escape of char ]
 
 val parser_directive : parser_directive -> t
 (** A parser directive. If used, needs to be the first line of the
-   Dockerfile.
-   @see <https://docs.docker.com/engine/reference/builder/#parser-directives>
-   @see <https://docs.docker.com/build/buildkit/dockerfile-frontend/> *)
+    Dockerfile.
+    @see <https://docs.docker.com/engine/reference/builder/#parser-directives>
+    @see <https://docs.docker.com/build/buildkit/dockerfile-frontend/> *)
 
 val buildkit_syntax : t
 (** Convenience function, returns the {{!val-parser_directive}parser directive}
@@ -131,19 +131,19 @@ val run :
   ('a, unit, string, t) format4 ->
   'a
 (** [run ?mounts ?network ?security fmt] will execute any commands in a new
-   layer on top of the current image and commit the results. The resulting
-   committed image will be used for the next step in the Dockerfile. The string
-   result of formatting [arg] will be passed as a [/bin/sh -c] invocation.
+    layer on top of the current image and commit the results. The resulting
+    committed image will be used for the next step in the Dockerfile. The string
+    result of formatting [arg] will be passed as a [/bin/sh -c] invocation.
 
-   @param mounts A list of filesystem mounts that the build can access. Requires
-     {!val:buildkit_syntax} 1.2.
+    @param mounts A list of filesystem mounts that the build can access. Requires
+      {!val:buildkit_syntax} 1.2.
 
-   @param network Control which networking environment the command is run in.
-     Requires {!val:buildkit_syntax} 1.1.
-     Requires BuildKit {{!val:parser_directive}syntax} 1.1.
+    @param network Control which networking environment the command is run in.
+      Requires {!val:buildkit_syntax} 1.1.
+      Requires BuildKit {{!val:parser_directive}syntax} 1.1.
 
-   @param security Control which security mode the command is run in.
-     Requires BuildKit {{!val:parser_directive}syntax} 1-labs. *)
+    @param security Control which security mode the command is run in.
+      Requires BuildKit {{!val:parser_directive}syntax} 1-labs. *)
 
 val run_exec :
   ?mounts:mount list ->
@@ -152,19 +152,19 @@ val run_exec :
   string list ->
   t
 (** [run_exec ?mounts ?network ?security args] will execute any commands in a
-   new layer on top of current image and commit the results. The resulting
-   committed image will be used for the next step in the Dockerfile. The [cmd]
-   form makes it possible to avoid shell string munging, and to run commands
-   using a base image that does not contain [/bin/sh].
+    new layer on top of current image and commit the results. The resulting
+    committed image will be used for the next step in the Dockerfile. The [cmd]
+    form makes it possible to avoid shell string munging, and to run commands
+    using a base image that does not contain [/bin/sh].
 
-  @param mounts A list of filesystem mounts that the build can access. Requires
-    {!val:buildkit_syntax} 1.2.
+    @param mounts A list of filesystem mounts that the build can access. Requires
+      {!val:buildkit_syntax} 1.2.
 
-  @param network Control which networking environment the command is run in.
-    Requires {!val:buildkit_syntax} 1.1.
+    @param network Control which networking environment the command is run in.
+      Requires {!val:buildkit_syntax} 1.1.
 
-  @param security Control which security mode the command is run in. Requires
-    BuildKit {{!val:parser_directive}syntax} 1-labs. *)
+    @param security Control which security mode the command is run in. Requires
+      BuildKit {{!val:parser_directive}syntax} 1-labs. *)
 
 val mount_bind :
   target:string ->
@@ -247,7 +247,7 @@ val mount_secret :
 
     Requires {!buildkit_syntax}.
 
- @see <https://docs.docker.com/engine/reference/builder/#run---mounttypesecret> Docker --mount=type=secret reference
+    @see <https://docs.docker.com/engine/reference/builder/#run---mounttypesecret> Docker --mount=type=secret reference
 *)
 
 val mount_ssh :
@@ -270,29 +270,29 @@ val mount_ssh :
 
 val cmd : ('a, unit, string, t) format4 -> 'a
 (** [cmd args] provides defaults for an executing container. These defaults
-  can include an executable, or they can omit the executable, in which case
-  you must specify an {!entrypoint} as well.  The string result of formatting
-  [arg] will be passed as a [/bin/sh -c] invocation.
+    can include an executable, or they can omit the executable, in which case
+    you must specify an {!entrypoint} as well.  The string result of formatting
+    [arg] will be passed as a [/bin/sh -c] invocation.
 
-  There can only be one [cmd] in a Dockerfile. If you list more than one
-  then only the last [cmd] will take effect. *)
+    There can only be one [cmd] in a Dockerfile. If you list more than one
+    then only the last [cmd] will take effect. *)
 
 val cmd_exec : string list -> t
 (** [cmd_exec args] provides defaults for an executing container. These defaults
-  can include an executable, or they can omit the executable, in which case
-  you must specify an {!entrypoint} as well.  The first argument to the [args]
-  list must be the full path to the executable.
+    can include an executable, or they can omit the executable, in which case
+    you must specify an {!entrypoint} as well.  The first argument to the [args]
+    list must be the full path to the executable.
 
-  There can only be one [cmd] in a Dockerfile. If you list more than one
-  then only the last [cmd] will take effect. *)
+    There can only be one [cmd] in a Dockerfile. If you list more than one
+    then only the last [cmd] will take effect. *)
 
 val expose_port : int -> t
 (** [expose_port] informs Docker that the container will listen on the specified
-  network port at runtime. *)
+    network port at runtime. *)
 
 val expose_ports : int list -> t
 (** [expose_ports] informs Docker that the container will listen on the specified
-  network ports at runtime. *)
+    network ports at runtime. *)
 
 val arg : ?default:string -> string -> t
 (** [arg ~default name] defines a variable that users can pass at
@@ -302,9 +302,9 @@ val arg : ?default:string -> string -> t
 
 val env : (string * string) list -> t
 (** [env] sets the list of environment variables supplied with the
-  (<key>, <value>) tuple. This value will be passed to all future {!run}
-  instructions. This is functionally equivalent to prefixing a shell
-  command with [<key>=<value>]. *)
+    (<key>, <value>) tuple. This value will be passed to all future {!run}
+    instructions. This is functionally equivalent to prefixing a shell
+    command with [<key>=<value>]. *)
 
 val add :
   ?link:bool ->
@@ -318,35 +318,35 @@ val add :
     directories or remote file URLs from [src] and adds them to the
     filesystem of the container at the [dst] path.
 
-  Multiple [src] resource may be specified but if they are files or
-  directories then they must be relative to the source directory that
-  is being built (the context of the build).
+    Multiple [src] resource may be specified but if they are files or
+    directories then they must be relative to the source directory that
+    is being built (the context of the build).
 
-  Each [src] may contain wildcards and matching will be done using
-  Go's filepath.Match rules.
+    Each [src] may contain wildcards and matching will be done using
+    Go's filepath.Match rules.
 
-  All new files and directories are created with a UID and GID of 0.
-  In the case where [src] is a remote file URL, the destination will
-  have permissions of 600. If the remote file being retrieved has an
-  HTTP Last-Modified header, the timestamp from that header will be
-  used to set the mtime on the destination file. Then, like any other
-  file processed during an ADD, mtime will be included in the
-  determination of whether or not the file has changed and the cache
-  should be updated.
+    All new files and directories are created with a UID and GID of 0.
+    In the case where [src] is a remote file URL, the destination will
+    have permissions of 600. If the remote file being retrieved has an
+    HTTP Last-Modified header, the timestamp from that header will be
+    used to set the mtime on the destination file. Then, like any other
+    file processed during an ADD, mtime will be included in the
+    determination of whether or not the file has changed and the cache
+    should be updated.
 
-  @param link Add files with enhanced semantics where your files
-    remain independent on their own layer and don’t get invalidated
-    when commands on previous layers are changed.
-    Requires 1.4 {!val:buildkit_syntax}.
+    @param link Add files with enhanced semantics where your files
+      remain independent on their own layer and don’t get invalidated
+      when commands on previous layers are changed.
+      Requires 1.4 {!val:buildkit_syntax}.
 
-  @param chown Specify a given username, groupname, or UID/GID
-    combination to request specific ownership of the copied
-    content.
+    @param chown Specify a given username, groupname, or UID/GID
+      combination to request specific ownership of the copied
+      content.
 
-  @param from Allows artefacts to be retrieved from multiple
-    stages. It can either be an integer number (starting with 0 for
-    the first {!from} stage, or a named stage (supplied via [?alias]
-    to the {!from} command). *)
+    @param from Allows artefacts to be retrieved from multiple
+      stages. It can either be an integer number (starting with 0 for
+      the first {!from} stage, or a named stage (supplied via [?alias]
+      to the {!from} command). *)
 
 val copy :
   ?link:bool ->
@@ -361,18 +361,18 @@ val copy :
     container at the path [dst]. See {!add} for more detailed
     documentation.
 
-  @param link Copy files with enhanced semantics where your files
-    remain independent on their own layer and don’t get invalidated
-    when commands on previous layers are changed.
-    Requires 1.4 {!val:buildkit_syntax}.
+    @param link Copy files with enhanced semantics where your files
+      remain independent on their own layer and don’t get invalidated
+      when commands on previous layers are changed.
+      Requires 1.4 {!val:buildkit_syntax}.
 
-  @param chown Specify a given username, groupname, or UID/GID
-    combination to request specific ownership of the copied content.
+    @param chown Specify a given username, groupname, or UID/GID
+      combination to request specific ownership of the copied content.
 
-  @param from Allows artefacts to be retrieved from multiple
-    stages. It can either be an integer number (starting with 0 for
-    the first {!from} stage, or a named stage (supplied via [?alias]
-    to the {!from} command). *)
+    @param from Allows artefacts to be retrieved from multiple
+      stages. It can either be an integer number (starting with 0 for
+      the first {!from} stage, or a named stage (supplied via [?alias]
+      to the {!from} command). *)
 
 val copy_heredoc : ?chown:string -> src:heredoc list -> dst:string -> unit -> t
 (** [copy_heredoc src dst] creates the file [dst] using the content of
@@ -383,50 +383,50 @@ val copy_heredoc : ?chown:string -> src:heredoc list -> dst:string -> unit -> t
 
 val user : ('a, unit, string, t) format4 -> 'a
 (** [user fmt] sets the user name or UID to use when running the image
-  and for any {!run}, {!cmd}, {!entrypoint} commands that follow it in
-  the Dockerfile.  *)
+    and for any {!run}, {!cmd}, {!entrypoint} commands that follow it in
+    the Dockerfile.  *)
 
 val workdir : ('a, unit, string, t) format4 -> 'a
 (** [workdir fmt] sets the working directory for any {!run}, {!cmd}
-  and {!entrypoint} instructions that follow it in the Dockerfile.
+    and {!entrypoint} instructions that follow it in the Dockerfile.
 
-  It can be used multiple times in the one Dockerfile. If a relative
-  path is provided, it will be relative to the path of the previous
-  {!workdir} instruction. *)
+    It can be used multiple times in the one Dockerfile. If a relative
+    path is provided, it will be relative to the path of the previous
+    {!workdir} instruction. *)
 
 val volume : ('a, unit, string, t) format4 -> 'a
 (** [volume fmt] will create a mount point with the specified name
-  and mark it as holding externally mounted volumes from native host
-  or other containers. The value can be a JSON array or a plain string
-  with multiple arguments that specify several mount points. *)
+    and mark it as holding externally mounted volumes from native host
+    or other containers. The value can be a JSON array or a plain string
+    with multiple arguments that specify several mount points. *)
 
 val volumes : string list -> t
 (** [volumes mounts] will create mount points with the specified names
-  in [mounts] and mark them as holding externally mounted volumes
-  from native host or other containers. *)
+    in [mounts] and mark them as holding externally mounted volumes
+    from native host or other containers. *)
 
 val entrypoint : ('a, unit, string, t) format4 -> 'a
 (** [entrypoint fmt] allows you to configure a container that will
-  run as an executable.  The [fmt] string will be executed using
-  a [/bin/sh] subshell.
+    run as an executable.  The [fmt] string will be executed using
+    a [/bin/sh] subshell.
 
-  The shell form prevents any {!cmd} or {!run} command line arguments
-  from being used, but has the disadvantage that your {!entrypoint}
-  will be started as a subcommand of [/bin/sh -c], which does not pass
-  signals. This means that the executable will not be the container's
-  PID 1 - and will not receive Unix signals - so your executable will
-  not receive a SIGTERM from [docker stop <container>].
+    The shell form prevents any {!cmd} or {!run} command line arguments
+    from being used, but has the disadvantage that your {!entrypoint}
+    will be started as a subcommand of [/bin/sh -c], which does not pass
+    signals. This means that the executable will not be the container's
+    PID 1 - and will not receive Unix signals - so your executable will
+    not receive a SIGTERM from [docker stop <container>].
 
-  To get around this limitation, use the {!entrypoint_exec} command
-  to directly execute an argument list without a subshell.
+    To get around this limitation, use the {!entrypoint_exec} command
+    to directly execute an argument list without a subshell.
 *)
 
 val entrypoint_exec : string list -> t
 (** [entrypoint fmt] allows you to configure a container that will
-  run as an executable.  You can use the exec form here to set fairly
-  stable default commands and arguments and then use either {!cmd} or
-  {!cmd_exec} to set additional defaults that are more likely to be changed
-  by the user starting the Docker container. *)
+    run as an executable.  You can use the exec form here to set fairly
+    stable default commands and arguments and then use either {!cmd} or
+    {!cmd_exec} to set additional defaults that are more likely to be changed
+    by the user starting the Docker container. *)
 
 val shell : string list -> t
 (** [shell t] allows the default shell used for the shell form of
@@ -438,30 +438,30 @@ val shell : string list -> t
 
 val onbuild : t -> t
 (** [onbuild t] adds to the image a trigger instruction [t] to be
-  executed at a later time, when the image is used as the base for
-  another build. The trigger will be executed in the context of the
-  downstream build, as if it had been inserted immediately after the
-  {!from} instruction in the downstream Dockerfile.
+    executed at a later time, when the image is used as the base for
+    another build. The trigger will be executed in the context of the
+    downstream build, as if it had been inserted immediately after the
+    {!from} instruction in the downstream Dockerfile.
 
-  Any build instruction can be registered as a trigger.
+    Any build instruction can be registered as a trigger.
 
-  This is useful if you are building an image which will be used as a
-  base to build other images, for example an application build environment
-  or a daemon which may be customized with user-specific configuration. *)
+    This is useful if you are building an image which will be used as a
+    base to build other images, for example an application build environment
+    or a daemon which may be customized with user-specific configuration. *)
 
 val label : (string * string) list -> t
 (** [label l] adds metadata to an image via a list of key-value pairs.
-  To include spaces within a label value, use quotes and backslashes as
-  you would in command-line parsing. An image can have more than one label.
-  To specify multiple labels, Docker recommends combining labels into a
-  single label instruction where possible. Each label instruction produces
-  a new layer which can result in an inefficient image if you use many labels.
+    To include spaces within a label value, use quotes and backslashes as
+    you would in command-line parsing. An image can have more than one label.
+    To specify multiple labels, Docker recommends combining labels into a
+    single label instruction where possible. Each label instruction produces
+    a new layer which can result in an inefficient image if you use many labels.
 
-  Labels are additive including [LABEL]s in [FROM] images. If Docker
-  encounters a label/key that already exists, the new value overrides any
-  previous labels with identical keys.
+    Labels are additive including [LABEL]s in [FROM] images. If Docker
+    encounters a label/key that already exists, the new value overrides any
+    previous labels with identical keys.
 
-  To view an image’s labels, use the [docker inspect] command. *)
+    To view an image’s labels, use the [docker inspect] command. *)
 
 val healthcheck :
   ?interval:string ->
@@ -471,24 +471,24 @@ val healthcheck :
   ('a, unit, string, t) format4 ->
   'a
 (** [healthcheck cmd] checks container health by running a command
-  inside the container. See {!cmd} for additional details.
+    inside the container. See {!cmd} for additional details.
 
-  @param interval The health check will first run [interval] seconds
-    after the container is started, and then again [interval] seconds
-    after each previous check completes.
+    @param interval The health check will first run [interval] seconds
+      after the container is started, and then again [interval] seconds
+      after each previous check completes.
 
-  @param timeout If a single run of the check takes longer than
-    [timeout] seconds then the check is considered to have failed.
+    @param timeout If a single run of the check takes longer than
+      [timeout] seconds then the check is considered to have failed.
 
-  @param retries It takes [retries] consecutive failures of the health
-    check for the container to be considered {i unhealthy}.
+    @param retries It takes [retries] consecutive failures of the health
+      check for the container to be considered {i unhealthy}.
 
-  @param start_period provides initialization time for containers that
-    need time to bootstrap. Probe failure during that period will not
-    be counted towards the maximum number of retries. However, if a
-    health check succeeds during the start period, the container is
-    considered started and all consecutive failures will be counted
-    towards the maximum number of retries.  *)
+    @param start_period provides initialization time for containers that
+      need time to bootstrap. Probe failure during that period will not
+      be counted towards the maximum number of retries. However, if a
+      health check succeeds during the start period, the container is
+      considered started and all consecutive failures will be counted
+      towards the maximum number of retries.  *)
 
 val healthcheck_exec :
   ?interval:string ->
@@ -498,13 +498,13 @@ val healthcheck_exec :
   string list ->
   t
 (** [healthcheck_exec cmd] checks container health by running a
-  command inside the container. See {!cmd_exec} and {!healthcheck}
-  for additional details.
+    command inside the container. See {!cmd_exec} and {!healthcheck}
+    for additional details.
 *)
 
 val healthcheck_none : unit -> t
 (** [healthcheck_none] disables any healthcheck inherited from the
-  base image. *)
+    base image. *)
 
 val stopsignal : string -> t
 (** [stopsignal signal] sets the system call signal that will be
@@ -512,8 +512,8 @@ val stopsignal : string -> t
 
 val crunch : t -> t
 (** [crunch t] will reduce coincident {!run} commands into a single
-  one that is chained using the shell [&&] operator. This reduces the
-  number of layers required for a production image.
+    one that is chained using the shell [&&] operator. This reduces the
+    number of layers required for a production image.
 
-  @raise Invalid_argument if mounts or networks or security modes differ for
-    each run command. *)
+    @raise Invalid_argument if mounts or networks or security modes differ for
+      each run command. *)

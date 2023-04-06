@@ -40,7 +40,7 @@ val run_log :
   Bos.Cmd.t ->
   (unit, [> `Msg of string ]) result
 (** [runlog log_dir name cmd] will run [cmd] with label [name]
-   and log the results in [<log_dir>/<name>.sxp]. *)
+    and log the results in [<log_dir>/<name>.sxp]. *)
 
 (** Docker command invocation *)
 module Docker : sig
