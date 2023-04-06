@@ -4,6 +4,4 @@
  (synopsis "Dockerfile functions to generate opam2 base containers")
  (libraries ocaml-version dockerfile fmt sexplib astring)
  (preprocess
-  (per_module
-   ((pps ppx_sexp_conv)
-    dockerfile_distro))))
+  (pps ppx_sexp_conv)))
