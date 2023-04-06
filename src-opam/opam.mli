@@ -56,17 +56,17 @@ val gen_opam2_distro :
   Distro.t ->
   string * Dockerfile.t
 (** [gen_opam2_distro ~opam_hashes d] will generate a Dockerfile
-   for Linux distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master,
-   per hash given in parameter.
-   @return a tuple of the Docker tag and the Dockerfile.
-   If [clone_opam_repo] is true (the default) then the Dockerfile will also git
-   clone the official opam-repository into [/home/opam/opam-repository].
-   If [arch] is not specified, it defaults to the base image that is assumed
-   to be multiarch (the main exception to this is i386, which requires different
-   base images from amd64).
-   For native Windows distributions, if [winget] is omitted, then winget
-   will be build in an prepended build stage. If specified, then
-   winget will be pulled from the [winget] external image. *)
+    for Linux distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master,
+    per hash given in parameter.
+    @return a tuple of the Docker tag and the Dockerfile.
+    If [clone_opam_repo] is true (the default) then the Dockerfile will also git
+    clone the official opam-repository into [/home/opam/opam-repository].
+    If [arch] is not specified, it defaults to the base image that is assumed
+    to be multiarch (the main exception to this is i386, which requires different
+    base images from amd64).
+    For native Windows distributions, if [winget] is omitted, then winget
+    will be build in an prepended build stage. If specified, then
+    winget will be pulled from the [winget] external image. *)
 
 val ocaml_depexts : Distro.t -> Ocaml_version.t -> Dockerfile.t
 (** [ocaml_depexts distro version] returns packages that are
@@ -76,21 +76,21 @@ val ocaml_depexts : Distro.t -> Ocaml_version.t -> Dockerfile.t
 val all_ocaml_compilers :
   string -> Ocaml_version.arch -> Distro.t -> string * Dockerfile.t
 (** [all_ocaml_compilers hub_id arch distro] will generate an opam2
-  container that has all the recent OCaml compilers installed into a
-  distribution [distro] on architecture [arch]. *)
+    container that has all the recent OCaml compilers installed into a
+    distribution [distro] on architecture [arch]. *)
 
 val separate_ocaml_compilers :
   string -> Ocaml_version.arch -> Distro.t -> (string * Dockerfile.t) list
 (** [separate_ocaml_compilers hub_id arch distro] will install a list of
-  Dockerfiles that build individual OCaml compiler versions and their
-  variants (e.g. flambda) in separate containers. *)
+    Dockerfiles that build individual OCaml compiler versions and their
+    variants (e.g. flambda) in separate containers. *)
 
 val deprecated : Dockerfile.t
 (** [deprecated] is a minimal container that outputs a deprecation error. This
-   is used to replace unsupported containers on the Hub rather than leaving an
-   unmaintained distribution lying around with possible security holes. *)
+    is used to replace unsupported containers on the Hub rather than leaving an
+    unmaintained distribution lying around with possible security holes. *)
 
 val multiarch_manifest :
   target:string -> platforms:(string * string) list -> string
 (** [multiarch_manifest ~target ~platforms] will generate a manifest-tool compliant yaml file to
-  build a [target] on the given multiarch [platforms]. *)
+    build a [target] on the given multiarch [platforms]. *)
