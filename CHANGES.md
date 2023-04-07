@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.2.1 2023-04-07 Paris
+-----------------------
 
 - Correct sexp generation for dockerfile-opam.
   (@benmandrew #158, review by @MisterDA)
