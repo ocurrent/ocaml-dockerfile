@@ -1,3 +1,9 @@
+unreleased
+----------
+
+- Add newlines in some cases for better formatting.
+  (@MisterDA #161, review by @benmandrew)
+
 v8.2.1 2023-04-07 Paris
 -----------------------
 
