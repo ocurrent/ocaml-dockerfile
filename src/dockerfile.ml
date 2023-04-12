@@ -445,6 +445,34 @@ let string_of_t tl =
     | `ParserDirective _ :: tl -> find_escape tl
     | _ -> '\\'
   in
-  String.concat "\n" (List.map (string_of_line ~escape:(find_escape tl)) tl)
+  let escape = find_escape tl in
+  let buf = Buffer.create 4096 in
+  let rec aux (tl : line list) =
+    match tl with
+    | [] -> ()
+    | ((`ParserDirective _ | `Comment _) as l1) :: (`From _ as l2) :: tl ->
+        Buffer.add_char buf '\n';
+        Buffer.add_string buf (string_of_line ~escape l1);
+        Buffer.add_string buf "\n";
+        Buffer.add_string buf (string_of_line ~escape l2);
+        aux tl
+    | l1 :: (`From _ as l2) :: tl ->
+        Buffer.add_char buf '\n';
+        Buffer.add_string buf (string_of_line ~escape l1);
+        Buffer.add_string buf "\n\n";
+        Buffer.add_string buf (string_of_line ~escape l2);
+        aux tl
+    | l :: tl ->
+        Buffer.add_char buf '\n';
+        Buffer.add_string buf (string_of_line ~escape l);
+        aux tl
+  in
+  (match tl with
+  | [] -> ()
+  | [ l ] -> Buffer.add_string buf (string_of_line ~escape l)
+  | l :: tl ->
+      Buffer.add_string buf (string_of_line ~escape l);
+      aux tl);
+  Buffer.contents buf
 
 let pp ppf tl = Fmt.pf ppf "%s" (string_of_t tl)

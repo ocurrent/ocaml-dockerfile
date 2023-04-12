@@ -1,3 +1,8 @@
+unreleased
+----------
+
+- Insert a newline before `FROM` instructions when printing. (@MisterDA #161)
+
 v8.2.1 2023-04-07 Paris
 -----------------------
 
