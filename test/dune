@@ -1,0 +1,11 @@
+(executables
+ (names test)
+ (libraries
+  alcotest
+  dockerfile))
+
+(rule
+ (alias runtest)
+ (package dockerfile)
+ (action
+  (run ./test.exe -e)))

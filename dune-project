@@ -38,7 +38,8 @@
   (ocaml (>= "4.08"))
   (fmt (>= "0.8.7"))
   (ppx_sexp_conv (>= "v0.9.0"))
-  sexplib)
+  sexplib
+  (alcotest :with-test))
  (conflicts
   (result (< 1.5))
   (rresult (< 0.7.0)))
