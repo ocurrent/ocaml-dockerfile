@@ -216,26 +216,25 @@ module Cygwin = struct
     env [ ("CYGWIN", "nodosfilewarning winsymlinks:native") ]
     @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
 
-  let install_from_release ?(cyg = default) ?(msvs_tools = false) ?(extra = [])
-      () =
+  let install_cygwin ?(cyg = default) ?(msvs_tools = false) ?(extra = []) () =
     setup_env ~cyg
     @@ add
          ~src:[ "https://www.cygwin.com/setup-x86_64.exe" ]
          ~dst:(cyg.root ^ {|\setup-x86_64.exe|})
          ()
     @@ install_cygsympathy_from_source cyg
-    @@ install ~cyg extra
+    @@ (if extra <> [] then install ~cyg extra else empty)
     @@ (if msvs_tools then install_msvs_tools_from_source cyg else empty)
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
          cyg.root
 
   let setup ?(cyg = default) ?from () =
-    (match from with
-    | Some from ->
+    maybe
+      (fun from ->
         copy ~from ~src:[ default.root ] ~dst:default.root () @@ setup_env ~cyg
-        |> cleanup
-    | None -> empty)
+        |> cleanup)
+      from
     @@ workdir {|%s\home\opam|} cyg.root
 
   let cygwin_packages ?(flexdll_version = "0.39-1") () =
@@ -322,12 +321,12 @@ module Winget = struct
 
   let setup ?from () =
     let escape s = String.(concat {|""""|} (split_on_char '"' s)) in
-    (match from with
-    | Some from ->
+    maybe
+      (fun from ->
         copy ~from
           ~src:[ {|C:\Program Files\winget-cli|} ]
-          ~dst:{|C:\Program Files\winget-cli|} ()
-    | None -> empty)
+          ~dst:{|C:\Program Files\winget-cli|} ())
+      from
     @@ prepend_path [ {|C:\Program Files\winget-cli|} ]
     @@ run_powershell ~escape
          {|$path=(Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\LocalState'); New-Item $path -ItemType Directory -Force; '{ "$schema": "https://aka.ms/winget-settings.schema.json", "telemetry": { "disable": "true" } }' | Out-File -encoding ASCII (Join-Path $path 'settings.json')|}
