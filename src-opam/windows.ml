@@ -66,7 +66,7 @@ let install_visual_studio_build_tools ?(vs_version = "16") components =
   add
     ~src:
       [
-        "https://raw.githubusercontent.com/avsm/ocaml-dockerfile/master/src-opam/Install.cmd";
+        "https://raw.githubusercontent.com/ocurrent/ocaml-dockerfile/master/src-opam/Install.cmd";
       ]
     ~dst:{|C:\TEMP\|} ()
   @@ add ~src:[ "https://aka.ms/vscollect.exe" ] ~dst:{|C:\TEMP\collect.exe|} ()
