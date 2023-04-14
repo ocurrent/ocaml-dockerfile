@@ -249,13 +249,24 @@ module Cygwin = struct
       "flexdll=" ^ flexdll_version;
     ]
 
-  let mingw_packages = [ "make"; "diffutils"; "mingw64-x86_64-gcc-core" ]
-  let msvc_packages = [ "make"; "diffutils" ]
+  let mingw_packages =
+    [ "make"; "diffutils"; "patch"; "mingw64-x86_64-gcc-core"; "git" ]
 
-  let ocaml_for_windows_packages ?cyg ?(extra = []) ?(version = "0.0.0.2") () =
+  let msvc_packages = [ "make"; "diffutils"; "patch"; "git" ]
+
+  let install_ocaml_for_windows ?cyg ?(version = "0.0.0.2") () =
     let packages =
-      "make" :: "diffutils" :: "mingw64-x86_64-gcc-g++" :: "vim" :: "git"
-      :: "curl" :: "rsync" :: "unzip" :: "patch" :: "m4" :: extra
+      [
+        "rsync";
+        "patch";
+        "diffutils";
+        "curl";
+        "make";
+        "unzip";
+        "git";
+        "m4";
+        "perl";
+      ]
     in
     let t =
       add
