@@ -410,24 +410,62 @@ let pacman_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
   @@ Linux.Pacman.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-(* TODO: Compile opam-2.0 and 2.1 instead of downloading binaries,
-   add an option to enable 0install-solver,
-   and pass ~hash_opam_2_0 ~hash_opam_2_1 like the cygwin one *)
-(* Native Windows, WinGet, Cygwin based Dockerfiles *)
-let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
+let install_winget ?win10_revision ?winget version =
+  match winget with
+  | None when Windows.Winget.is_supported version ->
+      ( Windows.header ~alias:"winget-builder" ?win10_revision ~version ()
+        @@ Windows.Winget.install_from_release (),
+        Windows.Winget.setup ~from:"winget-builder" ()
+        @@ Windows.Winget.dev_packages ~version () )
+  | _ -> (empty, empty)
+
+(* Native Windows with mingw-w64 and WinGet. *)
+let windows_mingw_opam2 ?win10_revision ?winget ?(labels = []) ?arch
+    ~opam_hashes distro () =
+  let opam_master_hash, opam_branches =
+    create_opam_branches_windows opam_hashes
+  in
+  let version = match distro with `Windows (_, v) -> v | _ -> assert false in
+  let winget_image, winget_setup =
+    install_winget ?win10_revision ?winget version
+  in
+  let opams_image =
+    Windows.header ~alias:"opam-builder" ?win10_revision ~version ()
+    @@ Windows.sanitize_reg_path ()
+    @@ Windows.Cygwin.(
+         install_cygwin
+           ~extra:
+             ("git" :: "patch" :: "mingw64-x86_64-gcc-g++"
+            :: "mingw64-i686-gcc-g++" :: mingw_packages)
+           ())
+    @@ install_opams_windows opam_master_hash opam_branches
+  in
+  (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
+     C:\cygwin64, so we cannot build Cygwin in a separate image. *)
+  let ocaml_for_windows =
+    let extra = Windows.Cygwin.mingw_packages in
+    let extra, pkgs = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
+    Windows.Cygwin.install_cygwin ~msvs_tools:true ~extra () @@ pkgs
+  in
+  winget_image @@ opams_image
+  @@ header ?win10_revision ?arch distro
+  @@ label (("distro_style", "windows") :: labels)
+  @@ user "ContainerAdministrator"
+  @@ Windows.install_vc_redist ()
+  @@ Windows.sanitize_reg_path ()
+  @@ winget_setup @@ ocaml_for_windows
+  @@ copy_opams_windows opam_branches
+  @@ Windows.Cygwin.setup () @@ Windows.Cygwin.Git.init ()
+
+(* Native Windows with MSVC and WinGet. *)
+let windows_msvc_opam2 ?win10_revision ?winget ?(labels = []) ~opam_hashes
     distro () =
   let opam_master_hash, opam_branches =
     create_opam_branches_windows opam_hashes
   in
   let version = match distro with `Windows (_, v) -> v | _ -> assert false in
   let winget_image, winget_setup =
-    match winget with
-    | None when Windows.Winget.is_supported version ->
-        ( Windows.header ~alias:"winget-builder" ?win10_revision ~version ()
-          @@ Windows.Winget.install_from_release (),
-          Windows.Winget.setup ~from:"winget-builder" ()
-          @@ Windows.Winget.dev_packages ~version () )
-    | _ -> (empty, empty)
+    install_winget ?win10_revision ?winget version
   in
   let opams_image =
     Windows.header ~alias:"opam-builder" ?win10_revision ~version ()
@@ -444,16 +482,12 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
      C:\cygwin64, so we cannot build Cygwin in a separate image. *)
   let ocaml_for_windows =
     let extra, vs_build_tools =
-      match distro with
-      | `Windows (`Mingw, _) -> (Windows.Cygwin.mingw_packages, empty)
-      | `Windows (`Msvc, _) ->
-          ( Windows.Cygwin.msvc_packages,
-            Windows.install_visual_studio_build_tools
-              [
-                "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
-                "Microsoft.VisualStudio.Component.Windows10SDK.18362";
-              ] )
-      | _ -> invalid_arg "Invalid distribution"
+      ( Windows.Cygwin.msvc_packages,
+        Windows.install_visual_studio_build_tools
+          [
+            "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
+            "Microsoft.VisualStudio.Component.Windows10SDK.18362";
+          ] )
     in
     let extra, pkgs = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
     Windows.Cygwin.install_cygwin ~msvs_tools:true ~extra ()
@@ -488,8 +522,14 @@ let gen_opam2_distro ?win10_revision ?winget ?(clone_opam_repo = true) ?arch
           ~c_devtools_libs ~opam_hashes d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()
-    | `Windows ->
-        windows_opam2 ?win10_revision ?winget ?labels ?arch ~opam_hashes d ()
+    | `Windows -> (
+        match d with
+        | `Windows (`Mingw, _) ->
+            windows_mingw_opam2 ?win10_revision ?winget ?labels ?arch
+              ~opam_hashes d ()
+        | `Windows (`Msvc, _) ->
+            windows_msvc_opam2 ?win10_revision ?winget ?labels ~opam_hashes d ()
+        | _ -> assert false)
     | `Cygwin ->
         failwith
           "OCaml/opam Docker images with the Cygwin port are not supported."
