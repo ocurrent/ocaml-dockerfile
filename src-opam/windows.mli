@@ -92,7 +92,7 @@ module Cygwin : sig
   val default : cyg
   (** The default Cygwin root, mirror, and arguments. *)
 
-  val install_from_release :
+  val install_cygwin :
     ?cyg:cyg -> ?msvs_tools:bool -> ?extra:string list -> unit -> Dockerfile.t
   (** Install Cygwin with CygSymPathy and optionally msvs-tools,
       and [extra] Cygwin packages (first in a separate Docker image).
@@ -101,7 +101,7 @@ module Cygwin : sig
       @see <https://github.com/metastack/msvs-tools> *)
 
   val setup : ?cyg:cyg -> ?from:string -> unit -> t
-  (** Setup winget, optionally copied from the [from] Docker image.  *)
+  (** Setup Cygwin workdir, optionally copied from the [from] Docker image. *)
 
   val install : ?cyg:cyg -> string list -> Dockerfile.t
   (** Install the supplied Cygwin package list. The packages should be
@@ -168,8 +168,8 @@ module Winget : sig
       image). The optional [winget_version] specifies a Git tag. *)
 
   val setup : ?from:string -> unit -> t
-  (** Setup winget, optionally copied from the [from] Docker
-      image. Disable winget telemetry. *)
+  (** Setup winget, optionally copied from the [from] Docker image. Disable
+      winget telemetry. *)
 
   val install : string list -> t
   (** [install packages] will install the supplied winget package list. *)

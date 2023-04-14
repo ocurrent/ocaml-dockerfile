@@ -433,7 +433,7 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
     Windows.header ~alias:"opam-builder" ?win10_revision ~version ()
     @@ Windows.sanitize_reg_path ()
     @@ Windows.Cygwin.(
-         install_from_release
+         install_cygwin
            ~extra:
              ("git" :: "patch" :: "mingw64-x86_64-gcc-g++"
             :: "mingw64-i686-gcc-g++" :: mingw_packages)
@@ -456,7 +456,7 @@ let windows_opam2 ?win10_revision ?winget ?(labels = []) ?arch ~opam_hashes
       | _ -> invalid_arg "Invalid distribution"
     in
     let extra, pkgs = Windows.Cygwin.ocaml_for_windows_packages ~extra () in
-    Windows.Cygwin.install_from_release ~msvs_tools:true ~extra ()
+    Windows.Cygwin.install_cygwin ~msvs_tools:true ~extra ()
     @@ vs_build_tools @@ pkgs
   in
   winget_image @@ opams_image
