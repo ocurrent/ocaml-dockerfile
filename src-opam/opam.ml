@@ -415,7 +415,8 @@ let install_winget ?win10_revision ?winget version =
   | None when Windows.Winget.is_supported version ->
       ( Windows.header ~alias:"winget-builder" ?win10_revision ~version ()
         @@ Windows.Winget.install_from_release (),
-        Windows.Winget.setup ~from:"winget-builder" ()
+        Windows.install_vc_redist ()
+        @@ Windows.Winget.setup ~from:"winget-builder" ()
         @@ Windows.Winget.dev_packages ~version () )
   | _ -> (empty, empty)
 
@@ -451,7 +452,6 @@ let windows_mingw_opam2 ?win10_revision ?winget ?(labels = []) ?arch
   @@ header ?win10_revision ?arch distro
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.install_vc_redist ()
   @@ Windows.sanitize_reg_path ()
   @@ winget_setup @@ ocaml_for_windows
   @@ copy_opams_windows opam_branches
@@ -497,7 +497,6 @@ let windows_msvc_opam2 ?win10_revision ?winget ?(labels = []) ~opam_hashes
   @@ header ?win10_revision ?arch distro
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
-  @@ Windows.install_vc_redist ()
   @@ Windows.sanitize_reg_path ()
   @@ winget_setup @@ ocaml_for_windows
   @@ copy_opams_windows opam_branches
