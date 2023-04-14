@@ -1,0 +1,4 @@
+(test
+ (name dockerfile)
+ (package dockerfile)
+ (libraries alcotest dockerfile))
