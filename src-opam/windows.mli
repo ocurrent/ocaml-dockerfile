@@ -122,11 +122,11 @@ module Cygwin : sig
   (** [msvc_packages] is the list of base development tools for the
       Caml MSVC port. *)
 
-  val ocaml_for_windows_packages :
-    ?cyg:cyg -> ?extra:string list -> ?version:string -> unit -> string list * t
-  (** [ocaml_for_windows_packages ?extra ()] returns the list of
-      Cygwin packages dependencies, and the installation instructions.
-      Extra packages may also be optionally supplied via [extra].
+  val install_ocaml_for_windows :
+    ?cyg:cyg -> ?version:string -> unit -> string list * t
+  (** [install_ocaml_for_windows ()] returns the list of Cygwin
+      packages dependencies, and the installation instructions for
+      OCaml for Windows.
       @see <https://fdopen.github.io/opam-repository-mingw/> *)
 
   val run_sh : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
