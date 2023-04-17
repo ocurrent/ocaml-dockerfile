@@ -181,7 +181,14 @@ module Cygwin = struct
          {|mklink %s\etc\postinstall\zp_zcygsympathy.sh %s\lib\cygsympathy\cygsympathy|}
          cyg.root cyg.root
 
-  let install_msvs_tools_from_source ?(version = "0.4.1") cyg =
+  let install_msvs_tools_from_source ?(version = "refs/heads/master") cyg =
+    let obj =
+      match String.split_on_char '/' version with
+      | [ "refs"; "heads"; branch ] -> branch
+      | [ "refs"; "tags"; tag ] -> tag
+      | [ x ] -> x
+      | _ -> failwith "Unexpected version string"
+    in
     add
       ~src:
         [
@@ -191,7 +198,7 @@ module Cygwin = struct
       ~dst:{|C:\TEMP\msvs-tools.tar.gz|} ()
     @@ run_sh ~cyg
          {|cd /tmp && tar -xf /cygdrive/c/TEMP/msvs-tools.tar.gz && cp msvs-tools-%s/msvs-detect msvs-tools-%s/msvs-promote-path /bin && rm -rf /cygdrive/c/TEMP/msvs-tools/*|}
-         version version
+         obj obj
 
   let cygsetup ?(cyg = default) ?(upgrade = false) fmt =
     ksprintf
