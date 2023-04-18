@@ -51,13 +51,17 @@ val sanitize_reg_path : unit -> t
 /usr/bin/bash: -c: line 1: syntax error: unexpected end of file
     v} |}]
 
-val install_vc_redist : ?vs_version:string -> ?arch:Ocaml_version.arch -> unit -> t
+val install_vc_redist :
+  ?vs_version:string -> ?arch:Ocaml_version.arch -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
     @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
 
 val install_visual_studio_build_tools : ?vs_version:string -> string list -> t
 (** Install Visual Studio Build Tools components.
-    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019> *)
+
+    @see <https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container?view=vs-2022>
+    @see <https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container-issues?view=vs-2022>
+    @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022> *)
 
 val ocaml_for_windows_package_exn :
   switch:Ocaml_version.t ->
