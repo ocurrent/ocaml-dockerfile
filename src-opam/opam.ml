@@ -49,18 +49,26 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
 
 (* Build opam in a separate worktree from an already cloned opam *)
 let install_opam_from_source_windows ?cyg ?prefix
-    ?(enable_0install_solver = false) ~branch ~hash () =
+    ?(enable_0install_solver = false) ?(msvs = false) ~branch ~hash () =
+  (* Although opam's readme states it can autodetec the environment
+     with MSVS, it doesn't always work. It's set explicitly here. *)
+  let msvs_env =
+    {|eval $(msvs-detect --arch=x64) && export PATH="$MSVS_PATH:$PATH" && export LIB="$MSVS_LIB" && export INCLUDE="$MSVS_INC" && |}
+  and ocaml_port = "OCAML_PORT=msvc64 " in
   Windows.Cygwin.run_sh ?cyg
     "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && cd \
      ../opam-build-%s && git checkout %s && git config --global --add \
      safe.directory /tmp/opam-build-%s"
     branch branch hash branch
   @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && make compiler && make lib-pkg" branch
+       "cd /tmp/opam-build-%s && %smake compiler %s&& make lib-pkg" branch
+       (if msvs then msvs_env else "")
+       (if msvs then ocaml_port else "")
   @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && ./configure --enable-cold-check \
+       "cd /tmp/opam-build-%s && %s./configure --enable-cold-check \
         --with-private-runtime%s%s && make && make install"
        branch
+       (if msvs then msvs_env else "")
        (Option.fold prefix ~none:"" ~some:(fun prefix ->
             Printf.sprintf {| --prefix="%s"|} prefix))
        (if enable_0install_solver then " --with-0install-solver" else "")
@@ -247,7 +255,7 @@ let install_opams ?prefix opam_master_hash opam_branches =
               ~enable_0install_solver ~branch ~hash ())
        empty opam_branches
 
-let install_opams_windows ?cyg ?prefix opam_master_hash opam_branches =
+let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
   Windows.Cygwin.Git.init ?cyg ~repos:[ "/tmp/opam-sources" ] ()
   @@ Windows.Cygwin.run_sh ?cyg
        "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && \
@@ -256,7 +264,7 @@ let install_opams_windows ?cyg ?prefix opam_master_hash opam_branches =
   @@ List.fold_left
        (fun acc { branch; hash; enable_0install_solver; _ } ->
          acc
-         @@ install_opam_from_source_windows ?cyg ?prefix
+         @@ install_opam_from_source_windows ?cyg ?prefix ?msvs
               ~enable_0install_solver ~branch ~hash ())
        empty opam_branches
 
@@ -484,8 +492,8 @@ let windows_msvc_opam2 ?win10_revision ?winget ?(labels = []) ~opam_hashes
     Windows.header ~alias:"opam-builder" ?win10_revision ~version ()
     @@ Windows.sanitize_reg_path ()
     @@ vs_build_tools
-    @@ Windows.Cygwin.install_cygwin ~extra:packages ()
-    @@ install_opams_windows opam_master_hash opam_branches
+    @@ Windows.Cygwin.install_cygwin ~msvs_tools:true ~extra:packages ()
+    @@ install_opams_windows ~msvs:true opam_master_hash opam_branches
   in
   (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
      C:\cygwin64, so we cannot build Cygwin in a separate image. *)
