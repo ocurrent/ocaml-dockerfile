@@ -28,8 +28,7 @@ let run_vc ~arch fmt =
     match arch with
     | `I386 -> "x86"
     | `X86_64 -> "amd64"
-    | `Aarch64 | `Aarch32 | `Ppc64le | `S390x | `Riscv64 ->
-        invalid_arg "Unsupported architecture"
+    | _ -> invalid_arg "Unsupported architecture"
   in
   ksprintf
     (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch)
@@ -41,15 +40,26 @@ let run_ocaml_env args fmt =
 let cleanup t = t @@ run_powershell {|Remove-Item 'C:\TEMP' -Recurse|} |> crunch
 
 (* VC redist is needed to run WinGet. *)
-let install_vc_redist ?(vs_version = "16") () =
+let install_vc_redist ?(vs_version = "17") ?(arch = `X86_64) () =
+  let arch =
+    match arch with
+    | `I386 -> "x86"
+    | `X86_64 -> "x64"
+    | `Aarch64 -> "arm64"
+    | _ -> invalid_arg "Unsupported architecture"
+  in
   add
-    ~src:[ "https://aka.ms/vs/" ^ vs_version ^ "/release/vc_redist.x64.exe" ]
+    ~src:
+      [
+        sprintf "https://aka.ms/vs/%s/release/vc_redist.%s.exe" vs_version arch;
+      ]
     ~dst:{|C:\TEMP\|} ()
   @@ run
-       {|C:\TEMP\vc_redist.x64.exe /install /passive /norestart /log C:\TEMP\vc_redist.log|}
+       {|C:\TEMP\vc_redist.%s.exe /install /passive /norestart /log C:\TEMP\vc_redist.log|}
+       arch
   |> cleanup
 
-let install_visual_studio_build_tools ?(vs_version = "16") components =
+let install_visual_studio_build_tools ?(vs_version = "17") components =
   let install =
     let fmt =
       format_of_string

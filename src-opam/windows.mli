@@ -51,7 +51,7 @@ val sanitize_reg_path : unit -> t
 /usr/bin/bash: -c: line 1: syntax error: unexpected end of file
     v} |}]
 
-val install_vc_redist : ?vs_version:string -> unit -> t
+val install_vc_redist : ?vs_version:string -> ?arch:Ocaml_version.arch -> unit -> t
 (** Install Microsoft Visual C++ Redistributable.
     @see <https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads> *)
 
