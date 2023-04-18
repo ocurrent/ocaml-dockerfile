@@ -476,6 +476,7 @@ let windows_msvc_opam2 ?win10_revision ?winget ?(labels = []) ~opam_hashes
       Windows.install_visual_studio_build_tools
         [
           "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
+          (* Without 18362, rc.exe is missing from the Path. *)
           "Microsoft.VisualStudio.Component.Windows10SDK.18362";
         ] )
   in

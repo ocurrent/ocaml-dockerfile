@@ -12,3 +12,5 @@ if "%ERRORLEVEL%"=="3010" (
         exit /b !ERR!
     )
 )
+
+exit /b 0

@@ -60,22 +60,31 @@ let install_vc_redist ?(vs_version = "17") ?(arch = `X86_64) () =
   |> cleanup
 
 let install_visual_studio_build_tools ?(vs_version = "17") components =
-  let install =
-    let fmt =
-      format_of_string
-        {|C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache `
-        --installPath C:\BuildTools --channelUri C:\TEMP\VisualStudio.chman `
-        --installChannelUri C:\TEMP\VisualStudio.chman%s|}
-    in
-    run fmt
-      (List.fold_left
-         (fun acc component -> acc ^ " `\n        --add " ^ component)
-         "" components)
+  (* https://learn.microsoft.com/en-us/visualstudio/install/advanced-build-tools-container?view=vs-2022#dockerfile *)
+  let excluded_components =
+    (* Exclude workloads and components with known issues *)
+    [
+      "Microsoft.VisualStudio.Component.Windows10SDK.10240";
+      "Microsoft.VisualStudio.Component.Windows10SDK.10586";
+      "Microsoft.VisualStudio.Component.Windows10SDK.14393";
+      "Microsoft.VisualStudio.Component.Windows81SDK";
+    ]
   in
-  (* https://docs.microsoft.com/en-us/visualstudio/install/advanced-build-tools-container?view=vs-2019#install-script *)
+  let pp cmd components =
+    let buf = Buffer.create 512 in
+    List.iter
+      (fun component ->
+        Buffer.add_string buf " `\n        --";
+        Buffer.add_string buf cmd;
+        Buffer.add_char buf ' ';
+        Buffer.add_string buf component)
+      components;
+    Buffer.contents buf
+  in
   add
     ~src:
       [
+        (* https://learn.microsoft.com/en-us/visualstudio/install/advanced-build-tools-container?view=vs-2022#install-script *)
         "https://raw.githubusercontent.com/ocurrent/ocaml-dockerfile/master/src-opam/Install.cmd";
       ]
     ~dst:{|C:\TEMP\|} ()
@@ -83,10 +92,15 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
   @@ add
        ~src:[ "https://aka.ms/vs/" ^ vs_version ^ "/release/channel" ]
        ~dst:{|C:\TEMP\VisualStudio.chman|} ()
-  @@ add
-       ~src:[ "https://aka.ms/vs/" ^ vs_version ^ "/release/vs_buildtools.exe" ]
-       ~dst:{|C:\TEMP\vs_buildtools.exe|} ()
-  @@ install
+  @@ run
+       {|curl -SL --output C:\TEMP\vs_buildtools.exe https://aka.ms/vs/%s/release/vs_buildtools.exe `
+    && (call C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache install `
+        --installPath "%%ProgramFiles(x86)%%\Microsoft Visual Studio\2022\BuildTools" `
+        --channelUri C:\TEMP\VisualStudio.chman `
+        --installChannelUri C:\TEMP\VisualStudio.chman%s%s) `
+    && del /q C:\TEMP\vs_buildtools.exe|}
+       vs_version (pp "add" components)
+       (pp "remove" excluded_components)
 
 let header ~alias ?win10_revision
     ?(version =
