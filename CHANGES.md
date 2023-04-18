@@ -1,16 +1,28 @@
 unreleased
 ----------
 
-- Added Ubuntu 23.04 (@mtelvers)
+- Rework Windows images and update their dependencies:
+  + Fix the origin of Install.cmd (avsm -> ocurrent);
+  + Rename Windows.Cygwin.install_from_release to install_cygwin;
+  + Rework Cygwin package list needed for opam and OCaml for Windows;
+  + Remove msvs-tools from the mingw images;
+  + Build opam with MSVS in the MSVS images. Explicitly set MSVS
+    environment vars with msvs-detect.
+  + Update to VC Redist 17 and MSVC 2022;
+  + Track msvs-tools master;
+  + Split MSVC build into multiple build steps;
+  + Internal refactors.
+  (@MisterDA #162)
+- Added Ubuntu 23.04 and Fedora 38. (@mtelvers #164)
 - Add newlines in some cases for better formatting.
   (@MisterDA #161, review by @benmandrew)
+- Various LCU Updates. (@mtelvers #160)
 
 v8.2.1 2023-04-07 Paris
 -----------------------
 
 - Correct sexp generation for dockerfile-opam.
   (@benmandrew #158, review by @MisterDA)
-
 - Switch to root and back to opam user when installing OCaml external
   dependencies in the ocaml stage; fixes depext installation.
   (@MisterDA #146, #157)
