@@ -65,10 +65,11 @@ let install_opam_from_source_windows ?cyg ?prefix
        (if msvs then msvs_env else "")
        (if msvs then ocaml_port else "")
   @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && %s./configure --enable-cold-check \
-        --with-private-runtime%s%s && make && make install"
+       "cd /tmp/opam-build-%s && %s./configure --enable-cold-check %s%s%s && \
+        make && make install"
        branch
        (if msvs then msvs_env else "")
+       (if msvs then "" else "--with-private-runtime")
        (Option.fold prefix ~none:"" ~some:(fun prefix ->
             Printf.sprintf {| --prefix="%s"|} prefix))
        (if enable_0install_solver then " --with-0install-solver" else "")
