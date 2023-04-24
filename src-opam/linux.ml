@@ -101,7 +101,9 @@ module Apt = struct
     else None
 
   let add_user ?uid ?gid ?(sudo = false) username =
-    let uid = match uid with Some u -> sprintf "--uid %d " u | None -> "" in
+    let uidparam =
+      match uid with Some u -> sprintf "--uid %d " u | None -> ""
+    in
     let gid = match gid with Some g -> sprintf "--gid %d " g | None -> "" in
     let home = "/home/" ^ username in
     (match sudo with
@@ -113,7 +115,11 @@ module Apt = struct
           ~dst:sudofile ()
         @@ run "chmod 440 %s" sudofile
         @@ run "chown root:root %s" sudofile)
-    @@ run "adduser %s%s--disabled-password --gecos '' %s" uid gid username
+    @@ (match uid with
+       | None -> empty
+       | Some u ->
+           run "if getent passwd %d; then userdel -r $(id -nu %d); fi" u u)
+    @@ run "adduser %s%s--disabled-password --gecos '' %s" uidparam gid username
     @@ run "passwd -l %s" username
     @@ run "chown -R %s:%s %s" username username home
     @@ user "%s" username
