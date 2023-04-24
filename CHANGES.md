@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Added Ubuntu 23.04 (@mtelvers)
 - Add newlines in some cases for better formatting.
   (@MisterDA #161, review by @benmandrew)
 
