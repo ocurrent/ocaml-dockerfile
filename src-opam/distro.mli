@@ -121,7 +121,8 @@ type distro =
     | `V34
     | `V35
     | `V36
-    | `V37 ]
+    | `V37
+    | `V38 ]
   | `OracleLinux of [ `V7 | `V8 | `V9 ]
   | `OpenSUSE of
     [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4 ]
@@ -143,7 +144,8 @@ type distro =
     | `V21_04
     | `V21_10
     | `V22_04
-    | `V22_10 ]
+    | `V22_10
+    | `V23_04 ]
   | `Cygwin of win10_release
   | `Windows of [ `Mingw | `Msvc ] * win10_release ]
 [@@deriving sexp]
@@ -188,6 +190,7 @@ type t =
     | `V35
     | `V36
     | `V37
+    | `V38
     | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `V9 | `Latest ]
   | `OpenSUSE of
@@ -219,6 +222,7 @@ type t =
     | `V21_10
     | `V22_04
     | `V22_10
+    | `V23_04
     | `Latest
     | `LTS ]
   | `Cygwin of win_all
