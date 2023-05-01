@@ -25,6 +25,7 @@ val install_opam_from_source :
   ?add_default_link:bool ->
   ?prefix:string ->
   ?enable_0install_solver:bool ->
+  ?with_vendored_deps:bool ->
   branch:string ->
   hash:string ->
   unit ->
@@ -38,7 +39,8 @@ val install_opam_from_source :
     binary is hardlinked to [opam].  Set it to false if you want to install
     multiple opam binaries from different branches in the same container.
     If [enable_0install_solver] is true (false by default), then the [builtin-0install]
-    solver should be accessible in the resulting opam binary. *)
+    solver should be accessible in the resulting opam binary.
+    Configure opam build [with_vendored_deps]. Required for opam 2.2. *)
 
 type opam_hashes = {
   opam_2_0_hash : string;

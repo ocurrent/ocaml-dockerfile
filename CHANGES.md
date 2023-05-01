@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support opam new `--with-vendored-deps` configure option. (@MisterDA #165)
 - Rework Windows images and update their dependencies:
   + Fix the origin of Install.cmd (avsm -> ocurrent);
   + Rename Windows.Cygwin.install_from_release to install_cygwin;
