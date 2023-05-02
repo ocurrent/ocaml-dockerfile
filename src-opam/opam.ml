@@ -33,23 +33,26 @@ let maybe_link_opam add_default_link prefix branch =
 
 (* Build opam in a separate worktree from an already cloned opam *)
 let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
-    ?(enable_0install_solver = false) ~branch ~hash () =
+    ?(enable_0install_solver = false) ?(with_vendored_deps = false) ~branch
+    ~hash () =
   run
     "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && cd \
      ../opam-build-%s && git checkout %s && ln -s ../opam/src_ext/archives \
      src_ext/archives && env PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" \
-     ./configure --enable-cold-check%s && env \
+     ./configure --enable-cold-check%s%s && env \
      PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" make lib-ext all && mkdir -p \
      %s/bin && cp /tmp/opam-build-%s/opam %s/bin/opam-%s && chmod a+x \
      %s/bin/opam-%s && rm -rf /tmp/opam-build-%s"
     branch branch hash
     (if enable_0install_solver then " --with-0install-solver" else "")
+    (if with_vendored_deps then " --with-vendored-deps" else "")
     prefix branch prefix branch prefix branch branch
   @@ maybe_link_opam add_default_link prefix branch
 
 (* Build opam in a separate worktree from an already cloned opam *)
 let install_opam_from_source_windows ?cyg ?prefix
-    ?(enable_0install_solver = false) ?(msvs = false) ~branch ~hash () =
+    ?(enable_0install_solver = false) ?(with_vendored_deps = false)
+    ?(msvs = false) ~branch ~hash () =
   (* Although opam's readme states it can autodetec the environment
      with MSVS, it doesn't always work. It's set explicitly here. *)
   let msvs_env =
@@ -65,11 +68,12 @@ let install_opam_from_source_windows ?cyg ?prefix
        (if msvs then msvs_env else "")
        (if msvs then ocaml_port else "")
   @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && %s./configure --enable-cold-check %s%s%s && \
+       "cd /tmp/opam-build-%s && %s./configure --enable-cold-check %s%s%s%s && \
         make && make install"
        branch
        (if msvs then msvs_env else "")
        (if msvs then "" else "--with-private-runtime")
+       (if with_vendored_deps then "" else "--with-vendored_deps")
        (Option.fold prefix ~none:"" ~some:(fun prefix ->
             Printf.sprintf {| --prefix="%s"|} prefix))
        (if enable_0install_solver then " --with-0install-solver" else "")
@@ -203,6 +207,7 @@ type opam_branch = {
   branch : string;
   hash : string;
   enable_0install_solver : bool;
+  with_vendored_deps : bool;
   public_name : string;
   aliases : string list;
 }
@@ -212,6 +217,7 @@ let opam_master_branch opam_master_hash =
     branch = "master";
     hash = opam_master_hash;
     enable_0install_solver = true;
+    with_vendored_deps = true;
     public_name = "opam-dev";
     aliases = [ "opam-2.2" ];
     (* TODO: Remove/update when opam 2.2 is branched *)
@@ -225,6 +231,7 @@ let create_opam_branches opam_hashes =
         branch = "2.0";
         hash = opam_2_0_hash;
         enable_0install_solver = false;
+        with_vendored_deps = false;
         public_name = "opam-2.0";
         aliases = [ "opam" ];
         (* Default *)
@@ -233,6 +240,7 @@ let create_opam_branches opam_hashes =
         branch = "2.1";
         hash = opam_2_1_hash;
         enable_0install_solver = true;
+        with_vendored_deps = false;
         public_name = "opam-2.1";
         aliases = [];
       };
@@ -250,10 +258,10 @@ let install_opams ?prefix opam_master_hash opam_branches =
      shell/bootstrap-ocaml.sh && make -C src_ext cache-archives"
     opam_master_hash
   @@ List.fold_left
-       (fun acc { branch; hash; enable_0install_solver; _ } ->
+       (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ } ->
          acc
          @@ install_opam_from_source ~add_default_link:false ?prefix
-              ~enable_0install_solver ~branch ~hash ())
+              ~enable_0install_solver ~with_vendored_deps ~branch ~hash ())
        empty opam_branches
 
 let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
@@ -263,10 +271,10 @@ let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
         cp -P -R -p . ../opam-sources && git checkout %s"
        opam_master_hash
   @@ List.fold_left
-       (fun acc { branch; hash; enable_0install_solver; _ } ->
+       (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ } ->
          acc
          @@ install_opam_from_source_windows ?cyg ?prefix ?msvs
-              ~enable_0install_solver ~branch ~hash ())
+              ~enable_0install_solver ~with_vendored_deps ~branch ~hash ())
        empty opam_branches
 
 let copy_opams ~src ~dst opam_branches =
@@ -717,7 +725,17 @@ let multiarch_manifest ~target ~platforms =
 
 (* Clone and build opam from source (legacy function) *)
 let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
-    ?(enable_0install_solver = false) ~branch ~hash () =
+    ?(enable_0install_solver = false) ?(with_vendored_deps = false) ~branch
+    ~hash () =
+  let configure_args =
+    let args =
+      if enable_0install_solver then "--with-0install-solver" else ""
+    in
+    let args =
+      args ^ if with_vendored_deps then "--with-vendored-deps" else ""
+    in
+    if args <> "" then " CONFIGURE_ARGS=" ^ args else ""
+  in
   run
     "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && git \
      checkout %s"
@@ -725,7 +743,5 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
   @@ Linux.run_sh
        "cd /tmp/opam && make%s cold && mkdir -p %s/bin && cp /tmp/opam/opam \
         %s/bin/opam-%s && chmod a+x %s/bin/opam-%s && rm -rf /tmp/opam"
-       (if enable_0install_solver then " CONFIGURE_ARGS=--with-0install-solver"
-        else "")
-       prefix prefix branch prefix branch
+       configure_args prefix prefix branch prefix branch
   @@ maybe_link_opam add_default_link prefix branch
