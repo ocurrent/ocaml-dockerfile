@@ -101,7 +101,8 @@ type distro =
     | `V3_14
     | `V3_15
     | `V3_16
-    | `V3_17 ]
+    | `V3_17
+    | `V3_18 ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 ]
   | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
@@ -169,6 +170,7 @@ type t =
     | `V3_15
     | `V3_16
     | `V3_17
+    | `V3_18
     | `Latest ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
