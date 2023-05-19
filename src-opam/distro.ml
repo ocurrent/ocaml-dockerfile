@@ -277,7 +277,7 @@ type distro =
     | `V38 ]
   | `OracleLinux of [ `V7 | `V8 | `V9 ]
   | `OpenSUSE of
-    [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4 ]
+    [ `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4 | `Tumbleweed ]
   | `Ubuntu of
     [ `V12_04
     | `V14_04
@@ -354,6 +354,7 @@ type t =
     | `V15_2
     | `V15_3
     | `V15_4
+    | `Tumbleweed
     | `Latest ]
   | `Ubuntu of
     [ `V12_04
@@ -475,6 +476,7 @@ let distros : t list =
     `OpenSUSE `V15_2;
     `OpenSUSE `V15_3;
     `OpenSUSE `V15_4;
+    `OpenSUSE `Tumbleweed;
     `OpenSUSE `Latest;
     `Ubuntu `V12_04;
     `Ubuntu `V14_04;
@@ -596,7 +598,7 @@ let resolve_alias (d : t) : distro =
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 )
     | `OracleLinux (`V7 | `V8 | `V9)
     | `OpenSUSE
-        (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4)
+        ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4 | `Tumbleweed )
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
@@ -640,6 +642,7 @@ let distro_status (d : t) : status =
       ->
         `Deprecated
     | `OpenSUSE `V15_4 -> `Active `Tier2
+    | `OpenSUSE `Tumbleweed -> `Active `Tier2
     | `Ubuntu `V18_04 -> `Active `Tier3
     | `Ubuntu (`V20_04 | `V22_04 | `V22_10 | `V23_04) -> `Active `Tier2
     | `Ubuntu
@@ -658,6 +661,7 @@ let latest_distros =
     `Debian `Stable;
     `OracleLinux `Latest;
     `OpenSUSE `Latest;
+    `OpenSUSE `Tumbleweed;
     `Fedora `Latest;
     `Ubuntu `Latest;
     `Ubuntu `LTS;
@@ -816,6 +820,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OpenSUSE `V15_2 -> Some "4.05.0"
   | `OpenSUSE `V15_3 -> Some "4.05.0"
   | `OpenSUSE `V15_4 -> Some "4.05.0"
+  | `OpenSUSE `Tumbleweed -> Some "4.14.1"
   | `OracleLinux `V7 -> Some "4.01.0"
   | `OracleLinux `V8 -> Some "4.07.0"
   | `OracleLinux `V9 -> Some "4.11.1"
@@ -977,6 +982,7 @@ let tag_of_distro (d : t) =
   | `OpenSUSE `V15_2 -> "opensuse-15.2"
   | `OpenSUSE `V15_3 -> "opensuse-15.3"
   | `OpenSUSE `V15_4 -> "opensuse-15.4"
+  | `OpenSUSE `Tumbleweed -> "opensuse-tumbleweed"
   | `OpenSUSE `Latest -> "opensuse"
   | `Cygwin v -> "cygwin-" ^ win10_release_to_string v
   | `Windows (`Mingw, v) -> "windows-mingw-" ^ win10_release_to_string v
@@ -1069,6 +1075,7 @@ let distro_of_tag x : t option =
   | "opensuse-15.2" -> Some (`OpenSUSE `V15_2)
   | "opensuse-15.3" -> Some (`OpenSUSE `V15_3)
   | "opensuse-15.4" -> Some (`OpenSUSE `V15_4)
+  | "opensuse-tumbleweed" -> Some (`OpenSUSE `Tumbleweed)
   | "opensuse" -> Some (`OpenSUSE `Latest)
   | s when String.is_prefix ~affix:"cygwin-" s ->
       win10_of_tag "cygwin-" s (fun v -> `Cygwin v)
@@ -1157,6 +1164,7 @@ let human_readable_string_of_distro (d : t) =
     | `OpenSUSE `V15_2 -> "OpenSUSE 15.2 (Leap)"
     | `OpenSUSE `V15_3 -> "OpenSUSE 15.3 (Leap)"
     | `OpenSUSE `V15_4 -> "OpenSUSE 15.4 (Leap)"
+    | `OpenSUSE `Tumbleweed -> "OpenSUSE Tumbleweed"
     | `Cygwin v -> "Cygwin " ^ win10_release_to_string v
     | `Windows (`Mingw, v) -> "Windows mingw " ^ win10_release_to_string v
     | `Windows (`Msvc, v) -> "Windows mingw " ^ win10_release_to_string v
@@ -1289,6 +1297,7 @@ let bubblewrap_version (t : t) =
   | `OpenSUSE `V15_2 -> Some (0, 4, 1)
   | `OpenSUSE `V15_3 -> Some (0, 4, 1)
   | `OpenSUSE `V15_4 -> Some (0, 4, 1)
+  | `OpenSUSE `Tumbleweed -> Some (0, 8, 0)
   | `Cygwin _ -> None
   | `Windows _ -> None
 
@@ -1398,6 +1407,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
   | `OracleLinux v ->
       let tag = match v with `V7 -> "7" | `V8 -> "8" | `V9 -> "9" in
       ("oraclelinux", tag)
+  | `OpenSUSE `Tumbleweed -> ("opensuse/tumbleweed", "latest")
   | `OpenSUSE v ->
       let tag =
         match v with
@@ -1409,6 +1419,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
         | `V15_2 -> "15.2"
         | `V15_3 -> "15.3"
         | `V15_4 -> "15.4"
+        | `Tumbleweed -> assert false
       in
       ("opensuse/leap", tag)
   | `Cygwin v ->
