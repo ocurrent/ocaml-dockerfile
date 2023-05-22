@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Deprecate Fedora 36. (@MisterDA #170)
 - Add Alpine 3.18. (@MisterDA #167)
 - Support opam new `--with-vendored-deps` configure option. (@MisterDA #165)
 - Rework Windows images and update their dependencies. (@MisterDA #162)
