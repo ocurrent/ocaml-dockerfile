@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add OpenSUSE Tumbleweed to Tier 2. (@MisterDA #168 #169)
 - Deprecate Fedora 36. (@MisterDA #170)
 - Add Alpine 3.18. (@MisterDA #167)
 - Support opam new `--with-vendored-deps` configure option. (@MisterDA #165)

@@ -187,7 +187,10 @@ end
 
 (* Zypper (opensuse) rules *)
 module Zypper = struct
-  let update = run "zypper update -y"
+  let update =
+    (* opensuse/tumbleweed has this repo, but updating it timeouts. *)
+    run "zypper repos repo-openh264 && zypper removerepo repo-openh264 || true"
+    @@ run "zypper update -y"
 
   let install fmt =
     ksprintf
@@ -198,7 +201,7 @@ module Zypper = struct
     install "-t pattern devel_C_C++"
     @@ install
          "sudo git unzip curl gcc-c++ libcap-devel xz libX11-devel bzip2 which \
-          rsync gzip%s"
+          rsync gzip openssl%s"
          (match extra with None -> "" | Some x -> " " ^ x)
 
   let ocaml_depexts v =
