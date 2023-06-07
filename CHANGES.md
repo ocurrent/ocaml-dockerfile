@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add OpenSUSE Leap 15.5 to Tier 2. (@MisterDA #171)
 - Add OpenSUSE Tumbleweed to Tier 2. (@MisterDA #168 #169)
 - Deprecate Fedora 36. (@MisterDA #170)
 - Add Alpine 3.18. (@MisterDA #167)
