@@ -26,6 +26,7 @@ type sources_to_dest =
   * [ `Src of string list ]
   * [ `Dst of string ]
   * [ `Chown of string option ]
+  * [ `Chmod of int option ]
   * [ `Link of bool option ]
 [@@deriving sexp]
 
@@ -48,7 +49,8 @@ type heredoc = {
 }
 [@@deriving sexp]
 
-type heredocs_to_dest = [ `Chown of string option ] * heredoc list * string
+type heredocs_to_dest =
+  [ `Chown of string option ] * [ `Chmod of int option ] * heredoc list * string
 [@@deriving sexp]
 
 type mount_bind = {
@@ -238,17 +240,19 @@ let optional_enum name string_of_val = function
   | Some value -> [ sprintf "--%s=%s" name (string_of_val value) ]
 
 let string_of_sources_to_dest (t : sources_to_dest) =
-  let `From frm, `Src sl, `Dst d, `Chown chown, `Link link = t in
+  let `From frm, `Src sl, `Dst d, `Chown chown, `Chmod chmod, `Link link = t in
   String.concat " "
     (optional_flag "--link" link
-    @ optional "--chown" chown @ optional "--from" frm
+    @ optional "--chown" chown
+    @ optional_int_octal "--chmod" chmod
+    @ optional "--from" frm
     @ [ json_array_of_list (sl @ [ d ]) ])
 
 let string_of_label_list ls =
   List.map (fun (k, v) -> sprintf "%s=%S" k v) ls |> String.concat " "
 
 let string_of_copy_heredoc (t : heredocs_to_dest) =
-  let `Chown chown, heredocs, dst = t in
+  let `Chown chown, `Chmod chmod, heredocs, dst = t in
   let header, docs =
     List.fold_left
       (fun (header, docs) t ->
@@ -256,7 +260,10 @@ let string_of_copy_heredoc (t : heredocs_to_dest) =
           sprintf "%s\n%s\n%s" docs t.here_document t.delimiter ))
       ([], "") heredocs
   in
-  String.concat " " (optional "--chown" chown @ List.rev header @ [ dst ])
+  String.concat " "
+    (optional "--chown" chown
+    @ optional_int_octal "--chmod" chmod
+    @ List.rev header @ [ dst ])
   ^ docs
 
 let string_of_mount { typ } =
@@ -409,14 +416,19 @@ let expose_ports p : t = [ `Expose p ]
 let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
-let add ?link ?chown ?from ~src ~dst () : t =
-  [ `Add (`From from, `Src src, `Dst dst, `Chown chown, `Link link) ]
+let add ?link ?chown ?chmod ?from ~src ~dst () : t =
+  [
+    `Add (`From from, `Src src, `Dst dst, `Chown chown, `Chmod chmod, `Link link);
+  ]
 
-let copy ?link ?chown ?from ~src ~dst () : t =
-  [ `Copy (`From from, `Src src, `Dst dst, `Chown chown, `Link link) ]
+let copy ?link ?chown ?chmod ?from ~src ~dst () : t =
+  [
+    `Copy
+      (`From from, `Src src, `Dst dst, `Chown chown, `Chmod chmod, `Link link);
+  ]
 
-let copy_heredoc ?chown ~src ~dst () : t =
-  [ `Copy_heredoc (`Chown chown, src, dst) ]
+let copy_heredoc ?chown ?chmod ~src ~dst () : t =
+  [ `Copy_heredoc (`Chown chown, `Chmod chmod, src, dst) ]
 
 let user fmt = ksprintf (fun u -> [ `User u ]) fmt
 let onbuild t = List.map (fun l -> `Onbuild l) t
