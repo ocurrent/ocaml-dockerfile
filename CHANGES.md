@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add Debian 12 as main distribution. (@MisterDA #172)
 - Add OpenSUSE Leap 15.5 to Tier 2. (@MisterDA #171)
 - Add OpenSUSE Tumbleweed to Tier 2. (@MisterDA #168 #169)
 - Deprecate Fedora 36. (@MisterDA #170)

@@ -41,6 +41,7 @@ type win10_ltsc = [ `Ltsc2015 | `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
 
 type win10_lcu =
   [ `LCU
+  | `LCU20230613
   | `LCU20230509
   | `LCU20230411
   | `LCU20230314
@@ -69,12 +70,17 @@ type win10_lcu =
 
 type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
 
-let win10_current_lcu = `LCU20230509
+let win10_current_lcu = `LCU20230613
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
 let win10_lcus : ('a * int * win10_release list) list =
   [
+    (`LCU20230613, 5027225, [ `V21H2 ]);
+    (`LCU20230613, 5027215, [ `V21H1 ]);
+    (`LCU20230613, 5027222, [ `V1809 ]);
+    (`LCU20230613, 5027219, [ `V1607 ]);
+    (`LCU20230613, 5027230, [ `V1507 ]);
     (`LCU20230509, 5026370, [ `V21H2 ]);
     (`LCU20230509, 5026361, [ `V21H1 ]);
     (`LCU20230509, 5026362, [ `V1809 ]);
@@ -255,7 +261,7 @@ type distro =
     | `V3_18 ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 ]
-  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
+  | `Debian of [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
@@ -332,7 +338,8 @@ type t =
     | `Latest ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
-  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Debian of
+    [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
@@ -449,6 +456,7 @@ let distros : t list =
     `CentOS `V7;
     `CentOS `V8;
     `CentOS `Latest;
+    `Debian `V12;
     `Debian `V11;
     `Debian `V10;
     `Debian `V9;
@@ -589,7 +597,7 @@ let resolve_alias (d : t) : distro =
   match d with
   | `Alpine `Latest -> `Alpine `V3_18
   | `CentOS `Latest -> `CentOS `V7
-  | `Debian `Stable -> `Debian `V11
+  | `Debian `Stable -> `Debian `V12
   | `Fedora `Latest -> `Fedora `V38
   | `OracleLinux `Latest -> `OracleLinux `V9
   | `OpenSUSE `Latest -> `OpenSUSE `V15_5
@@ -603,7 +611,7 @@ let resolve_alias (d : t) : distro =
           )
     | `Archlinux `Latest
     | `CentOS (`V6 | `V7 | `V8)
-    | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `Testing | `Unstable)
+    | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `V12 | `Testing | `Unstable)
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 )
@@ -640,8 +648,8 @@ let distro_status (d : t) : status =
     | `CentOS `V7 -> `Active `Tier3
     | `CentOS (`V6 | `V8) -> `Deprecated
     | `Debian (`V7 | `V8 | `V9) -> `Deprecated
-    | `Debian `V10 -> `Active `Tier2
-    | `Debian `V11 -> `Active `Tier1
+    | `Debian (`V10 | `V11) -> `Active `Tier2
+    | `Debian `V12 -> `Active `Tier1
     | `Debian `Testing -> `Active `Tier3
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
@@ -692,9 +700,9 @@ module OV = Ocaml_version
 let distro_arches ov (d : t) =
   match (resolve_alias d, ov) with
   | (`CentOS (`V6 | `V7) | `OracleLinux `V7), ov when OV.major ov >= 5 -> []
-  | `Debian `V11, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
+  | `Debian (`V11 | `V12), ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
-  | `Debian `V11, ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
+  | `Debian (`V11 | `V12), ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Debian `V10, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
@@ -767,6 +775,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Debian `V9 -> Some "4.02.3"
   | `Debian `V10 -> Some "4.05.0"
   | `Debian `V11 -> Some "4.11.1"
+  | `Debian `V12 -> Some "4.13.1"
   | `Ubuntu `V12_04 -> Some "3.12.1"
   | `Ubuntu `V14_04 -> Some "4.01.0"
   | `Ubuntu `V15_04 -> Some "4.01.0"
@@ -937,6 +946,7 @@ let tag_of_distro (d : t) =
   | `Debian `Stable -> "debian-stable"
   | `Debian `Unstable -> "debian-unstable"
   | `Debian `Testing -> "debian-testing"
+  | `Debian `V12 -> "debian-12"
   | `Debian `V11 -> "debian-11"
   | `Debian `V10 -> "debian-10"
   | `Debian `V9 -> "debian-9"
@@ -1034,6 +1044,7 @@ let distro_of_tag x : t option =
   | "debian-stable" -> Some (`Debian `Stable)
   | "debian-unstable" -> Some (`Debian `Unstable)
   | "debian-testing" -> Some (`Debian `Testing)
+  | "debian-12" -> Some (`Debian `V12)
   | "debian-11" -> Some (`Debian `V11)
   | "debian-10" -> Some (`Debian `V10)
   | "debian-9" -> Some (`Debian `V9)
@@ -1125,6 +1136,7 @@ let human_readable_string_of_distro (d : t) =
     | `Ubuntu `V23_04 -> "Ubuntu 23.04"
     | `Debian `Unstable -> "Debian Unstable"
     | `Debian `Testing -> "Debian Testing"
+    | `Debian `V12 -> "Debian 12 (Bookworm)"
     | `Debian `V11 -> "Debian 11 (Bullseye)"
     | `Debian `V10 -> "Debian 10 (Buster)"
     | `Debian `V9 -> "Debian 9 (Stretch)"
@@ -1262,8 +1274,9 @@ let bubblewrap_version (t : t) =
   | `Debian `V9 -> Some (0, 1, 7)
   | `Debian `V10 -> Some (0, 3, 1)
   | `Debian `V11 -> Some (0, 4, 1)
-  | `Debian `Testing -> Some (0, 7, 0)
-  | `Debian `Unstable -> Some (0, 7, 0)
+  | `Debian `V12 -> Some (0, 8, 0)
+  | `Debian `Testing -> Some (0, 8, 0)
+  | `Debian `Unstable -> Some (0, 8, 0)
   | `CentOS `V6 -> None
   | `CentOS `V7 -> None
   | `CentOS `V8 -> Some (0, 4, 0)
@@ -1360,6 +1373,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
         | `V9 -> "9"
         | `V10 -> "10"
         | `V11 -> "11"
+        | `V12 -> "12"
         | `Testing -> "testing"
         | `Unstable -> "unstable"
       in

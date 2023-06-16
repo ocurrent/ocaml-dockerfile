@@ -49,6 +49,7 @@ type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
 
 type win10_lcu =
   [ `LCU
+  | `LCU20230613
   | `LCU20230509
   | `LCU20230411
   | `LCU20230314
@@ -105,7 +106,7 @@ type distro =
     | `V3_18 ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 ]
-  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
+  | `Debian of [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
@@ -183,7 +184,8 @@ type t =
     | `Latest ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
-  | `Debian of [ `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+  | `Debian of
+    [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
