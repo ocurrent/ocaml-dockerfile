@@ -203,8 +203,8 @@ val mount_cache :
 
     @param id the cache id: all container builds with same cache id (even from other unrelated builds) will get the same writable directory mounted.
         Defaults to [target] when absent.
-    @param target where to mount the cache inside the container. The [RUN] 
-        command needs to cope with a completely empty cache, and with files from the 
+    @param target where to mount the cache inside the container. The [RUN]
+        command needs to cope with a completely empty cache, and with files from the
         cache being deleted by the container runtime's GC in arbitrary order.
         E.g. a download cache would be suitable here, an entire git repository wouldn't.
         Also make sure that your RUN commands doesn't inadvertently wipe the cache
@@ -309,12 +309,13 @@ val env : (string * string) list -> t
 val add :
   ?link:bool ->
   ?chown:string ->
+  ?chmod:int ->
   ?from:string ->
   src:string list ->
   dst:string ->
   unit ->
   t
-(** [add ?link ?chown ?from ~src ~dst ()] copies new files,
+(** [add ?link ?chown ?chmod ?from ~src ~dst ()] copies new files,
     directories or remote file URLs from [src] and adds them to the
     filesystem of the container at the [dst] path.
 
@@ -343,6 +344,9 @@ val add :
       combination to request specific ownership of the copied
       content.
 
+    @param chmod Specify permissions on the files. Only supported on
+      Linux, with Dockerfile syntax 1.3.
+
     @param from Allows artefacts to be retrieved from multiple
       stages. It can either be an integer number (starting with 0 for
       the first {!from} stage, or a named stage (supplied via [?alias]
@@ -351,6 +355,7 @@ val add :
 val copy :
   ?link:bool ->
   ?chown:string ->
+  ?chmod:int ->
   ?from:string ->
   src:string list ->
   dst:string ->
@@ -369,12 +374,16 @@ val copy :
     @param chown Specify a given username, groupname, or UID/GID
       combination to request specific ownership of the copied content.
 
+    @param chmod Specify permissions on the files. Only supported on
+      Linux, with Dockerfile syntax 1.3.
+
     @param from Allows artefacts to be retrieved from multiple
       stages. It can either be an integer number (starting with 0 for
       the first {!from} stage, or a named stage (supplied via [?alias]
       to the {!from} command). *)
 
-val copy_heredoc : ?chown:string -> src:heredoc list -> dst:string -> unit -> t
+val copy_heredoc :
+  ?chown:string -> ?chmod:int -> src:heredoc list -> dst:string -> unit -> t
 (** [copy_heredoc src dst] creates the file [dst] using the content of
     the here-documents [src].
     Requires 1.4 {!val:buildkit_syntax}.
