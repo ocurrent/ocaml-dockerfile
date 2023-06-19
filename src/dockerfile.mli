@@ -311,6 +311,7 @@ val add :
   ?chown:string ->
   ?chmod:int ->
   ?from:string ->
+  ?checksum:string ->
   src:string list ->
   dst:string ->
   unit ->
@@ -350,7 +351,9 @@ val add :
     @param from Allows artefacts to be retrieved from multiple
       stages. It can either be an integer number (starting with 0 for
       the first {!from} stage, or a named stage (supplied via [?alias]
-      to the {!from} command). *)
+      to the {!from} command).
+
+    @param checksum Verify a remote file checksum. *)
 
 val copy :
   ?link:bool ->
