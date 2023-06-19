@@ -28,6 +28,7 @@ type sources_to_dest =
   * [ `Chown of string option ]
   * [ `Chmod of int option ]
   * [ `Link of bool option ]
+  * [ `Checksum of string option ]
 [@@deriving sexp]
 
 type from = {
@@ -240,12 +241,21 @@ let optional_enum name string_of_val = function
   | Some value -> [ sprintf "--%s=%s" name (string_of_val value) ]
 
 let string_of_sources_to_dest (t : sources_to_dest) =
-  let `From frm, `Src sl, `Dst d, `Chown chown, `Chmod chmod, `Link link = t in
+  let ( `From frm,
+        `Src sl,
+        `Dst d,
+        `Chown chown,
+        `Chmod chmod,
+        `Link link,
+        `Checksum checksum ) =
+    t
+  in
   String.concat " "
     (optional_flag "--link" link
     @ optional "--chown" chown
     @ optional_int_octal "--chmod" chmod
     @ optional "--from" frm
+    @ optional "--checksum" checksum
     @ [ json_array_of_list (sl @ [ d ]) ])
 
 let string_of_label_list ls =
@@ -416,15 +426,28 @@ let expose_ports p : t = [ `Expose p ]
 let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
-let add ?link ?chown ?chmod ?from ~src ~dst () : t =
+let add ?link ?chown ?chmod ?from ?checksum ~src ~dst () : t =
   [
-    `Add (`From from, `Src src, `Dst dst, `Chown chown, `Chmod chmod, `Link link);
+    `Add
+      ( `From from,
+        `Src src,
+        `Dst dst,
+        `Chown chown,
+        `Chmod chmod,
+        `Link link,
+        `Checksum checksum );
   ]
 
 let copy ?link ?chown ?chmod ?from ~src ~dst () : t =
   [
     `Copy
-      (`From from, `Src src, `Dst dst, `Chown chown, `Chmod chmod, `Link link);
+      ( `From from,
+        `Src src,
+        `Dst dst,
+        `Chown chown,
+        `Chmod chmod,
+        `Link link,
+        `Checksum None );
   ]
 
 let copy_heredoc ?chown ?chmod ~src ~dst () : t =

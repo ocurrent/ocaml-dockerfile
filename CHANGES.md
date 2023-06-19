@@ -1,6 +1,8 @@
 unreleased
 ----------
 
+- Support `--checksum` argument in `ADD` Dockerfile
+  instruction. (@MisterDA #175)
 - Support `--chmod` argument in `COPY` and `ADD` Dockerfile
   instructions. (@MisterDA #174)
 - Add Debian 12 as main distribution. (@MisterDA #172)
