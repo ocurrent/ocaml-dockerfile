@@ -1,11 +1,13 @@
 unreleased
 ----------
 
+- Add Debian 12 as main distribution. (@MisterDA #172)
+- Deprecate Ubuntu 18.04 it is now EOL (@avsm).
+- Deprecate Alpine 3.16 and 3.17, OracleLinux 7  and OpenSUSE 15.2 (@avsm)
 - Support `--checksum` argument in `ADD` Dockerfile
   instruction. (@MisterDA #175)
 - Support `--chmod` argument in `COPY` and `ADD` Dockerfile
   instructions. (@MisterDA #174)
-- Add Debian 12 as main distribution. (@MisterDA #172)
 - Add OpenSUSE Leap 15.5 to Tier 2. (@MisterDA #171)
 - Add OpenSUSE Tumbleweed to Tier 2. (@MisterDA #168 #169)
 - Deprecate Fedora 36. (@MisterDA #170)
