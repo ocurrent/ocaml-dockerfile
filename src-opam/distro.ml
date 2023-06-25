@@ -641,8 +641,8 @@ let distro_status (d : t) : status =
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 ) ->
         `Deprecated
-    | `Alpine `V3_16 -> `Active `Tier2
-    | `Alpine `V3_17 -> `Active `Tier2
+    | `Alpine `V3_16 -> `Deprecated
+    | `Alpine `V3_17 -> `Deprecated
     | `Alpine `V3_18 -> `Active `Tier1
     | `Archlinux `Latest -> `Active `Tier3
     | `CentOS `V7 -> `Active `Tier3
@@ -657,18 +657,19 @@ let distro_status (d : t) : status =
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 ) ->
         `Deprecated
     | `Fedora (`V37 | `V38) -> `Active `Tier2
-    | `OracleLinux (`V7 | `V8 | `V9) -> `Active `Tier3
-    | `OpenSUSE (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3)
+    | `OracleLinux `V7 -> `Deprecated
+    | `OracleLinux (`V8 | `V9) -> `Active `Tier3
+    | `OpenSUSE
+        (`V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4)
       ->
         `Deprecated
-    | `OpenSUSE (`V15_4 | `V15_5) -> `Active `Tier2
+    | `OpenSUSE `V15_5 -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
-    | `Ubuntu `V18_04 -> `Active `Tier3
     | `Ubuntu (`V20_04 | `V22_04 | `V22_10 | `V23_04) -> `Active `Tier2
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
-        | `V17_10 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04 | `V21_10 )
-      ->
+        | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04
+        | `V21_10 ) ->
         `Deprecated
     | `Cygwin v -> win10_docker_status `ServerCore v
     | `Windows (_, v) -> win10_docker_status `Windows v
