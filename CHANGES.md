@@ -28,6 +28,7 @@ unreleased
 - Add newlines in some cases for better formatting.
   (@MisterDA #161, review by @benmandrew)
 - Various LCU Updates. (@mtelvers #160)
+- Adopt the OCaml Code of Conduct (@rikusilvola #177)
 
 v8.2.1 2023-04-07 Paris
 -----------------------
