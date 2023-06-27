@@ -728,6 +728,8 @@ let distro_arches ov (d : t) =
   | `Fedora (`V33 | `V34 | `V35 | `V36 | `V37 | `V38), ov
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
+  | `OpenSUSE (`V15_4 | `V15_5), ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
+      [ `X86_64; `Aarch64 ]
   (* OCaml for Windows doesn't package OCaml 5.0.
      TODO: remove when upstream opam gains OCaml packages on Windows. *)
   | `Windows (`Mingw, _), ov when OV.major ov >= 5 -> []
