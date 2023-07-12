@@ -41,6 +41,7 @@ type win10_ltsc = [ `Ltsc2015 | `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
 
 type win10_lcu =
   [ `LCU
+  | `LCU20230711
   | `LCU20230613
   | `LCU20230509
   | `LCU20230411
@@ -70,12 +71,17 @@ type win10_lcu =
 
 type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
 
-let win10_current_lcu = `LCU20230613
+let win10_current_lcu = `LCU20230711
 
 type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
 
 let win10_lcus : ('a * int * win10_release list) list =
   [
+    (`LCU20230711, 5028171, [ `V21H2 ]);
+    (`LCU20230711, 5028166, [ `V21H1 ]);
+    (`LCU20230711, 5028168, [ `V1809 ]);
+    (`LCU20230711, 5028169, [ `V1607 ]);
+    (`LCU20230711, 5028186, [ `V1507 ]);
     (`LCU20230613, 5027225, [ `V21H2 ]);
     (`LCU20230613, 5027215, [ `V21H1 ]);
     (`LCU20230613, 5027222, [ `V1809 ]);
@@ -728,7 +734,8 @@ let distro_arches ov (d : t) =
   | `Fedora (`V33 | `V34 | `V35 | `V36 | `V37 | `V38), ov
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
-  | `OpenSUSE (`V15_4 | `V15_5), ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
+  | `OpenSUSE (`V15_4 | `V15_5), ov when OV.(compare Releases.v4_02_0 ov) = -1
+    ->
       [ `X86_64; `Aarch64 ]
   (* OCaml for Windows doesn't package OCaml 5.0.
      TODO: remove when upstream opam gains OCaml packages on Windows. *)
