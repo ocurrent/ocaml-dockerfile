@@ -312,6 +312,7 @@ val add :
   ?chmod:int ->
   ?from:string ->
   ?checksum:string ->
+  ?keep_git_dir:bool ->
   src:string list ->
   dst:string ->
   unit ->
@@ -353,7 +354,10 @@ val add :
       the first {!from} stage, or a named stage (supplied via [?alias]
       to the {!from} command).
 
-    @param checksum Verify a remote file checksum. *)
+    @param checksum Verify a remote file checksum.
+
+    @param keep_git_dir When cloning a Git repository, the flag adds
+    the [.git] directory. This flag defaults to false. *)
 
 val copy :
   ?link:bool ->

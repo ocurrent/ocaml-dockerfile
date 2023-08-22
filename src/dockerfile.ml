@@ -29,6 +29,7 @@ type sources_to_dest =
   * [ `Chmod of int option ]
   * [ `Link of bool option ]
   * [ `Checksum of string option ]
+  * [ `Keep_git_dir of bool option ]
 [@@deriving sexp]
 
 type from = {
@@ -247,7 +248,8 @@ let string_of_sources_to_dest (t : sources_to_dest) =
         `Chown chown,
         `Chmod chmod,
         `Link link,
-        `Checksum checksum ) =
+        `Checksum checksum,
+        `Keep_git_dir keep_git_dir ) =
     t
   in
   String.concat " "
@@ -256,6 +258,7 @@ let string_of_sources_to_dest (t : sources_to_dest) =
     @ optional_int_octal "--chmod" chmod
     @ optional "--from" frm
     @ optional "--checksum" checksum
+    @ optional_bool "--keep-git-dir" keep_git_dir
     @ [ json_array_of_list (sl @ [ d ]) ])
 
 let string_of_label_list ls =
@@ -426,7 +429,7 @@ let expose_ports p : t = [ `Expose p ]
 let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
-let add ?link ?chown ?chmod ?from ?checksum ~src ~dst () : t =
+let add ?link ?chown ?chmod ?from ?checksum ?keep_git_dir ~src ~dst () : t =
   [
     `Add
       ( `From from,
@@ -435,7 +438,8 @@ let add ?link ?chown ?chmod ?from ?checksum ~src ~dst () : t =
         `Chown chown,
         `Chmod chmod,
         `Link link,
-        `Checksum checksum );
+        `Checksum checksum,
+        `Keep_git_dir keep_git_dir );
   ]
 
 let copy ?link ?chown ?chmod ?from ~src ~dst () : t =
@@ -447,7 +451,8 @@ let copy ?link ?chown ?chmod ?from ~src ~dst () : t =
         `Chown chown,
         `Chmod chmod,
         `Link link,
-        `Checksum None );
+        `Checksum None,
+        `Keep_git_dir None );
   ]
 
 let copy_heredoc ?chown ?chmod ~src ~dst () : t =
