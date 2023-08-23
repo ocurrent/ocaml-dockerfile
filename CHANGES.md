@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support `--keep-git-dir` in `ADD` Dockerfile instruction. (@MisterDA #182)
 - Add Debian 12 as main distribution. (@MisterDA #172)
 - Deprecate Ubuntu 18.04 it is now EOL (@avsm).
 - Deprecate Alpine 3.16 and 3.17, OracleLinux 7  and OpenSUSE 15.2 (@avsm)
