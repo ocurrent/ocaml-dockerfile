@@ -483,6 +483,7 @@ val healthcheck :
   ?interval:string ->
   ?timeout:string ->
   ?start_period:string ->
+  ?start_interval:string ->
   ?retries:int ->
   ('a, unit, string, t) format4 ->
   'a
@@ -496,20 +497,24 @@ val healthcheck :
     @param timeout If a single run of the check takes longer than
       [timeout] seconds then the check is considered to have failed.
 
-    @param retries It takes [retries] consecutive failures of the health
-      check for the container to be considered {i unhealthy}.
-
     @param start_period provides initialization time for containers that
       need time to bootstrap. Probe failure during that period will not
       be counted towards the maximum number of retries. However, if a
       health check succeeds during the start period, the container is
       considered started and all consecutive failures will be counted
-      towards the maximum number of retries.  *)
+      towards the maximum number of retries.
+
+    @param start_interval is the time between health checks during
+      the start period.
+
+    @param retries It takes [retries] consecutive failures of the health
+      check for the container to be considered {i unhealthy}. *)
 
 val healthcheck_exec :
   ?interval:string ->
   ?timeout:string ->
   ?start_period:string ->
+  ?start_interval:string ->
   ?retries:int ->
   string list ->
   t
