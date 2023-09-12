@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Deprecate Ubuntu 22.10 it is now EOL (@tmcgilchrist).
 - Support `--start-interval` in `HEALTCHECK` Dockerfile
   instruction. (@MisterDA #183)
 - Support `--keep-git-dir` in `ADD` Dockerfile instruction. (@MisterDA #182)
