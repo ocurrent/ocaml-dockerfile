@@ -288,6 +288,11 @@ module Cygwin = struct
 
   let msvc_packages = [ "make"; "diffutils"; "patch"; "git" ]
 
+  let cygwin_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      [ "libzstd-devel" ]
+    else []
+
   let mingw_depexts v =
     if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
       [ "mingw64-x86_64-zstd" ]
