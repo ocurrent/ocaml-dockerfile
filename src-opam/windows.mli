@@ -125,6 +125,10 @@ module Cygwin : sig
   (** [msvc_packages] is the list of base development tools for the
       OCaml MSVC port. *)
 
+  val mingw_depexts : Ocaml_version.t -> string list
+  (** [mingw_depexts v] returns packages that are required by the
+      OCaml mingw distribution at version [v]. *)
+
   val install_ocaml_for_windows :
     ?cyg:cyg -> ?version:string -> unit -> string list * t
   (** [install_ocaml_for_windows ()] returns the list of Cygwin

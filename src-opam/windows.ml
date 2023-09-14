@@ -287,6 +287,11 @@ module Cygwin = struct
 
   let msvc_packages = [ "make"; "diffutils"; "patch"; "git" ]
 
+  let mingw_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      [ "mingw64-x86_64-zstd" ]
+    else []
+
   let install_ocaml_for_windows ?cyg ?(version = "0.0.0.2") () =
     let packages =
       [

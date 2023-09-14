@@ -579,7 +579,11 @@ let ocaml_depexts distro v =
   | `Yum -> as_root (RPM.install "%s") (RPM.ocaml_depexts v)
   | `Zypper -> as_root (Zypper.install "%s") (Zypper.ocaml_depexts v)
   | `Pacman -> as_root (Pacman.install "%s") (Pacman.ocaml_depexts v)
-  | `Windows -> empty
+  | `Windows -> (
+      match distro with
+      | `Windows (`Mingw, _) -> Windows.Cygwin.(install (mingw_depexts v))
+      | `Windows (`Msvc, _) -> empty
+      | _ -> assert false)
   | `Cygwin -> empty
 
 let create_switch ~arch distro t =
