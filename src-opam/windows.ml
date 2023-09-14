@@ -268,8 +268,7 @@ module Cygwin = struct
       from
     @@ workdir {|%s\home\opam|} cyg.root
 
-  let cygwin_packages ?(flexdll_version = "0.39-1") () =
-    (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
+  let cygwin_packages ?flexdll_version () =
     [
       "make";
       "diffutils";
@@ -279,7 +278,9 @@ module Cygwin = struct
       "patch";
       "m4";
       "cygport";
-      "flexdll=" ^ flexdll_version;
+      (match flexdll_version with
+      | Some v -> "flexdll=" ^ v
+      | None -> "flexdll");
     ]
 
   let mingw_packages =
