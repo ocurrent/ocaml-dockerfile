@@ -234,10 +234,12 @@ module Cygwin = struct
          (if upgrade then " --upgrade-also" else ""))
       fmt
 
-  let install ?(cyg = default) pkgs =
-    cygsetup ~cyg "--packages %s"
-      (pkgs |> List.sort_uniq String.compare |> String.concat ",")
-    |> cleanup
+  let install ?(cyg = default) = function
+    | [] -> empty
+    | pkgs ->
+        cygsetup ~cyg "--packages %s"
+          (pkgs |> List.sort_uniq String.compare |> String.concat ",")
+        |> cleanup
 
   let update ?(cyg = default) () = cygsetup ~cyg ~upgrade:true "" |> cleanup
 
@@ -252,7 +254,7 @@ module Cygwin = struct
          ~dst:(cyg.root ^ {|\setup-x86_64.exe|})
          ()
     @@ install_cygsympathy_from_source cyg
-    @@ (if extra <> [] then install ~cyg extra else empty)
+    @@ install ~cyg extra
     @@ (if msvs_tools then install_msvs_tools_from_source cyg else empty)
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
