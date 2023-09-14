@@ -1,7 +1,7 @@
 unreleased
 ----------
 
-- Deprecate Ubuntu 22.10 it is now EOL (@tmcgilchrist).
+- Deprecate Ubuntu 22.10 it is now EOL (@tmcgilchrist #184)).
 - Support `--start-interval` in `HEALTCHECK` Dockerfile
   instruction. (@MisterDA #183)
 - Support `--keep-git-dir` in `ADD` Dockerfile instruction. (@MisterDA #182)
@@ -19,8 +19,8 @@ unreleased
 - Add Alpine 3.18. (@MisterDA #167)
 - Support opam new `--with-vendored-deps` configure option. (@MisterDA #165)
 - Rework Windows images and update their dependencies. (@MisterDA #162)
-  + Fix the origin of Install.cmd (avsm -> ocurrent);
-  + Rename Windows.Cygwin.install_from_release to install_cygwin;
+  + Fix the origin of `Install.cmd` (avsm -> ocurrent);
+  + Rename `Windows.Cygwin.install_from_release` to `install_cygwin`;
   + Rework Cygwin package list needed for opam and OCaml for Windows;
   + Remove msvs-tools from the mingw images;
   + Build opam with MSVS in the MSVS images. Explicitly set MSVS
@@ -32,7 +32,7 @@ unreleased
 - Add Ubuntu 23.04 and Fedora 38. (@mtelvers #164)
 - Add newlines in some cases for better formatting.
   (@MisterDA #161, review by @benmandrew)
-- Various LCU Updates. (@mtelvers #160)
+- Various LCU Updates. (@mtelvers #160 #166 #173 #179 #180 #185)
 
 v8.2.1 2023-04-07 Paris
 -----------------------
