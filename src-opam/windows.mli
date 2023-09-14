@@ -108,8 +108,7 @@ module Cygwin : sig
   (** Setup Cygwin workdir, optionally copied from the [from] Docker image. *)
 
   val install : ?cyg:cyg -> string list -> Dockerfile.t
-  (** Install the supplied Cygwin package list. The packages should be
-      comma-separated. *)
+  (** Install the supplied Cygwin package list. *)
 
   val update : ?cyg:cyg -> unit -> t
   (** Update Cygwin packages. *)
@@ -120,11 +119,19 @@ module Cygwin : sig
 
   val mingw_packages : string list
   (** [mingw_packages] is the list of base development tools for the
-      Caml mingw port. *)
+      OCaml mingw port. *)
 
   val msvc_packages : string list
   (** [msvc_packages] is the list of base development tools for the
-      Caml MSVC port. *)
+      OCaml MSVC port. *)
+
+  val cygwin_depexts : Ocaml_version.t -> string list
+  (** [cygwin_depexts v] returns packages that are required by the
+      OCaml Cygwin distribution at version [v]. *)
+
+  val mingw_depexts : Ocaml_version.t -> string list
+  (** [mingw_depexts v] returns packages that are required by the
+      OCaml mingw distribution at version [v]. *)
 
   val install_ocaml_for_windows :
     ?cyg:cyg -> ?version:string -> unit -> string list * t

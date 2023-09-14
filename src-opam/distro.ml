@@ -756,6 +756,7 @@ let distro_arches ov (d : t) =
   | `Windows (`Msvc, _), ov when OV.major ov >= 5 -> []
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
+  | `Cygwin _, ov when OV.(compare Releases.v5_1_0 ov) = 1 -> []
   | _ -> [ `X86_64 ]
 
 let distro_supported_on a ov (d : t) = List.mem a (distro_arches ov d)
@@ -868,7 +869,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OracleLinux `V7 -> Some "4.01.0"
   | `OracleLinux `V8 -> Some "4.07.0"
   | `OracleLinux `V9 -> Some "4.11.1"
-  | `Cygwin _ -> None
+  | `Cygwin _ -> Some "4.14.0"
   | `Windows _ -> None
   | `Debian (`Testing | `Unstable) -> assert false
 
@@ -1257,7 +1258,7 @@ type package_manager =
   [ `Apt | `Yum | `Apk | `Zypper | `Pacman | `Cygwin | `Windows ]
 [@@deriving sexp]
 
-let package_manager (t : t) =
+let package_manager (t : t) : package_manager =
   match t with
   | `Ubuntu _ -> `Apt
   | `Debian _ -> `Apt

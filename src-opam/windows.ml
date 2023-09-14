@@ -234,10 +234,12 @@ module Cygwin = struct
          (if upgrade then " --upgrade-also" else ""))
       fmt
 
-  let install ?(cyg = default) pkgs =
-    cygsetup ~cyg "--packages %s"
-      (pkgs |> List.sort_uniq String.compare |> String.concat ",")
-    |> cleanup
+  let install ?(cyg = default) = function
+    | [] -> empty
+    | pkgs ->
+        cygsetup ~cyg "--packages %s"
+          (pkgs |> List.sort_uniq String.compare |> String.concat ",")
+        |> cleanup
 
   let update ?(cyg = default) () = cygsetup ~cyg ~upgrade:true "" |> cleanup
 
@@ -252,7 +254,7 @@ module Cygwin = struct
          ~dst:(cyg.root ^ {|\setup-x86_64.exe|})
          ()
     @@ install_cygsympathy_from_source cyg
-    @@ (if extra <> [] then install ~cyg extra else empty)
+    @@ install ~cyg extra
     @@ (if msvs_tools then install_msvs_tools_from_source cyg else empty)
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
@@ -266,8 +268,7 @@ module Cygwin = struct
       from
     @@ workdir {|%s\home\opam|} cyg.root
 
-  let cygwin_packages ?(flexdll_version = "0.39-1") () =
-    (* 2021-03-19: flexdll 0.39 is required, but is in Cygwin testing *)
+  let cygwin_packages ?flexdll_version () =
     [
       "make";
       "diffutils";
@@ -277,13 +278,25 @@ module Cygwin = struct
       "patch";
       "m4";
       "cygport";
-      "flexdll=" ^ flexdll_version;
+      (match flexdll_version with
+      | Some v -> "flexdll=" ^ v
+      | None -> "flexdll");
     ]
 
   let mingw_packages =
     [ "make"; "diffutils"; "patch"; "mingw64-x86_64-gcc-core"; "git" ]
 
   let msvc_packages = [ "make"; "diffutils"; "patch"; "git" ]
+
+  let cygwin_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      [ "libzstd-devel" ]
+    else []
+
+  let mingw_depexts v =
+    if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
+      [ "mingw64-x86_64-zstd" ]
+    else []
 
   let install_ocaml_for_windows ?cyg ?(version = "0.0.0.2") () =
     let packages =
