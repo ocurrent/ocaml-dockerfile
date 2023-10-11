@@ -1217,7 +1217,7 @@ let human_readable_string_of_distro (d : t) =
     | `OpenSUSE `Tumbleweed -> "OpenSUSE Tumbleweed"
     | `Cygwin v -> "Cygwin " ^ win10_release_to_string v
     | `Windows (`Mingw, v) -> "Windows mingw " ^ win10_release_to_string v
-    | `Windows (`Msvc, v) -> "Windows mingw " ^ win10_release_to_string v
+    | `Windows (`Msvc, v) -> "Windows msvc " ^ win10_release_to_string v
 
 let human_readable_short_string_of_distro (t : t) =
   match t with
