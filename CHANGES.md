@@ -1,16 +1,16 @@
 unreleased
 ----------
 
-- Deprecate Ubuntu 22.10 it is now EOL (@tmcgilchrist #184)).
-- Support `--start-interval` in `HEALTCHECK` Dockerfile
-  instruction. (@MisterDA #183)
+- Deprecate Ubuntu 22.10 it is now EOL. (@tmcgilchrist #184).
+- Support `--start-interval` in `HEALTCHECK` Dockerfile instruction.
+  (@MisterDA #183)
 - Support `--keep-git-dir` in `ADD` Dockerfile instruction. (@MisterDA #182)
 - Add Debian 12 as main distribution. (@MisterDA #172)
 - Deprecate Ubuntu 18.04 it is now EOL (@avsm).
 - Deprecate Alpine 3.16 and 3.17, OracleLinux 7  and OpenSUSE 15.2 (@avsm)
 - Add ARM64 builds to OpenSUSE (@mtelvers #178)
-- Support `--checksum` argument in `ADD` Dockerfile
-  instruction. (@MisterDA #175)
+- Support `--checksum` argument in `ADD` Dockerfile instruction.
+  (@MisterDA #175)
 - Support `--chmod` argument in `COPY` and `ADD` Dockerfile
   instructions. (@MisterDA #174)
 - Add OpenSUSE Leap 15.5 to Tier 2. (@MisterDA #171)
@@ -32,7 +32,7 @@ unreleased
 - Add Ubuntu 23.04 and Fedora 38. (@mtelvers #164)
 - Add newlines in some cases for better formatting.
   (@MisterDA #161, review by @benmandrew)
-- Various LCU Updates. (@mtelvers #160 #166 #173 #179 #180 #185)
+- Various LCU Updates. (@mtelvers #160 #166 #173 #179 #180 #185 #188)
 
 v8.2.1 2023-04-07 Paris
 -----------------------
