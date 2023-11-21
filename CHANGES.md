@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Format RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
 - Add Ubuntu 23.10. (@MisterDA #189)
 - Deprecate Ubuntu 22.10 it is now EOL. (@tmcgilchrist #184).
 - Support `--start-interval` in `HEALTCHECK` Dockerfile instruction.
