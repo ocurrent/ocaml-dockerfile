@@ -200,10 +200,12 @@ let json_array_of_list sl =
 
 let string_of_shell_or_exec ~escape (t : shell_or_exec) =
   match t with
-  | `Shell s -> s
+  | `Shell s -> escape_string ~char_to_escape:'\n' ~escape s
   | `Shells [] -> ""
-  | `Shells [ s ] -> s
-  | `Shells l -> String.concat (" && " ^ String.make 1 escape ^ "\n  ") l
+  | `Shells [ s ] -> escape_string ~char_to_escape:'\n' ~escape s
+  | `Shells l ->
+      List.map (escape_string ~char_to_escape:'\n' ~escape) l
+      |> String.concat (" && " ^ String.make 1 escape ^ "\n  ")
   | `Exec sl -> json_array_of_list sl
 
 let quote_env_var = escape_string ~char_to_escape:'"'
