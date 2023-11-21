@@ -108,6 +108,16 @@ RUN script
   Alcotest.(check' string) ~msg:"complete" ~expected ~actual;
   ()
 
+let test_issue_192 () =
+  let open Dockerfile in
+  let actual = from "alpine" @@ run "ls\n/" |> string_of_t
+  and expected = {|FROM alpine
+RUN ls\
+/
+|} in
+  Alcotest.(check' string) ~msg:"escape newlines" ~expected ~actual;
+  ()
+
 let () =
   Alcotest.(
     run "test"
@@ -118,5 +128,6 @@ let () =
               test_string_of_t_formatting_simple_image;
             test_case "string_of_t" `Quick
               test_string_of_t_formatting_multiple_images;
+            test_case "test_issue_192" `Quick test_issue_192;
           ] );
       ])
