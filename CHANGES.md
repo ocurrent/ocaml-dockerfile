@@ -1,7 +1,8 @@
 unreleased
 ----------
 
-- Format RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
+- Support formatting RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
+- Turned off address space layout randomization on Windows 1809. (@mtelvers #196)
 - Add Ubuntu 23.10. (@MisterDA #189)
 - Deprecate Ubuntu 22.10 it is now EOL. (@tmcgilchrist #184).
 - Support `--start-interval` in `HEALTCHECK` Dockerfile instruction.

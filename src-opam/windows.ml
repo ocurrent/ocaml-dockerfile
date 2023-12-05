@@ -205,6 +205,10 @@ module Cygwin = struct
          {|mklink %s\etc\postinstall\zp_zcygsympathy.sh %s\lib\cygsympathy\cygsympathy|}
          cyg.root cyg.root
 
+  let run_peflags cyg =
+    (* Turn off address space layout randomization (ASLR) *)
+    run {|%s\bin\peflags -d0 %s\bin\cygwin1.dll|} cyg.root cyg.root
+
   let install_msvs_tools_from_source ?(version = "refs/heads/master") cyg =
     let obj =
       match String.split_on_char '/' version with
@@ -245,7 +249,7 @@ module Cygwin = struct
     env [ ("CYGWIN", "nodosfilewarning winsymlinks:native") ]
     @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
 
-  let install_cygwin ?(cyg = default) ?(msvs_tools = false) ?(extra = []) () =
+  let install_cygwin ?(cyg = default) ?(msvs_tools = false) ?(aslr_off = false) ?(extra = []) () =
     setup_env ~cyg
     @@ add
          ~src:[ "https://www.cygwin.com/setup-x86_64.exe" ]
@@ -253,6 +257,7 @@ module Cygwin = struct
          ()
     @@ install_cygsympathy_from_source cyg
     @@ (if extra <> [] then install ~cyg extra else empty)
+    @@ (if aslr_off then run_peflags cyg else empty)
     @@ (if msvs_tools then install_msvs_tools_from_source cyg else empty)
     @@ run
          {|awk -i inplace "/(^#)|(^$)/{print;next}{$4=""noacl,""$4; print}" %s\etc\fstab|}
