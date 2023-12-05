@@ -166,6 +166,27 @@ val run_exec :
     @param security Control which security mode the command is run in. Requires
       BuildKit {{!val:parser_directive}syntax} 1-labs. *)
 
+val run_heredoc :
+  ?mounts:mount list ->
+  ?network:network ->
+  ?security:security ->
+  (heredoc * string option) list ->
+  t
+(** [run_heredoc ?mounts ?network ?security docs] will execute any commands in a
+    new layer on top of the current image and commit the results. The resulting
+    committed image will be used for the next step in the Dockerfile. The string
+    result of formatting [arg] will be passed as a [/bin/sh -c] invocation.
+
+    @param mounts A list of filesystem mounts that the build can access. Requires
+      {!val:buildkit_syntax} 1.2.
+
+    @param network Control which networking environment the command is run in.
+      Requires {!val:buildkit_syntax} 1.1.  Requires BuildKit
+      {{!val:parser_directive}syntax} 1.1.
+
+    @param security Control which security mode the command is run in.  Requires
+      BuildKit {{!val:parser_directive}syntax} 1-labs. *)
+
 val mount_bind :
   target:string ->
   ?source:string ->

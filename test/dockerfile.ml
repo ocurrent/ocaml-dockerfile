@@ -108,6 +108,90 @@ RUN script
   Alcotest.(check' string) ~msg:"complete" ~expected ~actual;
   ()
 
+let test_issue_193 () =
+  let open Dockerfile in
+  let actual =
+    buildkit_syntax @@ from "debian"
+    @@ run_heredoc
+         [
+           ( heredoc ~word:"EOT"
+               {|  set -ex
+  apt-get update
+  apt-get install -y vim|},
+             Some "bash" );
+         ]
+    |> string_of_t
+  and expected =
+    {|# syntax=docker/dockerfile:1
+
+FROM debian
+RUN <<EOT bash
+  set -ex
+  apt-get update
+  apt-get install -y vim
+EOT
+|}
+  in
+  Alcotest.(check' string)
+    ~msg:"RUN heredocs multi-line script" ~expected ~actual;
+  let actual =
+    buildkit_syntax @@ from "debian"
+    @@ run_heredoc [ (heredoc ~word:"EOT" {|  mkdir -p foo/bar|}, None) ]
+    |> string_of_t
+  and expected =
+    {|# syntax=docker/dockerfile:1
+
+FROM debian
+RUN <<EOT
+  mkdir -p foo/bar
+EOT
+|}
+  in
+  Alcotest.(check' string) ~msg:"RUN heredocs default shell" ~expected ~actual;
+  let actual =
+    buildkit_syntax @@ from "python:3.6"
+    @@ run_heredoc
+         [
+           ( heredoc ~word:"EOT" {|#!/usr/bin/env python
+print("hello world")|},
+             None );
+         ]
+    |> string_of_t
+  and expected =
+    {|# syntax=docker/dockerfile:1
+
+FROM python:3.6
+RUN <<EOT
+#!/usr/bin/env python
+print("hello world")
+EOT
+|}
+  in
+  Alcotest.(check' string) ~msg:"RUN heredocs shebang header" ~expected ~actual;
+  let actual =
+    buildkit_syntax @@ from "alpine"
+    @@ run_heredoc
+         [
+           (heredoc ~word:"FILE1" "I am\nfirst", Some "cat > file1");
+           (heredoc ~word:"FILE2" "I am\nsecond", Some "cat > file2");
+         ]
+    |> string_of_t
+  and expected =
+    {|# syntax=docker/dockerfile:1
+
+FROM alpine
+RUN <<FILE1 cat > file1 && <<FILE2 cat > file2
+I am
+first
+FILE1
+I am
+second
+FILE2
+|}
+  in
+  Alcotest.(check' string) ~msg:"RUN multiple heredocs" ~expected ~actual;
+  ()
+
 let () =
   Alcotest.(
     run "test"
@@ -118,5 +202,6 @@ let () =
               test_string_of_t_formatting_simple_image;
             test_case "string_of_t" `Quick
               test_string_of_t_formatting_multiple_images;
+            test_case "Format RUN heredocs" `Quick test_issue_193;
           ] );
       ])

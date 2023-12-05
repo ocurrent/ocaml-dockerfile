@@ -134,6 +134,11 @@ type line =
   | `From of from
   | `Maintainer of string
   | `Run of mount list * network option * security option * shell_or_exec
+  | `Run_heredoc of
+    mount list
+    * network option
+    * security option
+    * (heredoc * string option) list
   | `Cmd of shell_or_exec
   | `Expose of int list
   | `Arg of string * string option
@@ -321,7 +326,7 @@ let string_of_mount { typ } =
         @ optional_int_octal "mode" mode
         @ optional_int "uid" uid @ optional_int "gid" gid)
 
-let string_of_run ~escape mounts network security c =
+let string_of_run' ~escape mounts network security =
   let mounts =
     mounts |> List.map string_of_mount
     |> List.map (escape_string ~char_to_escape:' ' ~escape)
@@ -336,8 +341,28 @@ let string_of_run ~escape mounts network security c =
       (function `Insecure -> "insecure" | `Sandbox -> "sandbox")
       security
   in
+  mounts @ network @ security
+
+let string_of_run ~escape mounts network security c =
+  let params = string_of_run' ~escape mounts network security in
   let run = string_of_shell_or_exec ~escape c in
-  String.concat " " (mounts @ network @ security @ [ run ])
+  String.concat " " (params @ [ run ])
+
+let string_of_run_heredoc ~escape mounts network security c =
+  let params = string_of_run' ~escape mounts network security in
+  let escape_cmd = function
+    | Some cmd -> " " ^ escape_string ~char_to_escape:'\n' ~escape cmd
+    | None -> ""
+  in
+  let cmds, docs =
+    List.fold_left
+      (fun (cmds, docs) (t, cmd) ->
+        let cmd = escape_cmd cmd in
+        ( cmds @ [ sprintf "<<%s%s%s" (if t.strip then "-" else "") t.word cmd ],
+          sprintf "%s\n%s\n%s" docs t.here_document t.delimiter ))
+      ([], "") c
+  in
+  String.concat " " (params @ [ String.concat " && " cmds ]) ^ docs
 
 let rec string_of_line ~escape (t : line) =
   match t with
@@ -358,6 +383,8 @@ let rec string_of_line ~escape (t : line) =
   | `Maintainer m -> cmd "MAINTAINER" m
   | `Run (mounts, network, security, c) ->
       cmd "RUN" (string_of_run ~escape mounts network security c)
+  | `Run_heredoc (mounts, network, security, c) ->
+      cmd "RUN" (string_of_run_heredoc ~escape mounts network security c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
   | `Arg a -> cmd "ARG" (string_of_arg ~escape a)
@@ -423,6 +450,9 @@ let run ?(mounts = []) ?network ?security fmt =
 
 let run_exec ?(mounts = []) ?network ?security cmds : t =
   [ `Run (mounts, network, security, `Exec cmds) ]
+
+let run_heredoc ?(mounts = []) ?network ?security docs : t =
+  [ `Run_heredoc (mounts, network, security, docs) ]
 
 let cmd fmt = ksprintf (fun b -> [ `Cmd (`Shell b) ]) fmt
 let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
