@@ -2,7 +2,7 @@ dockerfile —  Dockerfile eDSL and distribution support
 -----------------------------------------------------
 %%VERSION%%
 
-[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https://ci.ocamllabs.io/badge/ocurrent/ocaml-dockerfile/master&logo=ocaml)](https://ci.ocamllabs.io/github/ocurrent/ocaml-dockerfile)
+[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https://ocaml.ci.dev/badge/ocurrent/ocaml-dockerfile/master&logo=ocaml)](https://ocaml.ci.dev/github/ocurrent/ocaml-dockerfile)
 
 [Docker](https://docker.com) is a container manager that can build images
 automatically by reading the instructions from a `Dockerfile`. A Dockerfile is
