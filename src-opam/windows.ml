@@ -249,7 +249,8 @@ module Cygwin = struct
     env [ ("CYGWIN", "nodosfilewarning winsymlinks:native") ]
     @@ prepend_path (List.map (( ^ ) cyg.root) [ {|\bin|} ])
 
-  let install_cygwin ?(cyg = default) ?(msvs_tools = false) ?(aslr_off = false) ?(extra = []) () =
+  let install_cygwin ?(cyg = default) ?(msvs_tools = false) ?(aslr_off = false)
+      ?(extra = []) () =
     setup_env ~cyg
     @@ add
          ~src:[ "https://www.cygwin.com/setup-x86_64.exe" ]
