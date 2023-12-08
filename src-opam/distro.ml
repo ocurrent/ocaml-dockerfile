@@ -631,7 +631,7 @@ let win10_latest_image = `V21H2
 
 let resolve_alias (d : t) : distro =
   match d with
-  | `Alpine `Latest -> `Alpine `V3_18
+  | `Alpine `Latest -> `Alpine `V3_19
   | `CentOS `Latest -> `CentOS `V7
   | `Debian `Stable -> `Debian `V12
   | `Fedora `Latest -> `Fedora `V38
