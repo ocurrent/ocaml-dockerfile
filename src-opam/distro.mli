@@ -131,7 +131,8 @@ type distro =
     | `V35
     | `V36
     | `V37
-    | `V38 ]
+    | `V38
+    | `V39 ]
   | `OracleLinux of [ `V7 | `V8 | `V9 ]
   | `OpenSUSE of
     [ `V42_1
@@ -213,6 +214,7 @@ type t =
     | `V36
     | `V37
     | `V38
+    | `V39
     | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `V9 | `Latest ]
   | `OpenSUSE of

@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add Fedora 39. (@MisterDA #200)
 - Add Alpine 3.19, deprecate Alpine 3.18. (@MisterDA #197)
 - Support formatting RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
 - Turned off address space layout randomization on Windows 1809. (@mtelvers #196)
