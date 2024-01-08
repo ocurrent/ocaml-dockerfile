@@ -855,7 +855,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Alpine `V3_17 -> Some "4.14.0"
   | `Alpine `V3_18 -> Some "4.14.1"
   | `Alpine `V3_19 -> Some "4.14.1"
-  | `Archlinux `Latest -> Some "4.11.1"
+  | `Archlinux `Latest -> Some "5.1.0"
   | `Fedora `V21 -> Some "4.01.0"
   | `Fedora `V22 -> Some "4.02.0"
   | `Fedora `V23 -> Some "4.02.2"
