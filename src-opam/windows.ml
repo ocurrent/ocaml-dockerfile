@@ -325,13 +325,6 @@ module Cygwin = struct
 end
 
 module Winget = struct
-  let is_supported version =
-    not
-      (List.mem version
-         [
-           `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1803;
-         ])
-
   let footer path =
     run {|mkdir "C:\Program Files\winget-cli"|}
     @@ run
