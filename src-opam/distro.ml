@@ -613,6 +613,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OracleLinux `V9 -> Some "4.11.1"
   | `Cygwin _ -> None
   | `Windows _ -> None
+  | `WindowsServer _ -> None
   | `Debian (`Testing | `Unstable) -> assert false
 
 (* The Docker tag for this distro *)
@@ -712,10 +713,15 @@ let tag_of_distro (d : t) =
   | `Cygwin `Ltsc2016 -> "cygwin-2016"
   | `Cygwin `Ltsc2019 -> "cygwin-2019"
   | `Cygwin `Ltsc2022 -> "cygwin-2022"
+  | `Cygwin `Latest -> "cygwin-2022"
   | `Windows (`Mingw, `Ltsc2019) -> "windows-mingw-ltsc2019"
+  | `Windows (`Mingw, `Latest) -> "windows-mingw-ltsc2019"
   | `Windows (`Msvc, `Ltsc2019) -> "windows-msvc-ltsc2019"
+  | `Windows (`Msvc, `Latest) -> "windows-msvc-ltsc2019"
   | `WindowsServer (`Mingw, `Ltsc2022) -> "windows-server-mingw-ltsc2022"
+  | `WindowsServer (`Mingw, `Latest) -> "windows-server-mingw-ltsc2022"
   | `WindowsServer (`Msvc, `Ltsc2022) -> "windows-server-msvc-ltsc2022"
+  | `WindowsServer (`Msvc, `Latest) -> "windows-server-msvc-ltsc2022"
 
 let distro_of_tag x : t option =
   match x with

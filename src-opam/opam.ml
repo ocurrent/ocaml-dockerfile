@@ -434,12 +434,16 @@ let install_winget distro =
     @@ Windows.Winget.setup ~from:"winget-builder" ()
     @@ Windows.Winget.dev_packages ~distro () )
 
+let aslr_state = function
+  | `Windows _ -> true
+  | `WindowsServer _ -> false
+  | _ -> assert false
+
 (* Native Windows with mingw-w64 and WinGet. *)
 let windows_mingw_opam2 ?(labels = []) ?arch ~opam_hashes (distro:D.t) () =
   let opam_master_hash, opam_branches =
     create_opam_branches_windows opam_hashes
   in
-  let aslr_off = match distro with `Windows _ -> true | `WindowsServer _ -> false in
   let winget_image, winget_setup =
     install_winget distro
   in
@@ -453,8 +457,8 @@ let windows_mingw_opam2 ?(labels = []) ?arch ~opam_hashes (distro:D.t) () =
     in
     Windows.header ~alias:"opam-builder" ~distro
     @@ Windows.sanitize_reg_path ()
-    @@ Windows.Cygwin.install_cygwin ~aslr_off
-         ~extra:packages ()
+    @@ Windows.Cygwin.install_cygwin
+         ~aslr_off:(aslr_state distro) ~extra:packages ()
     @@ install_opams_windows opam_master_hash opam_branches
   in
   (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
@@ -462,7 +466,8 @@ let windows_mingw_opam2 ?(labels = []) ?arch ~opam_hashes (distro:D.t) () =
   let ocaml_for_windows =
     let packages, setup = Windows.Cygwin.install_ocaml_for_windows () in
     let packages = Windows.Cygwin.mingw_packages @ packages in
-    Windows.Cygwin.install_cygwin ~aslr_off ~extra:packages ()
+    Windows.Cygwin.install_cygwin
+         ~aslr_off:(aslr_state distro) ~extra:packages ()
     @@ setup
   in
   parser_directive (`Escape '`')
@@ -481,7 +486,6 @@ let windows_msvc_opam2 ?(labels = []) ~opam_hashes (distro:D.t) () =
   let opam_master_hash, opam_branches =
     create_opam_branches_windows opam_hashes
   in
-  let aslr_off = match distro with `Windows _ -> true | `WindowsServer _ -> false in
   let winget_image, winget_setup =
     install_winget distro
   in
@@ -499,7 +503,7 @@ let windows_msvc_opam2 ?(labels = []) ~opam_hashes (distro:D.t) () =
     @@ Windows.sanitize_reg_path ()
     @@ vs_build_tools
     @@ Windows.Cygwin.install_cygwin ~msvs_tools:true
-         ~aslr_off ~extra:packages ()
+         ~aslr_off:(aslr_state distro) ~extra:packages ()
   in
   let opams_image =
     Dockerfile.from ~alias:"opam-builder" "cygwin-msvc"
