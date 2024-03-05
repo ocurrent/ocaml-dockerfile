@@ -49,8 +49,6 @@ type opam_hashes = {
 }
 
 val gen_opam2_distro :
-  ?win10_revision:Distro.win10_lcu ->
-  ?winget:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
