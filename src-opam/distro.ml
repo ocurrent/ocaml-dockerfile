@@ -318,10 +318,15 @@ let distros : t list =
     `Cygwin `Ltsc2016;
     `Cygwin `Ltsc2019;
     `Cygwin `Ltsc2022;
+    `Cygwin `Latest;
     `Windows (`Mingw, `Ltsc2019);
+    `Windows (`Mingw, `Latest);
     `Windows (`Msvc, `Ltsc2019);
+    `Windows (`Msvc, `Latest);
     `WindowsServer (`Mingw, `Ltsc2022);
+    `WindowsServer (`Mingw, `Latest);
     `WindowsServer (`Msvc, `Ltsc2022);
+    `WindowsServer (`Msvc, `Latest);
   ]
 
 let resolve_alias (d : t) : distro =
@@ -687,15 +692,15 @@ let tag_of_distro (d : t) =
   | `Cygwin `Ltsc2016 -> "cygwin-2016"
   | `Cygwin `Ltsc2019 -> "cygwin-2019"
   | `Cygwin `Ltsc2022 -> "cygwin-2022"
-  | `Cygwin `Latest -> "cygwin-2022"
+  | `Cygwin `Latest -> "cygwin"
   | `Windows (`Mingw, `Ltsc2019) -> "windows-mingw-ltsc2019"
-  | `Windows (`Mingw, `Latest) -> "windows-mingw-ltsc2019"
+  | `Windows (`Mingw, `Latest) -> "windows-mingw"
   | `Windows (`Msvc, `Ltsc2019) -> "windows-msvc-ltsc2019"
-  | `Windows (`Msvc, `Latest) -> "windows-msvc-ltsc2019"
+  | `Windows (`Msvc, `Latest) -> "windows-msvc"
   | `WindowsServer (`Mingw, `Ltsc2022) -> "windows-server-mingw-ltsc2022"
-  | `WindowsServer (`Mingw, `Latest) -> "windows-server-mingw-ltsc2022"
+  | `WindowsServer (`Mingw, `Latest) -> "windows-server-mingw"
   | `WindowsServer (`Msvc, `Ltsc2022) -> "windows-server-msvc-ltsc2022"
-  | `WindowsServer (`Msvc, `Latest) -> "windows-server-msvc-ltsc2022"
+  | `WindowsServer (`Msvc, `Latest) -> "windows-server-msvc"
 
 let distro_of_tag x : t option =
   match x with
@@ -794,13 +799,13 @@ let distro_of_tag x : t option =
   | "cygwin-ltsc2022" -> Some (`Cygwin `Ltsc2022)
   | "cygwin" -> Some (`Cygwin `Latest)
   | "windows-mingw-ltsc2019" -> Some (`Windows (`Mingw, `Ltsc2019))
-  | "windows-mingw-latest" -> Some (`Windows (`Mingw, `Latest))
+  | "windows-mingw" -> Some (`Windows (`Mingw, `Latest))
   | "windows-msvc-ltsc2019" -> Some (`Windows (`Msvc, `Ltsc2019))
-  | "windows-msvc-latest" -> Some (`Windows (`Msvc, `Latest))
+  | "windows-msvc" -> Some (`Windows (`Msvc, `Latest))
   | "windows-server-mingw-ltsc2022" -> Some (`WindowsServer (`Mingw, `Ltsc2022))
-  | "windows-server-mingw-latest" -> Some (`WindowsServer (`Mingw, `Latest))
+  | "windows-server-mingw" -> Some (`WindowsServer (`Mingw, `Latest))
   | "windows-server-msvc-ltsc2022" -> Some (`WindowsServer (`Msvc, `Ltsc2022))
-  | "windows-server-msvc-latest" -> Some (`WindowsServer (`Msvc, `Latest))
+  | "windows-server-msvc" -> Some (`WindowsServer (`Msvc, `Latest))
   | _ -> None
 
 let human_readable_string_of_distro (d : t) =
