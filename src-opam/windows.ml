@@ -102,10 +102,10 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
        vs_version (pp "add" components)
        (pp "remove" excluded_components)
 
-let header ~alias ~distro ~override_tag =
+let header ?alias ~override_tag distro =
   let img, tag = Distro.base_distro_tag distro in
   let tag = Option.value ~default:tag override_tag in
-  from ~alias ~tag img @@ user "ContainerAdministrator"
+  from ?alias ~tag img @@ user "ContainerAdministrator"
 
 let sanitize_reg_path () =
   run
