@@ -76,10 +76,7 @@ val remove_system_attribute : ?recurse:bool -> string -> t
 (** Remove the system attribute on a path. Might be useful to copy
     data across images when building Docker images. *)
 
-val header :
-  alias:string ->
-  distro:Distro.t ->
-  t
+val header : alias:string -> distro:Distro.t -> override_tag:string option -> t
 (** A Dockerfile header for multi-staged builds. *)
 
 (** Rules for Cygwin-based installation. *)

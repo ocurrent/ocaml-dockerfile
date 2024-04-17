@@ -427,8 +427,8 @@ let pacman_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
   @@ Linux.Pacman.add_user ~uid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-let install_winget distro =
-  ( Windows.header ~alias:"winget-builder" ~distro
+let install_winget distro override_tag =
+  ( Windows.header ~alias:"winget-builder" ~distro ~override_tag
     @@ Windows.Winget.install_from_release (),
     Windows.install_vc_redist ()
     @@ Windows.Winget.setup ~from:"winget-builder" ()
@@ -440,11 +440,12 @@ let aslr_state = function
   | _ -> assert false
 
 (* Native Windows with mingw-w64 and WinGet. *)
-let windows_mingw_opam2 ?(labels = []) ?arch ~opam_hashes (distro : D.t) () =
+let windows_mingw_opam2 ?(labels = []) ?arch ~override_tag ~opam_hashes
+    (distro : D.t) () =
   let opam_master_hash, opam_branches =
     create_opam_branches_windows opam_hashes
   in
-  let winget_image, winget_setup = install_winget distro in
+  let winget_image, winget_setup = install_winget distro override_tag in
   let opams_image =
     let packages =
       (* dra27: we only need g++ in the "builder" image so that
@@ -453,7 +454,7 @@ let windows_mingw_opam2 ?(labels = []) ?arch ~opam_hashes (distro : D.t) () =
       "mingw64-x86_64-gcc-g++" :: "mingw64-i686-gcc-g++"
       :: Windows.Cygwin.mingw_packages
     in
-    Windows.header ~alias:"opam-builder" ~distro
+    Windows.header ~alias:"opam-builder" ~distro ~override_tag
     @@ Windows.sanitize_reg_path ()
     @@ Windows.Cygwin.install_cygwin ~aslr_off:(aslr_state distro)
          ~extra:packages ()
@@ -479,11 +480,12 @@ let windows_mingw_opam2 ?(labels = []) ?arch ~opam_hashes (distro : D.t) () =
   @@ Windows.Cygwin.setup () @@ Windows.Cygwin.Git.init ()
 
 (* Native Windows with MSVC and WinGet. *)
-let windows_msvc_opam2 ?(labels = []) ~opam_hashes (distro : D.t) () =
+let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
+    () =
   let opam_master_hash, opam_branches =
     create_opam_branches_windows opam_hashes
   in
-  let winget_image, winget_setup = install_winget distro in
+  let winget_image, winget_setup = install_winget distro override_tag in
   let cygwin_msvc_image =
     let packages, vs_build_tools =
       ( Windows.Cygwin.msvc_packages,
@@ -494,7 +496,7 @@ let windows_msvc_opam2 ?(labels = []) ~opam_hashes (distro : D.t) () =
             "Microsoft.VisualStudio.Component.Windows10SDK.18362";
           ] )
     in
-    Windows.header ~alias:"cygwin-msvc" ~distro
+    Windows.header ~alias:"cygwin-msvc" ~distro ~override_tag
     @@ Windows.sanitize_reg_path ()
     @@ vs_build_tools
     @@ Windows.Cygwin.install_cygwin ~msvs_tools:true
@@ -520,7 +522,8 @@ let windows_msvc_opam2 ?(labels = []) ~opam_hashes (distro : D.t) () =
   @@ copy_opams_windows opam_branches
   @@ Windows.Cygwin.setup () @@ Windows.Cygwin.Git.init ()
 
-let gen_opam2_distro ?(clone_opam_repo = true) ?arch ?labels ~opam_hashes d =
+let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
+    ~opam_hashes d =
   let fn =
     match D.package_manager d with
     | `Apk -> apk_opam2 ?labels ?arch ~opam_hashes d ()
@@ -541,9 +544,9 @@ let gen_opam2_distro ?(clone_opam_repo = true) ?arch ?labels ~opam_hashes d =
     | `Windows -> (
         match d with
         | `WindowsServer (`Mingw, _) | `Windows (`Mingw, _) ->
-            windows_mingw_opam2 ?labels ?arch ~opam_hashes d ()
+            windows_mingw_opam2 ?labels ?arch ~override_tag ~opam_hashes d ()
         | `WindowsServer (`Msvc, _) | `Windows (`Msvc, _) ->
-            windows_msvc_opam2 ?labels ~opam_hashes d ()
+            windows_msvc_opam2 ?labels ~override_tag ~opam_hashes d ()
         | _ -> assert false)
     | `Cygwin ->
         failwith

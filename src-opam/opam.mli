@@ -49,6 +49,7 @@ type opam_hashes = {
 }
 
 val gen_opam2_distro :
+  ?override_tag:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
