@@ -709,7 +709,8 @@ let distro_status (d : t) : status =
         `Deprecated
     | `OpenSUSE `V15_5 -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
-    | `Ubuntu (`V20_04 | `V22_04 | `V23_04 | `V23_10 | `V24_04) -> `Active `Tier2
+    | `Ubuntu (`V20_04 | `V22_04 | `V23_04 | `V23_10 | `V24_04) ->
+        `Active `Tier2
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04
