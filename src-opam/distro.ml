@@ -520,6 +520,8 @@ let distros : t list =
     `Fedora `V36;
     `Fedora `V37;
     `Fedora `V38;
+    `Fedora `V39;
+    `Fedora `V40;
     `Fedora `Latest;
     `OracleLinux `V7;
     `OracleLinux `V8;
@@ -693,9 +695,9 @@ let distro_status (d : t) : status =
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 ) ->
+        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 ) ->
         `Deprecated
-    | `Fedora (`V37 | `V38 | `V39 | `V40) -> `Active `Tier2
+    | `Fedora (`V38 | `V39 | `V40) -> `Active `Tier2
     | `OracleLinux `V7 -> `Deprecated
     | `OracleLinux (`V8 | `V9) -> `Active `Tier3
     | `OpenSUSE
@@ -877,7 +879,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Fedora `V37 -> Some "4.13.1"
   | `Fedora `V38 -> Some "4.14.0"
   | `Fedora `V39 -> Some "5.0.0"
-  | `Fedora `V40 -> Some "5.0.0"
+  | `Fedora `V40 -> Some "5.1.1"
   | `CentOS `V6 -> Some "3.11.2"
   | `CentOS `V7 -> Some "4.01.0"
   | `CentOS `V8 -> Some "4.07.0"
@@ -1124,6 +1126,10 @@ let distro_of_tag x : t option =
   | "fedora-34" -> Some (`Fedora `V34)
   | "fedora-35" -> Some (`Fedora `V35)
   | "fedora-36" -> Some (`Fedora `V36)
+  | "fedora-37" -> Some (`Fedora `V37)
+  | "fedora-38" -> Some (`Fedora `V38)
+  | "fedora-39" -> Some (`Fedora `V39)
+  | "fedora-40" -> Some (`Fedora `V40)
   | "fedora" -> Some (`Fedora `Latest)
   | "oraclelinux-7" -> Some (`OracleLinux `V7)
   | "oraclelinux-8" -> Some (`OracleLinux `V8)
