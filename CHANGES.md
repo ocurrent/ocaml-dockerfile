@@ -1,7 +1,7 @@
 unreleased
 ----------
 
-- Add Fedora 40. (@mtelvers)
+- Add Fedora 40, deprecate Fedora 37. (@mtelvers, #203)
 - Add Fedora 39. (@MisterDA #200)
 - Add Alpine 3.19, deprecate Alpine 3.18. (@MisterDA #197, #199)
 - Support formatting RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
