@@ -1006,8 +1006,8 @@ let bubblewrap_version (t : t) =
   | `Debian `V10 -> Some (0, 3, 1)
   | `Debian `V11 -> Some (0, 4, 1)
   | `Debian `V12 -> Some (0, 8, 0)
-  | `Debian `Testing -> Some (0, 8, 0)
-  | `Debian `Unstable -> Some (0, 8, 0)
+  | `Debian `Testing -> Some (0, 10, 0)
+  | `Debian `Unstable -> Some (0, 10, 0)
   | `CentOS `V6 -> None
   | `CentOS `V7 -> None
   | `CentOS `V8 -> Some (0, 4, 0)
@@ -1051,8 +1051,8 @@ let bubblewrap_version (t : t) =
   | `Alpine `V3_17 -> Some (0, 7, 0)
   | `Alpine `V3_18 -> Some (0, 8, 0)
   | `Alpine `V3_19 -> Some (0, 8, 0)
-  | `Alpine `V3_20 -> Some (0, 9, 0)
-  | `Archlinux `Latest -> Some (0, 8, 0)
+  | `Alpine `V3_20 -> Some (0, 10, 0)
+  | `Archlinux `Latest -> Some (0, 10, 0)
   | `OpenSUSE `V42_1 -> None (* Not actually checked *)
   | `OpenSUSE `V42_2 -> None (* Not actually checked *)
   | `OpenSUSE `V42_3 -> None (* Not actually checked *)
@@ -1063,7 +1063,7 @@ let bubblewrap_version (t : t) =
   | `OpenSUSE `V15_4 -> Some (0, 4, 1)
   | `OpenSUSE `V15_5 -> Some (0, 7, 0)
   | `OpenSUSE `V15_6 -> Some (0, 8, 0)
-  | `OpenSUSE `Tumbleweed -> Some (0, 8, 0)
+  | `OpenSUSE `Tumbleweed -> Some (0, 10, 0)
   | `Cygwin _ -> None
   | `Windows _ -> None
   | `WindowsServer _ -> None

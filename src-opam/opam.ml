@@ -74,7 +74,7 @@ let install_opam_from_source_windows ?cyg ?prefix
        branch
 
 let bubblewrap_minimum = (0, 4, 1)
-let bubblewrap_latest = (0, 8, 0)
+let bubblewrap_latest = (0, 10, 0)
 
 let maybe_build_bubblewrap_from_source ?(prefix = "/usr/local") distro =
   match D.bubblewrap_version distro with
@@ -90,8 +90,8 @@ let maybe_build_bubblewrap_from_source ?(prefix = "/usr/local") distro =
       in
       run "curl -fOL %s" url @@ run "tar xf %s" file
       @@ run
-           "cd bubblewrap-%s && ./configure --prefix=%s && make && sudo make \
-            install"
+           "cd bubblewrap-%s && meson --prefix %s --buildtype=plain _build &&
+            meson compile -C _build && sudo meson install -C _build"
            rel prefix
       @@ run "rm -rf %s bubblewrap-%s" file rel
 
