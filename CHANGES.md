@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add Ubuntu 24.04. (@mtelvers, #205)
 - Add Fedora 40, deprecate Fedora 37. (@mtelvers, #203)
 - Add Fedora 39. (@MisterDA #200)
 - Add Alpine 3.19, deprecate Alpine 3.18. (@MisterDA #197, #199)

@@ -346,7 +346,8 @@ type distro =
     | `V22_04
     | `V22_10
     | `V23_04
-    | `V23_10 ]
+    | `V23_10
+    | `V24_04 ]
   | `Cygwin of win10_release
   | `Windows of [ `Mingw | `Msvc ] * win10_release ]
 [@@deriving sexp]
@@ -431,6 +432,7 @@ type t =
     | `V22_10
     | `V23_04
     | `V23_10
+    | `V24_04
     | `Latest
     | `LTS ]
   | `Cygwin of win_all
@@ -558,6 +560,7 @@ let distros : t list =
     `Ubuntu `V22_10;
     `Ubuntu `V23_04;
     `Ubuntu `V23_10;
+    `Ubuntu `V24_04;
     `Ubuntu `Latest;
     `Ubuntu `LTS;
   ]
@@ -643,8 +646,8 @@ let resolve_alias (d : t) : distro =
   | `Fedora `Latest -> `Fedora `V40
   | `OracleLinux `Latest -> `OracleLinux `V9
   | `OpenSUSE `Latest -> `OpenSUSE `V15_5
-  | `Ubuntu `Latest -> `Ubuntu `V23_10
-  | `Ubuntu `LTS -> `Ubuntu `V22_04
+  | `Ubuntu `Latest -> `Ubuntu `V24_04
+  | `Ubuntu `LTS -> `Ubuntu `V24_04
   | `Cygwin (#win10_ltsc as v) -> `Cygwin (resolve_ltsc v)
   | `Windows (cc, (#win10_ltsc as v)) -> `Windows (cc, resolve_ltsc v)
   | ( `Alpine
@@ -664,7 +667,7 @@ let resolve_alias (d : t) : distro =
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
-        | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04 | `V23_10 )
+        | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04 | `V23_10 | `V24_04 )
     | `Cygwin
         ( `V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809 | `V1903
         | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2 )
@@ -706,7 +709,8 @@ let distro_status (d : t) : status =
         `Deprecated
     | `OpenSUSE `V15_5 -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
-    | `Ubuntu (`V20_04 | `V22_04 | `V23_04 | `V23_10) -> `Active `Tier2
+    | `Ubuntu (`V20_04 | `V22_04 | `V23_04 | `V23_10 | `V24_04) ->
+        `Active `Tier2
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04
@@ -762,7 +766,7 @@ let distro_arches ov (d : t) =
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Ubuntu
         ( `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04
-        | `V23_10 ),
+        | `V23_10 | `V24_04 ),
       ov )
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
@@ -842,6 +846,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Ubuntu `V22_10 -> Some "4.13.1"
   | `Ubuntu `V23_04 -> Some "4.13.1"
   | `Ubuntu `V23_10 -> Some "4.13.1"
+  | `Ubuntu `V24_04 -> Some "4.14.1"
   | `Alpine `V3_3 -> Some "4.02.3"
   | `Alpine `V3_4 -> Some "4.02.3"
   | `Alpine `V3_5 -> Some "4.04.0"
@@ -992,6 +997,7 @@ let tag_of_distro (d : t) =
   | `Ubuntu `V22_10 -> "ubuntu-22.10"
   | `Ubuntu `V23_04 -> "ubuntu-23.04"
   | `Ubuntu `V23_10 -> "ubuntu-23.10"
+  | `Ubuntu `V24_04 -> "ubuntu-24.04"
   | `Ubuntu `Latest -> "ubuntu"
   | `Ubuntu `LTS -> "ubuntu-lts"
   | `Debian `Stable -> "debian-stable"
@@ -1096,6 +1102,7 @@ let distro_of_tag x : t option =
   | "ubuntu-22.10" -> Some (`Ubuntu `V22_10)
   | "ubuntu-23.04" -> Some (`Ubuntu `V23_04)
   | "ubuntu-23.10" -> Some (`Ubuntu `V23_10)
+  | "ubuntu-24.04" -> Some (`Ubuntu `V24_04)
   | "ubuntu" -> Some (`Ubuntu `Latest)
   | "ubuntu-lts" -> Some (`Ubuntu `LTS)
   | "debian-stable" -> Some (`Debian `Stable)
@@ -1197,6 +1204,7 @@ let human_readable_string_of_distro (d : t) =
     | `Ubuntu `V22_10 -> "Ubuntu 22.10"
     | `Ubuntu `V23_04 -> "Ubuntu 23.04"
     | `Ubuntu `V23_10 -> "Ubuntu 23.10"
+    | `Ubuntu `V24_04 -> "Ubuntu 24.04"
     | `Debian `Unstable -> "Debian Unstable"
     | `Debian `Testing -> "Debian Testing"
     | `Debian `V12 -> "Debian 12 (Bookworm)"
@@ -1336,6 +1344,7 @@ let bubblewrap_version (t : t) =
   | `Ubuntu `V22_10 -> Some (0, 6, 2)
   | `Ubuntu `V23_04 -> Some (0, 8, 0)
   | `Ubuntu `V23_10 -> Some (0, 8, 0)
+  | `Ubuntu `V24_04 -> Some (0, 9, 0)
   | `Debian `V7 -> None (* Not actually checked *)
   | `Debian `V8 -> None (* Not actually checked *)
   | `Debian `V9 -> Some (0, 1, 7)
@@ -1477,6 +1486,7 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
         | `V22_10 -> "kinetic"
         | `V23_04 -> "lunar"
         | `V23_10 -> "mantic"
+        | `V24_04 -> "noble"
       in
       match arch with
       | `Riscv64 -> ("riscv64/ubuntu", tag)
