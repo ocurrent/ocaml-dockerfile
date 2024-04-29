@@ -468,18 +468,22 @@ let distro_arches ov (d : t) =
       [ `X86_64; `Aarch64 ]
   (* OCaml for Windows doesn't package OCaml 5.0.
      TODO: remove when upstream opam gains OCaml packages on Windows. *)
-  | `Windows (`Mingw, _), ov when OV.major ov >= 5 -> []
+  | `Windows (`Mingw, _), ov
+  | `WindowsServer (`Mingw, _), ov when OV.major ov >= 5 -> []
   (* OCaml 5 doesn't support MSVC: https://github.com/ocaml/ocaml/pull/11835. *)
-  | `Windows (`Msvc, _), ov when OV.major ov >= 5 -> []
+  | `Windows (`Msvc, _), ov
+  | `WindowsServer (`Msvc, _), ov when OV.major ov >= 5 -> []
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
-  | `Windows (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
+  | `Windows (`Msvc, _), ov
+  | `WindowsServer (`Msvc, _), ov when OV.(compare Releases.v4_06_0 ov) = 1 -> []
   | _ -> [ `X86_64 ]
 
 let distro_supported_on a ov (d : t) = List.mem a (distro_arches ov d)
 
 let distro_active_for arch (d : t) =
   match (arch, d) with
-  | `X86_64, `Windows _ -> true
+  | `X86_64, `Windows _
+  | `X86_64, `WindowsServer _ -> true
   | _ -> distro_supported_on arch OV.Releases.latest d
 
 let active_distros arch =

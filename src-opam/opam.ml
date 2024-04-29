@@ -440,7 +440,7 @@ let aslr_state = function
   | _ -> assert false
 
 (* Native Windows with mingw-w64 and WinGet. *)
-let windows_mingw_opam2 ?(labels = []) ?arch ~override_tag ~opam_hashes
+let windows_mingw_opam2 ?(labels = []) ~override_tag ~opam_hashes
     (distro : D.t) () =
   let opam_master_hash, opam_branches =
     create_opam_branches_windows opam_hashes
@@ -544,7 +544,7 @@ let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
     | `Windows -> (
         match d with
         | `WindowsServer (`Mingw, _) | `Windows (`Mingw, _) ->
-            windows_mingw_opam2 ?labels ?arch ~override_tag ~opam_hashes d ()
+            windows_mingw_opam2 ?labels ~override_tag ~opam_hashes d ()
         | `WindowsServer (`Msvc, _) | `Windows (`Msvc, _) ->
             windows_msvc_opam2 ?labels ~override_tag ~opam_hashes d ()
         | _ -> assert false)
