@@ -20,257 +20,6 @@
 open Astring
 open Sexplib.Conv
 
-type win10_release =
-  [ `V1507
-  | `V1511
-  | `V1607
-  | `V1703
-  | `V1709
-  | `V1803
-  | `V1809
-  | `V1903
-  | `V1909
-  | `V2004
-  | `V20H2
-  | `V21H1
-  | `V21H2 ]
-[@@deriving sexp]
-
-type win10_ltsc = [ `Ltsc2015 | `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
-[@@deriving sexp]
-
-type win10_lcu =
-  [ `LCU
-  | `LCU20231114
-  | `LCU20231010
-  | `LCU20230912
-  | `LCU20230808
-  | `LCU20230711
-  | `LCU20230613
-  | `LCU20230509
-  | `LCU20230411
-  | `LCU20230314
-  | `LCU20230214
-  | `LCU20230110
-  | `LCU20221213
-  | `LCU20221108
-  | `LCU20221011
-  | `LCU20220913
-  | `LCU20220809
-  | `LCU20220712
-  | `LCU20220614
-  | `LCU20220510
-  | `LCU20220412
-  | `LCU20220308
-  | `LCU20220208
-  | `LCU20220111
-  | `LCU20211214
-  | `LCU20211109
-  | `LCU20211012
-  | `LCU20210914
-  | `LCU20210810
-  | `LCU20210713
-  | `LCU20210608 ]
-[@@deriving sexp]
-
-type win_all = [ win10_release | win10_ltsc ] [@@deriving sexp]
-
-let win10_current_lcu = `LCU20231114
-
-type win10_revision = win10_release * win10_lcu option [@@deriving sexp]
-
-let win10_lcus : ('a * int * win10_release list) list =
-  [
-    (`LCU20231114, 5032198, [ `V21H2 ]);
-    (`LCU20231114, 5032189, [ `V21H1 ]);
-    (`LCU20231114, 5032196, [ `V1809 ]);
-    (`LCU20231114, 5032197, [ `V1607 ]);
-    (`LCU20231114, 5032199, [ `V1507 ]);
-    (`LCU20231010, 5031364, [ `V21H2 ]);
-    (`LCU20231010, 5031356, [ `V21H1 ]);
-    (`LCU20231010, 5031361, [ `V1809 ]);
-    (`LCU20231010, 5031362, [ `V1607 ]);
-    (`LCU20231010, 5031377, [ `V1507 ]);
-    (`LCU20230912, 5030216, [ `V21H2 ]);
-    (`LCU20230912, 5030211, [ `V21H1 ]);
-    (`LCU20230912, 5030214, [ `V1809 ]);
-    (`LCU20230912, 5030213, [ `V1607 ]);
-    (`LCU20230912, 5030220, [ `V1507 ]);
-    (`LCU20230808, 5029250, [ `V21H2 ]);
-    (`LCU20230808, 5029244, [ `V21H1 ]);
-    (`LCU20230808, 5029247, [ `V1809 ]);
-    (`LCU20230808, 5029242, [ `V1607 ]);
-    (`LCU20230808, 5029259, [ `V1507 ]);
-    (`LCU20230711, 5028171, [ `V21H2 ]);
-    (`LCU20230711, 5028166, [ `V21H1 ]);
-    (`LCU20230711, 5028168, [ `V1809 ]);
-    (`LCU20230711, 5028169, [ `V1607 ]);
-    (`LCU20230711, 5028186, [ `V1507 ]);
-    (`LCU20230613, 5027225, [ `V21H2 ]);
-    (`LCU20230613, 5027215, [ `V21H1 ]);
-    (`LCU20230613, 5027222, [ `V1809 ]);
-    (`LCU20230613, 5027219, [ `V1607 ]);
-    (`LCU20230613, 5027230, [ `V1507 ]);
-    (`LCU20230509, 5026370, [ `V21H2 ]);
-    (`LCU20230509, 5026361, [ `V21H1 ]);
-    (`LCU20230509, 5026362, [ `V1809 ]);
-    (`LCU20230509, 5026363, [ `V1607 ]);
-    (`LCU20230509, 5026382, [ `V1507 ]);
-    (`LCU20230411, 5025230, [ `V21H2 ]);
-    (`LCU20230411, 5025221, [ `V21H1 ]);
-    (`LCU20230411, 5025229, [ `V1809 ]);
-    (`LCU20230411, 5025228, [ `V1607 ]);
-    (`LCU20230411, 5025234, [ `V1507 ]);
-    (`LCU20230314, 5023705, [ `V21H2 ]);
-    (`LCU20230314, 5023696, [ `V21H1 ]);
-    (`LCU20230314, 5023702, [ `V1809 ]);
-    (`LCU20230314, 5023697, [ `V1607 ]);
-    (`LCU20230314, 5023713, [ `V1507 ]);
-    (`LCU20230214, 5022842, [ `V21H2 ]);
-    (`LCU20230214, 5022834, [ `V21H1 ]);
-    (`LCU20230214, 5022840, [ `V1809 ]);
-    (`LCU20230214, 5022838, [ `V1607 ]);
-    (`LCU20230214, 5022858, [ `V1507 ]);
-    (`LCU20230110, 5022291, [ `V21H2 ]);
-    (`LCU20230110, 5022282, [ `V21H1 ]);
-    (`LCU20230110, 5022286, [ `V1809 ]);
-    (`LCU20230110, 5022289, [ `V1607 ]);
-    (`LCU20230110, 5022297, [ `V1507 ]);
-    (`LCU20221213, 5021249, [ `V21H2 ]);
-    (`LCU20221213, 5021233, [ `V21H1 ]);
-    (`LCU20221213, 5021237, [ `V1809 ]);
-    (`LCU20221213, 5021235, [ `V1607 ]);
-    (`LCU20221213, 5021243, [ `V1507 ]);
-    (`LCU20221108, 5019081, [ `V21H2 ]);
-    (`LCU20221108, 5019959, [ `V21H1 ]);
-    (`LCU20221108, 5019966, [ `V1809 ]);
-    (`LCU20221108, 5019964, [ `V1607 ]);
-    (`LCU20221108, 5019970, [ `V1507 ]);
-    (`LCU20221011, 5018421, [ `V21H2 ]);
-    (`LCU20221011, 5018410, [ `V21H1 ]);
-    (`LCU20221011, 5018419, [ `V1809 ]);
-    (`LCU20221011, 5018411, [ `V1607 ]);
-    (`LCU20221011, 5018425, [ `V1507 ]);
-    (`LCU20220913, 5017316, [ `V21H2 ]);
-    (`LCU20220913, 5017308, [ `V21H1 ]);
-    (`LCU20220913, 5017315, [ `V1809 ]);
-    (`LCU20220913, 5017305, [ `V1607 ]);
-    (`LCU20220913, 5017327, [ `V1507 ]);
-    (`LCU20220809, 5016627, [ `V21H2 ]);
-    (`LCU20220809, 5016616, [ `V20H2; `V21H1 ]);
-    (`LCU20220809, 5016623, [ `V1809 ]);
-    (`LCU20220809, 5016622, [ `V1607 ]);
-    (`LCU20220809, 5016639, [ `V1507 ]);
-    (`LCU20220712, 5015827, [ `V21H2 ]);
-    (`LCU20220712, 5015807, [ `V20H2; `V21H1 ]);
-    (`LCU20220712, 5015811, [ `V1809 ]);
-    (`LCU20220712, 5015808, [ `V1607 ]);
-    (`LCU20220712, 5015832, [ `V1507 ]);
-    (`LCU20220614, 5014678, [ `V21H2 ]);
-    (`LCU20220614, 5014699, [ `V20H2; `V21H1 ]);
-    (`LCU20220614, 5014692, [ `V1809 ]);
-    (`LCU20220614, 5014702, [ `V1607 ]);
-    (`LCU20220614, 5014710, [ `V1507 ]);
-    (`LCU20220510, 5013944, [ `V21H2 ]);
-    (`LCU20220510, 5013942, [ `V20H2; `V21H1 ]);
-    (`LCU20220510, 5013945, [ `V1909 ]);
-    (`LCU20220510, 5013941, [ `V1809 ]);
-    (`LCU20220510, 5013952, [ `V1607 ]);
-    (`LCU20220510, 5013963, [ `V1507 ]);
-    (`LCU20220412, 5012604, [ `V21H2 ]);
-    (`LCU20220412, 5012599, [ `V20H2; `V21H1 ]);
-    (`LCU20220412, 5012591, [ `V1909 ]);
-    (`LCU20220412, 5012647, [ `V1809 ]);
-    (`LCU20220412, 5012596, [ `V1607 ]);
-    (`LCU20220412, 5012653, [ `V1507 ]);
-    (`LCU20220308, 5011497, [ `V21H2 ]);
-    (`LCU20220308, 5011487, [ `V20H2; `V21H1 ]);
-    (`LCU20220308, 5011485, [ `V1909 ]);
-    (`LCU20220308, 5011503, [ `V1809 ]);
-    (`LCU20220308, 5011495, [ `V1607 ]);
-    (`LCU20220308, 5011491, [ `V1507 ]);
-    (`LCU20220208, 5010354, [ `V21H2 ]);
-    (`LCU20220208, 5010342, [ `V20H2; `V21H1 ]);
-    (`LCU20220208, 5010345, [ `V1909 ]);
-    (`LCU20220208, 5010351, [ `V1809 ]);
-    (`LCU20220208, 5010359, [ `V1607 ]);
-    (`LCU20220208, 5010358, [ `V1507 ]);
-    (`LCU20220111, 5009555, [ `V21H2 ]);
-    (`LCU20220111, 5009543, [ `V20H2; `V21H1 ]);
-    (`LCU20220111, 5009545, [ `V1909 ]);
-    (`LCU20220111, 5009557, [ `V1809 ]);
-    (`LCU20220111, 5009546, [ `V1607 ]);
-    (`LCU20220111, 5009585, [ `V1507 ]);
-    (`LCU20211214, 5008223, [ `V21H2 ]);
-    (`LCU20211214, 5008212, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20211214, 5008206, [ `V1909 ]);
-    (`LCU20211214, 5008218, [ `V1809 ]);
-    (`LCU20211214, 5008207, [ `V1607 ]);
-    (`LCU20211214, 5008230, [ `V1507 ]);
-    (`LCU20211109, 5007205, [ `V21H2 ]);
-    (`LCU20211109, 5007186, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20211109, 5007189, [ `V1909 ]);
-    (`LCU20211109, 5007206, [ `V1809 ]);
-    (`LCU20211109, 5007192, [ `V1607 ]);
-    (`LCU20211109, 5007207, [ `V1507 ]);
-    (`LCU20211012, 5006699, [ `V21H2 ]);
-    (`LCU20211012, 5006670, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20211012, 5006667, [ `V1909 ]);
-    (`LCU20211012, 5006672, [ `V1809 ]);
-    (`LCU20211012, 5006669, [ `V1607 ]);
-    (`LCU20211012, 5006675, [ `V1507 ]);
-    (`LCU20210914, 5005575, [ `V21H2 ]);
-    (`LCU20210914, 5005565, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20210914, 5005566, [ `V1909 ]);
-    (`LCU20210914, 5005568, [ `V1809 ]);
-    (`LCU20210914, 5005573, [ `V1607 ]);
-    (`LCU20210914, 5005569, [ `V1507 ]);
-    (`LCU20210810, 5005039, [ `V21H2 ]);
-    (`LCU20210810, 5005033, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20210810, 5005031, [ `V1909 ]);
-    (`LCU20210810, 5005030, [ `V1809 ]);
-    (`LCU20210810, 5005043, [ `V1607 ]);
-    (`LCU20210810, 5005040, [ `V1507 ]);
-    (`LCU20210713, 5004237, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20210713, 5004245, [ `V1909 ]);
-    (`LCU20210713, 5004244, [ `V1809 ]);
-    (`LCU20210713, 5004238, [ `V1607 ]);
-    (`LCU20210713, 5004249, [ `V1507 ]);
-    (`LCU20210608, 5003637, [ `V2004; `V20H2; `V21H1 ]);
-    (`LCU20210608, 5003635, [ `V1909 ]);
-    (`LCU20210608, 5003646, [ `V1809 ]);
-    (`LCU20210608, 5003638, [ `V1607 ]);
-    (`LCU20210608, 5003687, [ `V1507 ]);
-  ]
-
-let win10_lcu_to_kb : (win10_lcu * win10_release, int option) Hashtbl.t =
-  let t = Hashtbl.create 63 in
-  let f (lcu, kb, vs) =
-    let g v =
-      if lcu = win10_current_lcu then Hashtbl.add t (`LCU, v) (Some kb);
-      Hashtbl.add t (lcu, v) (Some kb)
-    in
-    List.iter g vs
-  in
-  List.iter f win10_lcus;
-  t
-
-let win10_kb_to_lcu =
-  let t = Hashtbl.create 63 in
-  let f (lcu, kb, vs) =
-    List.iter (fun v -> Hashtbl.add t (kb, v) (Some lcu)) vs
-  in
-  List.iter f win10_lcus;
-  t
-
-let win10_lcu_kb_number v lcu =
-  try Hashtbl.find win10_lcu_to_kb (lcu, v) with Not_found -> None
-
-let win10_kb_number_to_lcu (v : win10_release) kb =
-  match Hashtbl.find win10_kb_to_lcu (kb, v) with
-  | lcu -> Some (v, lcu)
-  | exception Not_found -> None
-
 type distro =
   [ `Alpine of
     [ `V3_3
@@ -348,8 +97,18 @@ type distro =
     | `V23_04
     | `V23_10
     | `V24_04 ]
-  | `Cygwin of win10_release
-  | `Windows of [ `Mingw | `Msvc ] * win10_release ]
+  | `Cygwin of
+    [ `Ltsc2016
+    | `Ltsc2019
+    | `Ltsc2022 ]
+  | `Windows of
+    [ `Mingw
+    | `Msvc ] *
+    [ `Ltsc2019 ]
+  | `WindowsServer of
+    [ `Mingw
+    | `Msvc ] *
+    [ `Ltsc2022 ] ]
 [@@deriving sexp]
 
 type t =
@@ -435,8 +194,21 @@ type t =
     | `V24_04
     | `Latest
     | `LTS ]
-  | `Cygwin of win_all
-  | `Windows of [ `Mingw | `Msvc ] * win_all ]
+  | `Cygwin of
+    [ `Ltsc2016
+    | `Ltsc2019
+    | `Ltsc2022
+    | `Latest ]
+  | `Windows of
+    [ `Mingw
+    | `Msvc ] *
+    [ `Ltsc2019
+    | `Latest ]
+  | `WindowsServer of
+    [ `Mingw
+    | `Msvc ] *
+    [ `Ltsc2022
+    | `Latest ] ]
 [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -448,6 +220,7 @@ let os_family_of_distro (t : t) : os_family =
       `Linux
   | `Cygwin _ -> `Cygwin
   | `Windows _ -> `Windows
+  | `WindowsServer _ -> `Windows
 
 let os_family_to_string (os : os_family) =
   match os with
@@ -563,80 +336,14 @@ let distros : t list =
     `Ubuntu `V24_04;
     `Ubuntu `Latest;
     `Ubuntu `LTS;
+    `Cygwin `Ltsc2016;
+    `Cygwin `Ltsc2019;
+    `Cygwin `Ltsc2022;
+    `Windows (`Mingw, `Ltsc2019);
+    `Windows (`Msvc, `Ltsc2019);
+    `WindowsServer (`Mingw, `Ltsc2022);
+    `WindowsServer (`Msvc, `Ltsc2022);
   ]
-
-let distros =
-  let win10_releases =
-    [
-      `V1507;
-      `Ltsc2015;
-      `V1511;
-      `V1607;
-      `Ltsc2016;
-      `V1703;
-      `V1709;
-      `V1809;
-      `Ltsc2019;
-      `V1903;
-      `V1909;
-      `V2004;
-      `V20H2;
-      `V21H1;
-      `V21H2;
-      `Ltsc2022;
-    ]
-  in
-  List.fold_left
-    (fun distros version ->
-      `Cygwin version
-      :: `Windows (`Mingw, version)
-      :: `Windows (`Msvc, version)
-      :: distros)
-    distros win10_releases
-
-type win10_release_status = [ `Deprecated | `Active ]
-
-let resolve_ltsc v =
-  match v with
-  | `Ltsc2022 -> `V21H2
-  | `Ltsc2019 -> `V1809
-  | `Ltsc2016 -> `V1607
-  | `Ltsc2015 -> `V1507
-  | #win10_release as v -> v
-
-(* https://en.wikipedia.org/wiki/Windows_10_version_history#Channels *)
-let win10_release_status v : win10_release_status =
-  match resolve_ltsc v with
-  | `V1507 -> `Deprecated
-  | `Ltsc2015 -> `Active
-  | `V1511 -> `Deprecated
-  | `V1607 -> `Deprecated
-  | `Ltsc2016 -> `Active
-  | `V1703 | `V1709 | `V1803 | `V1809 -> `Deprecated
-  | `Ltsc2019 -> `Active
-  | `V1903 | `V1909 -> `Deprecated
-  | `V2004 -> `Deprecated
-  | `V20H2 -> `Deprecated
-  | `V21H1 | `V21H2 | `Ltsc2022 -> `Active
-
-let win10_latest_release = `V21H2
-
-type win10_docker_base_image = [ `Windows | `ServerCore | `NanoServer ]
-
-(* https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/base-image-lifecycle *)
-let win10_docker_status (base : win10_docker_base_image) v : status =
-  match (base, v) with
-  | _, `V21H2 -> `Active `Tier3
-  | _, `V20H2 | _, `V2004 | _, `V1909 | _, `V1903 -> `Deprecated
-  | `ServerCore, `V1809 | `NanoServer, `V1809 | `Windows, `V1809 ->
-      `Active `Tier3
-  | (`ServerCore | `NanoServer), `V1803 | (`ServerCore | `NanoServer), `V1709 ->
-      `Deprecated
-  | `ServerCore, `V1607 -> `Active `Tier3
-  | `NanoServer, `V1607 -> `Deprecated
-  | _ -> `Not_available
-
-let win10_latest_image = `V21H2
 
 let resolve_alias (d : t) : distro =
   match d with
@@ -648,8 +355,9 @@ let resolve_alias (d : t) : distro =
   | `OpenSUSE `Latest -> `OpenSUSE `V15_5
   | `Ubuntu `Latest -> `Ubuntu `V24_04
   | `Ubuntu `LTS -> `Ubuntu `V24_04
-  | `Cygwin (#win10_ltsc as v) -> `Cygwin (resolve_ltsc v)
-  | `Windows (cc, (#win10_ltsc as v)) -> `Windows (cc, resolve_ltsc v)
+  | `Cygwin `Latest -> `Cygwin `Ltsc2022
+  | `Windows (cc, `Latest) -> `Windows (cc, `Ltsc2019)
+  | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2022)
   | ( `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
@@ -669,12 +377,13 @@ let resolve_alias (d : t) : distro =
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
         | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04 | `V23_10 | `V24_04 )
     | `Cygwin
-        ( `V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809 | `V1903
-        | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2 )
+        ( `Ltsc2016 | `Ltsc2019 | `Ltsc2022 )
     | `Windows
         ( _,
-          ( `V1507 | `V1511 | `V1607 | `V1703 | `V1709 | `V1803 | `V1809
-          | `V1903 | `V1909 | `V2004 | `V20H2 | `V21H1 | `V21H2 ) ) ) as d ->
+          ( `Ltsc2019 ) )
+    | `WindowsServer
+        ( _,
+          ( `Ltsc2022 ) )) as d ->
       d
 
 let distro_status (d : t) : status =
@@ -716,8 +425,10 @@ let distro_status (d : t) : status =
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_10 | `V21_04
         | `V21_10 | `V22_10 ) ->
         `Deprecated
-    | `Cygwin v -> win10_docker_status `ServerCore v
-    | `Windows (_, v) -> win10_docker_status `Windows v
+    | `Cygwin ( `Ltsc2016 | `Ltsc2019 ) -> `Deprecated
+    | `Cygwin ( `Ltsc2022 ) -> `Active `Tier3
+    | `Windows (_, `Ltsc2019) -> `Active `Tier3
+    | `WindowsServer (_, `Ltsc2022) -> `Active `Tier3
 
 let latest_distros =
   [
@@ -731,12 +442,11 @@ let latest_distros =
     `Fedora `Latest;
     `Ubuntu `Latest;
     `Ubuntu `LTS;
-    (* Prefer win10_latest_image to win10_latest_release as
-       latest_distro is used by docker-base-images to fetch tag
-       aliases. *)
-    `Cygwin win10_latest_image;
-    `Windows (`Mingw, win10_latest_image);
-    `Windows (`Msvc, win10_latest_image);
+    `Cygwin `Latest;
+    `Windows (`Mingw, `Latest);
+    `Windows (`Msvc, `Latest);
+    `WindowsServer (`Mingw, `Latest);
+    `WindowsServer (`Msvc, `Latest);
   ]
 
 let master_distro = `Debian `Stable
@@ -905,75 +615,6 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Windows _ -> None
   | `Debian (`Testing | `Unstable) -> assert false
 
-let win10_release_to_string = function
-  | `V1507 -> "1507"
-  | `Ltsc2015 -> "ltsc2015"
-  | `V1511 -> "1511"
-  | `V1607 -> "1607"
-  | `Ltsc2016 -> "ltsc2016"
-  | `V1703 -> "1703"
-  | `V1709 -> "1709"
-  | `V1803 -> "1803"
-  | `V1809 -> "1809"
-  | `Ltsc2019 -> "ltsc2019"
-  | `V1903 -> "1903"
-  | `V1909 -> "1909"
-  | `V2004 -> "2004"
-  | `V20H2 -> "20H2"
-  | `V21H1 -> "21H1"
-  | `Ltsc2022 -> "ltsc2022"
-  | `V21H2 -> "21H2"
-
-let win10_release_of_string v : win_all option =
-  let v =
-    match String.cut ~sep:"-KB" v with
-    | Some (v, kb) -> if String.for_all Char.Ascii.is_digit kb then v else ""
-    | None -> v
-  in
-  match v with
-  | "1507" -> Some `V1507
-  | "ltsc2015" -> Some `Ltsc2015
-  | "1511" -> Some `V1511
-  | "1607" -> Some `V1607
-  | "ltsc2016" -> Some `Ltsc2016
-  | "1703" -> Some `V1703
-  | "1709" -> Some `V1709
-  | "1803" -> Some `V1803
-  | "1809" -> Some `V1809
-  | "ltsc2019" -> Some `Ltsc2019
-  | "1903" -> Some `V1903
-  | "1909" -> Some `V1909
-  | "2004" -> Some `V2004
-  | "20H2" -> Some `V20H2
-  | "21H1" -> Some `V21H1
-  | "ltsc2022" -> Some `Ltsc2022
-  | _ -> None
-
-let rec win10_revision_to_string = function
-  | v, None -> win10_release_to_string v
-  | v, Some `LCU -> win10_revision_to_string (v, Some win10_current_lcu)
-  | v, Some lcu -> (
-      match win10_lcu_kb_number (resolve_ltsc v) lcu with
-      | Some kb -> Printf.sprintf "%s-KB%d" (win10_release_to_string v) kb
-      | None ->
-          Fmt.invalid_arg "No KB for this Win10 %s revision"
-            (win10_release_to_string v))
-
-let win10_revision_of_string v =
-  let v, lcu =
-    match String.cut ~sep:"-KB" v with
-    | Some (v, lcu) when String.for_all Char.Ascii.is_digit lcu ->
-        (v, Some (int_of_string lcu))
-    | _ -> (v, None)
-  in
-  match win10_release_of_string v with
-  | None -> None
-  | Some v -> (
-      let v = resolve_ltsc v in
-      match lcu with
-      | None -> Some (v, None)
-      | Some lcu -> win10_kb_number_to_lcu v lcu)
-
 (* The Docker tag for this distro *)
 let tag_of_distro (d : t) =
   match d with
@@ -1068,19 +709,15 @@ let tag_of_distro (d : t) =
   | `OpenSUSE `V15_5 -> "opensuse-15.5"
   | `OpenSUSE `Tumbleweed -> "opensuse-tumbleweed"
   | `OpenSUSE `Latest -> "opensuse"
-  | `Cygwin v -> "cygwin-" ^ win10_release_to_string v
-  | `Windows (`Mingw, v) -> "windows-mingw-" ^ win10_release_to_string v
-  | `Windows (`Msvc, v) -> "windows-msvc-" ^ win10_release_to_string v
+  | `Cygwin `Ltsc2016 -> "cygwin-2016"
+  | `Cygwin `Ltsc2019 -> "cygwin-2019"
+  | `Cygwin `Ltsc2022 -> "cygwin-2022"
+  | `Windows (`Mingw, `Ltsc2019) -> "windows-mingw-ltsc2019"
+  | `Windows (`Msvc, `Ltsc2019) -> "windows-msvc-ltsc2019"
+  | `WindowsServer (`Mingw, `Ltsc2022) -> "windows-server-mingw-ltsc2022"
+  | `WindowsServer (`Msvc, `Ltsc2022) -> "windows-server-msvc-ltsc2022"
 
 let distro_of_tag x : t option =
-  let win10_of_tag affix s f =
-    let stop = String.length affix in
-    match
-      win10_release_of_string String.(sub ~start:0 ~stop s |> Sub.to_string)
-    with
-    | Some v -> Some (f v)
-    | None -> None
-  in
   match x with
   | "ubuntu-12.04" -> Some (`Ubuntu `V12_04)
   | "ubuntu-14.04" -> Some (`Ubuntu `V14_04)
@@ -1172,12 +809,18 @@ let distro_of_tag x : t option =
   | "opensuse-15.5" -> Some (`OpenSUSE `V15_5)
   | "opensuse-tumbleweed" -> Some (`OpenSUSE `Tumbleweed)
   | "opensuse" -> Some (`OpenSUSE `Latest)
-  | s when String.is_prefix ~affix:"cygwin-" s ->
-      win10_of_tag "cygwin-" s (fun v -> `Cygwin v)
-  | s when String.is_prefix ~affix:"windows-mingw-" s ->
-      win10_of_tag "windows-mingw-" s (fun v -> `Windows (`Mingw, v))
-  | s when String.is_prefix ~affix:"windows-msvc-" s ->
-      win10_of_tag "windows-msvc-" s (fun v -> `Windows (`Msvc, v))
+  | "cygwin-ltsc2016" -> Some (`Cygwin `Ltsc2016)
+  | "cygwin-ltsc2019" -> Some (`Cygwin `Ltsc2019)
+  | "cygwin-ltsc2022" -> Some (`Cygwin `Ltsc2022)
+  | "cygwin" -> Some (`Cygwin `Latest)
+  | "windows-mingw-ltsc2019" -> Some (`Windows (`Mingw, `Ltsc2019))
+  | "windows-mingw-latest" -> Some (`Windows (`Mingw, `Latest))
+  | "windows-msvc-ltsc2019" -> Some (`Windows (`Msvc, `Ltsc2019))
+  | "windows-msvc-latest" -> Some (`Windows (`Msvc, `Latest))
+  | "windows-server-mingw-ltsc2022" -> Some (`WindowsServer (`Mingw, `Ltsc2022))
+  | "windows-server-mingw-latest" -> Some (`WindowsServer (`Mingw, `Latest))
+  | "windows-server-msvc-ltsc2022" -> Some (`WindowsServer (`Msvc, `Ltsc2022))
+  | "windows-server-msvc-latest" -> Some (`WindowsServer (`Msvc, `Latest))
   | _ -> None
 
 let human_readable_string_of_distro (d : t) =
@@ -1267,9 +910,13 @@ let human_readable_string_of_distro (d : t) =
     | `OpenSUSE `V15_4 -> "OpenSUSE 15.4 (Leap)"
     | `OpenSUSE `V15_5 -> "OpenSUSE 15.5 (Leap)"
     | `OpenSUSE `Tumbleweed -> "OpenSUSE Tumbleweed"
-    | `Cygwin v -> "Cygwin " ^ win10_release_to_string v
-    | `Windows (`Mingw, v) -> "Windows mingw " ^ win10_release_to_string v
-    | `Windows (`Msvc, v) -> "Windows msvc " ^ win10_release_to_string v
+    | `Cygwin `Ltsc2016 -> "Cygwin Ltsc2016"
+    | `Cygwin `Ltsc2019 -> "Cygwin Ltsc2019"
+    | `Cygwin `Ltsc2022 -> "Cygwin Ltsc2022"
+    | `Windows (`Mingw, `Ltsc2019) -> "Windows Ltsc2019 mingw"
+    | `Windows (`Msvc, `Ltsc2019) -> "Windows Ltsc2019 msvc"
+    | `WindowsServer (`Mingw, `Ltsc2022) -> "Windows Server Ltsc2022 mingw"
+    | `WindowsServer (`Msvc, `Ltsc2022) -> "Windows Server Ltsc2022 msvc"
 
 let human_readable_short_string_of_distro (t : t) =
   match t with
@@ -1284,6 +931,8 @@ let human_readable_short_string_of_distro (t : t) =
   | `Cygwin _ -> "Cygwin"
   | `Windows (`Mingw, _) -> "Windows mingw"
   | `Windows (`Msvc, _) -> "Windows mvsc"
+  | `WindowsServer (`Mingw, _) -> "Windows Server mingw"
+  | `WindowsServer (`Msvc, _) -> "Windows Server mvsc"
 
 let is_same_distro (d1 : t) (d2 : t) =
   match (d1, d2) with
@@ -1298,6 +947,7 @@ let is_same_distro (d1 : t) (d2 : t) =
   | `Cygwin _, `Cygwin _ ->
       true
   | `Windows (p1, _), `Windows (p2, _) when p1 = p2 -> true
+  | `WindowsServer (p1, _), `WindowsServer (p2, _) when p1 = p2 -> true
   | _ -> false
 
 (* The alias tag for the latest stable version of this distro *)
@@ -1321,6 +971,7 @@ let package_manager (t : t) =
   | `OpenSUSE _ -> `Zypper
   | `Cygwin _ -> `Cygwin
   | `Windows _ -> `Windows
+  | `WindowsServer _ -> `Windows
 
 let bubblewrap_version (t : t) =
   match resolve_alias t with
@@ -1409,18 +1060,9 @@ let bubblewrap_version (t : t) =
   | `OpenSUSE `Tumbleweed -> Some (0, 8, 0)
   | `Cygwin _ -> None
   | `Windows _ -> None
+  | `WindowsServer _ -> None
 
-let win10_base_tag ?win10_revision (base : win10_docker_base_image) v =
-  let base, v =
-    match (base, resolve_ltsc v) with
-    | `NanoServer, _ -> ("mcr.microsoft.com/windows/nanoserver", v)
-    | `ServerCore, _ -> ("mcr.microsoft.com/windows/servercore", v)
-    | `Windows, `V21H2 -> ("mcr.microsoft.com/windows/server", `Ltsc2022)
-    | `Windows, _ -> ("mcr.microsoft.com/windows", v)
-  in
-  (base, win10_revision_to_string (v, win10_revision))
-
-let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
+let base_distro_tag ?(arch = `X86_64) d =
   match resolve_alias d with
   | `Alpine v -> (
       let tag =
@@ -1539,11 +1181,25 @@ let base_distro_tag ?win10_revision ?(arch = `X86_64) d =
       in
       ("opensuse/leap", tag)
   | `Cygwin v ->
-      win10_base_tag ?win10_revision `ServerCore
-        (v : win10_release :> [> win10_release ])
-  | `Windows (_, v) ->
-      win10_base_tag ?win10_revision `Windows
-        (v : win10_release :> [> win10_release ])
+      let tag =
+        match v with
+        | `Ltsc2016 -> "ltsc2016"
+        | `Ltsc2019 -> "ltsc2019"
+        | `Ltsc2022 -> "ltsc2022"
+      in
+      ("mcr.microsoft.com/windows/servercore", tag)
+  | `Windows v ->
+      let tag =
+        match v with
+        | _, `Ltsc2019 -> "ltsc2019"
+      in
+      ("mcr.microsoft.com/windows", tag)
+  | `WindowsServer v ->
+      let tag =
+        match v with
+        | _, `Ltsc2022 -> "ltsc2022"
+      in
+      ("mcr.microsoft.com/windows/server", tag)
 
 let compare a b =
   String.compare
