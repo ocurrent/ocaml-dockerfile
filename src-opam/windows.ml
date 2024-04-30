@@ -378,7 +378,7 @@ module Winget = struct
              pkg)
       empty pkgs
 
-  let dev_packages ~(distro:Distro.t) ?extra () =
+  let dev_packages ~(distro : Distro.t) ?extra () =
     match distro with
     | `WindowsServer _ -> install [ "Git.Git" ] @@ maybe install extra
     (* 2021-04-01: Installing git fails with exit-code 2316632065. *)
