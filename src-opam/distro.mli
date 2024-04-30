@@ -99,18 +99,9 @@ type distro =
     | `V23_04
     | `V23_10
     | `V24_04 ]
-  | `Cygwin of
-    [ `Ltsc2016
-    | `Ltsc2019
-    | `Ltsc2022 ]
-  | `Windows of
-    [ `Mingw
-    | `Msvc ] *
-    [ `Ltsc2019 ]
-  | `WindowsServer of
-    [ `Mingw
-    | `Msvc ] *
-    [ `Ltsc2022 ] ]
+  | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
+  | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 ] ]
 [@@deriving sexp]
 
 type t =
@@ -196,21 +187,9 @@ type t =
     | `V24_04
     | `Latest
     | `LTS ]
-  | `Cygwin of
-    [ `Ltsc2016
-    | `Ltsc2019
-    | `Ltsc2022
-    | `Latest ]
-  | `Windows of
-    [ `Mingw
-    | `Msvc ] *
-    [ `Ltsc2019
-    | `Latest ]
-  | `WindowsServer of
-    [ `Mingw
-    | `Msvc ] *
-    [ `Ltsc2022
-    | `Latest ] ]
+  | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
+  | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 | `Latest ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Latest ] ]
 [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -301,8 +280,7 @@ val latest_tag_of_distro : t -> string
     regularly rewritten to point to any new releases of the
     distribution. *)
 
-val base_distro_tag :
-  ?arch:Ocaml_version.arch -> t -> string * string
+val base_distro_tag : ?arch:Ocaml_version.arch -> t -> string * string
 (** [base_distro_tag ?arch t] will return a tuple of a Docker Hub
     user/repository and tag for which the base image of a distribution
     can be found (e.g. [opensuse/leap],[15.0] which maps to [opensuse/leap:15.0]
