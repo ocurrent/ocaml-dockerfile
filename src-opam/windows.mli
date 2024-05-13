@@ -76,12 +76,7 @@ val remove_system_attribute : ?recurse:bool -> string -> t
 (** Remove the system attribute on a path. Might be useful to copy
     data across images when building Docker images. *)
 
-val header :
-  alias:string ->
-  ?win10_revision:Distro.win10_lcu ->
-  ?version:Distro.win_all ->
-  unit ->
-  t
+val header : ?alias:string -> override_tag:string option -> Distro.t -> t
 (** A Dockerfile header for multi-staged builds. *)
 
 (** Rules for Cygwin-based installation. *)
@@ -167,11 +162,6 @@ end
 (** Rules for winget installation.
     @see <https://docs.microsoft.com/en-us/windows/package-manager/winget> *)
 module Winget : sig
-  val is_supported : Distro.win_all -> bool
-  (** Winget 1.0.11692 discontinued support for versions older than
-      Windows 10 1809. Older versions of Winget have bugs, don't use
-      them. *)
-
   val install_from_release : ?winget_version:string -> unit -> t
   (** Install winget from a released build (first in a separate Docker
       image). The optional [winget_version] specifies a Git tag. *)
@@ -183,10 +173,9 @@ module Winget : sig
   val install : string list -> t
   (** [install packages] will install the supplied winget package list. *)
 
-  val dev_packages : ?version:Distro.win_all -> ?extra:string list -> unit -> t
-  (** [dev_packages ?version ?extra ()] will install the base development
-      tools. Extra packages may also be optionally supplied via [extra].
-      Using [?version] may change the set of installed packages. *)
+  val dev_packages : distro:Distro.t -> ?extra:string list -> unit -> t
+  (** [dev_packages distro ?extra ()] will install the base development
+      tools. Extra packages may also be optionally supplied via [extra]. *)
 
   (** Rules for Git. *)
   module Git : sig

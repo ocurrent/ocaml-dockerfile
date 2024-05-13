@@ -102,11 +102,10 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
        vs_version (pp "add" components)
        (pp "remove" excluded_components)
 
-let header ~alias ?win10_revision
-    ?(version =
-      (Distro.win10_latest_image : Distro.win10_release :> Distro.win_all)) () =
-  let img, tag = Distro.win10_base_tag ?win10_revision `Windows version in
-  from ~alias ~tag img @@ user "ContainerAdministrator"
+let header ?alias ~override_tag distro =
+  let img, tag = Distro.base_distro_tag distro in
+  let tag = Option.value ~default:tag override_tag in
+  from ?alias ~tag img @@ user "ContainerAdministrator"
 
 let sanitize_reg_path () =
   run
@@ -327,13 +326,6 @@ module Cygwin = struct
 end
 
 module Winget = struct
-  let is_supported version =
-    not
-      (List.mem version
-         [
-           `V1507; `Ltsc2015; `V1511; `V1607; `Ltsc2016; `V1703; `V1709; `V1803;
-         ])
-
   let footer path =
     run {|mkdir "C:\Program Files\winget-cli"|}
     @@ run
@@ -387,11 +379,11 @@ module Winget = struct
              pkg)
       empty pkgs
 
-  let dev_packages ?version ?extra () =
-    match version with
+  let dev_packages ~(distro : Distro.t) ?extra () =
+    match distro with
+    | `WindowsServer _ -> install [ "Git.Git" ] @@ maybe install extra
     (* 2021-04-01: Installing git fails with exit-code 2316632065. *)
-    | Some `V1809 -> maybe install extra
-    | _ -> install [ "Git.Git" ] @@ maybe install extra
+    | _ -> maybe install extra
 
   module Git = struct
     let init ?(name = "Docker") ?(email = "docker@example.com")
