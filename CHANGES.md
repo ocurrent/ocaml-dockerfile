@@ -4,7 +4,7 @@ unreleased
 - Add Ubuntu 24.04. (@mtelvers, #205)
 - Add Fedora 40, deprecate Fedora 37. (@mtelvers, #203)
 - Add Fedora 39. (@MisterDA #200)
-- Add Alpine 3.19, deprecate Alpine 3.18. (@MisterDA #197, #199)
+- Add Alpine 3.20, deprecate Alpine 3.18, 3.19. (@MisterDA #167, #197, #199, #207)
 - Support formatting RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
 - Turned off address space layout randomization on Windows 1809. (@mtelvers #196)
 - Add Ubuntu 23.10. (@MisterDA #189)
@@ -23,7 +23,6 @@ unreleased
 - Add OpenSUSE Leap 15.5 to Tier 2. (@MisterDA #171)
 - Add OpenSUSE Tumbleweed to Tier 2. (@MisterDA #168 #169)
 - Deprecate Fedora 36. (@MisterDA #170)
-- Add Alpine 3.18. (@MisterDA #167)
 - Support opam new `--with-vendored-deps` configure option. (@MisterDA #165)
 - Rework Windows images and update their dependencies. (@MisterDA #162)
   + Fix the origin of `Install.cmd` (avsm -> ocurrent);
