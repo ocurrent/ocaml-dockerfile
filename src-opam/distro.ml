@@ -1131,7 +1131,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V24_04 -> "noble"
       in
       match arch with
-      | `Riscv64 -> ("riscv64/ubuntu", tag)
+      | `Riscv64 -> ("ocurrent/opam-staging", tag_of_distro d ^ "-riscv64")
       | _ -> ("ubuntu", tag))
   | `CentOS v ->
       let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" in
