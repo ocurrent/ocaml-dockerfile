@@ -20,7 +20,7 @@ unreleased
   (@MisterDA #175)
 - Support `--chmod` argument in `COPY` and `ADD` Dockerfile
   instructions. (@MisterDA #174)
-- Add OpenSUSE Leap 15.5 to Tier 2. (@MisterDA #171)
+- Add OpenSUSE Leap 15.6 to Tier 2, deprecate 15.5 and 15.4. (@MisterDA #171, #208)
 - Add OpenSUSE Tumbleweed to Tier 2. (@MisterDA #168 #169)
 - Deprecate Fedora 36. (@MisterDA #170)
 - Support opam new `--with-vendored-deps` configure option. (@MisterDA #165)
