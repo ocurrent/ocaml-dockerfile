@@ -385,8 +385,8 @@ let distro_status (d : t) : status =
     | `Archlinux `Latest -> `Active `Tier3
     | `CentOS `V7 -> `Active `Tier3
     | `CentOS (`V6 | `V8) -> `Deprecated
-    | `Debian (`V7 | `V8 | `V9) -> `Deprecated
-    | `Debian (`V10 | `V11) -> `Active `Tier2
+    | `Debian (`V7 | `V8 | `V9 | `V10) -> `Deprecated
+    | `Debian `V11 -> `Active `Tier2
     | `Debian `V12 -> `Active `Tier1
     | `Debian `Testing -> `Active `Tier3
     | `Debian `Unstable -> `Active `Tier3
