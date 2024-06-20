@@ -446,7 +446,7 @@ let distro_arches ov (d : t) =
   | `Debian (`V11 | `V12), ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Debian `V10, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
-      [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
+      [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Debian `V10, ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Debian `V9, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
