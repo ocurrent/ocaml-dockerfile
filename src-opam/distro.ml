@@ -392,9 +392,9 @@ let distro_status (d : t) : status =
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 ) ->
+        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 ) ->
         `Deprecated
-    | `Fedora (`V38 | `V39 | `V40) -> `Active `Tier2
+    | `Fedora (`V39 | `V40) -> `Active `Tier2
     | `OracleLinux `V7 -> `Deprecated
     | `OracleLinux (`V8 | `V9) -> `Active `Tier3
     | `OpenSUSE
