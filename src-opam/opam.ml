@@ -53,27 +53,20 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
 let install_opam_from_source_windows ?cyg ?prefix
     ?(enable_0install_solver = false) ?(with_vendored_deps = false)
     ?(msvs = false) ~branch ~hash () =
-  (* Although opam's readme states it can autodetec the environment
-     with MSVS, it doesn't always work. It's set explicitly here. *)
-  let msvs_env =
-    {|eval $(msvs-detect --arch=x64) && export PATH="$MSVS_PATH:$PATH" && export LIB="$MSVS_LIB" && export INCLUDE="$MSVS_INC" && |}
-  and ocaml_port = "OCAML_PORT=msvc64 " in
   Windows.Cygwin.run_sh ?cyg
     "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && cd \
      ../opam-build-%s && git checkout %s && git config --global --add \
      safe.directory /tmp/opam-build-%s"
     branch branch hash branch
+  @@ Windows.Cygwin.run_sh ?cyg "cd /tmp/opam-build-%s && make compiler %s"
+       branch
+       (if msvs then "OCAML_PORT=msvc64" else "")
   @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && %smake compiler %s&& make lib-pkg" branch
-       (if msvs then msvs_env else "")
-       (if msvs then ocaml_port else "")
-  @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && %s./configure --enable-cold-check %s%s%s%s && \
+       "cd /tmp/opam-build-%s && ./configure --enable-cold-check %s%s%s%s && \
         make && make install"
        branch
-       (if msvs then msvs_env else "")
        (if msvs then "" else "--with-private-runtime")
-       (if with_vendored_deps then "" else "--with-vendored_deps")
+       (if with_vendored_deps then " --with-vendored_deps" else "")
        (Option.fold prefix ~none:"" ~some:(fun prefix ->
             Printf.sprintf {| --prefix="%s"|} prefix))
        (if enable_0install_solver then " --with-0install-solver" else "")
