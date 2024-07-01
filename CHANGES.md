@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Deprecate Ubuntu 23.04. (@punchagan, #213)
 - Add Ubuntu 24.04. (@mtelvers, #205)
 - Add Fedora 40, deprecate Fedora 37. (@mtelvers, #203)
 - Add Fedora 39. (@MisterDA #200)
