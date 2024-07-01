@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Deprecate Ubuntu 23.10. (@mtelvers, #214)
 - Deprecate Ubuntu 23.04. (@punchagan, #213)
 - Deprecate Fedora 38. (@mtelvers, #211)
 - Deprecate Debian 10. (@shonfeder, #210)
