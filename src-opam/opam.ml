@@ -193,6 +193,7 @@ let header ?arch ?maintainer ?img ?tag d =
 type opam_hashes = {
   opam_2_0_hash : string;
   opam_2_1_hash : string;
+  opam_2_2_hash : string;
   opam_master_hash : string;
 }
 
@@ -212,12 +213,13 @@ let opam_master_branch opam_master_hash =
     enable_0install_solver = true;
     with_vendored_deps = true;
     public_name = "opam-dev";
-    aliases = [ "opam-2.2" ];
-    (* TODO: Remove/update when opam 2.2 is branched *)
+    aliases = [ "" ];
   }
 
 let create_opam_branches opam_hashes =
-  let { opam_2_0_hash; opam_2_1_hash; opam_master_hash } = opam_hashes in
+  let { opam_2_0_hash; opam_2_1_hash; opam_2_2_hash; opam_master_hash } =
+    opam_hashes
+  in
   ( opam_master_hash,
     [
       {
@@ -235,6 +237,14 @@ let create_opam_branches opam_hashes =
         enable_0install_solver = true;
         with_vendored_deps = false;
         public_name = "opam-2.1";
+        aliases = [];
+      };
+      {
+        branch = "2.2";
+        hash = opam_2_2_hash;
+        enable_0install_solver = true;
+        with_vendored_deps = false;
+        public_name = "opam-2.2";
         aliases = [];
       };
       opam_master_branch opam_master_hash;

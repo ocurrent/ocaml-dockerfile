@@ -45,6 +45,7 @@ val install_opam_from_source :
 type opam_hashes = {
   opam_2_0_hash : string;
   opam_2_1_hash : string;
+  opam_2_2_hash : string;
   opam_master_hash : string;
 }
 
