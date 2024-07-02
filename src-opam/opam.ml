@@ -213,7 +213,7 @@ let opam_master_branch opam_master_hash =
     enable_0install_solver = true;
     with_vendored_deps = true;
     public_name = "opam-dev";
-    aliases = [ "" ];
+    aliases = [];
   }
 
 let create_opam_branches opam_hashes =
