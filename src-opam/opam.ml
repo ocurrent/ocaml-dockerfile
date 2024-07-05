@@ -54,26 +54,23 @@ let install_opam_from_source_windows ?cyg ?prefix
     ?(enable_0install_solver = false) ?(with_vendored_deps = false)
     ?(msvs = false) ~branch ~hash () =
   Windows.Cygwin.run_sh ?cyg
-    "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && cd \
-     ../opam-build-%s && git checkout %s && git config --global --add \
-     safe.directory /tmp/opam-build-%s"
-    branch branch hash branch
-  @@ Windows.Cygwin.run_sh ?cyg "cd /tmp/opam-build-%s && make compiler %s"
-       branch
-       (if msvs then "OCAML_PORT=msvc64" else "")
+    "git clone /tmp/opam /tmp/opam-build-%s && cd /tmp/opam-build-%s && git \
+     config --global --add safe.directory /tmp/opam-build-%s && git checkout \
+     %s"
+    branch branch branch hash
   @@ Windows.Cygwin.run_sh ?cyg
-       "cd /tmp/opam-build-%s && ./configure --enable-cold-check %s%s%s%s && \
-        make && make install"
+       "cd /tmp/opam-build-%s && env \
+        PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" ./configure \
+        --enable-cold-check %s%s%s%s && env \
+        PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" make && make install && \
+        mv /usr/local/bin/opam.exe /usr/local/bin/opam-%s.exe"
        branch
        (if msvs then "" else "--with-private-runtime")
-       (if with_vendored_deps then " --with-vendored_deps" else "")
+       (if with_vendored_deps then " --with-vendored-deps" else "")
        (Option.fold prefix ~none:"" ~some:(fun prefix ->
             Printf.sprintf {| --prefix="%s"|} prefix))
        (if enable_0install_solver then " --with-0install-solver" else "")
-  (* Docker doesn't allow copying executables from /usr/local/bin
-     (why??), so tar the opam installation. *)
-  @@ Windows.Cygwin.run_sh ?cyg
-       {|cd /usr/local/bin && tar -cf /cygdrive/c/opam.tar .|}
+       branch
 
 let bubblewrap_minimum = (0, 4, 1)
 let bubblewrap_latest = (0, 8, 0)
@@ -251,8 +248,21 @@ let create_opam_branches opam_hashes =
     ] )
 
 let create_opam_branches_windows opam_hashes =
-  let { opam_master_hash; _ } = opam_hashes in
-  (opam_master_hash, [ opam_master_branch opam_master_hash ])
+  let { opam_2_0_hash; opam_2_1_hash; opam_2_2_hash; opam_master_hash } =
+    opam_hashes
+  in
+  ( opam_master_hash,
+    [
+      {
+        branch = "2.2";
+        hash = opam_2_2_hash;
+        enable_0install_solver = true;
+        with_vendored_deps = true;
+        public_name = "opam-2.2";
+        aliases = [];
+      };
+      opam_master_branch opam_master_hash;
+    ] )
 
 let install_opams ?prefix opam_master_hash opam_branches =
   run
@@ -271,8 +281,9 @@ let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
   Windows.Cygwin.Git.init ?cyg ~repos:[ "/tmp/opam-sources" ] ()
   @@ Windows.Cygwin.run_sh ?cyg
        "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && \
-        cp -P -R -p . ../opam-sources && git checkout %s"
+        git checkout %s && make compiler %s"
        opam_master_hash
+       (if Option.value ~default:false msvs then "OCAML_PORT=msvc64" else "")
   @@ List.fold_left
        (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ } ->
          acc
@@ -293,22 +304,23 @@ let copy_opams ~src ~dst opam_branches =
             aliases)
     empty opam_branches
 
-(* FIXME: only support building opam master for now *)
-let copy_opams_windows = function
-  | [ { public_name; aliases; _ } ] ->
-      copy ~from:"opam-builder" ~src:[ {|C:\opam.tar|} ] ~dst:{|C:\TEMP\|} ()
-      @@ run
-           {|C:\cygwin64\bin\tar.exe -xf /cygdrive/c/TEMP/opam.tar -C /usr/local/bin && del C:\TEMP\opam.tar|}
-      @@ run
-           {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\usr\local\bin\opam.exe|}
-           public_name
+let copy_opams_windows opam_branches =
+  List.fold_left
+    (fun acc { branch; public_name; aliases; _ } ->
+      acc
+      (* Docker doesn't allow copying executables to /usr/local/bin *)
+      @@ copy ~from:"opam-builder"
+           ~src:[ {|c:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
+           ~dst:({|c:\|} ^ public_name ^ ".exe")
+           ()
+      @@ run {|move c:\%s.exe c:\cygwin64\usr\local\bin|} public_name
       @@@ List.map
             (fun alias ->
-              run {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\bin\%s.exe|} alias
-                public_name)
-            aliases
-      |> crunch
-  | _ -> invalid_arg "Only a single opam branch can be build on Windows."
+              run
+                {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\usr\local\bin\%s.exe|}
+                alias public_name)
+            aliases)
+    empty opam_branches
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
