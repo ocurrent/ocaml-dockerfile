@@ -240,7 +240,7 @@ let create_opam_branches opam_hashes =
         branch = "2.2";
         hash = opam_2_2_hash;
         enable_0install_solver = true;
-        with_vendored_deps = false;
+        with_vendored_deps = true;
         public_name = "opam-2.2";
         aliases = [];
       };
@@ -248,21 +248,11 @@ let create_opam_branches opam_hashes =
     ] )
 
 let create_opam_branches_windows opam_hashes =
-  let { opam_2_0_hash; opam_2_1_hash; opam_2_2_hash; opam_master_hash } =
-    opam_hashes
-  in
+  let opam_master_hash, branches = create_opam_branches opam_hashes in
   ( opam_master_hash,
-    [
-      {
-        branch = "2.2";
-        hash = opam_2_2_hash;
-        enable_0install_solver = true;
-        with_vendored_deps = true;
-        public_name = "opam-2.2";
-        aliases = [];
-      };
-      opam_master_branch opam_master_hash;
-    ] )
+    List.filter
+      (fun { branch; _ } -> branch = "master" || branch = "2.2")
+      branches )
 
 let install_opams ?prefix opam_master_hash opam_branches =
   run
@@ -310,10 +300,10 @@ let copy_opams_windows opam_branches =
       acc
       (* Docker doesn't allow copying executables to /usr/local/bin *)
       @@ copy ~from:"opam-builder"
-           ~src:[ {|c:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
-           ~dst:({|c:\|} ^ public_name ^ ".exe")
+           ~src:[ {|C:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
+           ~dst:({|C:\|} ^ public_name ^ ".exe")
            ()
-      @@ run {|move c:\%s.exe c:\cygwin64\usr\local\bin|} public_name
+      @@ run {|move C:\%s.exe C:\cygwin64\usr\local\bin|} public_name
       @@@ List.map
             (fun alias ->
               run
