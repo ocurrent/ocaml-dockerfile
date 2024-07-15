@@ -251,7 +251,10 @@ let create_opam_branches_windows opam_hashes =
   let opam_master_hash, branches = create_opam_branches opam_hashes in
   ( opam_master_hash,
     List.filter
-      (fun { branch; _ } -> branch = "master" || branch = "2.2")
+      (* Note this is a lexicographic comparison
+       * branches are "2.0", "2.1", "2.2" and "master"
+       * Select "master" and 2.2 and later *)
+        (fun { branch; _ } -> branch >= "2.2")
       branches )
 
 let install_opams ?prefix opam_master_hash opam_branches =
