@@ -1,12 +1,14 @@
-unreleased
-----------
+v8.2.2 2023-07-31 Rochester
+---------------------------
 
+- Added Opam 2.2 (@mtelvers, #215)
 - Deprecate Ubuntu 23.10. (@mtelvers, #214)
 - Deprecate Ubuntu 23.04. (@punchagan, #213)
 - Deprecate Fedora 38. (@mtelvers, #211)
 - Deprecate Debian 10. (@shonfeder, #210)
 - Add Ubuntu 24.04. (@mtelvers, #205)
 - Add Fedora 40, deprecate Fedora 37. (@mtelvers, #203)
+- Refactored Windows builds (@mtelvers, #201)
 - Add Fedora 39. (@MisterDA #200)
 - Add Alpine 3.20, deprecate Alpine 3.18, 3.19. (@MisterDA #167, #197, #199, #207)
 - Support formatting RUN heredocs. (@MisterDA #193 #195, reported by @kit-ty-kate)
