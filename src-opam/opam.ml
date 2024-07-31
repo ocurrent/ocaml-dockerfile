@@ -37,9 +37,10 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
     ~hash () =
   run
     "cd /tmp/opam-sources && cp -P -R -p . ../opam-build-%s && cd \
-     ../opam-build-%s && git checkout %s && ln -s ../opam/src_ext/archives \
-     src_ext/archives && env PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" \
-     ./configure --enable-cold-check%s%s && env \
+     ../opam-build-%s && git fetch -q && git checkout %s && ln -s \
+     ../opam/src_ext/archives src_ext/archives && env \
+     PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" ./configure \
+     --enable-cold-check%s%s && env \
      PATH=\"/tmp/opam/bootstrap/ocaml/bin:$PATH\" make lib-ext all && mkdir -p \
      %s/bin && cp /tmp/opam-build-%s/opam %s/bin/opam-%s && chmod a+x \
      %s/bin/opam-%s && rm -rf /tmp/opam-build-%s"
