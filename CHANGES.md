@@ -1,4 +1,7 @@
-v8.2.2 2023-07-31 Rochester
+unreleased
+----------
+
+v8.2.2 2024-07-31 Rochester
 ---------------------------
 
 - Added Opam 2.2 (@mtelvers, #215)
