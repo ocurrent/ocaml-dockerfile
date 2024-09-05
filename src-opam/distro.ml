@@ -1112,7 +1112,7 @@ let base_distro_tag ?(arch = `X86_64) d =
       | `Ppc64le, (`V8 | `V9 | `V10) -> ("ppc64le/debian", tag)
       | `S390x, (`V8 | `V9 | `V10) -> ("s390x/debian", tag)
       | _ -> ("debian", tag))
-  | `Ubuntu v -> (
+  | `Ubuntu v ->
       let tag =
         match v with
         | `V12_04 -> "precise"
@@ -1137,9 +1137,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V23_10 -> "mantic"
         | `V24_04 -> "noble"
       in
-      match arch with
-      | `Riscv64 -> ("ocurrent/opam-staging", tag_of_distro d ^ "-riscv64")
-      | _ -> ("ubuntu", tag))
+      ("ubuntu", tag)
   | `CentOS v ->
       let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" in
       ("centos", tag)
