@@ -216,11 +216,13 @@ let opam_master_branch opam_master_hash =
   }
 
 let create_opam_branches opam_hashes =
-  let { opam_2_0_hash;
-        opam_2_1_hash;
-        opam_2_2_hash;
-        opam_2_3_hash;
-        opam_master_hash } =
+  let {
+    opam_2_0_hash;
+    opam_2_1_hash;
+    opam_2_2_hash;
+    opam_2_3_hash;
+    opam_master_hash;
+  } =
     opam_hashes
   in
   ( opam_master_hash,
