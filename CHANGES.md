@@ -3,6 +3,9 @@ v8.2.3 2024-10-30 Rochester
 
 - Add Ubuntu 24.10. (@MisterDA, #222)
 - Add Fedora 41, deprecate Fedora 39. (@MisterDA, #221)
+- Sunset for Debian Bullseye (@mtelvers, #220)
+- Add opam 2.3 (@kit-ty-kate, #219)
+- Add Ubuntu Noble RISCV (@mtelvers, #218)
 
 v8.2.2 2024-07-31 Rochester
 ---------------------------
