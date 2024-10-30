@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.2.3 2024-10-30 Rochester
+---------------------------
 
 - Add Ubuntu 24.10. (@MisterDA, #222)
 - Add Fedora 41, deprecate Fedora 39. (@MisterDA, #221)
