@@ -1,6 +1,8 @@
 unreleased
 ----------
 
+- Add Ubuntu 24.10. (@MisterDA, #222)
+
 v8.2.2 2024-07-31 Rochester
 ---------------------------
 
