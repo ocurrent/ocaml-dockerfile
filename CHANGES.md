@@ -1,6 +1,8 @@
 unreleased
 ----------
 
+- Add Fedora 41, deprecate Fedora 39. (@MisterDA, #???)
+
 v8.2.2 2024-07-31 Rochester
 ---------------------------
 
