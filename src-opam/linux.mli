@@ -36,8 +36,9 @@ module RPM : sig
   val install : ('a, unit, string, t) format4 -> 'a
   (** [install fmt] will run [yum install] on the supplied package list. *)
 
-  val groupinstall : ('a, unit, string, t) format4 -> 'a
-  (** [groupinstall fmt] will run [yum groupinstall] on the supplied package list. *)
+  val groupinstall : int -> ('a, unit, string, t) format4 -> 'a
+  (** [groupinstall ver fmt] will run [yum groupinstall] or [yum group install]
+      on the supplied package list. ver selects the appropriate syntax *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
   (** [add_user username] will install a new user with name [username] and a locked
