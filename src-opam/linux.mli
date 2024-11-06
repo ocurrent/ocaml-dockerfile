@@ -59,7 +59,7 @@ end
 (** Rules for Apt-based distributions *)
 module Apt : sig
   val update : t
-  (** [update] will run [apt-get update && apt-get upgrade] non-interactively. *)
+  (** [update] will run [apt-get update && apt-get upgrade] non-interactively. Requires [syntax=docker/dockerfile:1]. *)
 
   val install : ('a, unit, string, t) format4 -> 'a
   (** [install fmt] will [apt-get update && apt-get install] the packages specified by the [fmt] format string. *)

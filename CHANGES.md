@@ -1,3 +1,9 @@
+unreleased
+----------
+
+- Cache packages downloads for Apt-based distributions using BuildKit
+  cache mounts. (@MisterDA, #???)
+
 v8.2.3 2024-10-30 Rochester
 ---------------------------
 

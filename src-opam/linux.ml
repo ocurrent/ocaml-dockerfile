@@ -76,14 +76,27 @@ end
 
 (** Debian rules *)
 module Apt = struct
+  (* https://docs.docker.com/reference/dockerfile/#example-cache-apt-packages *)
+  let mounts =
+    [
+      mount_cache ~target:"/var/cache/apt" ~sharing:`Locked ();
+      mount_cache ~target:"/var/lib/apt" ~sharing:`Locked ();
+    ]
+
   let update =
-    run "apt-get -y update"
-    @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
+    run
+      {|rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache|}
+    @@ run ~mounts
+         "apt update && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
 
   let install fmt =
     ksprintf
       (fun s ->
-        update @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y install %s" s)
+        update
+        @@ run ~mounts
+             "DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends \
+              install -y %s"
+             s)
       fmt
 
   let dev_packages ?extra () =
