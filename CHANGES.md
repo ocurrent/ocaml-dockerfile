@@ -2,6 +2,9 @@ unreleased
 ----------
 
 - Add Alpine 3.21, deprecate Alpine 3.20. (@MisterDA, #225)
+- Cache packages downloads for Apt (Debian, Ubuntu) and pacman (Arch
+  Linux) based distributions using BuildKit cache mounts.
+  (@MisterDA, #224)
 
 v8.2.4 2024-11-18
 -----------------
