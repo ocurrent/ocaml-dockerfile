@@ -381,10 +381,12 @@ let apt_opam2 ?(labels = []) ?arch distro ~opam_hashes () =
    [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
    This is needed to get most of *-devel packages frequently used by opam packages.
 
-   [c_devtools_libs] uses the "C Development Tools and Libraries" package group.
-   If [false], defaults to the "Development Tools" package group. *)
+   [dnf_version] version of DNF tool installed which affects the syntax of groupinstall.
+
+   [c_devtools_libs] is the name of the package group e.g. "C Development Tools and Libraries" on Fedora, or
+   otherwise "Development Tools". *)
 let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
-    ~c_devtools_libs ~opam_hashes distro () =
+    ~dnf_version ~c_devtools_libs ~opam_hashes distro () =
   let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let workaround =
     if yum_workaround then
@@ -395,9 +397,7 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ label (("distro_style", "rpm") :: labels)
   @@ run "yum --version || dnf install -y yum"
   @@ workaround @@ Linux.RPM.update
-  @@ Linux.RPM.groupinstall
-       (if c_devtools_libs then {|"C Development Tools and Libraries"|}
-        else {|"Development Tools"|})
+  @@ Linux.RPM.groupinstall dnf_version c_devtools_libs
   @@ Linux.RPM.install
        "git patch unzip which tar curl xz libcap-devel openssl sudo bzip2"
   @@ Linux.Git.init ()
@@ -406,9 +406,7 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ from ?arch distro
   @@ run "yum --version || dnf install -y yum"
   @@ workaround @@ Linux.RPM.update
-  @@ Linux.RPM.groupinstall
-       (if c_devtools_libs then {|"C Development Tools and Libraries"|}
-        else {|"Development Tools"|})
+  @@ Linux.RPM.groupinstall dnf_version c_devtools_libs
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (if enable_powertools then
@@ -561,8 +559,14 @@ let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
           | `CentOS _ -> true
           | _ -> false
         in
-        let c_devtools_libs = match d with `Fedora _ -> true | _ -> false in
-        yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools
+        let c_devtools_libs : (t, unit, string, t) format4 =
+          match d with
+          | `Fedora `V41 -> {|"c-development"|}
+          | `Fedora _ -> {|"C Development Tools and Libraries"|}
+          | _ -> {|"Development Tools"|}
+        in
+        let dnf_version = match d with `Fedora `V41 -> 5 | _ -> 3 in
+        yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~dnf_version
           ~c_devtools_libs ~opam_hashes d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()

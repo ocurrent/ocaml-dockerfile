@@ -36,8 +36,18 @@ module RPM = struct
   let install fmt =
     ksprintf (fun s -> run "yum install -y %s && yum clean packages" s) fmt
 
-  let groupinstall fmt =
-    ksprintf (fun s -> run "yum groupinstall -y %s && yum clean packages" s) fmt
+  let groupinstall ver fmt =
+    match ver with
+    | 3 ->
+        (* dnf3 syntax which was deprecated but worked in dnf4 *)
+        ksprintf
+          (fun s -> run "yum groupinstall -y %s && yum clean packages" s)
+          fmt
+    | _ ->
+        (* dnf4 and dnf5 syntax *)
+        ksprintf
+          (fun s -> run "yum group install -y %s && yum clean packages" s)
+          fmt
 
   let dev_packages ?extra () =
     install
