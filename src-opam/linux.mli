@@ -41,17 +41,18 @@ module RPM : sig
       on the supplied package list. ver selects the appropriate syntax *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
-  (** [add_user username] will install a new user with name [username] and a locked
-      password.  If [sudo] is true then root access with no password will also be
-      configured.  The default value for [sudo] is [false]. *)
+  (** [add_user username] will install a new user with name [username] and a
+      locked password. If [sudo] is true then root access with no password will
+      also be configured. The default value for [sudo] is [false]. *)
 
   val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development tools and [sudo],
-      [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+  (** [dev_packages ?extra ()] will install the base development tools and
+      [sudo], [passwd] and [git]. Extra packages may also be optionally supplied
+      via [extra]. *)
 
   val ocaml_depexts : Ocaml_version.t -> string option
-  (** [ocaml_depexts v] returns packages that are required by the
-      OCaml distribution at version [v]. *)
+  (** [ocaml_depexts v] returns packages that are required by the OCaml
+      distribution at version [v]. *)
 
   val install_system_ocaml : t
   (** Install the system OCaml packages via Yum *)
@@ -60,23 +61,26 @@ end
 (** Rules for Apt-based distributions *)
 module Apt : sig
   val update : t
-  (** [update] will run [apt-get update && apt-get upgrade] non-interactively. *)
+  (** [update] will run [apt-get update && apt-get upgrade] non-interactively.
+  *)
 
   val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will [apt-get update && apt-get install] the packages specified by the [fmt] format string. *)
+  (** [install fmt] will [apt-get update && apt-get install] the packages
+      specified by the [fmt] format string. *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
-  (** [add_user username] will install a new user with name [username] and a locked
-      password.  If [sudo] is true then root access with no password will also be
-      configured.  The default value for [sudo] is [false]. *)
+  (** [add_user username] will install a new user with name [username] and a
+      locked password. If [sudo] is true then root access with no password will
+      also be configured. The default value for [sudo] is [false]. *)
 
   val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development tools and [sudo],
-      [passwd] and [git] and X11.  Extra packages may also be optionally supplied via [extra]. *)
+  (** [dev_packages ?extra ()] will install the base development tools and
+      [sudo], [passwd] and [git] and X11. Extra packages may also be optionally
+      supplied via [extra]. *)
 
   val ocaml_depexts : Ocaml_version.t -> string option
-  (** [ocaml_depexts v] returns packages that are required by the
-      OCaml distribution at version [v]. *)
+  (** [ocaml_depexts v] returns packages that are required by the OCaml
+      distribution at version [v]. *)
 
   val install_system_ocaml : t
   (** Install the system OCaml packages via [apt-get] *)
@@ -88,20 +92,22 @@ module Apk : sig
   (** [update] will run [apk update && apk upgrade] non-interactively. *)
 
   val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will [apk add] the packages specified by the [fmt] format string. *)
+  (** [install fmt] will [apk add] the packages specified by the [fmt] format
+      string. *)
 
   val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development tools and [sudo],
-      [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+  (** [dev_packages ?extra ()] will install the base development tools and
+      [sudo], [passwd] and [git]. Extra packages may also be optionally supplied
+      via [extra]. *)
 
   val ocaml_depexts : Ocaml_version.t -> string option
-  (** [ocaml_depexts v] returns packages that are required by the
-      OCaml distribution at version [v]. *)
+  (** [ocaml_depexts v] returns packages that are required by the OCaml
+      distribution at version [v]. *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
-  (** [add_user username] will install a new user with name [username] and a locked
-      password.  If [sudo] is true then root access with no password will also be
-      configured.  The default value for [sudo] is [false]. *)
+  (** [add_user username] will install a new user with name [username] and a
+      locked password. If [sudo] is true then root access with no password will
+      also be configured. The default value for [sudo] is [false]. *)
 
   val install_system_ocaml : t
   (** Install the system OCaml packages via Apk *)
@@ -110,7 +116,8 @@ module Apk : sig
   (** [add_repository ~tag url] adds "@tag url" to "/etc/apk/repositories". *)
 
   val add_repositories : (string option * string) list -> t
-  (** [add_repositories repos] adds a list of "@tag url" to "/etc/apk/repositories". *)
+  (** [add_repositories repos] adds a list of "@tag url" to
+      "/etc/apk/repositories". *)
 end
 
 (** Rules for Zypper-based distributions such as OpenSUSE *)
@@ -119,20 +126,22 @@ module Zypper : sig
   (** [update] will run [zypper update] non-interactively. *)
 
   val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will [zypper update && zypper install] the packages specified by the [fmt] format string. *)
+  (** [install fmt] will [zypper update && zypper install] the packages
+      specified by the [fmt] format string. *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
-  (** [add_user username] will install a new user with name [username] and a locked
-      password.  If [sudo] is true then root access with no password will also be
-      configured.  The default value for [sudo] is [false]. *)
+  (** [add_user username] will install a new user with name [username] and a
+      locked password. If [sudo] is true then root access with no password will
+      also be configured. The default value for [sudo] is [false]. *)
 
   val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development tools and [sudo],
-      [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+  (** [dev_packages ?extra ()] will install the base development tools and
+      [sudo], [passwd] and [git]. Extra packages may also be optionally supplied
+      via [extra]. *)
 
   val ocaml_depexts : Ocaml_version.t -> string option
-  (** [ocaml_depexts v] returns packages that are required by the
-      OCaml distribution at version [v]. *)
+  (** [ocaml_depexts v] returns packages that are required by the OCaml
+      distribution at version [v]. *)
 
   val install_system_ocaml : t
   (** Install the system OCaml packages via [zypper] *)
@@ -144,20 +153,22 @@ module Pacman : sig
   (** [update] will run [pacman -Syu] non-interactively. *)
 
   val install : ('a, unit, string, t) format4 -> 'a
-  (** [install fmt] will [pacman -Syu] the packages specified by the [fmt] format string. *)
+  (** [install fmt] will [pacman -Syu] the packages specified by the [fmt]
+      format string. *)
 
   val add_user : ?uid:int -> ?gid:int -> ?sudo:bool -> string -> t
-  (** [add_user username] will install a new user with name [username] and a locked
-      password.  If [sudo] is true then root access with no password will also be
-      configured.  The default value for [sudo] is [false]. *)
+  (** [add_user username] will install a new user with name [username] and a
+      locked password. If [sudo] is true then root access with no password will
+      also be configured. The default value for [sudo] is [false]. *)
 
   val dev_packages : ?extra:string -> unit -> t
-  (** [dev_packages ?extra ()] will install the base development tools and [sudo],
-      [passwd] and [git].  Extra packages may also be optionally supplied via [extra]. *)
+  (** [dev_packages ?extra ()] will install the base development tools and
+      [sudo], [passwd] and [git]. Extra packages may also be optionally supplied
+      via [extra]. *)
 
   val ocaml_depexts : Ocaml_version.t -> string option
-  (** [ocaml_depexts v] returns packages that are required by the
-      OCaml distribution at version [v]. *)
+  (** [ocaml_depexts v] returns packages that are required by the OCaml
+      distribution at version [v]. *)
 
   val install_system_ocaml : t
   (** Install the system OCaml packages via [pacman] *)
