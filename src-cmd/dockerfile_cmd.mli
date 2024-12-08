@@ -18,10 +18,10 @@
 (** Command invocation library to help with Docker builds.
 
     This module primarily exposes utility functions to glue together
-    Docker-based scripts for (e.g.) continuous integration systems
-    like the ocaml-ci.  The interface is fairly domain-specific and
-    does not expose all the functionality of the underlying tools.
-    Feel free to contribute more functions if you need them. *)
+    Docker-based scripts for (e.g.) continuous integration systems like the
+    ocaml-ci. The interface is fairly domain-specific and does not expose all
+    the functionality of the underlying tools. Feel free to contribute more
+    functions if you need them. *)
 
 type cmd_log = {
   command : string;
@@ -39,8 +39,8 @@ val run_log :
   string ->
   Bos.Cmd.t ->
   (unit, [> `Msg of string ]) result
-(** [runlog log_dir name cmd] will run [cmd] with label [name]
-    and log the results in [<log_dir>/<name>.sxp]. *)
+(** [runlog log_dir name cmd] will run [cmd] with label [name] and log the
+    results in [<log_dir>/<name>.sxp]. *)
 
 (** Docker command invocation *)
 module Docker : sig

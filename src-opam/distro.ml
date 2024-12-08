@@ -39,7 +39,8 @@ type distro =
     | `V3_17
     | `V3_18
     | `V3_19
-    | `V3_20 ]
+    | `V3_20
+    | `V3_21 ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 ]
   | `Debian of [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
@@ -126,6 +127,7 @@ type t =
     | `V3_18
     | `V3_19
     | `V3_20
+    | `V3_21
     | `Latest ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
@@ -252,6 +254,7 @@ let distros : t list =
     `Alpine `V3_18;
     `Alpine `V3_19;
     `Alpine `V3_20;
+    `Alpine `V3_21;
     `Alpine `Latest;
     `Archlinux `Latest;
     `CentOS `V6;
@@ -343,7 +346,7 @@ let distros : t list =
 
 let resolve_alias (d : t) : distro =
   match d with
-  | `Alpine `Latest -> `Alpine `V3_20
+  | `Alpine `Latest -> `Alpine `V3_21
   | `CentOS `Latest -> `CentOS `V7
   | `Debian `Stable -> `Debian `V12
   | `Fedora `Latest -> `Fedora `V41
@@ -357,7 +360,7 @@ let resolve_alias (d : t) : distro =
   | ( `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
-        | `V3_19 | `V3_20 )
+        | `V3_19 | `V3_20 | `V3_21 )
     | `Archlinux `Latest
     | `CentOS (`V6 | `V7 | `V8)
     | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `V12 | `Testing | `Unstable)
@@ -387,9 +390,9 @@ let distro_status (d : t) : status =
     | `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
-        | `V3_19 ) ->
+        | `V3_19 | `V3_20 ) ->
         `Deprecated
-    | `Alpine `V3_20 -> `Active `Tier1
+    | `Alpine `V3_21 -> `Active `Tier1
     | `Archlinux `Latest -> `Active `Tier3
     | `CentOS `V7 -> `Active `Tier3
     | `CentOS (`V6 | `V8) -> `Deprecated
@@ -462,7 +465,8 @@ let distro_arches ov (d : t) =
       [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | ( `Alpine
         ( `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10 | `V3_11 | `V3_12 | `V3_13
-        | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18 | `V3_19 | `V3_20 ),
+        | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18 | `V3_19 | `V3_20 | `V3_21
+          ),
       ov )
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
@@ -576,6 +580,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Alpine `V3_18 -> Some "4.14.1"
   | `Alpine `V3_19 -> Some "4.14.1"
   | `Alpine `V3_20 -> Some "4.14.2"
+  | `Alpine `V3_21 -> Some "4.14.2"
   | `Archlinux `Latest -> Some "5.1.0"
   | `Fedora `V21 -> Some "4.01.0"
   | `Fedora `V22 -> Some "4.02.0"
@@ -704,6 +709,7 @@ let tag_of_distro (d : t) =
   | `Alpine `V3_18 -> "alpine-3.18"
   | `Alpine `V3_19 -> "alpine-3.19"
   | `Alpine `V3_20 -> "alpine-3.20"
+  | `Alpine `V3_21 -> "alpine-3.21"
   | `Alpine `Latest -> "alpine"
   | `Archlinux `Latest -> "archlinux"
   | `OpenSUSE `V42_1 -> "opensuse-42.1"
@@ -920,6 +926,7 @@ let human_readable_string_of_distro (d : t) =
     | `Alpine `V3_18 -> "Alpine 3.18"
     | `Alpine `V3_19 -> "Alpine 3.19"
     | `Alpine `V3_20 -> "Alpine 3.20"
+    | `Alpine `V3_21 -> "Alpine 3.21"
     | `Archlinux `Latest -> "Archlinux"
     | `OpenSUSE `V42_1 -> "OpenSUSE 42.1"
     | `OpenSUSE `V42_2 -> "OpenSUSE 42.2"
@@ -1071,7 +1078,8 @@ let bubblewrap_version (t : t) =
   | `Alpine `V3_17 -> Some (0, 7, 0)
   | `Alpine `V3_18 -> Some (0, 8, 0)
   | `Alpine `V3_19 -> Some (0, 8, 0)
-  | `Alpine `V3_20 -> Some (0, 9, 0)
+  | `Alpine `V3_20 -> Some (0, 10, 0)
+  | `Alpine `V3_21 -> Some (0, 11, 0)
   | `Archlinux `Latest -> Some (0, 8, 0)
   | `OpenSUSE `V42_1 -> None (* Not actually checked *)
   | `OpenSUSE `V42_2 -> None (* Not actually checked *)
@@ -1111,6 +1119,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V3_18 -> "3.18"
         | `V3_19 -> "3.19"
         | `V3_20 -> "3.20"
+        | `V3_21 -> "3.21"
       in
       match arch with `I386 -> ("i386/alpine", tag) | _ -> ("alpine", tag))
   | `Archlinux `Latest -> ("archlinux", "latest")

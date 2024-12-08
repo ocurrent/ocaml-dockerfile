@@ -23,8 +23,8 @@ val generate_dockerfile :
   Fpath.t ->
   Dockerfile.t ->
   (unit, [> `Msg of string ]) result
-(** [generate_dockerfile output_dir docker] will output Dockerfile inside
-    the [output_dir] subdirectory.
+(** [generate_dockerfile output_dir docker] will output Dockerfile inside the
+    [output_dir] subdirectory.
 
     The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
     optimisation to reduce the number of layers; disable it if you really want
@@ -35,9 +35,9 @@ val generate_dockerfiles :
   Fpath.t ->
   (string * Dockerfile.t) list ->
   (unit, [> `Msg of string ]) result
-(** [generate_dockerfiles output_dir (name * docker)] will
-    output a list of Dockerfiles inside the [output_dir/] subdirectory,
-    with each Dockerfile named as [Dockerfile.<release>].
+(** [generate_dockerfiles output_dir (name * docker)] will output a list of
+    Dockerfiles inside the [output_dir/] subdirectory, with each Dockerfile
+    named as [Dockerfile.<release>].
 
     The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
     optimisation to reduce the number of layers; disable it if you really want
@@ -48,9 +48,9 @@ val generate_dockerfiles_in_directories :
   Fpath.t ->
   (string * Dockerfile.t) list ->
   (unit, [> `Msg of string ]) result
-(** [generate_dockerfiles_in_directories output_dir (name * docker)] will
-    output a list of Dockerfiles inside the [output_dir/name] subdirectory,
-    with each directory containing the Dockerfile specified by [docker].
+(** [generate_dockerfiles_in_directories output_dir (name * docker)] will output
+    a list of Dockerfiles inside the [output_dir/name] subdirectory, with each
+    directory containing the Dockerfile specified by [docker].
 
     The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
     optimisation to reduce the number of layers; disable it if you really want
@@ -63,12 +63,12 @@ val generate_dockerfiles_in_git_branches :
   (string * Dockerfile.t) list ->
   (unit, [> `Msg of string ]) result
 (** [generate_dockerfiles_in_git_branches output_dir (name * docker)] will
-    output a set of git branches in the [output_dir] Git repository.
-    Each branch will be named [name] and contain a single [docker] file.
-    The contents of these branches will be reset, so this should be
-    only be used on an [output_dir] that is a dedicated Git repository
-    for this purpose.  If [readme] is specified, the contents will be
-    written to [README.md] in that branch.
+    output a set of git branches in the [output_dir] Git repository. Each branch
+    will be named [name] and contain a single [docker] file. The contents of
+    these branches will be reset, so this should be only be used on an
+    [output_dir] that is a dedicated Git repository for this purpose. If
+    [readme] is specified, the contents will be written to [README.md] in that
+    branch.
 
     The [crunch] argument defaults to true and applies the {!Dockerfile.crunch}
     optimisation to reduce the number of layers; disable it if you really want

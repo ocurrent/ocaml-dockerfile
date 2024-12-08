@@ -270,7 +270,7 @@ let create_opam_branches_windows opam_hashes =
       (* Note this is a lexicographic comparison
        * branches are "2.0", "2.1", "2.2" and "master"
        * Select "master" and 2.2 and later *)
-        (fun { branch; _ } -> branch >= "2.2")
+      (fun { branch; _ } -> branch >= "2.2")
       branches )
 
 let install_opams ?prefix opam_master_hash opam_branches =
@@ -280,7 +280,8 @@ let install_opams ?prefix opam_master_hash opam_branches =
      shell/bootstrap-ocaml.sh && make -C src_ext cache-archives"
     opam_master_hash
   @@ List.fold_left
-       (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ } ->
+       (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ }
+          ->
          acc
          @@ install_opam_from_source ~add_default_link:false ?prefix
               ~enable_0install_solver ~with_vendored_deps ~branch ~hash ())
@@ -294,7 +295,8 @@ let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
        opam_master_hash
        (if Option.value ~default:false msvs then "OCAML_PORT=msvc64" else "")
   @@ List.fold_left
-       (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ } ->
+       (fun acc { branch; hash; enable_0install_solver; with_vendored_deps; _ }
+          ->
          acc
          @@ install_opam_from_source_windows ?cyg ?prefix ?msvs
               ~enable_0install_solver ~with_vendored_deps ~branch ~hash ())
@@ -744,7 +746,8 @@ let multiarch_manifest ~target ~platforms =
           \    image: %s\n\
           \    platform:\n\
           \      architecture: %s\n\
-          \      os: linux" image arch)
+          \      os: linux"
+          image arch)
       platforms
     |> String.concat "\n"
   in
