@@ -360,7 +360,7 @@ let resolve_alias (d : t) : distro =
   | ( `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
-        | `V3_19 | `V3_20 )
+        | `V3_19 | `V3_20 | `V3_21 )
     | `Archlinux `Latest
     | `CentOS (`V6 | `V7 | `V8)
     | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `V12 | `Testing | `Unstable)
@@ -709,6 +709,7 @@ let tag_of_distro (d : t) =
   | `Alpine `V3_18 -> "alpine-3.18"
   | `Alpine `V3_19 -> "alpine-3.19"
   | `Alpine `V3_20 -> "alpine-3.20"
+  | `Alpine `V3_21 -> "alpine-3.21"
   | `Alpine `Latest -> "alpine"
   | `Archlinux `Latest -> "archlinux"
   | `OpenSUSE `V42_1 -> "opensuse-42.1"
