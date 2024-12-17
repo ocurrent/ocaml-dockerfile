@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.2.5 2024-12-17 Lille
+-----------------------
 
 - Add Alpine 3.21, deprecate Alpine 3.20. (@MisterDA, #225)
 
