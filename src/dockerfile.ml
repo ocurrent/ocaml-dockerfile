@@ -378,7 +378,7 @@ let rec string_of_line ~escape (t : line) =
              | Some p -> "--platform=" ^ p ^ " ");
              image;
              (match tag with None -> "" | Some t -> ":" ^ t);
-             (match alias with None -> "" | Some a -> " as " ^ a);
+             (match alias with None -> "" | Some a -> " AS " ^ a);
            ])
   | `Maintainer m -> cmd "MAINTAINER" m
   | `Run (mounts, network, security, c) ->
