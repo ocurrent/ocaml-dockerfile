@@ -819,6 +819,7 @@ let distro_of_tag x : t option =
   | "alpine-3.18" -> Some (`Alpine `V3_18)
   | "alpine-3.19" -> Some (`Alpine `V3_19)
   | "alpine-3.20" -> Some (`Alpine `V3_20)
+  | "alpine-3.21" -> Some (`Alpine `V3_21)
   | "alpine" -> Some (`Alpine `Latest)
   | "archlinux" -> Some (`Archlinux `Latest)
   | "opensuse-42.1" -> Some (`OpenSUSE `V42_1)
