@@ -356,6 +356,7 @@ val add :
   ?chown:string ->
   ?chmod:int ->
   ?from:string ->
+  ?exclude:string list ->
   ?checksum:string ->
   ?keep_git_dir:bool ->
   src:string list ->
@@ -403,13 +404,20 @@ val add :
 
     @param keep_git_dir
       When cloning a Git repository, the flag adds the [.git] directory. This
-      flag defaults to false. *)
+      flag defaults to false.
+
+    @param exclude
+      The [--exclude] flag lets you specify a path expression for files to be
+      excluded. The path expression follows the same format as [<src>],
+      supporting wildcards and matching using Go's [filepath.Match] rules. *)
 
 val copy :
   ?link:bool ->
   ?chown:string ->
   ?chmod:int ->
   ?from:string ->
+  ?parents:bool ->
+  ?exclude:string list ->
   src:string list ->
   dst:string ->
   unit ->
@@ -434,7 +442,16 @@ val copy :
     @param from
       Allows artefacts to be retrieved from multiple stages. It can either be an
       integer number (starting with 0 for the first {!from} stage, or a named
-      stage (supplied via [?alias] to the {!from} command). *)
+      stage (supplied via [?alias] to the {!from} command).
+
+    @param parents
+      The [--parents] flag preserves parent directories for [src] entries. This
+      flag defaults to [false].
+
+    @param exclude
+      The [--exclude] flag lets you specify a path expression for files to be
+      excluded. The path expression follows the same format as [<src>],
+      supporting wildcards and matching using Go's [filepath.Match] rules. *)
 
 val copy_heredoc :
   ?chown:string -> ?chmod:int -> src:heredoc list -> dst:string -> unit -> t

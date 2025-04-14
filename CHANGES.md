@@ -1,3 +1,8 @@
+unreleased
+----------
+
+- Support `COPY` and `ADD` new `--exclude` and `--parents` flags. (@MisterDA #229)
+
 v8.2.5 2024-12-17 Lille
 -----------------------
 
