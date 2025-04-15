@@ -1,6 +1,7 @@
-unreleased
-----------
+v8.2.6 2025-04-15
+-----------------
 
+- Add `x-maintenance-intent` (@mtelvers, #230)
 - Support `COPY` and `ADD` new `--exclude` and `--parents` flags. (@MisterDA #229)
 - Add Fedora 42, deprecate Fedora 40. (@MisterDA, #228)
 
