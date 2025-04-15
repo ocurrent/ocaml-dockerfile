@@ -65,7 +65,8 @@ type distro =
     | `V38
     | `V39
     | `V40
-    | `V41 ]
+    | `V41
+    | `V42 ]
   | `OracleLinux of [ `V7 | `V8 | `V9 ]
   | `OpenSUSE of
     [ `V42_1
@@ -155,6 +156,7 @@ type t =
     | `V39
     | `V40
     | `V41
+    | `V42
     | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `V9 | `Latest ]
   | `OpenSUSE of
@@ -289,6 +291,7 @@ let distros : t list =
     `Fedora `V39;
     `Fedora `V40;
     `Fedora `V41;
+    `Fedora `V42;
     `Fedora `Latest;
     `OracleLinux `V7;
     `OracleLinux `V8;
@@ -349,7 +352,7 @@ let resolve_alias (d : t) : distro =
   | `Alpine `Latest -> `Alpine `V3_21
   | `CentOS `Latest -> `CentOS `V7
   | `Debian `Stable -> `Debian `V12
-  | `Fedora `Latest -> `Fedora `V41
+  | `Fedora `Latest -> `Fedora `V42
   | `OracleLinux `Latest -> `OracleLinux `V9
   | `OpenSUSE `Latest -> `OpenSUSE `V15_6
   | `Ubuntu `Latest -> `Ubuntu `V24_10
@@ -367,7 +370,7 @@ let resolve_alias (d : t) : distro =
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
-        | `V41 )
+        | `V41 | `V42 )
     | `OracleLinux (`V7 | `V8 | `V9)
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
@@ -403,9 +406,10 @@ let distro_status (d : t) : status =
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 ) ->
+        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 )
+      ->
         `Deprecated
-    | `Fedora (`V40 | `V41) -> `Active `Tier2
+    | `Fedora (`V41 | `V42) -> `Active `Tier2
     | `OracleLinux `V7 -> `Deprecated
     | `OracleLinux (`V8 | `V9) -> `Active `Tier3
     | `OpenSUSE
@@ -479,7 +483,9 @@ let distro_arches ov (d : t) =
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
-  | `Fedora (`V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41), ov
+  | ( `Fedora
+        (`V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42),
+      ov )
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
   | `OpenSUSE (`V15_4 | `V15_5 | `V15_6), ov
@@ -602,7 +608,8 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Fedora `V38 -> Some "4.14.0"
   | `Fedora `V39 -> Some "5.0.0"
   | `Fedora `V40 -> Some "5.1.1"
-  | `Fedora `V41 -> Some "5.2.0"
+  | `Fedora `V41 -> Some "5.2.1"
+  | `Fedora `V42 -> Some "5.3.0"
   | `CentOS `V6 -> Some "3.11.2"
   | `CentOS `V7 -> Some "4.01.0"
   | `CentOS `V8 -> Some "4.07.0"
@@ -687,6 +694,7 @@ let tag_of_distro (d : t) =
   | `Fedora `V39 -> "fedora-39"
   | `Fedora `V40 -> "fedora-40"
   | `Fedora `V41 -> "fedora-41"
+  | `Fedora `V42 -> "fedora-42"
   | `OracleLinux `V7 -> "oraclelinux-7"
   | `OracleLinux `V8 -> "oraclelinux-8"
   | `OracleLinux `V9 -> "oraclelinux-9"
@@ -796,6 +804,7 @@ let distro_of_tag x : t option =
   | "fedora-39" -> Some (`Fedora `V39)
   | "fedora-40" -> Some (`Fedora `V40)
   | "fedora-41" -> Some (`Fedora `V41)
+  | "fedora-42" -> Some (`Fedora `V42)
   | "fedora" -> Some (`Fedora `Latest)
   | "oraclelinux-7" -> Some (`OracleLinux `V7)
   | "oraclelinux-8" -> Some (`OracleLinux `V8)
@@ -819,6 +828,7 @@ let distro_of_tag x : t option =
   | "alpine-3.18" -> Some (`Alpine `V3_18)
   | "alpine-3.19" -> Some (`Alpine `V3_19)
   | "alpine-3.20" -> Some (`Alpine `V3_20)
+  | "alpine-3.21" -> Some (`Alpine `V3_21)
   | "alpine" -> Some (`Alpine `Latest)
   | "archlinux" -> Some (`Archlinux `Latest)
   | "opensuse-42.1" -> Some (`OpenSUSE `V42_1)
@@ -905,6 +915,7 @@ let human_readable_string_of_distro (d : t) =
     | `Fedora `V39 -> "Fedora 39"
     | `Fedora `V40 -> "Fedora 40"
     | `Fedora `V41 -> "Fedora 41"
+    | `Fedora `V42 -> "Fedora 42"
     | `OracleLinux `V7 -> "OracleLinux 7"
     | `OracleLinux `V8 -> "OracleLinux 8"
     | `OracleLinux `V9 -> "OracleLinux 9"
@@ -1058,6 +1069,7 @@ let bubblewrap_version (t : t) =
   | `Fedora `V39 -> Some (0, 10, 0)
   | `Fedora `V40 -> Some (0, 10, 0)
   | `Fedora `V41 -> Some (0, 10, 0)
+  | `Fedora `V42 -> Some (0, 11, 0)
   | `OracleLinux `V7 -> None
   | `OracleLinux `V8 -> Some (0, 4, 0)
   | `OracleLinux `V9 -> Some (0, 4, 1)
@@ -1195,6 +1207,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V39 -> "39"
         | `V40 -> "40"
         | `V41 -> "41"
+        | `V42 -> "42"
       in
       ("fedora", tag)
   | `OracleLinux v ->
