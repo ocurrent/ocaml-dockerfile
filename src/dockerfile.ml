@@ -30,6 +30,8 @@ type sources_to_dest =
   * [ `Link of bool option ]
   * [ `Checksum of string option ]
   * [ `Keep_git_dir of bool option ]
+  * [ `Parents of bool option ]
+  * [ `Exclude of string list option ]
 [@@deriving sexp]
 
 type from = {
@@ -247,6 +249,11 @@ let optional_enum name string_of_val = function
   | None -> []
   | Some value -> [ sprintf "--%s=%s" name (string_of_val value) ]
 
+let optional_list name string_of_val = function
+  | None | Some [] -> []
+  | Some list ->
+      List.map (fun e -> sprintf "--%s=%s" name (string_of_val e)) list
+
 let string_of_sources_to_dest (t : sources_to_dest) =
   let ( `From frm,
         `Src sl,
@@ -255,7 +262,9 @@ let string_of_sources_to_dest (t : sources_to_dest) =
         `Chmod chmod,
         `Link link,
         `Checksum checksum,
-        `Keep_git_dir keep_git_dir ) =
+        `Keep_git_dir keep_git_dir,
+        `Parents parents,
+        `Exclude exclude ) =
     t
   in
   String.concat " "
@@ -265,6 +274,8 @@ let string_of_sources_to_dest (t : sources_to_dest) =
     @ optional "--from" frm
     @ optional "--checksum" checksum
     @ optional_bool "--keep-git-dir" keep_git_dir
+    @ optional_bool "--parents" parents
+    @ optional_list "--exclude" Fun.id exclude
     @ [ json_array_of_list (sl @ [ d ]) ])
 
 let string_of_label_list ls =
@@ -461,7 +472,8 @@ let expose_ports p : t = [ `Expose p ]
 let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
-let add ?link ?chown ?chmod ?from ?checksum ?keep_git_dir ~src ~dst () : t =
+let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ~src ~dst ()
+    : t =
   [
     `Add
       ( `From from,
@@ -471,10 +483,12 @@ let add ?link ?chown ?chmod ?from ?checksum ?keep_git_dir ~src ~dst () : t =
         `Chmod chmod,
         `Link link,
         `Checksum checksum,
-        `Keep_git_dir keep_git_dir );
+        `Keep_git_dir keep_git_dir,
+        `Parents None,
+        `Exclude exclude );
   ]
 
-let copy ?link ?chown ?chmod ?from ~src ~dst () : t =
+let copy ?link ?chown ?chmod ?from ?parents ?exclude ~src ~dst () : t =
   [
     `Copy
       ( `From from,
@@ -484,7 +498,9 @@ let copy ?link ?chown ?chmod ?from ~src ~dst () : t =
         `Chmod chmod,
         `Link link,
         `Checksum None,
-        `Keep_git_dir None );
+        `Keep_git_dir None,
+        `Parents parents,
+        `Exclude exclude );
   ]
 
 let copy_heredoc ?chown ?chmod ~src ~dst () : t =

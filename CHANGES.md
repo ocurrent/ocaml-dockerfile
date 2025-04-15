@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support `COPY` and `ADD` new `--exclude` and `--parents` flags. (@MisterDA #229)
 - Add Fedora 42, deprecate Fedora 40. (@MisterDA, #228)
 
 v8.2.5 2024-12-17 Lille
