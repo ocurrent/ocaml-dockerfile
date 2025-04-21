@@ -561,13 +561,17 @@ let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
           | `CentOS _ -> true
           | _ -> false
         in
-        let c_devtools_libs : (t, unit, string, t) format4 =
+        let (dnf_version, c_devtools_libs) : int * (t, unit, string, t) format4
+            =
           match d with
-          | `Fedora `V41 -> {|"c-development"|}
-          | `Fedora _ -> {|"C Development Tools and Libraries"|}
-          | _ -> {|"Development Tools"|}
+          | `Fedora
+              ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29
+              | `V30 | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38
+              | `V39 | `V40 ) ->
+              (3, {|"C Development Tools and Libraries"|})
+          | `Fedora _ -> (5, {|"c-development"|})
+          | _ -> (3, {|"Development Tools"|})
         in
-        let dnf_version = match d with `Fedora `V41 -> 5 | _ -> 3 in
         yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~dnf_version
           ~c_devtools_libs ~opam_hashes d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
