@@ -401,7 +401,7 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ workaround @@ Linux.RPM.update
   @@ Linux.RPM.groupinstall dnf_version c_devtools_libs
   @@ Linux.RPM.install
-       "git patch unzip which tar curl xz libcap-devel openssl sudo bzip2"
+       "git patch unzip which tar curl xz libcap-devel openssl sudo bzip2 awk"
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
   @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
