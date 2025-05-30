@@ -1,4 +1,7 @@
 
+v8.2.7 2025-05-30
+-----------------
+
 - Use DNF 5 syntax for Fedora V41 and future versions (@mtelvers, #231)
 
 v8.2.6 2025-04-15
