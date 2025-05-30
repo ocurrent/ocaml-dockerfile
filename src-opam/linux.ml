@@ -52,7 +52,7 @@ module RPM = struct
   let dev_packages ?extra () =
     install
       "sudo passwd bzip2 unzip patch rsync nano gcc-c++ git tar curl xz \
-       libX11-devel which m4 diffutils findutils%s"
+       libX11-devel which m4 gawk diffutils findutils%s"
       (match extra with None -> "" | Some x -> " " ^ x)
 
   let ocaml_depexts v =
