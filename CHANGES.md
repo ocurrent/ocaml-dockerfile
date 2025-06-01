@@ -1,4 +1,9 @@
 
+Unreleased
+----------
+
+- Deprecate Ubuntu 20.04, EOL 31 May 2025. (@mtelvers, #232)
+
 v8.2.7 2025-05-30
 -----------------
 
