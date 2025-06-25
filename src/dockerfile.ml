@@ -308,7 +308,7 @@ let string_of_mount { typ } =
       String.concat ","
         ([ "--mount=type=cache" ] @ optional "id" id
         @ [ sprintf "target=%s" target ]
-        @ optional_bool "readonly" readonly
+        @ optional_flag "readonly" readonly
         @ (match sharing with
           | None -> []
           | Some `Shared -> [ "sharing=shared" ]
