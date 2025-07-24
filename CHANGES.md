@@ -39,6 +39,7 @@ v8.3.0 2025-08-19
 v8.2.9 2025-07-24
 -----------------
 
+- Dockerfile.mount_cache: readonly is a flag, not a boolean. (@edwintorok, #234)
 - Add Ubuntu 25.04. (@mtelvers, #233)
 - Add opam-2.4 (@kit-ty-kate, #235)
 
