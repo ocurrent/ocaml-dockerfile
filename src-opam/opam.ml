@@ -193,6 +193,7 @@ type opam_hashes = {
   opam_2_1_hash : string;
   opam_2_2_hash : string;
   opam_2_3_hash : string;
+  opam_2_4_hash : string;
   opam_master_hash : string;
 }
 
@@ -221,6 +222,7 @@ let create_opam_branches opam_hashes =
     opam_2_1_hash;
     opam_2_2_hash;
     opam_2_3_hash;
+    opam_2_4_hash;
     opam_master_hash;
   } =
     opam_hashes
@@ -258,6 +260,14 @@ let create_opam_branches opam_hashes =
         enable_0install_solver = true;
         with_vendored_deps = true;
         public_name = "opam-2.3";
+        aliases = [];
+      };
+      {
+        branch = "2.4";
+        hash = opam_2_4_hash;
+        enable_0install_solver = true;
+        with_vendored_deps = true;
+        public_name = "opam-2.4";
         aliases = [];
       };
       opam_master_branch opam_master_hash;

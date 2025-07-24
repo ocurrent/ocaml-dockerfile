@@ -46,6 +46,7 @@ type opam_hashes = {
   opam_2_1_hash : string;
   opam_2_2_hash : string;
   opam_2_3_hash : string;
+  opam_2_4_hash : string;
   opam_master_hash : string;
 }
 
