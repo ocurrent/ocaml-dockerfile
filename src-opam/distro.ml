@@ -474,10 +474,12 @@ module OV = Ocaml_version
 let distro_arches ov (d : t) =
   match (resolve_alias d, ov) with
   | (`CentOS (`V6 | `V7) | `OracleLinux `V7), ov when OV.major ov >= 5 -> []
+  | `Debian `V13, ov when OV.(compare Releases.v4_11_0 ov) = -1 ->
+      [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x; `Riscv64 ]
   | `Debian `V13, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
-      [ `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
+      [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
   | `Debian `V13, ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
-      [ `X86_64; `Aarch64; `Aarch32 ]
+      [ `I386; `X86_64; `Aarch64; `Aarch32 ]
   | `Debian `V12, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
   | `Debian `V12, ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
