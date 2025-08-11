@@ -44,7 +44,8 @@ type distro =
     | `V3_22 ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 ]
-  | `Debian of [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
+  | `Debian of
+    [ `V13 | `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
@@ -136,7 +137,16 @@ type t =
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of
-    [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+    [ `V13
+    | `V12
+    | `V11
+    | `V10
+    | `V9
+    | `V8
+    | `V7
+    | `Stable
+    | `Testing
+    | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
@@ -268,6 +278,7 @@ let distros : t list =
     `CentOS `V7;
     `CentOS `V8;
     `CentOS `Latest;
+    `Debian `V13;
     `Debian `V12;
     `Debian `V11;
     `Debian `V10;
@@ -357,7 +368,7 @@ let resolve_alias (d : t) : distro =
   match d with
   | `Alpine `Latest -> `Alpine `V3_22
   | `CentOS `Latest -> `CentOS `V7
-  | `Debian `Stable -> `Debian `V12
+  | `Debian `Stable -> `Debian `V13
   | `Fedora `Latest -> `Fedora `V42
   | `OracleLinux `Latest -> `OracleLinux `V9
   | `OpenSUSE `Latest -> `OpenSUSE `V15_6
@@ -372,7 +383,8 @@ let resolve_alias (d : t) : distro =
         | `V3_19 | `V3_20 | `V3_21 | `V3_22 )
     | `Archlinux `Latest
     | `CentOS (`V6 | `V7 | `V8)
-    | `Debian (`V7 | `V8 | `V9 | `V10 | `V11 | `V12 | `Testing | `Unstable)
+    | `Debian
+        (`V7 | `V8 | `V9 | `V10 | `V11 | `V12 | `V13 | `Testing | `Unstable)
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
@@ -407,7 +419,8 @@ let distro_status (d : t) : status =
     | `CentOS (`V6 | `V8) -> `Deprecated
     | `Debian (`V7 | `V8 | `V9 | `V10) -> `Deprecated
     | `Debian `V11 -> `Active `Tier2
-    | `Debian `V12 -> `Active `Tier1
+    | `Debian `V12 -> `Active `Tier2
+    | `Debian `V13 -> `Active `Tier1
     | `Debian `Testing -> `Active `Tier3
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
@@ -461,6 +474,10 @@ module OV = Ocaml_version
 let distro_arches ov (d : t) =
   match (resolve_alias d, ov) with
   | (`CentOS (`V6 | `V7) | `OracleLinux `V7), ov when OV.major ov >= 5 -> []
+  | `Debian `V13, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
+      [ `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
+  | `Debian `V13, ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
+      [ `X86_64; `Aarch64; `Aarch32 ]
   | `Debian `V12, ov when OV.(compare Releases.v4_03_0 ov) = -1 ->
       [ `I386; `X86_64; `Aarch64; `Aarch32; `Ppc64le; `S390x ]
   | `Debian `V12, ov when OV.(compare Releases.v4_02_0 ov) = -1 ->
@@ -552,6 +569,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Debian `V10 -> Some "4.05.0"
   | `Debian `V11 -> Some "4.11.1"
   | `Debian `V12 -> Some "4.13.1"
+  | `Debian `V13 -> Some "5.3.0"
   | `Ubuntu `V12_04 -> Some "3.12.1"
   | `Ubuntu `V14_04 -> Some "4.01.0"
   | `Ubuntu `V15_04 -> Some "4.01.0"
@@ -671,6 +689,7 @@ let tag_of_distro (d : t) =
   | `Debian `Stable -> "debian-stable"
   | `Debian `Unstable -> "debian-unstable"
   | `Debian `Testing -> "debian-testing"
+  | `Debian `V13 -> "debian-13"
   | `Debian `V12 -> "debian-12"
   | `Debian `V11 -> "debian-11"
   | `Debian `V10 -> "debian-10"
@@ -785,6 +804,7 @@ let distro_of_tag x : t option =
   | "debian-stable" -> Some (`Debian `Stable)
   | "debian-unstable" -> Some (`Debian `Unstable)
   | "debian-testing" -> Some (`Debian `Testing)
+  | "debian-13" -> Some (`Debian `V13)
   | "debian-12" -> Some (`Debian `V12)
   | "debian-11" -> Some (`Debian `V11)
   | "debian-10" -> Some (`Debian `V10)
@@ -898,6 +918,7 @@ let human_readable_string_of_distro (d : t) =
     | `Ubuntu `V25_04 -> "Ubuntu 25.04"
     | `Debian `Unstable -> "Debian Unstable"
     | `Debian `Testing -> "Debian Testing"
+    | `Debian `V13 -> "Debian 13 (Trixie)"
     | `Debian `V12 -> "Debian 12 (Bookworm)"
     | `Debian `V11 -> "Debian 11 (Bullseye)"
     | `Debian `V10 -> "Debian 10 (Buster)"
@@ -1058,6 +1079,7 @@ let bubblewrap_version (t : t) =
   | `Debian `V10 -> Some (0, 3, 1)
   | `Debian `V11 -> Some (0, 4, 1)
   | `Debian `V12 -> Some (0, 8, 0)
+  | `Debian `V13 -> Some (0, 11, 0)
   | `Debian `Testing -> Some (0, 8, 0)
   | `Debian `Unstable -> Some (0, 8, 0)
   | `CentOS `V6 -> None
@@ -1161,6 +1183,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V10 -> "10"
         | `V11 -> "11"
         | `V12 -> "12"
+        | `V13 -> "13"
         | `Testing -> "testing"
         | `Unstable -> "unstable"
       in

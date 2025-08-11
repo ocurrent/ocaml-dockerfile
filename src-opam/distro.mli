@@ -45,7 +45,8 @@ type distro =
     | `V3_22 ]
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 ]
-  | `Debian of [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
+  | `Debian of
+    [ `V13 | `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
@@ -137,7 +138,16 @@ type t =
   | `Archlinux of [ `Latest ]
   | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
   | `Debian of
-    [ `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Stable | `Testing | `Unstable ]
+    [ `V13
+    | `V12
+    | `V11
+    | `V10
+    | `V9
+    | `V8
+    | `V7
+    | `Stable
+    | `Testing
+    | `Unstable ]
   | `Fedora of
     [ `V21
     | `V22
