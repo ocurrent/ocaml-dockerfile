@@ -602,6 +602,8 @@ val crunch : t -> t
       if mounts or networks or security modes differ for each run command. *)
 
 val layers : t -> int
-(** [layers t] approximates the number of layers that would be produced by the Docker
-    build of this Dockerfile. Each {!from}, {!run}, {!copy}, {!add}
-    command produces a new layer. Note that multiple run commands can be combined into a single layer using {!crunch} and hence should be accounted for. *)
+(** [layers t] approximates the number of layers that would be produced by the
+    Docker build of this Dockerfile. Each {!from}, {!run}, {!copy}, {!add}
+    command produces a new layer. Note that multiple run commands can be
+    combined into a single layer using {!crunch} and hence should be accounted
+    for. *)

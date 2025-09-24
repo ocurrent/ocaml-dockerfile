@@ -579,11 +579,7 @@ let string_of_t tl =
 let layers (t : t) : int =
   let t = crunch t in
   let is_layer = function
-    | `From _
-    | `Run _
-    | `Copy _
-    | `Add _
-     -> true
+    | `From _ | `Run _ | `Copy _ | `Add _ -> true
     | _ -> false
   in
   List.fold_left (fun acc l -> if is_layer l then acc + 1 else acc) 0 t
