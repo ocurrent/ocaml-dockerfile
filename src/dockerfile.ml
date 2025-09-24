@@ -577,7 +577,6 @@ let string_of_t tl =
   Buffer.contents buf
 
 let layers (t : t) : int =
-  let t = crunch t in
   let is_layer = function
     | `From _ | `Run _ | `Copy _ | `Add _ -> true
     | _ -> false
