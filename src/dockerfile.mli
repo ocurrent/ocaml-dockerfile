@@ -604,6 +604,4 @@ val crunch : t -> t
 val layers : t -> int
 (** [layers t] approximates the number of layers that would be produced by the
     Docker build of this Dockerfile. Each {!from}, {!run}, {!copy}, {!add}
-    command produces a new layer. Note that multiple run commands can be
-    combined into a single layer using {!crunch} and hence should be accounted
-    for. *)
+    command produces a new layer. *)
