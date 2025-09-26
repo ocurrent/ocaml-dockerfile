@@ -581,6 +581,9 @@ let layers (t : t) : int =
     | `From _ | `Run _ | `Copy _ | `Add _ -> true
     | _ -> false
   in
-  List.fold_left (fun acc l -> if is_layer l then acc + 1 else acc) 0 t
+  List.fold_left
+    (fun acc l ->
+      match l with `From _ -> 1 | _ -> if is_layer l then acc + 1 else acc)
+    0 t
 
 let pp ppf tl = Fmt.pf ppf "%s" (string_of_t tl)
