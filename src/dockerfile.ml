@@ -43,7 +43,8 @@ type from = {
 }
 [@@deriving sexp]
 
-type parser_directive = [ `Syntax of string | `Escape of char ]
+type parser_directive =
+  [ `Syntax of string | `Escape of char | `Check of string list * bool ]
 [@@deriving sexp]
 
 type heredoc = {
@@ -403,6 +404,15 @@ let rec string_of_line ~escape (t : line) =
   match t with
   | `ParserDirective (`Escape c) -> cmd "#" ("escape=" ^ String.make 1 c)
   | `ParserDirective (`Syntax str) -> cmd "#" ("syntax=" ^ str)
+  | `ParserDirective (`Check (skip, error)) -> (
+      let skip =
+        match skip with
+        | [] -> []
+        | skip -> [ "skip=" ^ String.concat "," skip ]
+      and error = if error then [ "error=true" ] else [] in
+      match String.concat ";" (skip @ error) with
+      | "" -> ""
+      | check -> cmd "#" ("check=" ^ check))
   | `Comment c -> cmd "#" c
   | `From { image; tag; alias; platform } ->
       cmd "FROM"

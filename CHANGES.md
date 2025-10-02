@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Support `# check` parser directive. (@MisterDA, #241)
 - Support `RUN` new `--device` option. (@MisterDA, #241)
 - Support `ADD` new `--unpack` flag. (@MisterDA, #241)
 - Add a `layers` function to estimate the number of Dockerfile layers.

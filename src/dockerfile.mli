@@ -52,7 +52,12 @@ val maybe : ('a -> t) -> 'a option -> t
 
 (** {2 Dockerfile commands} *)
 
-type parser_directive = [ `Syntax of string | `Escape of char ]
+type parser_directive =
+  [ `Syntax of string
+  | `Escape of char
+  | `Check of string list * bool
+    (** List of check names or [["all"]], and [true] to turn warnings into
+        errors. *) ]
 [@@deriving sexp]
 
 val parser_directive : parser_directive -> t
