@@ -52,7 +52,12 @@ val maybe : ('a -> t) -> 'a option -> t
 
 (** {2 Dockerfile commands} *)
 
-type parser_directive = [ `Syntax of string | `Escape of char ]
+type parser_directive =
+  [ `Syntax of string
+  | `Escape of char
+  | `Check of string list * bool
+    (** List of check names or [["all"]], and [true] to turn warnings into
+        errors. *) ]
 [@@deriving sexp]
 
 val parser_directive : parser_directive -> t
@@ -122,11 +127,13 @@ val maintainer : ('a, unit, string, t) format4 -> 'a
 type mount
 type network = [ `Default | `None | `Host ]
 type security = [ `Insecure | `Sandbox ]
+type device
 
 val run :
   ?mounts:mount list ->
   ?network:network ->
   ?security:security ->
+  ?device:device ->
   ('a, unit, string, t) format4 ->
   'a
 (** [run ?mounts ?network ?security fmt] will execute any commands in a new
@@ -145,12 +152,17 @@ val run :
 
     @param security
       Control which security mode the command is run in. Requires BuildKit
-      {{!val:parser_directive}syntax} 1-labs. *)
+      {{!val:parser_directive}syntax} 1-labs.
+
+    @param device
+      Lets builds request CDI devices are available to the build step. See
+      {!val-device}. *)
 
 val run_exec :
   ?mounts:mount list ->
   ?network:network ->
   ?security:security ->
+  ?device:device ->
   string list ->
   t
 (** [run_exec ?mounts ?network ?security args] will execute any commands in a
@@ -169,12 +181,17 @@ val run_exec :
 
     @param security
       Control which security mode the command is run in. Requires BuildKit
-      {{!val:parser_directive}syntax} 1-labs. *)
+      {{!val:parser_directive}syntax} 1-labs.
+
+    @param device
+      Lets builds request CDI devices are available to the build step. See
+      {!val-device}. *)
 
 val run_heredoc :
   ?mounts:mount list ->
   ?network:network ->
   ?security:security ->
+  ?device:device ->
   (heredoc * string option) list ->
   t
 (** [run_heredoc ?mounts ?network ?security docs] will execute any commands in a
@@ -193,7 +210,11 @@ val run_heredoc :
 
     @param security
       Control which security mode the command is run in. Requires BuildKit
-      {{!val:parser_directive}syntax} 1-labs. *)
+      {{!val:parser_directive}syntax} 1-labs.
+
+    @param device
+      Lets builds request CDI devices are available to the build step. See
+      {!val-device}. *)
 
 val mount_bind :
   target:string ->
@@ -313,6 +334,10 @@ val mount_ssh :
     @see <https://docs.docker.com/engine/reference/builder/#run---mounttypessh>
       Docker --mount=type=ssh reference *)
 
+val device : name:string -> ?required:bool -> unit -> device
+(** Create a device for [RUN]. Lets builds request CDI devices are available to
+    the build step. *)
+
 val cmd : ('a, unit, string, t) format4 -> 'a
 (** [cmd args] provides defaults for an executing container. These defaults can
     include an executable, or they can omit the executable, in which case you
@@ -359,6 +384,7 @@ val add :
   ?exclude:string list ->
   ?checksum:string ->
   ?keep_git_dir:bool ->
+  ?unpack:bool ->
   src:string list ->
   dst:string ->
   unit ->
@@ -409,7 +435,11 @@ val add :
     @param exclude
       The [--exclude] flag lets you specify a path expression for files to be
       excluded. The path expression follows the same format as [<src>],
-      supporting wildcards and matching using Go's [filepath.Match] rules. *)
+      supporting wildcards and matching using Go's [filepath.Match] rules.
+
+    @param unpack
+      Control whether archives from a URL path are unpacked. The default is to
+      detect unpack behavior based on the source path. *)
 
 val copy :
   ?link:bool ->

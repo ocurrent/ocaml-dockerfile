@@ -32,6 +32,7 @@ type sources_to_dest =
   * [ `Keep_git_dir of bool option ]
   * [ `Parents of bool option ]
   * [ `Exclude of string list option ]
+  * [ `Unpack of bool option ]
 [@@deriving sexp]
 
 type from = {
@@ -42,7 +43,8 @@ type from = {
 }
 [@@deriving sexp]
 
-type parser_directive = [ `Syntax of string | `Escape of char ]
+type parser_directive =
+  [ `Syntax of string | `Escape of char | `Check of string list * bool ]
 [@@deriving sexp]
 
 type heredoc = {
@@ -101,6 +103,8 @@ type mount = {
 }
 [@@deriving sexp]
 
+type device = { name : string; required : bool option } [@@deriving sexp]
+
 type healthcheck_options = {
   interval : string option;
   timeout : string option;
@@ -135,11 +139,17 @@ type line =
   | `Comment of string
   | `From of from
   | `Maintainer of string
-  | `Run of mount list * network option * security option * shell_or_exec
+  | `Run of
+    mount list
+    * network option
+    * security option
+    * device option
+    * shell_or_exec
   | `Run_heredoc of
     mount list
     * network option
     * security option
+    * device option
     * (heredoc * string option) list
   | `Cmd of shell_or_exec
   | `Expose of int list
@@ -177,18 +187,22 @@ let crunch l =
   let pack l =
     let rec aux acc = function
       | [] -> acc
-      | `Run (m, n, s, `Shell a) :: `Run (m', n', s', `Shell b) :: tl ->
+      | `Run (m, n, s, d, `Shell a) :: `Run (m', n', s', d', `Shell b) :: tl ->
           if n <> n' then invalid_arg "crunch: at least two networks differ.";
           if s <> s' then invalid_arg "crunch: at least two securities differ.";
-          aux (`Run (merge m m', n, s, `Shells [ a; b ]) :: acc) tl
-      | `Run (m, n, s, `Shells a) :: `Run (m', n', s', `Shell b) :: tl ->
+          if d <> d' then invalid_arg "crunch: devices differ";
+          aux (`Run (merge m m', n, s, d, `Shells [ a; b ]) :: acc) tl
+      | `Run (m, n, s, d, `Shells a) :: `Run (m', n', s', d', `Shell b) :: tl ->
           if n <> n' then invalid_arg "crunch: at least two networks differ.";
           if s <> s' then invalid_arg "crunch: at least two securities differ.";
-          aux (`Run (merge m m', n, s, `Shells (a @ [ b ])) :: acc) tl
-      | `Run (m, n, s, `Shells a) :: `Run (m', n', s', `Shells b) :: tl ->
+          if d <> d' then invalid_arg "crunch: devices differ";
+          aux (`Run (merge m m', n, s, d, `Shells (a @ [ b ])) :: acc) tl
+      | `Run (m, n, s, d, `Shells a) :: `Run (m', n', s', d', `Shells b) :: tl
+        ->
           if n <> n' then invalid_arg "crunch: at least two networks differ.";
           if s <> s' then invalid_arg "crunch: at least two securities differ.";
-          aux (`Run (merge m m', n, s, `Shells (a @ b)) :: acc) tl
+          if d <> d' then invalid_arg "crunch: devices differ";
+          aux (`Run (merge m m', n, s, d, `Shells (a @ b)) :: acc) tl
       | hd :: tl -> aux (hd :: acc) tl
     in
     List.rev (aux [] l)
@@ -264,7 +278,8 @@ let string_of_sources_to_dest (t : sources_to_dest) =
         `Checksum checksum,
         `Keep_git_dir keep_git_dir,
         `Parents parents,
-        `Exclude exclude ) =
+        `Exclude exclude,
+        `Unpack unpack ) =
     t
   in
   String.concat " "
@@ -276,6 +291,7 @@ let string_of_sources_to_dest (t : sources_to_dest) =
     @ optional_bool "--keep-git-dir" keep_git_dir
     @ optional_bool "--parents" parents
     @ optional_list "--exclude" Fun.id exclude
+    @ optional_bool "--unpack" unpack
     @ [ json_array_of_list (sl @ [ d ]) ])
 
 let string_of_label_list ls =
@@ -337,7 +353,7 @@ let string_of_mount { typ } =
         @ optional_int_octal "mode" mode
         @ optional_int "uid" uid @ optional_int "gid" gid)
 
-let string_of_run' ~escape mounts network security =
+let string_of_run' ~escape mounts network security device =
   let mounts =
     mounts |> List.map string_of_mount
     |> List.map (escape_string ~char_to_escape:' ' ~escape)
@@ -352,15 +368,24 @@ let string_of_run' ~escape mounts network security =
       (function `Insecure -> "insecure" | `Sandbox -> "sandbox")
       security
   in
-  mounts @ network @ security
+  let device =
+    match device with
+    | None -> []
+    | Some { name; required } ->
+        [
+          String.concat ","
+            ([ sprintf "--device=%s" name ] @ optional_flag "required" required);
+        ]
+  in
+  mounts @ network @ security @ device
 
-let string_of_run ~escape mounts network security c =
-  let params = string_of_run' ~escape mounts network security in
+let string_of_run ~escape mounts network security device c =
+  let params = string_of_run' ~escape mounts network security device in
   let run = string_of_shell_or_exec ~escape c in
   String.concat " " (params @ [ run ])
 
-let string_of_run_heredoc ~escape mounts network security c =
-  let params = string_of_run' ~escape mounts network security in
+let string_of_run_heredoc ~escape mounts network security device c =
+  let params = string_of_run' ~escape mounts network security device in
   let escape_cmd = function
     | Some cmd -> " " ^ escape_string ~char_to_escape:'\n' ~escape cmd
     | None -> ""
@@ -379,6 +404,15 @@ let rec string_of_line ~escape (t : line) =
   match t with
   | `ParserDirective (`Escape c) -> cmd "#" ("escape=" ^ String.make 1 c)
   | `ParserDirective (`Syntax str) -> cmd "#" ("syntax=" ^ str)
+  | `ParserDirective (`Check (skip, error)) -> (
+      let skip =
+        match skip with
+        | [] -> []
+        | skip -> [ "skip=" ^ String.concat "," skip ]
+      and error = if error then [ "error=true" ] else [] in
+      match String.concat ";" (skip @ error) with
+      | "" -> ""
+      | check -> cmd "#" ("check=" ^ check))
   | `Comment c -> cmd "#" c
   | `From { image; tag; alias; platform } ->
       cmd "FROM"
@@ -392,10 +426,10 @@ let rec string_of_line ~escape (t : line) =
              (match alias with None -> "" | Some a -> " AS " ^ a);
            ])
   | `Maintainer m -> cmd "MAINTAINER" m
-  | `Run (mounts, network, security, c) ->
-      cmd "RUN" (string_of_run ~escape mounts network security c)
-  | `Run_heredoc (mounts, network, security, c) ->
-      cmd "RUN" (string_of_run_heredoc ~escape mounts network security c)
+  | `Run (mounts, network, security, device, c) ->
+      cmd "RUN" (string_of_run ~escape mounts network security device c)
+  | `Run_heredoc (mounts, network, security, device, c) ->
+      cmd "RUN" (string_of_run_heredoc ~escape mounts network security device c)
   | `Cmd c -> cmd "CMD" (string_of_shell_or_exec ~escape c)
   | `Expose pl -> cmd "EXPOSE" (String.concat " " (List.map string_of_int pl))
   | `Arg a -> cmd "ARG" (string_of_arg ~escape a)
@@ -452,18 +486,19 @@ let mount_ssh ?id ?target ?required ?mode ?uid ?gid () =
   let m = { id; target; required; mode; uid; gid } in
   { typ = `Ssh m }
 
+let device ~name ?required () = { name; required }
 let from ?alias ?tag ?platform image = [ `From { image; tag; alias; platform } ]
 let comment fmt = ksprintf (fun c -> [ `Comment c ]) fmt
 let maintainer fmt = ksprintf (fun m -> [ `Maintainer m ]) fmt
 
-let run ?(mounts = []) ?network ?security fmt =
-  ksprintf (fun b -> [ `Run (mounts, network, security, `Shell b) ]) fmt
+let run ?(mounts = []) ?network ?security ?device fmt =
+  ksprintf (fun b -> [ `Run (mounts, network, security, device, `Shell b) ]) fmt
 
-let run_exec ?(mounts = []) ?network ?security cmds : t =
-  [ `Run (mounts, network, security, `Exec cmds) ]
+let run_exec ?(mounts = []) ?network ?security ?device cmds : t =
+  [ `Run (mounts, network, security, device, `Exec cmds) ]
 
-let run_heredoc ?(mounts = []) ?network ?security docs : t =
-  [ `Run_heredoc (mounts, network, security, docs) ]
+let run_heredoc ?(mounts = []) ?network ?security ?device docs : t =
+  [ `Run_heredoc (mounts, network, security, device, docs) ]
 
 let cmd fmt = ksprintf (fun b -> [ `Cmd (`Shell b) ]) fmt
 let cmd_exec cmds : t = [ `Cmd (`Exec cmds) ]
@@ -472,8 +507,8 @@ let expose_ports p : t = [ `Expose p ]
 let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
-let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ~src ~dst ()
-    : t =
+let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ?unpack ~src
+    ~dst () : t =
   [
     `Add
       ( `From from,
@@ -485,7 +520,8 @@ let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ~src ~dst ()
         `Checksum checksum,
         `Keep_git_dir keep_git_dir,
         `Parents None,
-        `Exclude exclude );
+        `Exclude exclude,
+        `Unpack unpack );
   ]
 
 let copy ?link ?chown ?chmod ?from ?parents ?exclude ~src ~dst () : t =
@@ -500,7 +536,8 @@ let copy ?link ?chown ?chmod ?from ?parents ?exclude ~src ~dst () : t =
         `Checksum None,
         `Keep_git_dir None,
         `Parents parents,
-        `Exclude exclude );
+        `Exclude exclude,
+        `Unpack None );
   ]
 
 let copy_heredoc ?chown ?chmod ~src ~dst () : t =
