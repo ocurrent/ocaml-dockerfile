@@ -47,8 +47,8 @@ val sanitize_reg_path : unit -> t
     The following error is raised if [PATH] isn't sanitized.
 
     {v
-/usr/bin/bash: -c: line 0: unexpected EOF while looking for matching `"'
-/usr/bin/bash: -c: line 1: syntax error: unexpected end of file
+    /usr/bin/bash: -c: line 0: unexpected EOF while looking for matching `"'
+    /usr/bin/bash: -c: line 1: syntax error: unexpected end of file
     v} |}]
 
 val install_vc_redist :
