@@ -32,6 +32,7 @@ type sources_to_dest =
   * [ `Keep_git_dir of bool option ]
   * [ `Parents of bool option ]
   * [ `Exclude of string list option ]
+  * [ `Unpack of bool option ]
 [@@deriving sexp]
 
 type from = {
@@ -264,7 +265,8 @@ let string_of_sources_to_dest (t : sources_to_dest) =
         `Checksum checksum,
         `Keep_git_dir keep_git_dir,
         `Parents parents,
-        `Exclude exclude ) =
+        `Exclude exclude,
+        `Unpack unpack ) =
     t
   in
   String.concat " "
@@ -276,6 +278,7 @@ let string_of_sources_to_dest (t : sources_to_dest) =
     @ optional_bool "--keep-git-dir" keep_git_dir
     @ optional_bool "--parents" parents
     @ optional_list "--exclude" Fun.id exclude
+    @ optional_bool "--unpack" unpack
     @ [ json_array_of_list (sl @ [ d ]) ])
 
 let string_of_label_list ls =
@@ -472,8 +475,8 @@ let expose_ports p : t = [ `Expose p ]
 let arg ?default a : t = [ `Arg (a, default) ]
 let env e : t = [ `Env e ]
 
-let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ~src ~dst ()
-    : t =
+let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ?unpack ~src
+    ~dst () : t =
   [
     `Add
       ( `From from,
@@ -485,7 +488,8 @@ let add ?link ?chown ?chmod ?from ?exclude ?checksum ?keep_git_dir ~src ~dst ()
         `Checksum checksum,
         `Keep_git_dir keep_git_dir,
         `Parents None,
-        `Exclude exclude );
+        `Exclude exclude,
+        `Unpack unpack );
   ]
 
 let copy ?link ?chown ?chmod ?from ?parents ?exclude ~src ~dst () : t =
@@ -500,7 +504,8 @@ let copy ?link ?chown ?chmod ?from ?parents ?exclude ~src ~dst () : t =
         `Checksum None,
         `Keep_git_dir None,
         `Parents parents,
-        `Exclude exclude );
+        `Exclude exclude,
+        `Unpack None );
   ]
 
 let copy_heredoc ?chown ?chmod ~src ~dst () : t =

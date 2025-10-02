@@ -359,6 +359,7 @@ val add :
   ?exclude:string list ->
   ?checksum:string ->
   ?keep_git_dir:bool ->
+  ?unpack:bool ->
   src:string list ->
   dst:string ->
   unit ->
@@ -409,7 +410,11 @@ val add :
     @param exclude
       The [--exclude] flag lets you specify a path expression for files to be
       excluded. The path expression follows the same format as [<src>],
-      supporting wildcards and matching using Go's [filepath.Match] rules. *)
+      supporting wildcards and matching using Go's [filepath.Match] rules.
+
+    @param unpack
+      Control whether archives from a URL path are unpacked. The default is to
+      detect unpack behavior based on the source path. *)
 
 val copy :
   ?link:bool ->
