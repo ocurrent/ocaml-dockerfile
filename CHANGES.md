@@ -2,6 +2,8 @@ unreleased
 ----------
 
 - Support `ADD` new `--unpack` flag. (@MisterDA, #241)
+- Add a `layers` function to estimate the number of Dockerfile layers.
+  (@fiifikcbentil, #239, #240)
 
 v8.3.1 2025-09-15
 -----------------
