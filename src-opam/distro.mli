@@ -44,7 +44,7 @@ type distro =
     | `V3_21
     | `V3_22 ]
   | `Archlinux of [ `Latest ]
-  | `CentOS of [ `V6 | `V7 | `V8 ]
+  | `CentOS of [ `V6 | `V7 | `V8 | `V9 | `V10 ]
   | `Debian of
     [ `V13 | `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
   | `Fedora of
@@ -69,8 +69,9 @@ type distro =
     | `V39
     | `V40
     | `V41
-    | `V42 ]
-  | `OracleLinux of [ `V7 | `V8 | `V9 ]
+    | `V42
+    | `V43 ]
+  | `OracleLinux of [ `V7 | `V8 | `V9 | `V10 ]
   | `OpenSUSE of
     [ `V42_1
     | `V42_2
@@ -106,7 +107,8 @@ type distro =
     | `V23_10
     | `V24_04
     | `V24_10
-    | `V25_04 ]
+    | `V25_04
+    | `V25_10 ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
   | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 ] ]
@@ -136,7 +138,7 @@ type t =
     | `V3_22
     | `Latest ]
   | `Archlinux of [ `Latest ]
-  | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
+  | `CentOS of [ `V6 | `V7 | `V8 | `V9 | `V10 | `Latest ]
   | `Debian of
     [ `V13
     | `V12
@@ -171,8 +173,9 @@ type t =
     | `V40
     | `V41
     | `V42
+    | `V43
     | `Latest ]
-  | `OracleLinux of [ `V7 | `V8 | `V9 | `Latest ]
+  | `OracleLinux of [ `V7 | `V8 | `V9 | `V10 | `Latest ]
   | `OpenSUSE of
     [ `V42_1
     | `V42_2
@@ -210,6 +213,7 @@ type t =
     | `V24_04
     | `V24_10
     | `V25_04
+    | `V25_10
     | `Latest
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
