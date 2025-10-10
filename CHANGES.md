@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.3.2 2025-10-10
+-----------------
 
 - Support `# check` parser directive. (@MisterDA, #241)
 - Support `RUN` new `--device` option. (@MisterDA, #241)
