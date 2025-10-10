@@ -6,6 +6,11 @@ unreleased
 - Support `ADD` new `--unpack` flag. (@MisterDA, #241)
 - Add a `layers` function to estimate the number of Dockerfile layers.
   (@fiifikcbentil, #239, #240)
+- Add CentOS 9, 10 (Stream) support (@mtelvers, #243).
+- Deprecate CentOS 7, EOL 30 June 2024 (@mtelvers, #243).
+- Add Fedora 43 support (@mtelvers, #243).
+- Add Oracle Linux 10 support (@mtelvers, #243).
+- Add Ubuntu 25.10 (Questing Quokka) support (@mtelvers, #243).
 
 v8.3.1 2025-09-15
 -----------------

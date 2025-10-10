@@ -43,7 +43,7 @@ type distro =
     | `V3_21
     | `V3_22 ]
   | `Archlinux of [ `Latest ]
-  | `CentOS of [ `V6 | `V7 | `V8 ]
+  | `CentOS of [ `V6 | `V7 | `V8 | `V9 | `V10 ]
   | `Debian of
     [ `V13 | `V12 | `V11 | `V10 | `V9 | `V8 | `V7 | `Testing | `Unstable ]
   | `Fedora of
@@ -68,8 +68,9 @@ type distro =
     | `V39
     | `V40
     | `V41
-    | `V42 ]
-  | `OracleLinux of [ `V7 | `V8 | `V9 ]
+    | `V42
+    | `V43 ]
+  | `OracleLinux of [ `V7 | `V8 | `V9 | `V10 ]
   | `OpenSUSE of
     [ `V42_1
     | `V42_2
@@ -105,7 +106,8 @@ type distro =
     | `V23_10
     | `V24_04
     | `V24_10
-    | `V25_04 ]
+    | `V25_04
+    | `V25_10 ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
   | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 ] ]
@@ -135,7 +137,7 @@ type t =
     | `V3_22
     | `Latest ]
   | `Archlinux of [ `Latest ]
-  | `CentOS of [ `V6 | `V7 | `V8 | `Latest ]
+  | `CentOS of [ `V6 | `V7 | `V8 | `V9 | `V10 | `Latest ]
   | `Debian of
     [ `V13
     | `V12
@@ -170,8 +172,9 @@ type t =
     | `V40
     | `V41
     | `V42
+    | `V43
     | `Latest ]
-  | `OracleLinux of [ `V7 | `V8 | `V9 | `Latest ]
+  | `OracleLinux of [ `V7 | `V8 | `V9 | `V10 | `Latest ]
   | `OpenSUSE of
     [ `V42_1
     | `V42_2
@@ -209,6 +212,7 @@ type t =
     | `V24_04
     | `V24_10
     | `V25_04
+    | `V25_10
     | `Latest
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
@@ -277,6 +281,8 @@ let distros : t list =
     `CentOS `V6;
     `CentOS `V7;
     `CentOS `V8;
+    `CentOS `V9;
+    `CentOS `V10;
     `CentOS `Latest;
     `Debian `V13;
     `Debian `V12;
@@ -308,10 +314,12 @@ let distros : t list =
     `Fedora `V40;
     `Fedora `V41;
     `Fedora `V42;
+    `Fedora `V43;
     `Fedora `Latest;
     `OracleLinux `V7;
     `OracleLinux `V8;
     `OracleLinux `V9;
+    `OracleLinux `V10;
     `OracleLinux `Latest;
     `OpenSUSE `V42_1;
     `OpenSUSE `V42_2;
@@ -348,6 +356,7 @@ let distros : t list =
     `Ubuntu `V24_04;
     `Ubuntu `V24_10;
     `Ubuntu `V25_04;
+    `Ubuntu `V25_10;
     `Ubuntu `Latest;
     `Ubuntu `LTS;
     `Cygwin `Ltsc2016;
@@ -367,12 +376,12 @@ let distros : t list =
 let resolve_alias (d : t) : distro =
   match d with
   | `Alpine `Latest -> `Alpine `V3_22
-  | `CentOS `Latest -> `CentOS `V7
+  | `CentOS `Latest -> `CentOS `V10
   | `Debian `Stable -> `Debian `V13
-  | `Fedora `Latest -> `Fedora `V42
-  | `OracleLinux `Latest -> `OracleLinux `V9
+  | `Fedora `Latest -> `Fedora `V43
+  | `OracleLinux `Latest -> `OracleLinux `V10
   | `OpenSUSE `Latest -> `OpenSUSE `V15_6
-  | `Ubuntu `Latest -> `Ubuntu `V25_04
+  | `Ubuntu `Latest -> `Ubuntu `V25_10
   | `Ubuntu `LTS -> `Ubuntu `V24_04
   | `Cygwin `Latest -> `Cygwin `Ltsc2022
   | `Windows (cc, `Latest) -> `Windows (cc, `Ltsc2019)
@@ -382,14 +391,14 @@ let resolve_alias (d : t) : distro =
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
         | `V3_19 | `V3_20 | `V3_21 | `V3_22 )
     | `Archlinux `Latest
-    | `CentOS (`V6 | `V7 | `V8)
+    | `CentOS (`V6 | `V7 | `V8 | `V9 | `V10)
     | `Debian
         (`V7 | `V8 | `V9 | `V10 | `V11 | `V12 | `V13 | `Testing | `Unstable)
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
-        | `V41 | `V42 )
-    | `OracleLinux (`V7 | `V8 | `V9)
+        | `V41 | `V42 | `V43 )
+    | `OracleLinux (`V7 | `V8 | `V9 | `V10)
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
         | `V15_5 | `V15_6 | `Tumbleweed )
@@ -397,7 +406,7 @@ let resolve_alias (d : t) : distro =
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
         | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04 | `V23_10 | `V24_04
-        | `V24_10 | `V25_04 )
+        | `V24_10 | `V25_04 | `V25_10 )
     | `Cygwin (`Ltsc2016 | `Ltsc2019 | `Ltsc2022)
     | `Windows (_, `Ltsc2019)
     | `WindowsServer (_, `Ltsc2022) ) as d ->
@@ -415,8 +424,8 @@ let distro_status (d : t) : status =
         `Deprecated
     | `Alpine `V3_22 -> `Active `Tier1
     | `Archlinux `Latest -> `Active `Tier3
-    | `CentOS `V7 -> `Active `Tier3
-    | `CentOS (`V6 | `V8) -> `Deprecated
+    | `CentOS (`V9 | `V10) -> `Active `Tier3
+    | `CentOS (`V6 | `V7 | `V8) -> `Deprecated
     | `Debian (`V7 | `V8 | `V9 | `V10) -> `Deprecated
     | `Debian `V11 -> `Active `Tier2
     | `Debian `V12 -> `Active `Tier2
@@ -428,16 +437,16 @@ let distro_status (d : t) : status =
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 )
       ->
         `Deprecated
-    | `Fedora (`V41 | `V42) -> `Active `Tier2
+    | `Fedora (`V41 | `V42 | `V43) -> `Active `Tier2
     | `OracleLinux `V7 -> `Deprecated
-    | `OracleLinux (`V8 | `V9) -> `Active `Tier3
+    | `OracleLinux (`V8 | `V9 | `V10) -> `Active `Tier3
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
         | `V15_5 ) ->
         `Deprecated
     | `OpenSUSE `V15_6 -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
-    | `Ubuntu (`V22_04 | `V24_04 | `V25_04) -> `Active `Tier2
+    | `Ubuntu (`V22_04 | `V24_04 | `V25_04 | `V25_10) -> `Active `Tier2
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
@@ -503,13 +512,14 @@ let distro_arches ov (d : t) =
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Ubuntu
         ( `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04
-        | `V23_10 | `V24_04 | `V24_10 | `V25_04 ),
+        | `V23_10 | `V24_04 | `V24_10 | `V25_04 | `V25_10 ),
       ov )
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
   | ( `Fedora
-        (`V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42),
+        ( `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42
+        | `V43 ),
       ov )
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
@@ -595,6 +605,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Ubuntu `V24_04 -> Some "4.14.1"
   | `Ubuntu `V24_10 -> Some "5.2.0"
   | `Ubuntu `V25_04 -> Some "5.3.0"
+  | `Ubuntu `V25_10 -> Some "5.3.0"
   | `Alpine `V3_3 -> Some "4.02.3"
   | `Alpine `V3_4 -> Some "4.02.3"
   | `Alpine `V3_5 -> Some "4.04.0"
@@ -638,9 +649,12 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Fedora `V40 -> Some "5.1.1"
   | `Fedora `V41 -> Some "5.2.1"
   | `Fedora `V42 -> Some "5.3.0"
+  | `Fedora `V43 -> Some "5.3.0"
   | `CentOS `V6 -> Some "3.11.2"
   | `CentOS `V7 -> Some "4.01.0"
   | `CentOS `V8 -> Some "4.07.0"
+  | `CentOS `V9 -> None
+  | `CentOS `V10 -> None
   | `OpenSUSE `V42_1 -> Some "4.02.3"
   | `OpenSUSE `V42_2 -> Some "4.03.0"
   | `OpenSUSE `V42_3 -> Some "4.03.0"
@@ -655,6 +669,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OracleLinux `V7 -> Some "4.01.0"
   | `OracleLinux `V8 -> Some "4.07.0"
   | `OracleLinux `V9 -> Some "4.11.1"
+  | `OracleLinux `V10 -> None
   | `Cygwin _ -> None
   | `Windows _ -> None
   | `WindowsServer _ -> None
@@ -686,6 +701,7 @@ let tag_of_distro (d : t) =
   | `Ubuntu `V24_04 -> "ubuntu-24.04"
   | `Ubuntu `V24_10 -> "ubuntu-24.10"
   | `Ubuntu `V25_04 -> "ubuntu-25.04"
+  | `Ubuntu `V25_10 -> "ubuntu-25.10"
   | `Ubuntu `Latest -> "ubuntu"
   | `Ubuntu `LTS -> "ubuntu-lts"
   | `Debian `Stable -> "debian-stable"
@@ -701,6 +717,8 @@ let tag_of_distro (d : t) =
   | `CentOS `V6 -> "centos-6"
   | `CentOS `V7 -> "centos-7"
   | `CentOS `V8 -> "centos-8"
+  | `CentOS `V9 -> "centos-9"
+  | `CentOS `V10 -> "centos-10"
   | `CentOS `Latest -> "centos"
   | `Fedora `Latest -> "fedora"
   | `Fedora `V21 -> "fedora-21"
@@ -725,9 +743,11 @@ let tag_of_distro (d : t) =
   | `Fedora `V40 -> "fedora-40"
   | `Fedora `V41 -> "fedora-41"
   | `Fedora `V42 -> "fedora-42"
+  | `Fedora `V43 -> "fedora-43"
   | `OracleLinux `V7 -> "oraclelinux-7"
   | `OracleLinux `V8 -> "oraclelinux-8"
   | `OracleLinux `V9 -> "oraclelinux-9"
+  | `OracleLinux `V10 -> "oraclelinux-10"
   | `OracleLinux `Latest -> "oraclelinux"
   | `Alpine `V3_3 -> "alpine-3.3"
   | `Alpine `V3_4 -> "alpine-3.4"
@@ -801,6 +821,7 @@ let distro_of_tag x : t option =
   | "ubuntu-24.04" -> Some (`Ubuntu `V24_04)
   | "ubuntu-24.10" -> Some (`Ubuntu `V24_10)
   | "ubuntu-25.04" -> Some (`Ubuntu `V25_04)
+  | "ubuntu-25.10" -> Some (`Ubuntu `V25_10)
   | "ubuntu" -> Some (`Ubuntu `Latest)
   | "ubuntu-lts" -> Some (`Ubuntu `LTS)
   | "debian-stable" -> Some (`Debian `Stable)
@@ -816,6 +837,8 @@ let distro_of_tag x : t option =
   | "centos-6" -> Some (`CentOS `V6)
   | "centos-7" -> Some (`CentOS `V7)
   | "centos-8" -> Some (`CentOS `V8)
+  | "centos-stream-9" -> Some (`CentOS `V9)
+  | "centos-stream-10" -> Some (`CentOS `V10)
   | "fedora-21" -> Some (`Fedora `V21)
   | "fedora-22" -> Some (`Fedora `V22)
   | "fedora-23" -> Some (`Fedora `V23)
@@ -838,10 +861,12 @@ let distro_of_tag x : t option =
   | "fedora-40" -> Some (`Fedora `V40)
   | "fedora-41" -> Some (`Fedora `V41)
   | "fedora-42" -> Some (`Fedora `V42)
+  | "fedora-43" -> Some (`Fedora `V43)
   | "fedora" -> Some (`Fedora `Latest)
   | "oraclelinux-7" -> Some (`OracleLinux `V7)
   | "oraclelinux-8" -> Some (`OracleLinux `V8)
   | "oraclelinux-9" -> Some (`OracleLinux `V9)
+  | "oraclelinux-10" -> Some (`OracleLinux `V10)
   | "oraclelinux" -> Some (`OracleLinux `Latest)
   | "alpine-3.3" -> Some (`Alpine `V3_3)
   | "alpine-3.4" -> Some (`Alpine `V3_4)
@@ -918,6 +943,7 @@ let human_readable_string_of_distro (d : t) =
     | `Ubuntu `V24_04 -> "Ubuntu 24.04"
     | `Ubuntu `V24_10 -> "Ubuntu 24.10"
     | `Ubuntu `V25_04 -> "Ubuntu 25.04"
+    | `Ubuntu `V25_10 -> "Ubuntu 25.10"
     | `Debian `Unstable -> "Debian Unstable"
     | `Debian `Testing -> "Debian Testing"
     | `Debian `V13 -> "Debian 13 (Trixie)"
@@ -930,6 +956,8 @@ let human_readable_string_of_distro (d : t) =
     | `CentOS `V6 -> "CentOS 6"
     | `CentOS `V7 -> "CentOS 7"
     | `CentOS `V8 -> "CentOS 8"
+    | `CentOS `V9 -> "CentOS Stream 9"
+    | `CentOS `V10 -> "CentOS Stream 10"
     | `Fedora `V21 -> "Fedora 21"
     | `Fedora `V22 -> "Fedora 22"
     | `Fedora `V23 -> "Fedora 23"
@@ -952,9 +980,11 @@ let human_readable_string_of_distro (d : t) =
     | `Fedora `V40 -> "Fedora 40"
     | `Fedora `V41 -> "Fedora 41"
     | `Fedora `V42 -> "Fedora 42"
+    | `Fedora `V43 -> "Fedora 43"
     | `OracleLinux `V7 -> "OracleLinux 7"
     | `OracleLinux `V8 -> "OracleLinux 8"
     | `OracleLinux `V9 -> "OracleLinux 9"
+    | `OracleLinux `V10 -> "OracleLinux 10"
     | `Alpine `V3_3 -> "Alpine 3.3"
     | `Alpine `V3_4 -> "Alpine 3.4"
     | `Alpine `V3_5 -> "Alpine 3.5"
@@ -1075,6 +1105,7 @@ let bubblewrap_version (t : t) =
   | `Ubuntu `V24_04 -> Some (0, 9, 0)
   | `Ubuntu `V24_10 -> Some (0, 10, 0)
   | `Ubuntu `V25_04 -> Some (0, 11, 0)
+  | `Ubuntu `V25_10 -> Some (0, 11, 0)
   | `Debian `V7 -> None (* Not actually checked *)
   | `Debian `V8 -> None (* Not actually checked *)
   | `Debian `V9 -> Some (0, 1, 7)
@@ -1087,6 +1118,8 @@ let bubblewrap_version (t : t) =
   | `CentOS `V6 -> None
   | `CentOS `V7 -> None
   | `CentOS `V8 -> Some (0, 4, 0)
+  | `CentOS `V9 -> Some (0, 6, 3)
+  | `CentOS `V10 -> Some (0, 10, 0)
   | `Fedora `V21 -> None (* Not actually checked *)
   | `Fedora `V22 -> None (* Not actually checked *)
   | `Fedora `V23 -> None (* Not actually checked *)
@@ -1109,9 +1142,11 @@ let bubblewrap_version (t : t) =
   | `Fedora `V40 -> Some (0, 10, 0)
   | `Fedora `V41 -> Some (0, 10, 0)
   | `Fedora `V42 -> Some (0, 11, 0)
+  | `Fedora `V43 -> Some (0, 11, 0)
   | `OracleLinux `V7 -> None
   | `OracleLinux `V8 -> Some (0, 4, 0)
   | `OracleLinux `V9 -> Some (0, 4, 1)
+  | `OracleLinux `V10 -> Some (0, 10, 0)
   | `Alpine `V3_3 -> None (* Not actually checked *)
   | `Alpine `V3_4 -> None (* Not actually checked *)
   | `Alpine `V3_5 -> None (* Not actually checked *)
@@ -1221,11 +1256,20 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V24_04 -> "noble"
         | `V24_10 -> "oracular"
         | `V25_04 -> "plucky"
+        | `V25_10 -> "questing"
       in
       ("ubuntu", tag)
   | `CentOS v ->
-      let tag = match v with `V6 -> "6" | `V7 -> "7" | `V8 -> "8" in
-      ("centos", tag)
+      let tag =
+        match v with
+        | `V6 -> "6"
+        | `V7 -> "7"
+        | `V8 -> "8"
+        | `V9 -> "stream9"
+        | `V10 -> "stream10"
+      in
+      ( (match v with `V9 | `V10 -> "quay.io/centos/centos" | _ -> "centos"),
+        tag )
   | `Fedora v ->
       let tag =
         match v with
@@ -1251,10 +1295,13 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V40 -> "40"
         | `V41 -> "41"
         | `V42 -> "42"
+        | `V43 -> "43"
       in
       ("fedora", tag)
   | `OracleLinux v ->
-      let tag = match v with `V7 -> "7" | `V8 -> "8" | `V9 -> "9" in
+      let tag =
+        match v with `V7 -> "7" | `V8 -> "8" | `V9 -> "9" | `V10 -> "10"
+      in
       ("oraclelinux", tag)
   | `OpenSUSE `Tumbleweed -> ("opensuse/tumbleweed", "latest")
   | `OpenSUSE v ->
