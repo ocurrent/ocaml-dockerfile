@@ -111,7 +111,7 @@ type distro =
     | `V25_10 ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
-  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 ] ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 ] ]
 [@@deriving sexp]
 
 type t =
@@ -219,7 +219,7 @@ type t =
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 | `Latest ]
-  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Latest ] ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 | `Latest ] ]
 [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -371,8 +371,10 @@ let distros : t list =
     `Windows (`Msvc, `Ltsc2019);
     `Windows (`Msvc, `Latest);
     `WindowsServer (`Mingw, `Ltsc2022);
+    `WindowsServer (`Mingw, `Ltsc2025);
     `WindowsServer (`Mingw, `Latest);
     `WindowsServer (`Msvc, `Ltsc2022);
+    `WindowsServer (`Msvc, `Ltsc2025);
     `WindowsServer (`Msvc, `Latest);
   ]
 
@@ -388,7 +390,7 @@ let resolve_alias (d : t) : distro =
   | `Ubuntu `LTS -> `Ubuntu `V24_04
   | `Cygwin `Latest -> `Cygwin `Ltsc2022
   | `Windows (cc, `Latest) -> `Windows (cc, `Ltsc2019)
-  | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2022)
+  | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2025)
   | ( `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
@@ -412,7 +414,7 @@ let resolve_alias (d : t) : distro =
         | `V24_10 | `V25_04 | `V25_10 )
     | `Cygwin (`Ltsc2016 | `Ltsc2019 | `Ltsc2022)
     | `Windows (_, `Ltsc2019)
-    | `WindowsServer (_, `Ltsc2022) ) as d ->
+    | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) ) as d ->
       d
 
 let distro_status (d : t) : status =
@@ -458,7 +460,7 @@ let distro_status (d : t) : status =
     | `Cygwin (`Ltsc2016 | `Ltsc2019) -> `Deprecated
     | `Cygwin `Ltsc2022 -> `Active `Tier3
     | `Windows (_, `Ltsc2019) -> `Active `Tier3
-    | `WindowsServer (_, `Ltsc2022) -> `Active `Tier3
+    | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) -> `Active `Tier3
 
 let latest_distros =
   [
@@ -797,8 +799,10 @@ let tag_of_distro (d : t) =
   | `Windows (`Msvc, `Ltsc2019) -> "windows-msvc-ltsc2019"
   | `Windows (`Msvc, `Latest) -> "windows-msvc"
   | `WindowsServer (`Mingw, `Ltsc2022) -> "windows-server-mingw-ltsc2022"
+  | `WindowsServer (`Mingw, `Ltsc2025) -> "windows-server-mingw-ltsc2025"
   | `WindowsServer (`Mingw, `Latest) -> "windows-server-mingw"
   | `WindowsServer (`Msvc, `Ltsc2022) -> "windows-server-msvc-ltsc2022"
+  | `WindowsServer (`Msvc, `Ltsc2025) -> "windows-server-msvc-ltsc2025"
   | `WindowsServer (`Msvc, `Latest) -> "windows-server-msvc"
 
 let distro_of_tag x : t option =
@@ -917,8 +921,10 @@ let distro_of_tag x : t option =
   | "windows-msvc-ltsc2019" -> Some (`Windows (`Msvc, `Ltsc2019))
   | "windows-msvc" -> Some (`Windows (`Msvc, `Latest))
   | "windows-server-mingw-ltsc2022" -> Some (`WindowsServer (`Mingw, `Ltsc2022))
+  | "windows-server-mingw-ltsc2025" -> Some (`WindowsServer (`Mingw, `Ltsc2025))
   | "windows-server-mingw" -> Some (`WindowsServer (`Mingw, `Latest))
   | "windows-server-msvc-ltsc2022" -> Some (`WindowsServer (`Msvc, `Ltsc2022))
+  | "windows-server-msvc-ltsc2025" -> Some (`WindowsServer (`Msvc, `Ltsc2025))
   | "windows-server-msvc" -> Some (`WindowsServer (`Msvc, `Latest))
   | _ -> None
 
@@ -1030,7 +1036,9 @@ let human_readable_string_of_distro (d : t) =
     | `Windows (`Mingw, `Ltsc2019) -> "Windows Ltsc2019 mingw"
     | `Windows (`Msvc, `Ltsc2019) -> "Windows Ltsc2019 msvc"
     | `WindowsServer (`Mingw, `Ltsc2022) -> "Windows Server Ltsc2022 mingw"
+    | `WindowsServer (`Mingw, `Ltsc2025) -> "Windows Server Ltsc2025 mingw"
     | `WindowsServer (`Msvc, `Ltsc2022) -> "Windows Server Ltsc2022 msvc"
+    | `WindowsServer (`Msvc, `Ltsc2025) -> "Windows Server Ltsc2025 msvc"
 
 let human_readable_short_string_of_distro (t : t) =
   match t with
@@ -1341,7 +1349,9 @@ let base_distro_tag ?(arch = `X86_64) d =
       let tag = match v with _, `Ltsc2019 -> "ltsc2019" in
       ("mcr.microsoft.com/windows", tag)
   | `WindowsServer v ->
-      let tag = match v with _, `Ltsc2022 -> "ltsc2022" in
+      let tag =
+        match v with _, `Ltsc2022 -> "ltsc2022" | _, `Ltsc2025 -> "ltsc2025"
+      in
       ("mcr.microsoft.com/windows/server", tag)
 
 let compare a b =
