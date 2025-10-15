@@ -83,6 +83,7 @@ type distro =
     | `V15_4
     | `V15_5
     | `V15_6
+    | `V16_0
     | `Tumbleweed ]
   | `Ubuntu of
     [ `V12_04
@@ -187,6 +188,7 @@ type t =
     | `V15_4
     | `V15_5
     | `V15_6
+    | `V16_0
     | `Tumbleweed
     | `Latest ]
   | `Ubuntu of
