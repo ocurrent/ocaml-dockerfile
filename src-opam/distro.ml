@@ -517,11 +517,14 @@ let distro_arches ov (d : t) =
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Ubuntu
         ( `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04
-        | `V23_10 | `V24_04 | `V24_10 | `V25_04 | `V25_10 ),
+        | `V23_10 | `V24_04 | `V24_10 | `V25_04 ),
       ov )
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
+  | `Ubuntu `V25_10, ov when OV.(compare Releases.v4_05_0 ov) = -1 ->
+    (* Ubuntu 25.10's Only Supported RISC-V Platform is QEMU Virtualization *)
+      [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Fedora
         ( `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42
         | `V43 ),
