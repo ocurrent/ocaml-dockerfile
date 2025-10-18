@@ -398,8 +398,8 @@ let apt_opam2 ?(labels = []) ?arch distro ~opam_hashes () =
 
    [c_devtools_libs] is the name of the package group e.g. "C Development Tools and Libraries" on Fedora, or
    otherwise "Development Tools". *)
-let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~powertools_repo
-    ~dnf_version ~c_devtools_libs ~opam_hashes distro () =
+let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~powertools_repo ~dnf_version
+    ~c_devtools_libs ~opam_hashes distro () =
   let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let workaround =
     if yum_workaround then
@@ -423,9 +423,9 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~powertools_repo
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (match powertools_repo with
-      | Some repo ->
-          run "dnf config-manager --set-enabled %s" repo @@ Linux.RPM.update
-      | None -> empty)
+     | Some repo ->
+         run "dnf config-manager --set-enabled %s" repo @@ Linux.RPM.update
+     | None -> empty)
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \
         \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"

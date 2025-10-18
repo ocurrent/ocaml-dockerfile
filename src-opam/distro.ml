@@ -219,7 +219,8 @@ type t =
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 | `Latest ]
-  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 | `Latest ] ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 | `Latest ]
+  ]
 [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -523,7 +524,7 @@ let distro_arches ov (d : t) =
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
   | `Ubuntu `V25_10, ov when OV.(compare Releases.v4_05_0 ov) = -1 ->
-    (* Ubuntu 25.10's Only Supported RISC-V Platform is QEMU Virtualization *)
+      (* Ubuntu 25.10's Only Supported RISC-V Platform is QEMU Virtualization *)
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Fedora
         ( `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42
