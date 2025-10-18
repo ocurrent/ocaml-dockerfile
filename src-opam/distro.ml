@@ -432,20 +432,19 @@ let distro_status (d : t) : status =
     | `Archlinux `Latest -> `Active `Tier3
     | `CentOS (`V9 | `V10) -> `Active `Tier3
     | `CentOS (`V6 | `V7 | `V8) -> `Deprecated
-    | `Debian (`V7 | `V8 | `V9 | `V10) -> `Deprecated
-    | `Debian `V11 -> `Active `Tier2
+    | `Debian (`V7 | `V8 | `V9 | `V10 | `V11) -> `Deprecated
     | `Debian `V12 -> `Active `Tier2
     | `Debian `V13 -> `Active `Tier1
     | `Debian `Testing -> `Active `Tier3
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 )
-      ->
+        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
+        | `V41 ) ->
         `Deprecated
-    | `Fedora (`V41 | `V42 | `V43) -> `Active `Tier2
-    | `OracleLinux `V7 -> `Deprecated
-    | `OracleLinux (`V8 | `V9 | `V10) -> `Active `Tier3
+    | `Fedora (`V42 | `V43) -> `Active `Tier2
+    | `OracleLinux (`V7 | `V8 | `V9) -> `Deprecated
+    | `OracleLinux `V10 -> `Active `Tier3
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
         | `V15_5 ) ->
