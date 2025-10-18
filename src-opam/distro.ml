@@ -82,6 +82,7 @@ type distro =
     | `V15_4
     | `V15_5
     | `V15_6
+    | `V16_0
     | `Tumbleweed ]
   | `Ubuntu of
     [ `V12_04
@@ -110,7 +111,7 @@ type distro =
     | `V25_10 ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
-  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 ] ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 ] ]
 [@@deriving sexp]
 
 type t =
@@ -186,6 +187,7 @@ type t =
     | `V15_4
     | `V15_5
     | `V15_6
+    | `V16_0
     | `Tumbleweed
     | `Latest ]
   | `Ubuntu of
@@ -217,7 +219,8 @@ type t =
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 | `Latest ]
-  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Latest ] ]
+  | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 | `Latest ]
+  ]
 [@@deriving sexp]
 
 type os_family = [ `Cygwin | `Linux | `Windows ] [@@deriving sexp]
@@ -331,6 +334,7 @@ let distros : t list =
     `OpenSUSE `V15_4;
     `OpenSUSE `V15_5;
     `OpenSUSE `V15_6;
+    `OpenSUSE `V16_0;
     `OpenSUSE `Tumbleweed;
     `OpenSUSE `Latest;
     `Ubuntu `V12_04;
@@ -368,8 +372,10 @@ let distros : t list =
     `Windows (`Msvc, `Ltsc2019);
     `Windows (`Msvc, `Latest);
     `WindowsServer (`Mingw, `Ltsc2022);
+    `WindowsServer (`Mingw, `Ltsc2025);
     `WindowsServer (`Mingw, `Latest);
     `WindowsServer (`Msvc, `Ltsc2022);
+    `WindowsServer (`Msvc, `Ltsc2025);
     `WindowsServer (`Msvc, `Latest);
   ]
 
@@ -380,12 +386,12 @@ let resolve_alias (d : t) : distro =
   | `Debian `Stable -> `Debian `V13
   | `Fedora `Latest -> `Fedora `V43
   | `OracleLinux `Latest -> `OracleLinux `V10
-  | `OpenSUSE `Latest -> `OpenSUSE `V15_6
+  | `OpenSUSE `Latest -> `OpenSUSE `V16_0
   | `Ubuntu `Latest -> `Ubuntu `V25_10
   | `Ubuntu `LTS -> `Ubuntu `V24_04
   | `Cygwin `Latest -> `Cygwin `Ltsc2022
   | `Windows (cc, `Latest) -> `Windows (cc, `Ltsc2019)
-  | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2022)
+  | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2025)
   | ( `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
@@ -401,7 +407,7 @@ let resolve_alias (d : t) : distro =
     | `OracleLinux (`V7 | `V8 | `V9 | `V10)
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
-        | `V15_5 | `V15_6 | `Tumbleweed )
+        | `V15_5 | `V15_6 | `V16_0 | `Tumbleweed )
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
@@ -409,7 +415,7 @@ let resolve_alias (d : t) : distro =
         | `V24_10 | `V25_04 | `V25_10 )
     | `Cygwin (`Ltsc2016 | `Ltsc2019 | `Ltsc2022)
     | `Windows (_, `Ltsc2019)
-    | `WindowsServer (_, `Ltsc2022) ) as d ->
+    | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) ) as d ->
       d
 
 let distro_status (d : t) : status =
@@ -426,25 +432,24 @@ let distro_status (d : t) : status =
     | `Archlinux `Latest -> `Active `Tier3
     | `CentOS (`V9 | `V10) -> `Active `Tier3
     | `CentOS (`V6 | `V7 | `V8) -> `Deprecated
-    | `Debian (`V7 | `V8 | `V9 | `V10) -> `Deprecated
-    | `Debian `V11 -> `Active `Tier2
+    | `Debian (`V7 | `V8 | `V9 | `V10 | `V11) -> `Deprecated
     | `Debian `V12 -> `Active `Tier2
     | `Debian `V13 -> `Active `Tier1
     | `Debian `Testing -> `Active `Tier3
     | `Debian `Unstable -> `Active `Tier3
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
-        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 )
-      ->
+        | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
+        | `V41 ) ->
         `Deprecated
-    | `Fedora (`V41 | `V42 | `V43) -> `Active `Tier2
-    | `OracleLinux `V7 -> `Deprecated
-    | `OracleLinux (`V8 | `V9 | `V10) -> `Active `Tier3
+    | `Fedora (`V42 | `V43) -> `Active `Tier2
+    | `OracleLinux (`V7 | `V8 | `V9) -> `Deprecated
+    | `OracleLinux `V10 -> `Active `Tier3
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
         | `V15_5 ) ->
         `Deprecated
-    | `OpenSUSE `V15_6 -> `Active `Tier2
+    | `OpenSUSE (`V15_6 | `V16_0) -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
     | `Ubuntu (`V22_04 | `V24_04 | `V25_04 | `V25_10) -> `Active `Tier2
     | `Ubuntu
@@ -455,7 +460,7 @@ let distro_status (d : t) : status =
     | `Cygwin (`Ltsc2016 | `Ltsc2019) -> `Deprecated
     | `Cygwin `Ltsc2022 -> `Active `Tier3
     | `Windows (_, `Ltsc2019) -> `Active `Tier3
-    | `WindowsServer (_, `Ltsc2022) -> `Active `Tier3
+    | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) -> `Active `Tier3
 
 let latest_distros =
   [
@@ -512,18 +517,21 @@ let distro_arches ov (d : t) =
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Ubuntu
         ( `V20_04 | `V20_10 | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04
-        | `V23_10 | `V24_04 | `V24_10 | `V25_04 | `V25_10 ),
+        | `V23_10 | `V24_04 | `V24_10 | `V25_04 ),
       ov )
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
+  | `Ubuntu `V25_10, ov when OV.(compare Releases.v4_05_0 ov) = -1 ->
+      (* Ubuntu 25.10's Only Supported RISC-V Platform is QEMU Virtualization *)
+      [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Fedora
         ( `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42
         | `V43 ),
       ov )
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
-  | `OpenSUSE (`V15_4 | `V15_5 | `V15_6), ov
+  | `OpenSUSE (`V15_4 | `V15_5 | `V15_6 | `V16_0), ov
     when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
   (* OCaml for Windows doesn't package OCaml 5.0.
@@ -665,6 +673,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OpenSUSE `V15_4 -> Some "4.05.0"
   | `OpenSUSE `V15_5 -> Some "4.05.0"
   | `OpenSUSE `V15_6 -> Some "4.14.2"
+  | `OpenSUSE `V16_0 -> Some "4.14.2"
   | `OpenSUSE `Tumbleweed -> Some "4.14.1"
   | `OracleLinux `V7 -> Some "4.01.0"
   | `OracleLinux `V8 -> Some "4.07.0"
@@ -781,6 +790,7 @@ let tag_of_distro (d : t) =
   | `OpenSUSE `V15_4 -> "opensuse-15.4"
   | `OpenSUSE `V15_5 -> "opensuse-15.5"
   | `OpenSUSE `V15_6 -> "opensuse-15.6"
+  | `OpenSUSE `V16_0 -> "opensuse-16.0"
   | `OpenSUSE `Tumbleweed -> "opensuse-tumbleweed"
   | `OpenSUSE `Latest -> "opensuse"
   | `Cygwin `Ltsc2016 -> "cygwin-2016"
@@ -792,8 +802,10 @@ let tag_of_distro (d : t) =
   | `Windows (`Msvc, `Ltsc2019) -> "windows-msvc-ltsc2019"
   | `Windows (`Msvc, `Latest) -> "windows-msvc"
   | `WindowsServer (`Mingw, `Ltsc2022) -> "windows-server-mingw-ltsc2022"
+  | `WindowsServer (`Mingw, `Ltsc2025) -> "windows-server-mingw-ltsc2025"
   | `WindowsServer (`Mingw, `Latest) -> "windows-server-mingw"
   | `WindowsServer (`Msvc, `Ltsc2022) -> "windows-server-msvc-ltsc2022"
+  | `WindowsServer (`Msvc, `Ltsc2025) -> "windows-server-msvc-ltsc2025"
   | `WindowsServer (`Msvc, `Latest) -> "windows-server-msvc"
 
 let distro_of_tag x : t option =
@@ -900,6 +912,7 @@ let distro_of_tag x : t option =
   | "opensuse-15.4" -> Some (`OpenSUSE `V15_4)
   | "opensuse-15.5" -> Some (`OpenSUSE `V15_5)
   | "opensuse-15.6" -> Some (`OpenSUSE `V15_6)
+  | "opensuse-16.0" -> Some (`OpenSUSE `V16_0)
   | "opensuse-tumbleweed" -> Some (`OpenSUSE `Tumbleweed)
   | "opensuse" -> Some (`OpenSUSE `Latest)
   | "cygwin-ltsc2016" -> Some (`Cygwin `Ltsc2016)
@@ -911,8 +924,10 @@ let distro_of_tag x : t option =
   | "windows-msvc-ltsc2019" -> Some (`Windows (`Msvc, `Ltsc2019))
   | "windows-msvc" -> Some (`Windows (`Msvc, `Latest))
   | "windows-server-mingw-ltsc2022" -> Some (`WindowsServer (`Mingw, `Ltsc2022))
+  | "windows-server-mingw-ltsc2025" -> Some (`WindowsServer (`Mingw, `Ltsc2025))
   | "windows-server-mingw" -> Some (`WindowsServer (`Mingw, `Latest))
   | "windows-server-msvc-ltsc2022" -> Some (`WindowsServer (`Msvc, `Ltsc2022))
+  | "windows-server-msvc-ltsc2025" -> Some (`WindowsServer (`Msvc, `Ltsc2025))
   | "windows-server-msvc" -> Some (`WindowsServer (`Msvc, `Latest))
   | _ -> None
 
@@ -1016,6 +1031,7 @@ let human_readable_string_of_distro (d : t) =
     | `OpenSUSE `V15_4 -> "OpenSUSE 15.4 (Leap)"
     | `OpenSUSE `V15_5 -> "OpenSUSE 15.5 (Leap)"
     | `OpenSUSE `V15_6 -> "OpenSUSE 15.6 (Leap)"
+    | `OpenSUSE `V16_0 -> "OpenSUSE 16.0 (Leap)"
     | `OpenSUSE `Tumbleweed -> "OpenSUSE Tumbleweed"
     | `Cygwin `Ltsc2016 -> "Cygwin Ltsc2016"
     | `Cygwin `Ltsc2019 -> "Cygwin Ltsc2019"
@@ -1023,7 +1039,9 @@ let human_readable_string_of_distro (d : t) =
     | `Windows (`Mingw, `Ltsc2019) -> "Windows Ltsc2019 mingw"
     | `Windows (`Msvc, `Ltsc2019) -> "Windows Ltsc2019 msvc"
     | `WindowsServer (`Mingw, `Ltsc2022) -> "Windows Server Ltsc2022 mingw"
+    | `WindowsServer (`Mingw, `Ltsc2025) -> "Windows Server Ltsc2025 mingw"
     | `WindowsServer (`Msvc, `Ltsc2022) -> "Windows Server Ltsc2022 msvc"
+    | `WindowsServer (`Msvc, `Ltsc2025) -> "Windows Server Ltsc2025 msvc"
 
 let human_readable_short_string_of_distro (t : t) =
   match t with
@@ -1178,6 +1196,7 @@ let bubblewrap_version (t : t) =
   | `OpenSUSE `V15_4 -> Some (0, 4, 1)
   | `OpenSUSE `V15_5 -> Some (0, 7, 0)
   | `OpenSUSE `V15_6 -> Some (0, 8, 0)
+  | `OpenSUSE `V16_0 -> Some (0, 11, 0)
   | `OpenSUSE `Tumbleweed -> Some (0, 8, 0)
   | `Cygwin _ -> None
   | `Windows _ -> None
@@ -1317,6 +1336,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V15_4 -> "15.4"
         | `V15_5 -> "15.5"
         | `V15_6 -> "15.6"
+        | `V16_0 -> "16.0"
         | `Tumbleweed -> assert false
       in
       ("opensuse/leap", tag)
@@ -1332,7 +1352,9 @@ let base_distro_tag ?(arch = `X86_64) d =
       let tag = match v with _, `Ltsc2019 -> "ltsc2019" in
       ("mcr.microsoft.com/windows", tag)
   | `WindowsServer v ->
-      let tag = match v with _, `Ltsc2022 -> "ltsc2022" in
+      let tag =
+        match v with _, `Ltsc2022 -> "ltsc2022" | _, `Ltsc2025 -> "ltsc2025"
+      in
       ("mcr.microsoft.com/windows/server", tag)
 
 let compare a b =

@@ -390,15 +390,16 @@ let apt_opam2 ?(labels = []) ?arch distro ~opam_hashes () =
    [yum_workaround] activates the overlay/yum workaround needed
    for older versions of yum as found in CentOS 7 and earlier
 
-   [enable_powertools] enables the PowerTools repository on CentOS 8 and above.
+   [powertools_repo] enables the PowerTools/CRB repository on CentOS 8 and above.
    This is needed to get most of *-devel packages frequently used by opam packages.
+   The repository name is "powertools" for CentOS 8 and "crb" for CentOS 9+.
 
    [dnf_version] version of DNF tool installed which affects the syntax of groupinstall.
 
    [c_devtools_libs] is the name of the package group e.g. "C Development Tools and Libraries" on Fedora, or
    otherwise "Development Tools". *)
-let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
-    ~dnf_version ~c_devtools_libs ~opam_hashes distro () =
+let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~powertools_repo ~dnf_version
+    ~c_devtools_libs ~opam_hashes distro () =
   let opam_master_hash, opam_branches = create_opam_branches opam_hashes in
   let workaround =
     if yum_workaround then
@@ -411,7 +412,7 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ workaround @@ Linux.RPM.update
   @@ Linux.RPM.groupinstall dnf_version c_devtools_libs
   @@ Linux.RPM.install
-       "git patch unzip which tar curl xz libcap-devel openssl sudo bzip2 gawk"
+       "git patch unzip which tar xz libcap-devel openssl sudo bzip2 gawk"
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
   @@ install_opams ~prefix:"/usr" opam_master_hash opam_branches
@@ -421,9 +422,10 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~enable_powertools
   @@ Linux.RPM.groupinstall dnf_version c_devtools_libs
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
-  @@ (if enable_powertools then
-        run "yum config-manager --set-enabled powertools" @@ Linux.RPM.update
-      else empty)
+  @@ (match powertools_repo with
+     | Some repo ->
+         run "dnf config-manager --set-enabled %s" repo @@ Linux.RPM.update
+     | None -> empty)
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \
         \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
@@ -565,11 +567,12 @@ let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
     | `Apt -> apt_opam2 ?labels ?arch ~opam_hashes d ()
     | `Yum ->
         let yum_workaround = match d with `CentOS `V7 -> true | _ -> false in
-        let enable_powertools =
+        let powertools_repo =
           match d with
-          | `CentOS (`V6 | `V7) -> false
-          | `CentOS _ -> true
-          | _ -> false
+          | `CentOS (`V6 | `V7) -> None
+          | `CentOS `V8 -> Some "powertools"
+          | `CentOS _ -> Some "crb"
+          | _ -> None
         in
         let (dnf_version, c_devtools_libs) : int * (t, unit, string, t) format4
             =
@@ -582,7 +585,7 @@ let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
           | `Fedora _ -> (5, {|"c-development"|})
           | _ -> (3, {|"Development Tools"|})
         in
-        yum_opam2 ?labels ?arch ~yum_workaround ~enable_powertools ~dnf_version
+        yum_opam2 ?labels ?arch ~yum_workaround ~powertools_repo ~dnf_version
           ~c_devtools_libs ~opam_hashes d ()
     | `Zypper -> zypper_opam2 ?labels ?arch ~opam_hashes d ()
     | `Pacman -> pacman_opam2 ?labels ?arch ~opam_hashes d ()
