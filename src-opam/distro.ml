@@ -257,6 +257,7 @@ type status =
   | `Not_available ]
 [@@deriving sexp]
 
+(* These should be version-sorted within each distribution *)
 let distros : t list =
   [
     `Alpine `V3_3;
@@ -287,13 +288,13 @@ let distros : t list =
     `CentOS `V9;
     `CentOS `V10;
     `CentOS `Latest;
-    `Debian `V13;
-    `Debian `V12;
-    `Debian `V11;
-    `Debian `V10;
-    `Debian `V9;
-    `Debian `V8;
     `Debian `V7;
+    `Debian `V8;
+    `Debian `V9;
+    `Debian `V10;
+    `Debian `V11;
+    `Debian `V12;
+    `Debian `V13;
     `Debian `Stable;
     `Debian `Testing;
     `Debian `Unstable;
@@ -335,8 +336,8 @@ let distros : t list =
     `OpenSUSE `V15_5;
     `OpenSUSE `V15_6;
     `OpenSUSE `V16_0;
-    `OpenSUSE `Tumbleweed;
     `OpenSUSE `Latest;
+    `OpenSUSE `Tumbleweed;
     `Ubuntu `V12_04;
     `Ubuntu `V14_04;
     `Ubuntu `V15_04;
@@ -358,11 +359,11 @@ let distros : t list =
     `Ubuntu `V23_04;
     `Ubuntu `V23_10;
     `Ubuntu `V24_04;
+    `Ubuntu `LTS; (* Latest LTS *)
     `Ubuntu `V24_10;
     `Ubuntu `V25_04;
     `Ubuntu `V25_10;
     `Ubuntu `Latest;
-    `Ubuntu `LTS;
     `Cygwin `Ltsc2016;
     `Cygwin `Ltsc2019;
     `Cygwin `Ltsc2022;
