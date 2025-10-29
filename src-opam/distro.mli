@@ -246,7 +246,8 @@ val is_same_distro : t -> t -> bool
     regardless of their respective versions. *)
 
 val compare : t -> t -> int
-(** [compare a b] is a lexical comparison function for {!t}. *)
+(** [compare a b] is a comparison function for {!t}. The ordering is only total
+    for {!distro} values. *)
 
 val resolve_alias : t -> distro
 (** [resolve_alias t] will resolve [t] into a concrete version. This removes
