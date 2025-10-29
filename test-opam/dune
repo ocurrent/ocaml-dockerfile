@@ -1,0 +1,4 @@
+(test
+ (name dockerfile)
+ (package dockerfile-opam)
+ (libraries alcotest dockerfile-opam))
