@@ -247,7 +247,8 @@ val is_same_distro : t -> t -> bool
 
 val compare : t -> t -> int
 (** [compare a b] is a comparison function for {!t}. The ordering is only total
-    for {!distro} values. *)
+    for {!distro} values and is lexicographic by distribution name and sorted by
+    version order within each distribution. *)
 
 val resolve_alias : t -> distro
 (** [resolve_alias t] will resolve [t] into a concrete version. This removes

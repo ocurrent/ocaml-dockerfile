@@ -17,7 +17,6 @@
 
 (** Distro selection for various OPAM combinations. *)
 
-open Astring
 open Sexplib.Conv
 
 type distro =
@@ -1358,7 +1357,119 @@ let base_distro_tag ?(arch = `X86_64) d =
       in
       ("mcr.microsoft.com/windows/server", tag)
 
-let compare a b =
-  String.compare
-    (human_readable_string_of_distro a)
-    (human_readable_string_of_distro b)
+let sort_key_of_distro (d : t) =
+  if d = `Debian `Stable then
+    50997 (* "Compatibility" with use of human_readable_string_of_distro before,
+             giving `Debian `Stable < `Debian `Testing but greater than all
+             numbered releases. *)
+  else
+    match resolve_alias d with
+    | `Alpine `V3_3 -> 10001
+    | `Alpine `V3_4 -> 10002
+    | `Alpine `V3_5 -> 10003
+    | `Alpine `V3_6 -> 10004
+    | `Alpine `V3_7 -> 10005
+    | `Alpine `V3_8 -> 10005
+    | `Alpine `V3_9 -> 10005
+    | `Alpine `V3_10 -> 10005
+    | `Alpine `V3_11 -> 10005
+    | `Alpine `V3_12 -> 10005
+    | `Alpine `V3_13 -> 10005
+    | `Alpine `V3_14 -> 10005
+    | `Alpine `V3_15 -> 10005
+    | `Alpine `V3_16 -> 10005
+    | `Alpine `V3_17 -> 10005
+    | `Alpine `V3_18 -> 10005
+    | `Alpine `V3_19 -> 10005
+    | `Alpine `V3_20 -> 10005
+    | `Alpine `V3_21 -> 10005
+    | `Alpine `V3_22 -> 10005
+    | `Archlinux `Latest -> 20000
+    | `CentOS `V6 -> 30000
+    | `CentOS `V7 -> 30001
+    | `CentOS `V8 -> 30002
+    | `CentOS `V9 -> 30003
+    | `CentOS `V10 -> 30004
+    | `Cygwin `Ltsc2016 -> 40000
+    | `Cygwin `Ltsc2019 -> 40001
+    | `Cygwin `Ltsc2022 -> 40002
+    | `Debian `V7 -> 50000
+    | `Debian `V8 -> 50001
+    | `Debian `V9 -> 50002
+    | `Debian `V10 -> 50003
+    | `Debian `V11 -> 50004
+    | `Debian `V12 -> 50005
+    | `Debian `V13 -> 50006
+    | `Debian `Testing -> 50998
+    | `Debian `Unstable -> 50999
+    | `Fedora `V21 -> 60000
+    | `Fedora `V22 -> 60001
+    | `Fedora `V23 -> 60002
+    | `Fedora `V24 -> 60003
+    | `Fedora `V25 -> 60004
+    | `Fedora `V26 -> 60005
+    | `Fedora `V27 -> 60006
+    | `Fedora `V28 -> 60007
+    | `Fedora `V29 -> 60008
+    | `Fedora `V30 -> 60009
+    | `Fedora `V31 -> 60010
+    | `Fedora `V32 -> 60011
+    | `Fedora `V33 -> 60012
+    | `Fedora `V34 -> 60013
+    | `Fedora `V35 -> 60014
+    | `Fedora `V36 -> 60015
+    | `Fedora `V37 -> 60016
+    | `Fedora `V38 -> 60017
+    | `Fedora `V39 -> 60018
+    | `Fedora `V40 -> 60019
+    | `Fedora `V41 -> 60020
+    | `Fedora `V42 -> 60021
+    | `Fedora `V43 -> 60022
+    | `OpenSUSE `V42_1 -> 70000
+    | `OpenSUSE `V42_2 -> 70001
+    | `OpenSUSE `V42_3 -> 70002
+    | `OpenSUSE `V15_0 -> 70003
+    | `OpenSUSE `V15_1 -> 70004
+    | `OpenSUSE `V15_2 -> 70005
+    | `OpenSUSE `V15_3 -> 70006
+    | `OpenSUSE `V15_4 -> 70007
+    | `OpenSUSE `V15_5 -> 70008
+    | `OpenSUSE `V15_6 -> 70009
+    | `OpenSUSE `V16_0 -> 70010
+    | `OpenSUSE `Tumbleweed -> 70999
+    | `OracleLinux `V7 -> 80000
+    | `OracleLinux `V8 -> 80001
+    | `OracleLinux `V9 -> 80002
+    | `OracleLinux `V10 -> 80003
+    | `Ubuntu `V12_04 -> 90000
+    | `Ubuntu `V14_04 -> 90001
+    | `Ubuntu `V15_04 -> 90002
+    | `Ubuntu `V15_10 -> 90003
+    | `Ubuntu `V16_04 -> 90004
+    | `Ubuntu `V16_10 -> 90005
+    | `Ubuntu `V17_04 -> 90006
+    | `Ubuntu `V17_10 -> 90007
+    | `Ubuntu `V18_04 -> 90008
+    | `Ubuntu `V18_10 -> 90009
+    | `Ubuntu `V19_04 -> 90010
+    | `Ubuntu `V19_10 -> 90011
+    | `Ubuntu `V20_04 -> 90012
+    | `Ubuntu `V20_10 -> 90013
+    | `Ubuntu `V21_04 -> 90014
+    | `Ubuntu `V21_10 -> 90015
+    | `Ubuntu `V22_04 -> 90016
+    | `Ubuntu `V22_10 -> 90017
+    | `Ubuntu `V23_04 -> 90018
+    | `Ubuntu `V23_10 -> 90019
+    | `Ubuntu `V24_04 -> 90020
+    | `Ubuntu `V24_10 -> 90021
+    | `Ubuntu `V25_04 -> 90022
+    | `Ubuntu `V25_10 -> 90023
+    | `Windows (`Mingw, `Ltsc2019) -> 100000
+    | `Windows (`Msvc, `Ltsc2019) -> 100001
+    | `WindowsServer (`Mingw, `Ltsc2022) -> 110000
+    | `WindowsServer (`Mingw, `Ltsc2025) -> 110001
+    | `WindowsServer (`Msvc, `Ltsc2022) -> 110002
+    | `WindowsServer (`Msvc, `Ltsc2025) -> 110003
+
+let compare a b = Int.compare (sort_key_of_distro a) (sort_key_of_distro b)
