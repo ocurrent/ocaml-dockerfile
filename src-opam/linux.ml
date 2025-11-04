@@ -65,15 +65,15 @@ module RPM = struct
     let gid = match gid with Some g -> sprintf "-g %d " g | None -> "" in
     let home = "/home/" ^ username in
     (match sudo with
-    | false -> empty
-    | true ->
-        let sudofile = "/etc/sudoers.d/" ^ username in
-        copy_heredoc
-          ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
-          ~dst:sudofile ()
-        @@ run "chmod 440 %s" sudofile
-        @@ run "chown root:root %s" sudofile
-        @@ run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers")
+      | false -> empty
+      | true ->
+          let sudofile = "/etc/sudoers.d/" ^ username in
+          copy_heredoc
+            ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
+            ~dst:sudofile ()
+          @@ run "chmod 440 %s" sudofile
+          @@ run "chown root:root %s" sudofile
+          @@ run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers")
     @@ run "useradd -d %s %s%s-m -s /bin/bash %s" home uid gid username
     @@ run "passwd -l %s" username
     @@ run "chown -R %s:%s %s" username username home
@@ -117,18 +117,18 @@ module Apt = struct
     let gid = match gid with Some g -> sprintf "--gid %d " g | None -> "" in
     let home = "/home/" ^ username in
     (match sudo with
-    | false -> empty
-    | true ->
-        let sudofile = "/etc/sudoers.d/" ^ username in
-        copy_heredoc
-          ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
-          ~dst:sudofile ()
-        @@ run "chmod 440 %s" sudofile
-        @@ run "chown root:root %s" sudofile)
+      | false -> empty
+      | true ->
+          let sudofile = "/etc/sudoers.d/" ^ username in
+          copy_heredoc
+            ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
+            ~dst:sudofile ()
+          @@ run "chmod 440 %s" sudofile
+          @@ run "chown root:root %s" sudofile)
     @@ (match uid with
-       | None -> empty
-       | Some u ->
-           run "if getent passwd %d; then userdel -r $(id -nu %d); fi" u u)
+      | None -> empty
+      | Some u ->
+          run "if getent passwd %d; then userdel -r $(id -nu %d); fi" u u)
     @@ run "adduser %s%s--disabled-password --gecos '' %s" uidparam gid username
     @@ run "passwd -l %s" username
     @@ run "chown -R %s:%s %s" username username home
@@ -159,22 +159,22 @@ module Apk = struct
   let add_user ?uid ?gid ?(sudo = false) username =
     let home = "/home/" ^ username in
     (match gid with
-    | None -> empty
-    | Some gid -> run "addgroup -S -g %d %s" gid username)
+      | None -> empty
+      | Some gid -> run "addgroup -S -g %d %s" gid username)
     @@ run "adduser -S %s%s%s"
          (match uid with None -> "" | Some d -> sprintf "-u %d " d)
          (match gid with None -> "" | Some _ -> sprintf "-G %s " username)
          username
     @@ (match sudo with
-       | false -> empty
-       | true ->
-           let sudofile = "/etc/sudoers.d/" ^ username in
-           copy_heredoc
-             ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
-             ~dst:sudofile ()
-           @@ run "chmod 440 %s" sudofile
-           @@ run "chown root:root %s" sudofile
-           @@ run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers")
+      | false -> empty
+      | true ->
+          let sudofile = "/etc/sudoers.d/" ^ username in
+          copy_heredoc
+            ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
+            ~dst:sudofile ()
+          @@ run "chmod 440 %s" sudofile
+          @@ run "chown root:root %s" sudofile
+          @@ run "sed -i.bak 's/^Defaults.*requiretty//g' /etc/sudoers")
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 
@@ -226,14 +226,14 @@ module Zypper = struct
       (match gid with None -> "" | Some g -> sprintf "-g %d " g)
       home username
     @@ (match sudo with
-       | false -> empty
-       | true ->
-           let sudofile = "/etc/sudoers.d/" ^ username in
-           copy_heredoc
-             ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
-             ~dst:sudofile ()
-           @@ run "chmod 440 %s" sudofile
-           @@ run "chown root:root %s" sudofile)
+      | false -> empty
+      | true ->
+          let sudofile = "/etc/sudoers.d/" ^ username in
+          copy_heredoc
+            ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
+            ~dst:sudofile ()
+          @@ run "chmod 440 %s" sudofile
+          @@ run "chown root:root %s" sudofile)
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 
@@ -267,14 +267,14 @@ module Pacman = struct
       (match gid with None -> "" | Some g -> sprintf "-g %d " g)
       home username
     @@ (match sudo with
-       | false -> empty
-       | true ->
-           let sudofile = "/etc/sudoers.d/" ^ username in
-           copy_heredoc
-             ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
-             ~dst:sudofile ()
-           @@ run "chmod 440 %s" sudofile
-           @@ run "chown root:root %s" sudofile)
+      | false -> empty
+      | true ->
+          let sudofile = "/etc/sudoers.d/" ^ username in
+          copy_heredoc
+            ~src:[ heredoc ~strip:true "\t%s %s" username sudo_nopasswd ]
+            ~dst:sudofile ()
+          @@ run "chmod 440 %s" sudofile
+          @@ run "chown root:root %s" sudofile)
     @@ user "%s" username @@ workdir "%s" home @@ run "mkdir .ssh"
     @@ run "chmod 700 .ssh"
 

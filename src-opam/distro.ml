@@ -358,7 +358,7 @@ let distros : t list =
     `Ubuntu `V23_04;
     `Ubuntu `V23_10;
     `Ubuntu `V24_04;
-    `Ubuntu `LTS; (* Latest LTS *)
+    `Ubuntu `LTS (* Latest LTS *);
     `Ubuntu `V24_10;
     `Ubuntu `V25_04;
     `Ubuntu `V25_10;
@@ -1359,9 +1359,10 @@ let base_distro_tag ?(arch = `X86_64) d =
 
 let sort_key_of_distro (d : t) =
   if d = `Debian `Stable then
-    50997 (* "Compatibility" with use of human_readable_string_of_distro before,
-             giving `Debian `Stable < `Debian `Testing but greater than all
-             numbered releases. *)
+    (* "Compatibility" with use of human_readable_string_of_distro
+       before, giving `Debian `Stable < `Debian `Testing but greater
+       than all numbered releases. *)
+    50997
   else
     match resolve_alias d with
     | `Alpine `V3_3 -> 10001
