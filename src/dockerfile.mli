@@ -24,10 +24,10 @@
 type t
 (** [t] is a list of Dockerfile lines *)
 
-val sexp_of_t : t -> Sexplib.Sexp.t
+val sexp_of_t : t -> Sexplib0.Sexp.t
 (** [sexp_of_t t] converts a Dockerfile into a s-expression representation. *)
 
-val t_of_sexp : Sexplib.Sexp.t -> t
+val t_of_sexp : Sexplib0.Sexp.t -> t
 (** [t_of_sexp s] converts the [s] s-expression representation into a {!t}. The
     s-expression should have been generated using {!sexp_of_t}. *)
 

@@ -15,7 +15,7 @@
  *
  *)
 
-open Sexplib.Conv
+open Sexplib0.Sexp_conv
 
 type shell_or_exec =
   [ `Shell of string | `Shells of string list | `Exec of string list ]

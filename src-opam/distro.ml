@@ -17,7 +17,7 @@
 
 (** Distro selection for various OPAM combinations. *)
 
-open Sexplib.Conv
+open Sexplib0.Sexp_conv
 
 type distro =
   [ `Alpine of
