@@ -43,7 +43,6 @@
  (conflicts
   (result (< 1.5))
   (rresult (< 0.7.0)))
- (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile/")
  (tags ("org:mirage" "org:ocamllabs")))
 
 (package
@@ -68,7 +67,6 @@
  (conflicts
   (result (< 1.5))
   (rresult (< 0.7.0)))
- (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-cmd/")
  (tags ("org:mirage" "org:ocamllabs")))
 
 (package
@@ -92,5 +90,4 @@
  (conflicts
   (result (< 1.5))
   (rresult (< 0.7.0)))
- (documentation "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-opam/")
  (tags ("org:mirage" "org:ocamllabs")))
