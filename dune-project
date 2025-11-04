@@ -57,6 +57,7 @@
 "\| programmatically.
  )
  (depends
+  astring
   (bos (>= 0.2))
   cmdliner
   (dockerfile-opam (= :version))
@@ -81,7 +82,6 @@
 "\| for generating dockerfiles.
  )
  (depends
-  astring
   (dockerfile (= :version))
   (fmt (>= "0.8.7"))
   (ocaml-version (>= "3.5.0"))
