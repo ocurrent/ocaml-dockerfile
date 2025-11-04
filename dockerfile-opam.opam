@@ -32,7 +32,6 @@ authors: [
 license: "ISC"
 tags: ["org:mirage" "org:ocamllabs"]
 homepage: "https://github.com/ocurrent/ocaml-dockerfile"
-doc: "https://ocurrent.github.io/ocaml-dockerfile/doc/dockerfile-opam/"
 bug-reports: "https://github.com/ocurrent/ocaml-dockerfile/issues"
 depends: [
   "dune" {>= "3.0"}
