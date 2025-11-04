@@ -63,10 +63,10 @@ let generate_dockerfiles_in_git_branches ?readme ?(crunch = true) output_dir d =
       let file = Fpath.(output_dir / "Dockerfile") in
       write_dockerfile ~crunch file docker >>= fun () ->
       (match readme with
-      | None -> Ok ()
-      | Some r ->
-          OS.File.write Fpath.(output_dir / "README.md") r >>= fun () ->
-          Cmd.(git % "add" % "README.md") |> OS.Cmd.run)
+        | None -> Ok ()
+        | Some r ->
+            OS.File.write Fpath.(output_dir / "README.md") r >>= fun () ->
+            Cmd.(git % "add" % "README.md") |> OS.Cmd.run)
       >>= fun () ->
       Cmd.(git % "add" % "Dockerfile") |> OS.Cmd.run >>= fun () ->
       let msg = Fmt.str "update %s Dockerfile" name in

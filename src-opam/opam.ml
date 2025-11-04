@@ -423,9 +423,9 @@ let yum_opam2 ?(labels = []) ?arch ~yum_workaround ~powertools_repo ~dnf_version
   @@ bubblewrap_and_dev_packages distro
   @@ copy_opams ~src:"/usr/bin" ~dst:"/usr/bin" opam_branches
   @@ (match powertools_repo with
-     | Some repo ->
-         run "dnf config-manager --set-enabled %s" repo @@ Linux.RPM.update
-     | None -> empty)
+    | Some repo ->
+        run "dnf config-manager --set-enabled %s" repo @@ Linux.RPM.update
+    | None -> empty)
   @@ run
        "sed -i.bak '/LC_TIME LC_ALL LANGUAGE/aDefaults    env_keep += \
         \"OPAMYES OPAMJOBS OPAMVERBOSE\"' /etc/sudoers"
@@ -697,53 +697,50 @@ let separate_ocaml_compilers hub_id arch distro =
   OV.Releases.recent_with_dev
   |> List.filter (fun ov -> D.distro_supported_on arch ov distro)
   |> List.map (fun ov ->
-         let add_remote =
-           if OV.Releases.is_dev ov then
-             run
-               "opam repo add beta \
-                git+https://github.com/ocaml/ocaml-beta-repository \
-                --set-default"
-           else empty
-         in
-         let default_switch_name =
-           OV.(with_patch (with_variant ov None) None |> to_string)
-         in
-         let variants =
-           empty
-           @@@ List.map
-                 (create_switch ~arch distro)
-                 (OV.Opam.V2.switches arch ov)
-         in
-         let d =
-           let pers =
-             match personality ~arch distro with
-             | None -> []
-             | Some pers -> [ pers ]
-           in
-           let sandbox =
-             match os_family with
-             | `Linux -> run "opam-sandbox-disable"
-             | `Windows | `Cygwin -> empty
-           in
-           header ~arch
-             ~tag:(Printf.sprintf "%s-opam" distro_tag)
-             ~img:hub_id distro
-           @@ workdir "/home/opam/opam-repository"
-           @@ sandbox
-           @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
-                (if os_family = `Windows then "--disable-sandboxing" else "")
-           @@ add_remote @@ variants
-           @@ run "opam switch %s" default_switch_name
-           @@ run "opam install -y depext%s"
-                (if os_family = `Windows then "depext-cygwinports" else "")
-           @@ env [ ("OPAMYES", "1") ]
-           @@ entrypoint_exec (pers @ [ "opam"; "config"; "exec"; "--" ])
-           @@
-           match os_family with
-           | `Linux | `Cygwin -> cmd "bash"
-           | `Windows -> cmd_exec [ "cmd.exe" ]
-         in
-         (Printf.sprintf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d))
+      let add_remote =
+        if OV.Releases.is_dev ov then
+          run
+            "opam repo add beta \
+             git+https://github.com/ocaml/ocaml-beta-repository --set-default"
+        else empty
+      in
+      let default_switch_name =
+        OV.(with_patch (with_variant ov None) None |> to_string)
+      in
+      let variants =
+        empty
+        @@@ List.map (create_switch ~arch distro) (OV.Opam.V2.switches arch ov)
+      in
+      let d =
+        let pers =
+          match personality ~arch distro with
+          | None -> []
+          | Some pers -> [ pers ]
+        in
+        let sandbox =
+          match os_family with
+          | `Linux -> run "opam-sandbox-disable"
+          | `Windows | `Cygwin -> empty
+        in
+        header ~arch
+          ~tag:(Printf.sprintf "%s-opam" distro_tag)
+          ~img:hub_id distro
+        @@ workdir "/home/opam/opam-repository"
+        @@ sandbox
+        @@ run "opam init -k git -a /home/opam/opam-repository --bare%s"
+             (if os_family = `Windows then "--disable-sandboxing" else "")
+        @@ add_remote @@ variants
+        @@ run "opam switch %s" default_switch_name
+        @@ run "opam install -y depext%s"
+             (if os_family = `Windows then "depext-cygwinports" else "")
+        @@ env [ ("OPAMYES", "1") ]
+        @@ entrypoint_exec (pers @ [ "opam"; "config"; "exec"; "--" ])
+        @@
+        match os_family with
+        | `Linux | `Cygwin -> cmd "bash"
+        | `Windows -> cmd_exec [ "cmd.exe" ]
+      in
+      (Printf.sprintf "%s-ocaml-%s" distro_tag (tag_of_ocaml_version ov), d))
 
 let deprecated =
   header (`Alpine `Latest)

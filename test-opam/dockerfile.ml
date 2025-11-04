@@ -3,16 +3,17 @@ let test_distro_compare () =
   (* Check that Distro.compare thinks that Distro.distros is in sort order *)
   match Distro.distros with
   | [] -> assert false
-  | hd::tl ->
+  | hd :: tl ->
       let check (errors, prev) this =
         let errors =
-          if Distro.is_same_distro prev this
-             && Dockerfile_opam.Distro.compare this prev < 0 then
+          if
+            Distro.is_same_distro prev this
+            && Dockerfile_opam.Distro.compare this prev < 0
+          then
             let this = Distro.human_readable_string_of_distro this in
             let prev = Distro.human_readable_string_of_distro prev in
-(Printf.sprintf "%s < %s" this prev) :: errors
-          else
-            errors
+            Printf.sprintf "%s < %s" this prev :: errors
+          else errors
         in
         (errors, this)
       in
@@ -25,8 +26,5 @@ let () =
     run "test"
       [
         ( "dockerfile-opam",
-          [
-            test_case "Distro.compare" `Quick
-              test_distro_compare;
-          ] );
+          [ test_case "Distro.compare" `Quick test_distro_compare ] );
       ])
