@@ -35,6 +35,7 @@ homepage: "https://github.com/ocurrent/ocaml-dockerfile"
 bug-reports: "https://github.com/ocurrent/ocaml-dockerfile/issues"
 depends: [
   "dune" {>= "3.0"}
+  "astring"
   "bos" {>= "0.2"}
   "cmdliner"
   "dockerfile-opam" {= version}

@@ -2,6 +2,6 @@
  (name dockerfile_opam)
  (public_name dockerfile-opam)
  (synopsis "Dockerfile functions to generate opam2 base containers")
- (libraries ocaml-version dockerfile fmt sexplib astring)
+ (libraries ocaml-version dockerfile fmt sexplib)
  (preprocess
   (pps ppx_sexp_conv)))
