@@ -15,7 +15,7 @@
  *
  *)
 
-open Sexplib.Conv
+open Sexplib0.Sexp_conv
 open Bos
 open Astring
 module OC = OS.Cmd
@@ -55,7 +55,7 @@ let run_log ?(ok_to_fail = true) ?env log_dir name cmd =
   let success = status = `Exited 0 in
   let cmd_log = { command; stdout; success; status } in
   let path = Fpath.(log_dir / (name ^ ".sxp")) in
-  OS.File.write path (Sexplib.Sexp.to_string_hum (sexp_of_cmd_log cmd_log))
+  OS.File.write path (Sexplib0.Sexp.to_string_hum (sexp_of_cmd_log cmd_log))
   >>= fun () ->
   match status with
   | `Signaled n -> if ok_to_fail then Ok () else Fmt.error_msg "Signal %d" n
