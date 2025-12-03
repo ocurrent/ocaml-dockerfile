@@ -1,3 +1,8 @@
+unreleased
+----------
+
+- Update Cygwin base image to ServerCore LTSC 2025 (@MisterDA, #251)
+
 v8.3.4 2025-12-03
 -----------------
 
