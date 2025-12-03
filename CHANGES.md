@@ -1,9 +1,9 @@
 v8.3.4 2025-12-03
 -----------------
 
-- Return "centos-stream-x" in tag_of_distro (@MisterDA, #250)
+- Make `tag_of_distro` and `distro_of_tag` use `centos-n` name  (@MisterDA, #250)
 - Add opam-2.5 (@MisterDA, #246, #249)
-- Add Packaging chores (@MisterDA, #248)
+- Packaging chores (@MisterDA, #248)
 - Compare by versions within `Distro.compare` (@dra27, #247)
 
 v8.3.3 2025-10-18
