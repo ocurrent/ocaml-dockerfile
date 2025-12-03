@@ -726,8 +726,8 @@ let tag_of_distro (d : t) =
   | `CentOS `V6 -> "centos-6"
   | `CentOS `V7 -> "centos-7"
   | `CentOS `V8 -> "centos-8"
-  | `CentOS `V9 -> "centos-stream-9"
-  | `CentOS `V10 -> "centos-stream-10"
+  | `CentOS `V9 -> "centos-9"
+  | `CentOS `V10 -> "centos-10"
   | `CentOS `Latest -> "centos"
   | `Fedora `Latest -> "fedora"
   | `Fedora `V21 -> "fedora-21"
@@ -849,8 +849,8 @@ let distro_of_tag x : t option =
   | "centos-6" -> Some (`CentOS `V6)
   | "centos-7" -> Some (`CentOS `V7)
   | "centos-8" -> Some (`CentOS `V8)
-  | "centos-stream-9" -> Some (`CentOS `V9)
-  | "centos-stream-10" -> Some (`CentOS `V10)
+  | "centos-9" -> Some (`CentOS `V9)
+  | "centos-10" -> Some (`CentOS `V10)
   | "fedora-21" -> Some (`Fedora `V21)
   | "fedora-22" -> Some (`Fedora `V22)
   | "fedora-23" -> Some (`Fedora `V23)
