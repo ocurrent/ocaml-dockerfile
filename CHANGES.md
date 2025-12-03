@@ -1,3 +1,15 @@
+unreleased
+----------
+
+- Compare by versions within `Distro.compare` (@dra27, #247)
+
+v8.3.3 2025-10-18
+-----------------
+
+- Add Windows LTSC 2025 and openSUSE Leap 16.0.
+  Deprecate Debian 11, Oracle Linux 8 and 9 and Fedora 41.
+  (@mtelvers, #245)
+
 v8.3.2 2025-10-10
 -----------------
 
