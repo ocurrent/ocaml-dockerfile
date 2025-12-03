@@ -1,6 +1,7 @@
 unreleased
 ----------
 
+- Add opam-2.5 (@MisterDA, #246, #249)
 - Compare by versions within `Distro.compare` (@dra27, #247)
 
 v8.3.3 2025-10-18
