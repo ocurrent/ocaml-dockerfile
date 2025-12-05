@@ -108,7 +108,7 @@ type distro =
     | `V24_10
     | `V25_04
     | `V25_10 ]
-  | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 ]
+  | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
   | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 ] ]
 [@@deriving sexp]
@@ -216,7 +216,7 @@ type t =
     | `V25_10
     | `Latest
     | `LTS ]
-  | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Latest ]
+  | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025 | `Latest ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 | `Latest ]
   | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 | `Latest ]
   ]
@@ -366,6 +366,7 @@ let distros : t list =
     `Cygwin `Ltsc2016;
     `Cygwin `Ltsc2019;
     `Cygwin `Ltsc2022;
+    `Cygwin `Ltsc2025;
     `Cygwin `Latest;
     `Windows (`Mingw, `Ltsc2019);
     `Windows (`Mingw, `Latest);
@@ -389,7 +390,7 @@ let resolve_alias (d : t) : distro =
   | `OpenSUSE `Latest -> `OpenSUSE `V16_0
   | `Ubuntu `Latest -> `Ubuntu `V25_10
   | `Ubuntu `LTS -> `Ubuntu `V24_04
-  | `Cygwin `Latest -> `Cygwin `Ltsc2022
+  | `Cygwin `Latest -> `Cygwin `Ltsc2025
   | `Windows (cc, `Latest) -> `Windows (cc, `Ltsc2019)
   | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2025)
   | ( `Alpine
@@ -413,7 +414,7 @@ let resolve_alias (d : t) : distro =
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
         | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04 | `V23_10 | `V24_04
         | `V24_10 | `V25_04 | `V25_10 )
-    | `Cygwin (`Ltsc2016 | `Ltsc2019 | `Ltsc2022)
+    | `Cygwin (`Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025)
     | `Windows (_, `Ltsc2019)
     | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) ) as d ->
       d
@@ -458,7 +459,7 @@ let distro_status (d : t) : status =
         | `V21_04 | `V21_10 | `V22_10 | `V23_04 | `V23_10 | `V24_10 ) ->
         `Deprecated
     | `Cygwin (`Ltsc2016 | `Ltsc2019) -> `Deprecated
-    | `Cygwin `Ltsc2022 -> `Active `Tier3
+    | `Cygwin (`Ltsc2022 | `Ltsc2025) -> `Active `Tier3
     | `Windows (_, `Ltsc2019) -> `Active `Tier3
     | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) -> `Active `Tier3
 
@@ -796,6 +797,7 @@ let tag_of_distro (d : t) =
   | `Cygwin `Ltsc2016 -> "cygwin-2016"
   | `Cygwin `Ltsc2019 -> "cygwin-2019"
   | `Cygwin `Ltsc2022 -> "cygwin-2022"
+  | `Cygwin `Ltsc2025 -> "cygwin-2025"
   | `Cygwin `Latest -> "cygwin"
   | `Windows (`Mingw, `Ltsc2019) -> "windows-mingw-ltsc2019"
   | `Windows (`Mingw, `Latest) -> "windows-mingw"
@@ -918,6 +920,7 @@ let distro_of_tag x : t option =
   | "cygwin-ltsc2016" -> Some (`Cygwin `Ltsc2016)
   | "cygwin-ltsc2019" -> Some (`Cygwin `Ltsc2019)
   | "cygwin-ltsc2022" -> Some (`Cygwin `Ltsc2022)
+  | "cygwin-ltsc2025" -> Some (`Cygwin `Ltsc2025)
   | "cygwin" -> Some (`Cygwin `Latest)
   | "windows-mingw-ltsc2019" -> Some (`Windows (`Mingw, `Ltsc2019))
   | "windows-mingw" -> Some (`Windows (`Mingw, `Latest))
@@ -1036,6 +1039,7 @@ let human_readable_string_of_distro (d : t) =
     | `Cygwin `Ltsc2016 -> "Cygwin Ltsc2016"
     | `Cygwin `Ltsc2019 -> "Cygwin Ltsc2019"
     | `Cygwin `Ltsc2022 -> "Cygwin Ltsc2022"
+    | `Cygwin `Ltsc2025 -> "Cygwin Ltsc2025"
     | `Windows (`Mingw, `Ltsc2019) -> "Windows Ltsc2019 mingw"
     | `Windows (`Msvc, `Ltsc2019) -> "Windows Ltsc2019 msvc"
     | `WindowsServer (`Mingw, `Ltsc2022) -> "Windows Server Ltsc2022 mingw"
@@ -1346,6 +1350,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `Ltsc2016 -> "ltsc2016"
         | `Ltsc2019 -> "ltsc2019"
         | `Ltsc2022 -> "ltsc2022"
+        | `Ltsc2025 -> "ltsc2025"
       in
       ("mcr.microsoft.com/windows/servercore", tag)
   | `Windows v ->
@@ -1394,6 +1399,7 @@ let sort_key_of_distro (d : t) =
     | `Cygwin `Ltsc2016 -> 40000
     | `Cygwin `Ltsc2019 -> 40001
     | `Cygwin `Ltsc2022 -> 40002
+    | `Cygwin `Ltsc2025 -> 40003
     | `Debian `V7 -> 50000
     | `Debian `V8 -> 50001
     | `Debian `V9 -> 50002
