@@ -430,7 +430,7 @@ let distro_status (d : t) : status =
     | `Alpine
         ( `V3_3 | `V3_4 | `V3_5 | `V3_6 | `V3_7 | `V3_8 | `V3_9 | `V3_10
         | `V3_11 | `V3_12 | `V3_13 | `V3_14 | `V3_15 | `V3_16 | `V3_17 | `V3_18
-        | `V3_19 | `V3_20 | `V3_21 ) ->
+        | `V3_19 | `V3_20 | `V3_21 | `V3_22 ) ->
         `Deprecated
     | `Alpine `V3_23 -> `Active `Tier1
     | `Archlinux `Latest -> `Active `Tier3
