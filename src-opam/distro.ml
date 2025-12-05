@@ -1384,22 +1384,22 @@ let sort_key_of_distro (d : t) =
     | `Alpine `V3_5 -> 10003
     | `Alpine `V3_6 -> 10004
     | `Alpine `V3_7 -> 10005
-    | `Alpine `V3_8 -> 10005
-    | `Alpine `V3_9 -> 10005
-    | `Alpine `V3_10 -> 10005
-    | `Alpine `V3_11 -> 10005
-    | `Alpine `V3_12 -> 10005
-    | `Alpine `V3_13 -> 10005
-    | `Alpine `V3_14 -> 10005
-    | `Alpine `V3_15 -> 10005
-    | `Alpine `V3_16 -> 10005
-    | `Alpine `V3_17 -> 10005
-    | `Alpine `V3_18 -> 10005
-    | `Alpine `V3_19 -> 10005
-    | `Alpine `V3_20 -> 10005
-    | `Alpine `V3_21 -> 10005
-    | `Alpine `V3_22 -> 10005
-    | `Alpine `V3_23 -> 10005
+    | `Alpine `V3_8 -> 10006
+    | `Alpine `V3_9 -> 10007
+    | `Alpine `V3_10 -> 10008
+    | `Alpine `V3_11 -> 10009
+    | `Alpine `V3_12 -> 10010
+    | `Alpine `V3_13 -> 10011
+    | `Alpine `V3_14 -> 10012
+    | `Alpine `V3_15 -> 10013
+    | `Alpine `V3_16 -> 10014
+    | `Alpine `V3_17 -> 10015
+    | `Alpine `V3_18 -> 10016
+    | `Alpine `V3_19 -> 10017
+    | `Alpine `V3_20 -> 10018
+    | `Alpine `V3_21 -> 10019
+    | `Alpine `V3_22 -> 10020
+    | `Alpine `V3_23 -> 10021
     | `Archlinux `Latest -> 20000
     | `CentOS `V6 -> 30000
     | `CentOS `V7 -> 30001
