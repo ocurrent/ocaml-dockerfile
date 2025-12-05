@@ -1,8 +1,8 @@
-(lang dune 3.0)
+(lang dune 3.20)
 (name dockerfile)
 
 (generate_opam_files true)
-
+(maintenance_intent "(latest)")
 (source (github ocurrent/ocaml-dockerfile))
 (license "ISC")
 
