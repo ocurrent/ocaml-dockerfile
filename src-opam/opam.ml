@@ -391,13 +391,13 @@ let apt_opam2 ?(labels = []) ?arch distro ~opam_hashes () =
   header ?arch distro
   @@ label (("distro_style", "apt") :: labels)
   @@ Linux.Apt.install "build-essential curl git libcap-dev sudo"
-  @@ maybe_replace_uutils_coreutils distro
   @@ Linux.Git.init ()
   @@ maybe_build_bubblewrap_from_source distro
   @@ install_opams opam_master_hash opam_branches
   @@ from ?arch distro
   @@ run "ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime"
   @@ bubblewrap_and_dev_packages distro
+  @@ maybe_replace_uutils_coreutils distro
   @@ copy_opams ~src:"/usr/local/bin" ~dst:"/usr/bin" opam_branches
   @@ run
        "echo 'debconf debconf/frontend select Noninteractive' | \
