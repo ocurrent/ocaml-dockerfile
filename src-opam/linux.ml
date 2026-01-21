@@ -86,14 +86,30 @@ end
 
 (** Debian rules *)
 module Apt = struct
+  (* https://docs.docker.com/reference/dockerfile/#example-cache-apt-packages *)
+  let cache_mounts =
+    [
+      mount_cache ~target:"/var/cache/apt" ~sharing:`Locked ();
+      mount_cache ~target:"/var/lib/apt" ~sharing:`Locked ();
+    ]
+
   let update =
-    run "apt-get -y update"
-    @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
+    run
+      {|mv /etc/apt/apt.conf.d/docker-clean /tmp/; echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache|}
+    @@ run ~mounts:cache_mounts
+         "apt update && DEBIAN_FRONTEND=noninteractive apt-get -y upgrade"
+    @@ run
+         "mv /tmp/docker-clean /etc/apt/apt.conf.d/ && rm -f \
+          /etc/apt/apt.conf.d/keep-cache"
 
   let install fmt =
     ksprintf
       (fun s ->
-        update @@ run "DEBIAN_FRONTEND=noninteractive apt-get -y install %s" s)
+        update
+        @@ run ~mounts:cache_mounts
+             "DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends \
+              install -y %s"
+             s)
       fmt
 
   let dev_packages ?extra () =
@@ -242,11 +258,13 @@ end
 
 (** Pacman rules *)
 module Pacman = struct
-  let update = run "pacman -Syu --noconfirm && yes | pacman -Scc"
+  let cache_mount = mount_cache ~target:"/var/cache/pacman" ~sharing:`Locked ()
+  let update = run ~mounts:[ cache_mount ] "pacman -Syu --noconfirm --needed"
 
   let install fmt =
     ksprintf
-      (fun s -> run "pacman -Syu --noconfirm %s && yes | pacman -Scc" s)
+      (fun s ->
+        run ~mounts:[ cache_mount ] "pacman -Syu --noconfirm --needed %s" s)
       fmt
 
   let dev_packages ?extra () =
