@@ -311,8 +311,9 @@ let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
   Windows.Cygwin.Git.init ?cyg ~repos:[ "/tmp/opam-sources" ] ()
   @@ Windows.Cygwin.run_sh ?cyg
        "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && \
-        git checkout %s && sed -i 's/make -j[0-9]*/make -j1/g' \
-        shell/bootstrap-ocaml.sh && make compiler %s"
+        git checkout %s && sed -i \\\"s/make -j[0-9]*/make \
+        -j\\$NUMBER_OF_PROCESSORS/g\\\" shell/bootstrap-ocaml.sh && make \
+        compiler %s"
        opam_master_hash
        (if Option.value ~default:false msvs then "OCAML_PORT=msvc64" else "")
   @@ List.fold_left
