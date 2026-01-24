@@ -550,9 +550,9 @@ let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
       ( Windows.Cygwin.msvc_packages,
         Windows.install_visual_studio_build_tools
           [
+            "Microsoft.VisualStudio.Workload.VCTools";
             "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
-            (* Without 18362, rc.exe is missing from the Path. *)
-            "Microsoft.VisualStudio.Component.Windows10SDK.18362";
+            "Microsoft.VisualStudio.Component.Windows11SDK.22621";
           ] )
     in
     Windows.header ~alias:"cygwin-msvc" ~override_tag distro
