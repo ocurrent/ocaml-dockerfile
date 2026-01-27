@@ -131,15 +131,20 @@ let remove_system_attribute ?(recurse = true) path =
     (if recurse then "-Recurse" else "")
 
 let ocaml_for_windows_package_exn ~switch ~port ~arch =
-  let variant =
-    let bitness = if Ocaml_version.arch_is_32bit arch then "32" else "64" in
-    match arch with
-    | `X86_64 | `I386 ->
-        (match port with `Mingw -> "mingw" | `Msvc -> "msvc") ^ bitness
-    | _ -> invalid_arg "Unsupported architecture"
-  in
   let _, pkgver = Ocaml_version.Opam.V2.package switch in
-  ("ocaml-variants", pkgver ^ "+" ^ variant)
+  if Ocaml_version.major switch >= 5 then
+    (* OCaml 5.x uses +options variant with system-mingw/system-msvc for port selection *)
+    ("ocaml-variants", pkgver ^ "+options")
+  else
+    (* OCaml 4.x uses +mingw64/+msvc64 variant naming *)
+    let variant =
+      let bitness = if Ocaml_version.arch_is_32bit arch then "32" else "64" in
+      match arch with
+      | `X86_64 | `I386 ->
+          (match port with `Mingw -> "mingw" | `Msvc -> "msvc") ^ bitness
+      | _ -> invalid_arg "Unsupported architecture"
+    in
+    ("ocaml-variants", pkgver ^ "+" ^ variant)
 
 let git_init ~name ~email ~repos =
   String.concat " && "

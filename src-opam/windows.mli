@@ -70,7 +70,7 @@ val ocaml_for_windows_package_exn :
   port:[ `Mingw | `Msvc ] ->
   arch:Ocaml_version.arch ->
   string * string
-(** [ocaml_for_windows_variant ~port ~arch] returns the
+(** [ocaml_for_windows_package_exn ~switch ~port ~arch] returns the
     [(package_name, package_version)] of the OCaml compiler package in OCaml for
     Windows, if applicable. *)
 

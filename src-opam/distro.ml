@@ -538,14 +538,9 @@ let distro_arches ov (d : t) =
   | `OpenSUSE (`V15_4 | `V15_5 | `V15_6 | `V16_0), ov
     when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
-  (* OCaml for Windows doesn't package OCaml 5.0.
-     TODO: remove when upstream opam gains OCaml packages on Windows. *)
-  | (`Windows (`Mingw, _), ov | `WindowsServer (`Mingw, _), ov)
-    when OV.major ov >= 5 ->
-      []
-  (* OCaml 5 doesn't support MSVC: https://github.com/ocaml/ocaml/pull/11835. *)
+  (* MSVC support restored in OCaml 5.3: https://github.com/ocaml/ocaml/pull/12954 *)
   | (`Windows (`Msvc, _), ov | `WindowsServer (`Msvc, _), ov)
-    when OV.major ov >= 5 ->
+    when OV.major ov >= 5 && OV.(compare Releases.v5_3_0 ov) = 1 ->
       []
   (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
   | (`Windows (`Msvc, _), ov | `WindowsServer (`Msvc, _), ov)
