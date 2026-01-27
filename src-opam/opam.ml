@@ -356,9 +356,15 @@ let copy_opams_windows opam_branches =
     empty opam_branches
 
 (* Make native opam-2.2 the default opam.
-   We no longer install fdopen's opam - native opam 2.2+ supports Windows directly. *)
+   We no longer install fdopen's opam - native opam 2.2+ supports Windows directly.
+   Copy to same directory to preserve DLL resolution, and add usr/local/bin plus
+   the mingw runtime directory to PATH for DLL resolution. *)
 let setup_default_opam_windows =
-  run {|copy C:\cygwin64\usr\local\bin\opam-2.2.exe C:\cygwin64\bin\opam.exe|}
+  run
+    {|copy C:\cygwin64\usr\local\bin\opam-2.2.exe C:\cygwin64\usr\local\bin\opam.exe|}
+  @@ run
+       {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "C:\cygwin64\usr\local\bin;C:\cygwin64\usr\x86_64-w64-mingw32\sys-root\mingw\bin;%%c"|}
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
