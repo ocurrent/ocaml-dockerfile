@@ -31,11 +31,8 @@ let run_vc ~arch fmt =
     | _ -> invalid_arg "Unsupported architecture"
   in
   ksprintf
-    (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch)
+    (run {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %s && %s|} arch)
     fmt
-
-let run_ocaml_env args fmt =
-  ksprintf (run {|ocaml-env exec %s -- %s|} (String.concat " " args)) fmt
 
 let cleanup t = t @@ run_powershell {|Remove-Item 'C:\TEMP' -Recurse|} |> crunch
 
@@ -101,6 +98,14 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
     && del /q C:\TEMP\vs_buildtools.exe|}
        vs_version (pp "add" components)
        (pp "remove" excluded_components)
+
+let persist_msvc_env ?(arch = `X86_64) () =
+  (* Capture the MSVC environment from vcvarsall.bat and persist it permanently.
+     This allows opam and users to access the MSVC compiler without needing a wrapper. *)
+  let arch_str = match arch with `I386 -> "x86" | `X86_64 -> "amd64" | _ -> invalid_arg "Unsupported architecture" in
+  run {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %s && set > C:\msvc_env.txt|} arch_str
+  @@ run_powershell {|Get-Content C:\msvc_env.txt | ForEach-Object { if ($_ -match '^(PATH|INCLUDE|LIB|LIBPATH)=(.*)$') { Write-Host ('Setting ' + $matches[1]); [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Machine') } }|}
+  @@ run {|del C:\msvc_env.txt|}
 
 let header ?alias ~override_tag distro =
   let img, tag = Distro.base_distro_tag distro in
@@ -179,11 +184,6 @@ module Cygwin = struct
 
   let run_sh ?(cyg = default) fmt =
     ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
-
-  let run_sh_ocaml_env ?(cyg = default) args fmt =
-    ksprintf
-      (run_sh ~cyg "ocaml-env exec %s -- %s" (String.concat " " args))
-      fmt
 
   let install_cygsympathy_from_source cyg =
     run {|mkdir %s\lib\cygsympathy && mkdir %s\etc\postinstall|} cyg.root

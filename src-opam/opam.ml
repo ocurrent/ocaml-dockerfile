@@ -337,34 +337,41 @@ let copy_opams ~src ~dst opam_branches =
             aliases)
     empty opam_branches
 
-let copy_opams_windows opam_branches =
-  List.fold_left
-    (fun acc { branch; public_name; aliases; _ } ->
-      acc
-      (* Docker doesn't allow copying executables to /usr/local/bin *)
-      @@ copy ~from:"opam-builder"
-           ~src:[ {|C:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
-           ~dst:({|C:\|} ^ public_name ^ ".exe")
-           ()
-      @@ run {|move C:\%s.exe C:\cygwin64\usr\local\bin|} public_name
-      @@@ List.map
-            (fun alias ->
-              run
-                {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\usr\local\bin\%s.exe|}
-                alias public_name)
-            aliases)
-    empty opam_branches
+let copy_opams_windows ~mingw opam_branches =
+  (* Copy MinGW runtime DLLs if building with MinGW *)
+  (if mingw then
+     copy ~from:"opam-builder"
+       ~src:[ {|C:\cygwin64\usr\local\bin\Opam.Runtime.amd64|} ]
+       ~dst:{|C:\cygwin64\usr\local\bin\Opam.Runtime.amd64|}
+       ()
+   else empty)
+  @@ List.fold_left
+       (fun acc { branch; public_name; aliases; _ } ->
+         acc
+         (* Docker doesn't allow copying executables to /usr/local/bin *)
+         @@ copy ~from:"opam-builder"
+              ~src:[ {|C:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
+              ~dst:({|C:\|} ^ public_name ^ ".exe")
+              ()
+         @@ run {|move C:\%s.exe C:\cygwin64\usr\local\bin|} public_name
+         @@@ List.map
+               (fun alias ->
+                 run
+                   {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\usr\local\bin\%s.exe|}
+                   alias public_name)
+               aliases)
+       empty opam_branches
 
 (* Make native opam-2.2 the default opam.
    We no longer install fdopen's opam - native opam 2.2+ supports Windows directly.
-   Copy to same directory to preserve DLL resolution, and add usr/local/bin plus
-   the mingw runtime directory to PATH for DLL resolution. *)
+   Use mklink to create a symlink - DLLs in Opam.Runtime.amd64 are resolved
+   relative to the symlink target. *)
 let setup_default_opam_windows =
   run
-    {|copy C:\cygwin64\usr\local\bin\opam-2.2.exe C:\cygwin64\usr\local\bin\opam.exe|}
+    {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
   @@ run
        {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "C:\cygwin64\usr\local\bin;C:\cygwin64\usr\x86_64-w64-mingw32\sys-root\mingw\bin;%%c"|}
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "C:\cygwin64\usr\local\bin;C:\cygwin64\bin;%%c"|}
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
@@ -549,7 +556,7 @@ let windows_mingw_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   @@ user "ContainerAdministrator"
   @@ Windows.sanitize_reg_path ()
   @@ winget_setup @@ cygwin_setup
-  @@ copy_opams_windows opam_branches
+  @@ copy_opams_windows ~mingw:true opam_branches
   @@ setup_default_opam_windows @@ Windows.Cygwin.setup ()
   @@ Windows.Cygwin.Git.init ()
 
@@ -597,7 +604,8 @@ let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ cygwin_packages @@ winget_setup
-  @@ copy_opams_windows opam_branches
+  @@ Windows.persist_msvc_env ()
+  @@ copy_opams_windows ~mingw:false opam_branches
   @@ setup_default_opam_windows @@ Windows.Cygwin.setup ()
   @@ Windows.Cygwin.Git.init ()
 

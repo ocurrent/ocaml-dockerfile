@@ -35,10 +35,6 @@ val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
 (** [run_vc ~arch fmt] will execute [run fmt] with Visual Compiler for [~arch]
     loaded in the environment. *)
 
-val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
-(** [run_ocaml_env args fmt] will execute [fmt] in the environment loaded by
-    [ocaml-env exec] with [args]. *)
-
 val sanitize_reg_path : unit -> t
 [@@ocaml.doc
   {|[sanitize_reg_path ()] adds the command necessary to remove a trailing
@@ -64,6 +60,12 @@ val install_visual_studio_build_tools : ?vs_version:string -> string list -> t
     @see <https://learn.microsoft.com/en-us/visualstudio/install/build-tools-container-issues?view=vs-2022>
     @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022>
 *)
+
+val persist_msvc_env : ?arch:Ocaml_version.arch -> unit -> t
+(** [persist_msvc_env ?arch ()] captures the MSVC environment variables from
+    vcvarsall.bat and persists them permanently to the system environment.
+    This allows opam and users to access the MSVC compiler without needing
+    a wrapper script. Should be called after [install_visual_studio_build_tools]. *)
 
 val ocaml_for_windows_package_exn :
   switch:Ocaml_version.t ->
@@ -138,11 +140,6 @@ module Cygwin : sig
   val run_sh : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
   (** [run_sh ?cyg fmt] will execute in the Cygwin root
       [\bin\bash.exe --login -c "fmt"]. *)
-
-  val run_sh_ocaml_env :
-    ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
-  (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the environment loaded
-      by [ocaml-env cygwin exec] with [args]. *)
 
   (** Rules for Git. *)
   module Git : sig
