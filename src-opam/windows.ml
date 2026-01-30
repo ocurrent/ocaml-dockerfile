@@ -99,14 +99,6 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
        vs_version (pp "add" components)
        (pp "remove" excluded_components)
 
-let persist_msvc_env ?(arch = `X86_64) () =
-  (* Capture the MSVC environment from vcvarsall.bat and persist it permanently.
-     This allows opam and users to access the MSVC compiler without needing a wrapper. *)
-  let arch_str = match arch with `I386 -> "x86" | `X86_64 -> "amd64" | _ -> invalid_arg "Unsupported architecture" in
-  run {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %s && set > C:\msvc_env.txt|} arch_str
-  @@ run_powershell {|Get-Content C:\msvc_env.txt | ForEach-Object { if ($_ -match '^(PATH|INCLUDE|LIB|LIBPATH)=(.*)$') { Write-Host ('Setting ' + $matches[1]); [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Machine') } }|}
-  @@ run {|del C:\msvc_env.txt|}
-
 let header ?alias ~override_tag distro =
   let img, tag = Distro.base_distro_tag distro in
   let tag = Option.value ~default:tag override_tag in

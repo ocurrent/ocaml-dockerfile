@@ -61,12 +61,6 @@ val install_visual_studio_build_tools : ?vs_version:string -> string list -> t
     @see <https://docs.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022>
 *)
 
-val persist_msvc_env : ?arch:Ocaml_version.arch -> unit -> t
-(** [persist_msvc_env ?arch ()] captures the MSVC environment variables from
-    vcvarsall.bat and persists them permanently to the system environment.
-    This allows opam and users to access the MSVC compiler without needing
-    a wrapper script. Should be called after [install_visual_studio_build_tools]. *)
-
 val ocaml_for_windows_package_exn :
   switch:Ocaml_version.t ->
   port:[ `Mingw | `Msvc ] ->

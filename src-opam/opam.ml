@@ -338,12 +338,15 @@ let copy_opams ~src ~dst opam_branches =
     empty opam_branches
 
 let copy_opams_windows ~mingw opam_branches =
-  (* Copy MinGW runtime DLLs if building with MinGW *)
+  (* Copy MinGW runtime DLLs if building with MinGW.
+     Docker doesn't allow copying directly to /usr/local/bin on older Windows,
+     so copy to C:\ first then move. *)
   (if mingw then
      copy ~from:"opam-builder"
        ~src:[ {|C:\cygwin64\usr\local\bin\Opam.Runtime.amd64|} ]
-       ~dst:{|C:\cygwin64\usr\local\bin\Opam.Runtime.amd64|}
+       ~dst:{|C:\Opam.Runtime.amd64|}
        ()
+     @@ run {|move C:\Opam.Runtime.amd64 C:\cygwin64\usr\local\bin|}
    else empty)
   @@ List.fold_left
        (fun acc { branch; public_name; aliases; _ } ->
@@ -365,13 +368,32 @@ let copy_opams_windows ~mingw opam_branches =
 (* Make native opam-2.2 the default opam.
    We no longer install fdopen's opam - native opam 2.2+ supports Windows directly.
    Use mklink to create a symlink - DLLs in Opam.Runtime.amd64 are resolved
-   relative to the symlink target. *)
-let setup_default_opam_windows =
+   relative to the symlink target.
+   For MinGW: Cygwin paths first (MinGW compilers), then Windows paths.
+   For MSVC: persist_msvc_env already set MSVC paths first, just add Cygwin paths. *)
+let setup_default_opam_windows_mingw =
   run
     {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
   @@ run
        {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "C:\cygwin64\usr\local\bin;C:\cygwin64\bin;%%c"|}
+
+let setup_default_opam_windows_msvc =
+  let cygwin = {|C:\cygwin64\usr\local\bin;C:\cygwin64\bin|} in
+  let ps_cmd =
+    (* $before = original Windows PATH from registry
+       $msvcPaths = new paths added by vcvarsall.bat
+       $finalPath = MSVC -> Cygwin -> original Windows *)
+    {|powershell -Command "$before = (Get-Content C:\path_before.txt).Trim(); $content = Get-Content C:\msvc_env.txt; foreach ($line in $content) { if ($line -match '^(INCLUDE|LIB|LIBPATH)=(.*)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Machine') } elseif ($line -match '^PATH=(.*)$') { $vcPath = $matches[1]; $msvcPaths = ($vcPath -split ';' | Where-Object { $before -notlike \"*$_*\" -and $_ -ne '' }) -join ';'; $finalPath = \"$msvcPaths;|}
+    ^ cygwin
+    ^ {|;$before\"; [Environment]::SetEnvironmentVariable('PATH', $finalPath, 'Machine') } }"|}
+  in
+  (* Capture MSVC environment and set PATH = MSVC -> Cygwin -> Windows *)
+  run {|powershell -Command "[Environment]::GetEnvironmentVariable('PATH', 'Machine')" > C:\path_before.txt|}
+  @@ run {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && set > C:\msvc_env.txt|}
+  @@ run "%s" ps_cmd
+  @@ run {|del C:\path_before.txt C:\msvc_env.txt|}
+  @@ run {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
@@ -557,7 +579,7 @@ let windows_mingw_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   @@ Windows.sanitize_reg_path ()
   @@ winget_setup @@ cygwin_setup
   @@ copy_opams_windows ~mingw:true opam_branches
-  @@ setup_default_opam_windows @@ Windows.Cygwin.setup ()
+  @@ setup_default_opam_windows_mingw @@ Windows.Cygwin.setup ()
   @@ Windows.Cygwin.Git.init ()
 
 (* Native Windows with MSVC and WinGet. *)
@@ -604,9 +626,8 @@ let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ cygwin_packages @@ winget_setup
-  @@ Windows.persist_msvc_env ()
   @@ copy_opams_windows ~mingw:false opam_branches
-  @@ setup_default_opam_windows @@ Windows.Cygwin.setup ()
+  @@ setup_default_opam_windows_msvc @@ Windows.Cygwin.setup ()
   @@ Windows.Cygwin.Git.init ()
 
 let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
