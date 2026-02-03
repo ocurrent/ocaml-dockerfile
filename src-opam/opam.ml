@@ -708,9 +708,7 @@ let create_switch ~arch distro t =
   | `Windows (port, _) ->
       let pn, pv = Windows.ocaml_for_windows_package_exn ~port ~arch ~switch in
       let port_pkg =
-        if OV.major switch >= 5 then
-          match port with `Mingw -> ",system-mingw" | `Msvc -> ",system-msvc"
-        else ""
+        match port with `Mingw -> ",system-mingw" | `Msvc -> ",system-msvc"
       in
       create_switch switch (pn ^ "." ^ pv ^ port_pkg)
   | _ -> create_switch switch (Ocaml_version.Opam.V2.name switch)
