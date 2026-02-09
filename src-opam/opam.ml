@@ -344,8 +344,7 @@ let copy_opams_windows ~mingw opam_branches =
   (if mingw then
      copy ~from:"opam-builder"
        ~src:[ {|C:\cygwin64\usr\local\bin\Opam.Runtime.amd64|} ]
-       ~dst:{|C:\Opam.Runtime.amd64|}
-       ()
+       ~dst:{|C:\Opam.Runtime.amd64|} ()
      @@ run {|move C:\Opam.Runtime.amd64 C:\cygwin64\usr\local\bin|}
    else empty)
   @@ List.fold_left
@@ -389,11 +388,14 @@ let setup_default_opam_windows_msvc =
     ^ {|;$before\"; [Environment]::SetEnvironmentVariable('PATH', $finalPath, 'Machine') } }"|}
   in
   (* Capture MSVC environment and set PATH = MSVC -> Cygwin -> Windows *)
-  run {|powershell -Command "[Environment]::GetEnvironmentVariable('PATH', 'Machine')" > C:\path_before.txt|}
-  @@ run {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && set > C:\msvc_env.txt|}
+  run
+    {|powershell -Command "[Environment]::GetEnvironmentVariable('PATH', 'Machine')" > C:\path_before.txt|}
+  @@ run
+       {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && set > C:\msvc_env.txt|}
   @@ run "%s" ps_cmd
   @@ run {|del C:\path_before.txt C:\msvc_env.txt|}
-  @@ run {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
+  @@ run
+       {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =

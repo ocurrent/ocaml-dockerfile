@@ -31,7 +31,9 @@ let run_vc ~arch fmt =
     | _ -> invalid_arg "Unsupported architecture"
   in
   ksprintf
-    (run {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %s && %s|} arch)
+    (run
+       {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %s && %s|}
+       arch)
     fmt
 
 let cleanup t = t @@ run_powershell {|Remove-Item 'C:\TEMP' -Recurse|} |> crunch
