@@ -129,7 +129,8 @@ module Apt = struct
       | None -> empty
       | Some u ->
           run "if getent passwd %d; then userdel -r $(id -nu %d); fi" u u)
-    @@ run "adduser %s%s--disabled-password --gecos '' %s" uidparam gid username
+    @@ run "useradd %s%s--create-home --shell /bin/bash %s" uidparam gid
+         username
     @@ run "passwd -l %s" username
     @@ run "chown -R %s:%s %s" username username home
     @@ user "%s" username
