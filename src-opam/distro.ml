@@ -243,8 +243,8 @@ let os_family_to_string (os : os_family) =
 
 let opam_repository (os : os_family) =
   match os with
-  | `Cygwin | `Linux -> "https://github.com/ocaml/opam-repository.git"
-  | `Windows -> "https://github.com/ocaml-opam/opam-repository-mingw.git#sunset"
+  | `Cygwin | `Linux | `Windows ->
+      "https://github.com/ocaml/opam-repository.git"
 
 let personality os_family arch =
   match os_family with
@@ -538,18 +538,13 @@ let distro_arches ov (d : t) =
   | `OpenSUSE (`V15_4 | `V15_5 | `V15_6 | `V16_0), ov
     when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
-  (* OCaml for Windows doesn't package OCaml 5.0.
-     TODO: remove when upstream opam gains OCaml packages on Windows. *)
-  | (`Windows (`Mingw, _), ov | `WindowsServer (`Mingw, _), ov)
-    when OV.major ov >= 5 ->
+  (* Native opam 2.2+ requires official opam-repository packages, available from 4.13 *)
+  | (`Windows (_, _), ov | `WindowsServer (_, _), ov)
+    when OV.(compare Releases.v4_13_0 ov) = 1 ->
       []
-  (* OCaml 5 doesn't support MSVC: https://github.com/ocaml/ocaml/pull/11835. *)
+  (* MSVC support restored in OCaml 5.3: https://github.com/ocaml/ocaml/pull/12954 *)
   | (`Windows (`Msvc, _), ov | `WindowsServer (`Msvc, _), ov)
-    when OV.major ov >= 5 ->
-      []
-  (* 2021-04-19: should be 4.03 but there's a linking failure until 4.06. *)
-  | (`Windows (`Msvc, _), ov | `WindowsServer (`Msvc, _), ov)
-    when OV.(compare Releases.v4_06_0 ov) = 1 ->
+    when OV.major ov >= 5 && OV.(compare Releases.v5_3_0 ov) = 1 ->
       []
   | _ -> [ `X86_64 ]
 

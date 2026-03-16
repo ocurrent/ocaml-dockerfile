@@ -311,7 +311,9 @@ let install_opams_windows ?cyg ?prefix ?msvs opam_master_hash opam_branches =
   Windows.Cygwin.Git.init ?cyg ~repos:[ "/tmp/opam-sources" ] ()
   @@ Windows.Cygwin.run_sh ?cyg
        "git clone https://github.com/ocaml/opam /tmp/opam && cd /tmp/opam && \
-        git checkout %s && make compiler %s"
+        git checkout %s && sed -i \\\"s/make -j[0-9]*/make \
+        -j\\$NUMBER_OF_PROCESSORS/g\\\" shell/bootstrap-ocaml.sh && make \
+        compiler %s"
        opam_master_hash
        (if Option.value ~default:false msvs then "OCAML_PORT=msvc64" else "")
   @@ List.fold_left
@@ -335,23 +337,65 @@ let copy_opams ~src ~dst opam_branches =
             aliases)
     empty opam_branches
 
-let copy_opams_windows opam_branches =
-  List.fold_left
-    (fun acc { branch; public_name; aliases; _ } ->
-      acc
-      (* Docker doesn't allow copying executables to /usr/local/bin *)
-      @@ copy ~from:"opam-builder"
-           ~src:[ {|C:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
-           ~dst:({|C:\|} ^ public_name ^ ".exe")
-           ()
-      @@ run {|move C:\%s.exe C:\cygwin64\usr\local\bin|} public_name
-      @@@ List.map
-            (fun alias ->
-              run
-                {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\usr\local\bin\%s.exe|}
-                alias public_name)
-            aliases)
-    empty opam_branches
+let copy_opams_windows ~mingw opam_branches =
+  (* Copy MinGW runtime DLLs if building with MinGW.
+     Docker doesn't allow copying directly to /usr/local/bin on older Windows,
+     so copy to C:\ first then move. *)
+  (if mingw then
+     copy ~from:"opam-builder"
+       ~src:[ {|C:\cygwin64\usr\local\bin\Opam.Runtime.amd64|} ]
+       ~dst:{|C:\Opam.Runtime.amd64|} ()
+     @@ run {|move C:\Opam.Runtime.amd64 C:\cygwin64\usr\local\bin|}
+   else empty)
+  @@ List.fold_left
+       (fun acc { branch; public_name; aliases; _ } ->
+         acc
+         (* Docker doesn't allow copying executables to /usr/local/bin *)
+         @@ copy ~from:"opam-builder"
+              ~src:[ {|C:\cygwin64\usr\local\bin\opam-|} ^ branch ^ ".exe" ]
+              ~dst:({|C:\|} ^ public_name ^ ".exe")
+              ()
+         @@ run {|move C:\%s.exe C:\cygwin64\usr\local\bin|} public_name
+         @@@ List.map
+               (fun alias ->
+                 run
+                   {|mklink C:\cygwin64\bin\%s.exe C:\cygwin64\usr\local\bin\%s.exe|}
+                   alias public_name)
+               aliases)
+       empty opam_branches
+
+(* Make native opam-2.2 the default opam.
+   We no longer install fdopen's opam - native opam 2.2+ supports Windows directly.
+   Use mklink to create a symlink - DLLs in Opam.Runtime.amd64 are resolved
+   relative to the symlink target.
+   For MinGW: Cygwin paths first (MinGW compilers), then Windows paths.
+   For MSVC: persist_msvc_env already set MSVC paths first, just add Cygwin paths. *)
+let setup_default_opam_windows_mingw =
+  run
+    {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
+  @@ run
+       {|for /f "tokens=1,2,*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path ^| findstr /r "^[^H]"') do `
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /V Path /t REG_EXPAND_SZ /f /d "C:\cygwin64\usr\local\bin;C:\cygwin64\bin;%%c"|}
+
+let setup_default_opam_windows_msvc =
+  let cygwin = {|C:\cygwin64\usr\local\bin;C:\cygwin64\bin|} in
+  let ps_cmd =
+    (* $before = original Windows PATH from registry
+       $msvcPaths = new paths added by vcvarsall.bat
+       $finalPath = MSVC -> Cygwin -> original Windows *)
+    {|powershell -Command "$before = (Get-Content C:\path_before.txt).Trim(); $content = Get-Content C:\msvc_env.txt; foreach ($line in $content) { if ($line -match '^(INCLUDE|LIB|LIBPATH)=(.*)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Machine') } elseif ($line -match '^PATH=(.*)$') { $vcPath = $matches[1]; $msvcPaths = ($vcPath -split ';' | Where-Object { $before -notlike \"*$_*\" -and $_ -ne '' }) -join ';'; $finalPath = \"$msvcPaths;|}
+    ^ cygwin
+    ^ {|;$before\"; [Environment]::SetEnvironmentVariable('PATH', $finalPath, 'Machine') } }"|}
+  in
+  (* Capture MSVC environment and set PATH = MSVC -> Cygwin -> Windows *)
+  run
+    {|powershell -Command "[Environment]::GetEnvironmentVariable('PATH', 'Machine')" > C:\path_before.txt|}
+  @@ run
+       {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && set > C:\msvc_env.txt|}
+  @@ run "%s" ps_cmd
+  @@ run {|del C:\path_before.txt C:\msvc_env.txt|}
+  @@ run
+       {|mklink C:\cygwin64\usr\local\bin\opam.exe C:\cygwin64\usr\local\bin\opam-2.2.exe|}
 
 (* Apk based Dockerfile *)
 let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
@@ -518,12 +562,15 @@ let windows_mingw_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   in
   (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
      C:\cygwin64, so we cannot build Cygwin in a separate image. *)
-  let ocaml_for_windows =
-    let packages, setup = Windows.Cygwin.install_ocaml_for_windows () in
+  (* We use native opam 2.2+ instead of fdopen's opam, but still need the
+     Cygwin packages that install_ocaml_for_windows would provide. *)
+  let cygwin_setup =
+    let packages, _fdopen_opam_setup =
+      Windows.Cygwin.install_ocaml_for_windows ()
+    in
     let packages = Windows.Cygwin.mingw_packages @ packages in
     Windows.Cygwin.install_cygwin ~aslr_off:(aslr_state distro) ~extra:packages
       ()
-    @@ setup
   in
   parser_directive (`Escape '`')
   @@ comment "Autogenerated by OCaml-Dockerfile scripts"
@@ -532,9 +579,10 @@ let windows_mingw_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
   @@ Windows.sanitize_reg_path ()
-  @@ winget_setup @@ ocaml_for_windows
-  @@ copy_opams_windows opam_branches
-  @@ Windows.Cygwin.setup () @@ Windows.Cygwin.Git.init ()
+  @@ winget_setup @@ cygwin_setup
+  @@ copy_opams_windows ~mingw:true opam_branches
+  @@ setup_default_opam_windows_mingw @@ Windows.Cygwin.setup ()
+  @@ Windows.Cygwin.Git.init ()
 
 (* Native Windows with MSVC and WinGet. *)
 let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
@@ -548,9 +596,9 @@ let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
       ( Windows.Cygwin.msvc_packages,
         Windows.install_visual_studio_build_tools
           [
+            "Microsoft.VisualStudio.Workload.VCTools";
             "Microsoft.VisualStudio.Component.VC.Tools.x86.x64";
-            (* Without 18362, rc.exe is missing from the Path. *)
-            "Microsoft.VisualStudio.Component.Windows10SDK.18362";
+            "Microsoft.VisualStudio.Component.Windows11SDK.22621";
           ] )
     in
     Windows.header ~alias:"cygwin-msvc" ~override_tag distro
@@ -565,9 +613,13 @@ let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   in
   (* 2022-10-12: Docker Engine 20.10.18 on Windows fails copying
      C:\cygwin64, so we cannot build Cygwin in a separate image. *)
-  let ocaml_for_windows =
-    let packages, setup = Windows.Cygwin.install_ocaml_for_windows () in
-    Windows.Cygwin.install packages @@ setup
+  (* We use native opam 2.2+ instead of fdopen's opam, but still need the
+     Cygwin packages that install_ocaml_for_windows would provide. *)
+  let cygwin_packages =
+    let packages, _fdopen_opam_setup =
+      Windows.Cygwin.install_ocaml_for_windows ()
+    in
+    Windows.Cygwin.install packages
   in
   parser_directive (`Escape '`')
   @@ comment "Autogenerated by OCaml-Dockerfile scripts"
@@ -575,9 +627,10 @@ let windows_msvc_opam2 ?(labels = []) ~override_tag ~opam_hashes (distro : D.t)
   @@ Dockerfile.from "cygwin-msvc"
   @@ label (("distro_style", "windows") :: labels)
   @@ user "ContainerAdministrator"
-  @@ ocaml_for_windows @@ winget_setup
-  @@ copy_opams_windows opam_branches
-  @@ Windows.Cygwin.setup () @@ Windows.Cygwin.Git.init ()
+  @@ cygwin_packages @@ winget_setup
+  @@ copy_opams_windows ~mingw:false opam_branches
+  @@ setup_default_opam_windows_msvc @@ Windows.Cygwin.setup ()
+  @@ Windows.Cygwin.Git.init ()
 
 let gen_opam2_distro ?override_tag ?(clone_opam_repo = true) ?arch ?labels
     ~opam_hashes d =
@@ -656,7 +709,10 @@ let create_switch ~arch distro t =
   match distro with
   | `Windows (port, _) ->
       let pn, pv = Windows.ocaml_for_windows_package_exn ~port ~arch ~switch in
-      create_switch switch (pv ^ pn)
+      let port_pkg =
+        match port with `Mingw -> ",system-mingw" | `Msvc -> ",system-msvc"
+      in
+      create_switch switch (pn ^ "." ^ pv ^ port_pkg)
   | _ -> create_switch switch (Ocaml_version.Opam.V2.name switch)
 
 let all_ocaml_compilers hub_id arch distro =

@@ -35,10 +35,6 @@ val run_vc : arch:Ocaml_version.arch -> ('a, unit, string, t) format4 -> 'a
 (** [run_vc ~arch fmt] will execute [run fmt] with Visual Compiler for [~arch]
     loaded in the environment. *)
 
-val run_ocaml_env : string list -> ('a, unit, string, t) format4 -> 'a
-(** [run_ocaml_env args fmt] will execute [fmt] in the environment loaded by
-    [ocaml-env exec] with [args]. *)
-
 val sanitize_reg_path : unit -> t
 [@@ocaml.doc
   {|[sanitize_reg_path ()] adds the command necessary to remove a trailing
@@ -70,7 +66,7 @@ val ocaml_for_windows_package_exn :
   port:[ `Mingw | `Msvc ] ->
   arch:Ocaml_version.arch ->
   string * string
-(** [ocaml_for_windows_variant ~port ~arch] returns the
+(** [ocaml_for_windows_package_exn ~switch ~port ~arch] returns the
     [(package_name, package_version)] of the OCaml compiler package in OCaml for
     Windows, if applicable. *)
 
@@ -138,11 +134,6 @@ module Cygwin : sig
   val run_sh : ?cyg:cyg -> ('a, unit, string, t) format4 -> 'a
   (** [run_sh ?cyg fmt] will execute in the Cygwin root
       [\bin\bash.exe --login -c "fmt"]. *)
-
-  val run_sh_ocaml_env :
-    ?cyg:cyg -> string list -> ('a, unit, string, t) format4 -> 'a
-  (** [run_cmd_ocaml_env args fmt] will execute [fmt] in the environment loaded
-      by [ocaml-env cygwin exec] with [args]. *)
 
   (** Rules for Git. *)
   module Git : sig

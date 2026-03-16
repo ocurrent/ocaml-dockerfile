@@ -31,11 +31,10 @@ let run_vc ~arch fmt =
     | _ -> invalid_arg "Unsupported architecture"
   in
   ksprintf
-    (run {|cd C:\BuildTools\VC\Auxiliary\Build && vcvarsall.bat %s && %s|} arch)
+    (run
+       {|call "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" %s && %s|}
+       arch)
     fmt
-
-let run_ocaml_env args fmt =
-  ksprintf (run {|ocaml-env exec %s -- %s|} (String.concat " " args)) fmt
 
 let cleanup t = t @@ run_powershell {|Remove-Item 'C:\TEMP' -Recurse|} |> crunch
 
@@ -130,16 +129,10 @@ let remove_system_attribute ?(recurse = true) path =
     path
     (if recurse then "-Recurse" else "")
 
-let ocaml_for_windows_package_exn ~switch ~port ~arch =
-  let variant =
-    let bitness = if Ocaml_version.arch_is_32bit arch then "32" else "64" in
-    match arch with
-    | `X86_64 | `I386 ->
-        (match port with `Mingw -> "mingw" | `Msvc -> "msvc") ^ bitness
-    | _ -> invalid_arg "Unsupported architecture"
-  in
-  let _, pkgver = Ocaml_version.Opam.V2.package switch in
-  ("ocaml-variants", pkgver ^ "+" ^ variant)
+let ocaml_for_windows_package_exn ~switch ~port:_ ~arch:_ =
+  (* From 4.13+, official opam-repository packages support Windows natively.
+     Port selection (MinGW/MSVC) is done via system-mingw/system-msvc packages. *)
+  Ocaml_version.Opam.V2.package switch
 
 let git_init ~name ~email ~repos =
   String.concat " && "
@@ -174,11 +167,6 @@ module Cygwin = struct
 
   let run_sh ?(cyg = default) fmt =
     ksprintf (run {|%s\bin\bash.exe --login -c "%s"|} cyg.root) fmt
-
-  let run_sh_ocaml_env ?(cyg = default) args fmt =
-    ksprintf
-      (run_sh ~cyg "ocaml-env exec %s -- %s" (String.concat " " args))
-      fmt
 
   let install_cygsympathy_from_source cyg =
     run {|mkdir %s\lib\cygsympathy && mkdir %s\etc\postinstall|} cyg.root
