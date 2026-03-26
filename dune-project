@@ -84,7 +84,7 @@
  (depends
   (dockerfile (= :version))
   (fmt (>= "0.8.7"))
-  (ocaml-version (>= "3.5.0"))
+  (ocaml-version (>= "3.6.4"))
   (ppx_sexp_conv (>= "v0.9.0"))
   sexplib0
   (alcotest (and (>= "1.9.1") :with-test)))
