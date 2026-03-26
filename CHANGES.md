@@ -1,7 +1,14 @@
-unreleased
-----------
+v8.3.5 2026-03-26
+-----------------
 
 - Update Cygwin base image to ServerCore LTSC 2025 (@MisterDA, #251)
+- Update to Dune 3.20 (@MisterDA, #252)
+- Add Alpine 3.23, deprecate Alpine 3.22 (@mtelvers, #254)
+- Fix GNU coreutils on Ubuntu 25.10 (@mtelvers, #255, #256)
+- Use native opam for Windows builds, update Visual Studio components,
+  fix Windows paths, remove fdopen's opam repository (@mtelvers, #257)
+- Use useradd rather than adduser (@mtelvers, #258)
+- Update bubblewrap and builtin OCaml versions for rolling distros (@mtelvers, #259)
 
 v8.3.4 2025-12-03
 -----------------
