@@ -1137,8 +1137,8 @@ let bubblewrap_version (t : t) =
   | `Debian `V11 -> Some (0, 4, 1)
   | `Debian `V12 -> Some (0, 8, 0)
   | `Debian `V13 -> Some (0, 11, 0)
-  | `Debian `Testing -> Some (0, 11, 0)
-  | `Debian `Unstable -> Some (0, 11, 0)
+  | `Debian `Testing -> Some (0, 11, 1)
+  | `Debian `Unstable -> Some (0, 11, 1)
   | `CentOS `V6 -> None
   | `CentOS `V7 -> None
   | `CentOS `V8 -> Some (0, 4, 0)
@@ -1192,7 +1192,7 @@ let bubblewrap_version (t : t) =
   | `Alpine `V3_21 -> Some (0, 11, 0)
   | `Alpine `V3_22 -> Some (0, 11, 0)
   | `Alpine `V3_23 -> Some (0, 11, 0)
-  | `Archlinux `Latest -> Some (0, 11, 0)
+  | `Archlinux `Latest -> Some (0, 11, 1)
   | `OpenSUSE `V42_1 -> None (* Not actually checked *)
   | `OpenSUSE `V42_2 -> None (* Not actually checked *)
   | `OpenSUSE `V42_3 -> None (* Not actually checked *)
