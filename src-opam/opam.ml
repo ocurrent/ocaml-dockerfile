@@ -235,7 +235,7 @@ let create_opam_branches opam_hashes =
         enable_0install_solver = true;
         with_vendored_deps = false;
         public_name = "opam-2.1";
-        aliases = [];
+        aliases = ["opam"];
       };
       {
         branch = "2.2";
