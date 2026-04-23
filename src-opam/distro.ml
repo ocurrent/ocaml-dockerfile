@@ -108,7 +108,8 @@ type distro =
     | `V24_04
     | `V24_10
     | `V25_04
-    | `V25_10 ]
+    | `V25_10
+    | `V26_04 ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
   | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 ] ]
@@ -216,6 +217,7 @@ type t =
     | `V24_10
     | `V25_04
     | `V25_10
+    | `V26_04
     | `Latest
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025 | `Latest ]
@@ -361,10 +363,11 @@ let distros : t list =
     `Ubuntu `V23_04;
     `Ubuntu `V23_10;
     `Ubuntu `V24_04;
-    `Ubuntu `LTS (* Latest LTS *);
     `Ubuntu `V24_10;
     `Ubuntu `V25_04;
     `Ubuntu `V25_10;
+    `Ubuntu `V26_04;
+    `Ubuntu `LTS (* Latest LTS *);
     `Ubuntu `Latest;
     `Cygwin `Ltsc2016;
     `Cygwin `Ltsc2019;
@@ -391,8 +394,8 @@ let resolve_alias (d : t) : distro =
   | `Fedora `Latest -> `Fedora `V43
   | `OracleLinux `Latest -> `OracleLinux `V10
   | `OpenSUSE `Latest -> `OpenSUSE `V16_0
-  | `Ubuntu `Latest -> `Ubuntu `V25_10
-  | `Ubuntu `LTS -> `Ubuntu `V24_04
+  | `Ubuntu `Latest -> `Ubuntu `V26_04
+  | `Ubuntu `LTS -> `Ubuntu `V26_04
   | `Cygwin `Latest -> `Cygwin `Ltsc2025
   | `Windows (cc, `Latest) -> `Windows (cc, `Ltsc2019)
   | `WindowsServer (cc, `Latest) -> `WindowsServer (cc, `Ltsc2025)
@@ -416,7 +419,7 @@ let resolve_alias (d : t) : distro =
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
         | `V21_04 | `V21_10 | `V22_04 | `V22_10 | `V23_04 | `V23_10 | `V24_04
-        | `V24_10 | `V25_04 | `V25_10 )
+        | `V24_10 | `V25_04 | `V25_10 | `V26_04 )
     | `Cygwin (`Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025)
     | `Windows (_, `Ltsc2019)
     | `WindowsServer (_, (`Ltsc2022 | `Ltsc2025)) ) as d ->
@@ -455,7 +458,8 @@ let distro_status (d : t) : status =
         `Deprecated
     | `OpenSUSE (`V15_6 | `V16_0) -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
-    | `Ubuntu (`V22_04 | `V24_04 | `V25_04 | `V25_10) -> `Active `Tier2
+    | `Ubuntu (`V22_04 | `V24_04 | `V25_04 | `V25_10 | `V26_04) ->
+        `Active `Tier2
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
@@ -526,8 +530,9 @@ let distro_arches ov (d : t) =
     when OV.(compare Releases.v4_05_0 ov) = -1 ->
       let base = [ `X86_64; `Aarch64; `Ppc64le; `S390x ] in
       if OV.(compare Releases.v4_11_0 ov) <= 0 then `Riscv64 :: base else base
-  | `Ubuntu `V25_10, ov when OV.(compare Releases.v4_05_0 ov) = -1 ->
-      (* Ubuntu 25.10's Only Supported RISC-V Platform is QEMU Virtualization *)
+  | `Ubuntu (`V25_10 | `V26_04), ov when OV.(compare Releases.v4_05_0 ov) = -1
+    ->
+      (* Ubuntu 25.10 and 26.04's Only Supported RISC-V Platform is QEMU Virtualization *)
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Fedora
         ( `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42
@@ -613,6 +618,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Ubuntu `V24_10 -> Some "5.2.0"
   | `Ubuntu `V25_04 -> Some "5.3.0"
   | `Ubuntu `V25_10 -> Some "5.3.0"
+  | `Ubuntu `V26_04 -> Some "5.4.0"
   | `Alpine `V3_3 -> Some "4.02.3"
   | `Alpine `V3_4 -> Some "4.02.3"
   | `Alpine `V3_5 -> Some "4.04.0"
@@ -711,6 +717,7 @@ let tag_of_distro (d : t) =
   | `Ubuntu `V24_10 -> "ubuntu-24.10"
   | `Ubuntu `V25_04 -> "ubuntu-25.04"
   | `Ubuntu `V25_10 -> "ubuntu-25.10"
+  | `Ubuntu `V26_04 -> "ubuntu-26.04"
   | `Ubuntu `Latest -> "ubuntu"
   | `Ubuntu `LTS -> "ubuntu-lts"
   | `Debian `Stable -> "debian-stable"
@@ -836,6 +843,7 @@ let distro_of_tag x : t option =
   | "ubuntu-24.10" -> Some (`Ubuntu `V24_10)
   | "ubuntu-25.04" -> Some (`Ubuntu `V25_04)
   | "ubuntu-25.10" -> Some (`Ubuntu `V25_10)
+  | "ubuntu-26.04" -> Some (`Ubuntu `V26_04)
   | "ubuntu" -> Some (`Ubuntu `Latest)
   | "ubuntu-lts" -> Some (`Ubuntu `LTS)
   | "debian-stable" -> Some (`Debian `Stable)
@@ -963,6 +971,7 @@ let human_readable_string_of_distro (d : t) =
     | `Ubuntu `V24_10 -> "Ubuntu 24.10"
     | `Ubuntu `V25_04 -> "Ubuntu 25.04"
     | `Ubuntu `V25_10 -> "Ubuntu 25.10"
+    | `Ubuntu `V26_04 -> "Ubuntu 26.04"
     | `Debian `Unstable -> "Debian Unstable"
     | `Debian `Testing -> "Debian Testing"
     | `Debian `V13 -> "Debian 13 (Trixie)"
@@ -1130,6 +1139,7 @@ let bubblewrap_version (t : t) =
   | `Ubuntu `V24_10 -> Some (0, 10, 0)
   | `Ubuntu `V25_04 -> Some (0, 11, 0)
   | `Ubuntu `V25_10 -> Some (0, 11, 0)
+  | `Ubuntu `V26_04 -> Some (0, 11, 1)
   | `Debian `V7 -> None (* Not actually checked *)
   | `Debian `V8 -> None (* Not actually checked *)
   | `Debian `V9 -> Some (0, 1, 7)
@@ -1284,6 +1294,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V24_10 -> "oracular"
         | `V25_04 -> "plucky"
         | `V25_10 -> "questing"
+        | `V26_04 -> "resolute"
       in
       ("ubuntu", tag)
   | `CentOS v ->
@@ -1477,6 +1488,7 @@ let sort_key_of_distro (d : t) =
     | `Ubuntu `V24_10 -> 90021
     | `Ubuntu `V25_04 -> 90022
     | `Ubuntu `V25_10 -> 90023
+    | `Ubuntu `V26_04 -> 90024
     | `Windows (`Mingw, `Ltsc2019) -> 100000
     | `Windows (`Msvc, `Ltsc2019) -> 100001
     | `WindowsServer (`Mingw, `Ltsc2022) -> 110000
