@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+- Add Ubuntu 26.04 LTS (Resolute Raccoon) support (@mtelvers, #263).
+
 v8.3.5 2026-03-26
 -----------------
 
