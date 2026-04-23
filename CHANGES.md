@@ -1,7 +1,8 @@
-Unreleased
-----------
+v8.3.6 2026-04-23
+-----------------
 
-- Add Ubuntu 26.04 LTS (Resolute Raccoon) support (@mtelvers, #263).
+- Update bubblewrap to 0.11.1 for rolling distros (@mtelvers, #261)
+- Add Ubuntu 26.04 LTS (Resolute Raccoon) support (@mtelvers, #263)
 
 v8.3.5 2026-03-26
 -----------------
@@ -14,6 +15,7 @@ v8.3.5 2026-03-26
   fix Windows paths, remove fdopen's opam repository (@mtelvers, #257)
 - Use useradd rather than adduser (@mtelvers, #258)
 - Update bubblewrap and builtin OCaml versions for rolling distros (@mtelvers, #259)
+- Bump ocaml-version lower bound to 3.6.4 (@mtelvers, #260)
 
 v8.3.4 2025-12-03
 -----------------
