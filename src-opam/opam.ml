@@ -189,7 +189,6 @@ let header ?arch ?maintainer ?img ?tag d =
   @@ from ?arch ?maintainer ?img ?tag d
 
 type opam_hashes = {
-  opam_2_0_hash : string;
   opam_2_1_hash : string;
   opam_2_2_hash : string;
   opam_2_3_hash : string;
@@ -219,7 +218,6 @@ let opam_master_branch opam_master_hash =
 
 let create_opam_branches opam_hashes =
   let {
-    opam_2_0_hash;
     opam_2_1_hash;
     opam_2_2_hash;
     opam_2_3_hash;
@@ -232,21 +230,12 @@ let create_opam_branches opam_hashes =
   ( opam_master_hash,
     [
       {
-        branch = "2.0";
-        hash = opam_2_0_hash;
-        enable_0install_solver = false;
-        with_vendored_deps = false;
-        public_name = "opam-2.0";
-        aliases = [ "opam" ];
-        (* Default *)
-      };
-      {
         branch = "2.1";
         hash = opam_2_1_hash;
         enable_0install_solver = true;
         with_vendored_deps = false;
         public_name = "opam-2.1";
-        aliases = [];
+        aliases = ["opam"];
       };
       {
         branch = "2.2";
