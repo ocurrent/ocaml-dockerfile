@@ -1,3 +1,9 @@
+unreleased
+----------
+
+- Add `tar` to the openSUSE/SLES dev package list; the Leap base image
+  no longer ships it (@mtelvers)
+
 v8.3.6 2026-04-23
 -----------------
 

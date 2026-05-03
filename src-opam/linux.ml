@@ -212,7 +212,7 @@ module Zypper = struct
     install "-t pattern devel_C_C++"
     @@ install
          "sudo git unzip curl gcc-c++ libcap-devel xz libX11-devel bzip2 which \
-          rsync gzip openssl%s"
+          rsync gzip openssl tar%s"
          (match extra with None -> "" | Some x -> " " ^ x)
 
   let ocaml_depexts v =
