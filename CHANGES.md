@@ -1,3 +1,10 @@
+unreleased
+----------
+
+- Deprecate openSUSE Leap 15.6: the distribution has reached
+  end-of-life and its package repositories are no longer available
+  (@mtelvers)
+
 v8.3.7 2026-05-03
 -----------------
 

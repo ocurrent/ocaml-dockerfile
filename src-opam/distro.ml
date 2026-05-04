@@ -454,9 +454,9 @@ let distro_status (d : t) : status =
     | `OracleLinux `V10 -> `Active `Tier3
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
-        | `V15_5 ) ->
+        | `V15_5 | `V15_6 ) ->
         `Deprecated
-    | `OpenSUSE (`V15_6 | `V16_0) -> `Active `Tier2
+    | `OpenSUSE `V16_0 -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
     | `Ubuntu (`V22_04 | `V24_04 | `V25_04 | `V25_10 | `V26_04) ->
         `Active `Tier2
