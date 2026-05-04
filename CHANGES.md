@@ -1,9 +1,11 @@
 unreleased
 ----------
 
+- Remove opam 2.0 support; minimum tested version is now opam 2.1
+  (@avsm, #262)
 - Deprecate openSUSE Leap 15.6: the distribution has reached
   end-of-life and its package repositories are no longer available
-  (@mtelvers)
+  (@mtelvers, #265)
 
 v8.3.7 2026-05-03
 -----------------
