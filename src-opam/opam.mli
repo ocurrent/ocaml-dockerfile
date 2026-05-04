@@ -42,7 +42,6 @@ val install_opam_from_source :
     Configure opam build [with_vendored_deps]. Required for opam 2.2. *)
 
 type opam_hashes = {
-  opam_2_0_hash : string;
   opam_2_1_hash : string;
   opam_2_2_hash : string;
   opam_2_3_hash : string;
