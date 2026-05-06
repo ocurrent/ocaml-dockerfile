@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.3.8 2026-05-04
+-----------------
 
 - Remove opam 2.0 support; minimum tested version is now opam 2.1
   (@avsm, #262)
