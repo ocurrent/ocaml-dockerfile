@@ -69,7 +69,8 @@ type distro =
     | `V40
     | `V41
     | `V42
-    | `V43 ]
+    | `V43
+    | `V44 ]
   | `OracleLinux of [ `V7 | `V8 | `V9 | `V10 ]
   | `OpenSUSE of
     [ `V42_1
@@ -176,6 +177,7 @@ type t =
     | `V41
     | `V42
     | `V43
+    | `V44
     | `Latest ]
   | `OracleLinux of [ `V7 | `V8 | `V9 | `V10 | `Latest ]
   | `OpenSUSE of
@@ -323,6 +325,7 @@ let distros : t list =
     `Fedora `V41;
     `Fedora `V42;
     `Fedora `V43;
+    `Fedora `V44;
     `Fedora `Latest;
     `OracleLinux `V7;
     `OracleLinux `V8;
@@ -391,7 +394,7 @@ let resolve_alias (d : t) : distro =
   | `Alpine `Latest -> `Alpine `V3_23
   | `CentOS `Latest -> `CentOS `V10
   | `Debian `Stable -> `Debian `V13
-  | `Fedora `Latest -> `Fedora `V43
+  | `Fedora `Latest -> `Fedora `V44
   | `OracleLinux `Latest -> `OracleLinux `V10
   | `OpenSUSE `Latest -> `OpenSUSE `V16_0
   | `Ubuntu `Latest -> `Ubuntu `V26_04
@@ -410,7 +413,7 @@ let resolve_alias (d : t) : distro =
     | `Fedora
         ( `V21 | `V22 | `V23 | `V24 | `V25 | `V26 | `V27 | `V28 | `V29 | `V30
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
-        | `V41 | `V42 | `V43 )
+        | `V41 | `V42 | `V43 | `V44 )
     | `OracleLinux (`V7 | `V8 | `V9 | `V10)
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
@@ -449,7 +452,7 @@ let distro_status (d : t) : status =
         | `V31 | `V32 | `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40
         | `V41 ) ->
         `Deprecated
-    | `Fedora (`V42 | `V43) -> `Active `Tier2
+    | `Fedora (`V42 | `V43 | `V44) -> `Active `Tier2
     | `OracleLinux (`V7 | `V8 | `V9) -> `Deprecated
     | `OracleLinux `V10 -> `Active `Tier3
     | `OpenSUSE
@@ -536,7 +539,7 @@ let distro_arches ov (d : t) =
       [ `X86_64; `Aarch64; `Ppc64le; `S390x ]
   | ( `Fedora
         ( `V33 | `V34 | `V35 | `V36 | `V37 | `V38 | `V39 | `V40 | `V41 | `V42
-        | `V43 ),
+        | `V43 | `V44 ),
       ov )
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
@@ -664,6 +667,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `Fedora `V41 -> Some "5.2.1"
   | `Fedora `V42 -> Some "5.3.0"
   | `Fedora `V43 -> Some "5.3.0"
+  | `Fedora `V44 -> Some "5.4.0"
   | `CentOS `V6 -> Some "3.11.2"
   | `CentOS `V7 -> Some "4.01.0"
   | `CentOS `V8 -> Some "4.07.0"
@@ -760,6 +764,7 @@ let tag_of_distro (d : t) =
   | `Fedora `V41 -> "fedora-41"
   | `Fedora `V42 -> "fedora-42"
   | `Fedora `V43 -> "fedora-43"
+  | `Fedora `V44 -> "fedora-44"
   | `OracleLinux `V7 -> "oraclelinux-7"
   | `OracleLinux `V8 -> "oraclelinux-8"
   | `OracleLinux `V9 -> "oraclelinux-9"
@@ -884,6 +889,7 @@ let distro_of_tag x : t option =
   | "fedora-41" -> Some (`Fedora `V41)
   | "fedora-42" -> Some (`Fedora `V42)
   | "fedora-43" -> Some (`Fedora `V43)
+  | "fedora-44" -> Some (`Fedora `V44)
   | "fedora" -> Some (`Fedora `Latest)
   | "oraclelinux-7" -> Some (`OracleLinux `V7)
   | "oraclelinux-8" -> Some (`OracleLinux `V8)
@@ -1009,6 +1015,7 @@ let human_readable_string_of_distro (d : t) =
     | `Fedora `V41 -> "Fedora 41"
     | `Fedora `V42 -> "Fedora 42"
     | `Fedora `V43 -> "Fedora 43"
+    | `Fedora `V44 -> "Fedora 44"
     | `OracleLinux `V7 -> "OracleLinux 7"
     | `OracleLinux `V8 -> "OracleLinux 8"
     | `OracleLinux `V9 -> "OracleLinux 9"
@@ -1177,6 +1184,7 @@ let bubblewrap_version (t : t) =
   | `Fedora `V41 -> Some (0, 10, 0)
   | `Fedora `V42 -> Some (0, 11, 0)
   | `Fedora `V43 -> Some (0, 11, 0)
+  | `Fedora `V44 -> Some (0, 11, 0)
   | `OracleLinux `V7 -> None
   | `OracleLinux `V8 -> Some (0, 4, 0)
   | `OracleLinux `V9 -> Some (0, 4, 1)
@@ -1334,6 +1342,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V41 -> "41"
         | `V42 -> "42"
         | `V43 -> "43"
+        | `V44 -> "44"
       in
       ("fedora", tag)
   | `OracleLinux v ->
@@ -1448,6 +1457,7 @@ let sort_key_of_distro (d : t) =
     | `Fedora `V41 -> 60020
     | `Fedora `V42 -> 60021
     | `Fedora `V43 -> 60022
+    | `Fedora `V44 -> 60023
     | `OpenSUSE `V42_1 -> 70000
     | `OpenSUSE `V42_2 -> 70001
     | `OpenSUSE `V42_3 -> 70002
