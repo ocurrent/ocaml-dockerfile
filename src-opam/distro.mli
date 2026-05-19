@@ -305,9 +305,9 @@ val bubblewrap_version : t -> (int * int * int) option
 val gcc_version : t -> (int * int) option
 (** [gcc_version t] returns the default version of gcc shipped on that
     distribution (i.e. what [gcc --version] reports after installing the
-    distribution's [gcc] / [gcc-c++] package). Returns [None] for distros
-    where gcc is not the default compiler (Windows, Cygwin) or where the
-    image is no longer pullable from Docker Hub. *)
+    distribution's [gcc] / [gcc-c++] package). Returns [None] for distros where
+    gcc is not the default compiler (Windows, Cygwin) or where the image is no
+    longer pullable from Docker Hub. *)
 
 (** {2 Docker Hub addresses} *)
 
