@@ -1,11 +1,11 @@
-unreleased
-----------
+v8.4.0 2026-05-20
+-----------------
 
 - Add `Distro.gcc_version` to expose the default gcc major.minor version
   shipped by each distribution. This lets consumers gate per-distro
   workarounds (e.g. the GCC 15 default-`-std=gnu23` change that breaks
   OCaml < 5.1) on the actual compiler version rather than maintaining a
-  hand-written list of affected distros (@mtelvers)
+  hand-written list of affected distros (@mtelvers #267)
 
 v8.3.9 2026-05-12
 -----------------
