@@ -57,7 +57,7 @@ module RPM = struct
 
   let ocaml_depexts v =
     if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
-      Some "zstd"
+      Some "libzstd-devel"
     else None
 
   let add_user ?uid ?gid ?(sudo = false) username =
@@ -154,7 +154,7 @@ module Apk = struct
 
   let ocaml_depexts v =
     if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
-      Some "zstd"
+      Some "zstd-dev"
     else None
 
   let add_user ?uid ?gid ?(sudo = false) username =
@@ -217,7 +217,7 @@ module Zypper = struct
 
   let ocaml_depexts v =
     if Ocaml_version.compare v Ocaml_version.Releases.v5_1_0 >= 0 then
-      Some "zstd"
+      Some "libzstd-devel"
     else None
 
   let add_user ?uid ?gid ?(sudo = false) username =
