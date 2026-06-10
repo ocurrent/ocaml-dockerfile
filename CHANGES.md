@@ -1,3 +1,12 @@
+v8.4.1 2026-06-10
+-----------------
+
+- Fix the `zstd` OCaml 5.1+ depext to install the headers package
+  (`zstd-dev` on Alpine, `libzstd-devel` on RHEL/SUSE) rather than
+  the CLI-only `zstd`, so the compiler is built with artifact
+  compression and switches aren't ~90MB larger than on Debian
+  (@frejsoya, #268)
+
 v8.4.0 2026-05-20
 -----------------
 
