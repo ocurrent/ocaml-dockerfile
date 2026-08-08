@@ -1,3 +1,11 @@
+unreleased
+----------
+
+- Drop s390x from Debian 12; the `debian:12` image no longer publishes an
+  s390x manifest, so the builds fail with "no matching manifest for
+  linux/s390x". ppc64le is unaffected, as are Debian 13 and later
+  (@mtelvers)
+
 v8.4.1 2026-06-10
 -----------------
 
