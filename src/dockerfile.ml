@@ -335,7 +335,7 @@ let string_of_mount { typ } =
         @ optional_int "uid" uid @ optional_int "gid" gid)
   | `Tmpfs { target; size } ->
       String.concat ","
-        ([ "--mount=type=bind" ]
+        ([ "--mount=type=tmpfs" ]
         @ [ sprintf "target=%s" target ]
         @ optional_int "size" size)
   | `Ssh m | `Secret m ->
