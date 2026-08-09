@@ -1,6 +1,11 @@
 unreleased
 ----------
 
+- Add Alpine 3.24, deprecate Alpine 3.23 (@mtelvers)
+- Drop s390x from Debian 12; the `debian:12` image no longer publishes an
+  s390x manifest, so the builds fail with "no matching manifest for
+  linux/s390x". ppc64le is unaffected, as are Debian 13 and later
+  (@mtelvers)
 - Set `gc.autoDetach false` in the global git configuration of the base
   images. `git fetch` spawns a detached `git maintenance run --auto`, and
   since Git 2.55 that background run takes a lock file inside
