@@ -1,11 +1,11 @@
-unreleased
-----------
+v8.4.2 2026-08-09
+-----------------
 
-- Add Alpine 3.24, deprecate Alpine 3.23 (@mtelvers)
+- Add Alpine 3.24, deprecate Alpine 3.23 (@mtelvers #271)
 - Drop s390x from Debian 12; the `debian:12` image no longer publishes an
   s390x manifest, so the builds fail with "no matching manifest for
   linux/s390x". ppc64le is unaffected, as are Debian 13 and later
-  (@mtelvers)
+  (@mtelvers #271)
 - Set `gc.autoDetach false` in the global git configuration of the base
   images. `git fetch` spawns a detached `git maintenance run --auto`, and
   since Git 2.55 that background run takes a lock file inside
@@ -13,7 +13,10 @@ unreleased
   with "file changed as we read it" as opam packs the repository it has
   just fetched, so `opam repo add <git url>` fails on the distributions
   now shipping Git 2.55: openSUSE Tumbleweed, Fedora 44 and Debian
-  unstable (@mtelvers)
+  unstable (@mtelvers #270)
+- Render a `tmpfs` mount as `--mount=type=tmpfs`; `string_of_mount` emitted
+  `--mount=type=bind` for the `` `Tmpfs `` case, so a tmpfs mount was
+  rendered as a bind mount (@samoht #269)
 
 v8.4.1 2026-06-10
 -----------------
