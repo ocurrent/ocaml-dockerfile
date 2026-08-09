@@ -25,6 +25,19 @@ module Git = struct
   let init ?(name = "Docker") ?(email = "docker@example.com") () =
     run "git config --global user.email %S" email
     @@ run "git config --global user.name %S" name
+    (* "git fetch" ends by spawning "git maintenance run --auto --detach",
+       which carries on running after fetch itself has returned.  Since Git
+       2.55 that background run creates and then removes a lock file inside
+       .git/objects.  That changes the directory underneath opam as it tars
+       up the repository it has just fetched, so GNU tar exits 1 with "file
+       changed as we read it" and "opam repo add" fails.
+
+       Turning off autoDetach runs the maintenance in the foreground, so the
+       repository is quiescent by the time opam reads it.  We set
+       gc.autoDetach rather than maintenance.autoDetach because the latter
+       falls back to it, and it is also understood by older versions of
+       git. *)
+    @@ run "git config --global gc.autoDetach false"
 end
 
 let sudo_nopasswd = "ALL=(ALL:ALL) NOPASSWD:ALL"

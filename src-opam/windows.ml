@@ -139,6 +139,9 @@ let git_init ~name ~email ~repos =
     (sprintf "git config --global user.email '%s'" email
     :: sprintf "git config --global user.name '%s'" name
     :: "git config --system core.longpaths true"
+       (* See the comment in Linux.Git.init: a detached auto maintenance races
+       opam's tarring of the repository it has just fetched. *)
+    :: "git config --global gc.autoDetach false"
     :: List.map
          (fun repo ->
            sprintf "git config --global --add safe.directory %s" repo)

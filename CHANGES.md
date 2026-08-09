@@ -6,6 +6,14 @@ unreleased
   s390x manifest, so the builds fail with "no matching manifest for
   linux/s390x". ppc64le is unaffected, as are Debian 13 and later
   (@mtelvers)
+- Set `gc.autoDetach false` in the global git configuration of the base
+  images. `git fetch` spawns a detached `git maintenance run --auto`, and
+  since Git 2.55 that background run takes a lock file inside
+  `.git/objects`. The resulting change to the directory makes tar exit 1
+  with "file changed as we read it" as opam packs the repository it has
+  just fetched, so `opam repo add <git url>` fails on the distributions
+  now shipping Git 2.55: openSUSE Tumbleweed, Fedora 44 and Debian
+  unstable (@mtelvers)
 
 v8.4.1 2026-06-10
 -----------------
