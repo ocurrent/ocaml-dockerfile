@@ -1,3 +1,16 @@
+unreleased
+----------
+
+- Disable Windows Update in the Windows images. The `windows`,
+  `windows/server` and `windows/servercore` base images set the Automatic
+  Updates policy to "auto download and notify for install"
+  (microsoft/Windows-Containers#637), so the Update Orchestrator wakes
+  Windows Update inside the container and downloads patches into
+  `C:\Windows\SoftwareDistribution`. Those downloads are sparse files,
+  which the layer exporter rejects with "unknown stream ID 9". Set
+  `NoAutoUpdate` and stop the `wuauserv`, `UsoSvc` and `WaaSMedicSvc`
+  services from starting in every stage (@mtelvers)
+
 v8.4.2 2026-08-09
 -----------------
 
