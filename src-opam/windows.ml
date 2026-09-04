@@ -101,10 +101,23 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
        vs_version (pp "add" components)
        (pp "remove" excluded_components)
 
+(* The base images enable Automatic Updates by policy
+   (https://github.com/microsoft/Windows-Containers/issues/637). The
+   downloads left in C:\Windows\SoftwareDistribution are sparse files,
+   which break layer export. WaaSMedicSvc refuses `sc config`. *)
+let disable_windows_update () =
+  run
+    {|reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v NoAutoUpdate /t REG_DWORD /d 1 /f `
+    && reg add "HKLM\SYSTEM\CurrentControlSet\Services\wuauserv" /v Start /t REG_DWORD /d 4 /f `
+    && reg add "HKLM\SYSTEM\CurrentControlSet\Services\UsoSvc" /v Start /t REG_DWORD /d 4 /f `
+    && reg add "HKLM\SYSTEM\CurrentControlSet\Services\WaaSMedicSvc" /v Start /t REG_DWORD /d 4 /f|}
+
 let header ?alias ~override_tag distro =
   let img, tag = Distro.base_distro_tag distro in
   let tag = Option.value ~default:tag override_tag in
-  from ?alias ~tag img @@ user "ContainerAdministrator"
+  from ?alias ~tag img
+  @@ user "ContainerAdministrator"
+  @@ disable_windows_update ()
 
 let sanitize_reg_path () =
   run
