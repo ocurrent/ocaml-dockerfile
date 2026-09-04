@@ -1,5 +1,5 @@
-unreleased
-----------
+v8.4.3 2026-09-04
+-----------------
 
 - Disable Windows Update in the Windows images. The `windows`,
   `windows/server` and `windows/servercore` base images set the Automatic
@@ -9,7 +9,7 @@ unreleased
   `C:\Windows\SoftwareDistribution`. Those downloads are sparse files,
   which the layer exporter rejects with "unknown stream ID 9". Set
   `NoAutoUpdate` and stop the `wuauserv`, `UsoSvc` and `WaaSMedicSvc`
-  services from starting in every stage (@mtelvers)
+  services from starting in every stage (@mtelvers #272)
 
 v8.4.2 2026-08-09
 -----------------
