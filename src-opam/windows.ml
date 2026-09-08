@@ -80,6 +80,22 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
       components;
     Buffer.contents buf
   in
+  (* Since 17.14, Microsoft.VisualStudio.Workload.VCTools pulls in
+     Microsoft.VisualStudio.PackageGroup.CoreEditor, which requires the
+     Microsoft.WebView2 package. That package runs the bundled Edge
+     WebView2 Runtime offline installer, which first self-updates Edge
+     Update from the internet and then hands the offline install to the
+     new Edge Update, which can't find the offline payload and fails with
+     0x80070003, taking the whole Build Tools install down with exit code
+     1603. WebView2 is only used by the IDE, and there is no Edge in a
+     Server Core container anyway, so satisfy the installer's detect
+     condition (HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\
+     {F3017226-...}\pv >= 131.0.2903.86) up front so the package is
+     skipped. *)
+  let webview2_detect_key =
+    {|HKLM\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}|}
+  in
+  let webview2_version = "131.0.2903.86" in
   add
     ~src:
       [
@@ -91,6 +107,8 @@ let install_visual_studio_build_tools ?(vs_version = "17") components =
   @@ add
        ~src:[ "https://aka.ms/vs/" ^ vs_version ^ "/release/channel" ]
        ~dst:{|C:\TEMP\VisualStudio.chman|} ()
+  @@ run {|reg add "%s" /v pv /t REG_SZ /d %s /f|} webview2_detect_key
+       webview2_version
   @@ run
        {|curl -SL --output C:\TEMP\vs_buildtools.exe https://aka.ms/vs/%s/release/vs_buildtools.exe `
     && (call C:\TEMP\Install.cmd C:\TEMP\vs_buildtools.exe --quiet --wait --norestart --nocache install `

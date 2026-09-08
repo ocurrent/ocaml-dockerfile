@@ -1,3 +1,15 @@
+Unreleased
+----------
+
+- Fix the Windows MSVC images. Since 17.14, the Visual Studio Build Tools
+  `VCTools` workload depends on the `Microsoft.WebView2` package, whose
+  bundled Edge WebView2 Runtime offline installer self-updates Edge Update
+  from the internet and then hands the offline install to the new Edge
+  Update, which can't find the offline payload and fails with 0x80070003,
+  failing the whole Build Tools install with exit code 1603. WebView2 is
+  only used by the IDE, so pre-seed the installer's detect condition in
+  the registry so the package is skipped (@mtelvers #273)
+
 v8.4.3 2026-09-04
 -----------------
 
