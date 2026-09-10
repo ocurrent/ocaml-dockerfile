@@ -1,6 +1,7 @@
-Unreleased
-----------
+v8.4.4 2026-09-10
+-----------------
 
+- Add opam-2.6 (@kit-ty-kate #274)
 - Fix the Windows MSVC images. Since 17.14, the Visual Studio Build Tools
   `VCTools` workload depends on the `Microsoft.WebView2` package, whose
   bundled Edge WebView2 Runtime offline installer self-updates Edge Update
