@@ -54,10 +54,14 @@ let install_opam_from_source ?(add_default_link = true) ?(prefix = "/usr/local")
 let install_opam_from_source_windows ?cyg ?prefix
     ?(enable_0install_solver = false) ?(with_vendored_deps = false)
     ?(msvs = false) ~branch ~hash () =
+  (* The local clone of /tmp/opam only contains commits which existed when the
+     (cached) master layer was built, so fetch from upstream before checking
+     out, as the Linux build does. *)
   Windows.Cygwin.run_sh ?cyg
     "git clone /tmp/opam /tmp/opam-build-%s && cd /tmp/opam-build-%s && git \
-     config --global --add safe.directory /tmp/opam-build-%s && git checkout \
-     %s"
+     config --global --add safe.directory /tmp/opam-build-%s && git remote \
+     set-url origin https://github.com/ocaml/opam && git fetch -q && git \
+     checkout %s"
     branch branch branch hash
   @@ Windows.Cygwin.run_sh ?cyg
        "cd /tmp/opam-build-%s && env \
