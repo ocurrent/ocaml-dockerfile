@@ -113,7 +113,8 @@ type distro =
     | `V24_10
     | `V25_04
     | `V25_10
-    | `V26_04 ]
+    | `V26_04
+    | `V26_10 ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025 ]
   | `Windows of [ `Mingw | `Msvc ] * [ `Ltsc2019 ]
   | `WindowsServer of [ `Mingw | `Msvc ] * [ `Ltsc2022 | `Ltsc2025 ] ]
@@ -224,6 +225,7 @@ type t =
     | `V25_04
     | `V25_10
     | `V26_04
+    | `V26_10
     | `Latest
     | `LTS ]
   | `Cygwin of [ `Ltsc2016 | `Ltsc2019 | `Ltsc2022 | `Ltsc2025 | `Latest ]

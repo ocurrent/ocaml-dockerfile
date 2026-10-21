@@ -1,3 +1,11 @@
+Unreleased
+----------
+
+- Add Ubuntu 26.10 (Stonking Stingray) support and make it the `Latest Ubuntu
+  alias (@mtelvers)
+- Deprecate Ubuntu 25.04 and 25.10, and Fedora 42, which have reached end of
+  life (@mtelvers)
+
 v8.4.4 2026-09-10
 -----------------
 
