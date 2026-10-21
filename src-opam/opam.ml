@@ -423,12 +423,12 @@ let apk_opam2 ?(labels = []) ?arch ~opam_hashes distro () =
   @@ Linux.Apk.add_user ~uid:1000 ~gid:1000 ~sudo:true "opam"
   @@ install_bubblewrap_wrappers @@ Linux.Git.init ()
 
-(* Ubuntu 25.10 and 26.04 use uutils-coreutils (Rust) which has a bug with
+(* Ubuntu 25.10 and later use uutils-coreutils (Rust) which has a bug with
    symbolic modes in the install command. This breaks OCaml < 4.12 builds
    which use symbolic modes in their Makefiles. Replace with GNU coreutils. *)
 let maybe_replace_uutils_coreutils distro =
   match distro with
-  | `Ubuntu (`V25_10 | `V26_04) ->
+  | `Ubuntu (`V25_10 | `V26_04 | `V26_10) ->
       run
         "apt-get install -y --allow-remove-essential coreutils-from-gnu \
          coreutils-from-uutils-"
