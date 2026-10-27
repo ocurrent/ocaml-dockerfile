@@ -1,5 +1,5 @@
-Unreleased
-----------
+v8.4.5 2026-10-27
+-----------------
 
 - Add Ubuntu 26.10 (Stonking Stingray) support and make it the `Latest Ubuntu
   alias (@mtelvers)
