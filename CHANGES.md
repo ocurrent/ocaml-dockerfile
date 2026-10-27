@@ -1,10 +1,16 @@
-v8.4.5 2026-10-27
+v8.4.6 2026-10-27
 -----------------
 
 - Add Ubuntu 26.10 (Stonking Stingray) support and make it the `Latest Ubuntu
-  alias (@mtelvers)
+  alias (@mtelvers #276)
 - Deprecate Ubuntu 25.04 and 25.10, and Fedora 42, which have reached end of
-  life (@mtelvers)
+  life (@mtelvers #276)
+
+v8.4.5 2026-10-07
+-----------------
+
+- Fetch from upstream before checking out each opam branch on Windows
+  (@mtelvers #275)
 
 v8.4.4 2026-09-10
 -----------------
