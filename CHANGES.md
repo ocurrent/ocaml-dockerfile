@@ -1,3 +1,16 @@
+Unreleased
+----------
+
+- dockerfile-opam: Add `Opam_version`, a single enumeration of the opam
+  versions installed in the base images, with `all`, `releases`, `latest`,
+  string, sexp and yojson conversions (the yojson shape is the
+  one `[@@deriving yojson]` produces, so existing consumers' cache digests
+  are unchanged), and the git `branch` and installed `binary` name for each
+  (@mtelvers)
+- dockerfile-opam: `gen_opam2_distro` now takes `~opam_hashes` as an
+  `(Opam_version.t * string) list` instead of a record with one field per
+  release, so adding an opam release no longer changes the API (@mtelvers)
+
 v8.4.6 2026-10-27
 -----------------
 

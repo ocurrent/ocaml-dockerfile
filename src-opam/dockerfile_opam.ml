@@ -25,4 +25,5 @@
 module Distro = Distro
 module Linux = Linux
 module Windows = Windows
+module Opam_version = Opam_version
 include Opam
