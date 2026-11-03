@@ -1,3 +1,8 @@
+Unreleased
+----------
+
+- Add Fedora 45 support and make it the `Latest Fedora alias (@mtelvers)
+
 v8.4.6 2026-10-27
 -----------------
 
