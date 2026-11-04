@@ -1,5 +1,5 @@
-Unreleased
-----------
+v8.4.7 2026-11-04
+-----------------
 
 - Add Fedora 45 support and make it the `Latest Fedora alias (@mtelvers #278)
 - dockerfile-opam: Add `Opam_version`, a single enumeration of the opam
