@@ -50,9 +50,6 @@ let test_opam_version () =
   Alcotest.(check string) "binary" "opam-dev" (Opam_version.binary `Dev);
   Alcotest.(check string) "branch" "master" (Opam_version.branch `Dev);
   Alcotest.(check string) "branch" "2.6" (Opam_version.branch `V2_6);
-  Alcotest.(check t)
-    "sexp round-trip" `V2_6
-    Opam_version.(t_of_sexp (sexp_of_t `V2_6));
   Alcotest.(check (result t string))
     "yojson round-trip" (Ok `V2_6)
     Opam_version.(of_yojson (to_yojson `V2_6));

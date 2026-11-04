@@ -54,7 +54,6 @@ let equal (a : t) (b : t) = a = b
 let pp = Fmt.of_to_string to_string
 let branch = function `Dev -> "master" | v -> to_string v
 let binary v = "opam-" ^ to_string v
-let sexp_of_t v = Sexplib0.Sexp.Atom (to_string v)
 
 (* The JSON encoding deliberately matches what [@@deriving yojson] generates
    for a constant polymorphic variant constructor, i.e. ["V2_6"].  ocaml-ci
@@ -73,13 +72,3 @@ let of_yojson = function
       | Some v -> Ok v
       | None -> Error ("Opam_version.of_yojson: unknown constructor " ^ s))
   | _ -> Error "Opam_version.of_yojson: expected [\"<constructor>\"]"
-
-let t_of_sexp sexp =
-  match sexp with
-  | Sexplib0.Sexp.Atom s -> (
-      match of_string s with
-      | Ok v -> v
-      | Error (`Msg m) -> Sexplib0.Sexp_conv.of_sexp_error m sexp)
-  | Sexplib0.Sexp.List _ ->
-      Sexplib0.Sexp_conv.of_sexp_error "Opam_version.t_of_sexp: atom expected"
-        sexp

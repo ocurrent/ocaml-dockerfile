@@ -62,9 +62,6 @@ val branch : t -> string
 val binary : t -> string
 (** The name of the installed binary: ["opam-2.1"], ..., ["opam-dev"]. *)
 
-val sexp_of_t : t -> Sexplib0.Sexp.t
-val t_of_sexp : Sexplib0.Sexp.t -> t
-
 val to_yojson : t -> [> `List of [> `String of string ] list ]
 (** Encodes exactly as [[@@deriving yojson]] would for this polymorphic variant:
     a one-element list holding the constructor name, e.g. [["V2_6"]] or

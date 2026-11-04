@@ -3,7 +3,7 @@ Unreleased
 
 - dockerfile-opam: Add `Opam_version`, a single enumeration of the opam
   versions installed in the base images, with `all`, `releases`, `latest`,
-  string, sexp and yojson conversions (the yojson shape is the
+  string and yojson conversions (the yojson shape is the
   one `[@@deriving yojson]` produces, so existing consumers' cache digests
   are unchanged), and the git `branch` and installed `binary` name for each
   (@mtelvers)
