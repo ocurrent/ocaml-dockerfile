@@ -41,27 +41,24 @@ val install_opam_from_source :
     [builtin-0install] solver should be accessible in the resulting opam binary.
     Configure opam build [with_vendored_deps]. Required for opam 2.2. *)
 
-type opam_hashes = {
-  opam_2_1_hash : string;
-  opam_2_2_hash : string;
-  opam_2_3_hash : string;
-  opam_2_4_hash : string;
-  opam_2_5_hash : string;
-  opam_2_6_hash : string;
-  opam_master_hash : string;
-}
-
 val gen_opam2_distro :
   ?override_tag:string ->
   ?clone_opam_repo:bool ->
   ?arch:Ocaml_version.arch ->
   ?labels:(string * string) list ->
-  opam_hashes:opam_hashes ->
+  opam_hashes:(Opam_version.t * string) list ->
   Distro.t ->
   string * Dockerfile.t
 (** [gen_opam2_distro ~opam_hashes d] will generate a Dockerfile for Linux
-    distribution [d] with opam 2.0, opam 2.1, opam 2.2 and opam master, per hash
-    given in parameter.
+    distribution [d] with one opam binary per entry of [opam_hashes]. Each is
+    built from the given commit hash of
+    {{:https://github.com/ocaml/opam}ocaml/opam} and installed as
+    {!Opam_version.binary}. An entry for [`Dev] is mandatory, as its hash is
+    also used to bootstrap the OCaml compiler that builds every opam. Plain
+    [opam] resolves to the oldest version in the list. Pass one entry per
+    element of {!Opam_version.all} to install every supported version. Native
+    Windows images only install [`V2_2] and later, and link [opam.exe] to the
+    oldest of those.
     @return
       a tuple of the Docker tag and the Dockerfile. If [clone_opam_repo] is true
       (the default) then the Dockerfile will also git clone the official
