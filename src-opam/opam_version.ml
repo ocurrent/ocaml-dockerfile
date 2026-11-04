@@ -57,9 +57,10 @@ let binary v = "opam-" ^ to_string v
 let sexp_of_t v = Sexplib0.Sexp.Atom (to_string v)
 
 (* The JSON encoding deliberately matches what [@@deriving yojson] generates
-   for a constant polymorphic variant constructor, i.e. ["V2_6"].  Both CIs
-   mix this value into Current_cache key and value digests, so changing the
-   shape would invalidate every cached job on deploy. *)
+   for a constant polymorphic variant constructor, i.e. ["V2_6"].  ocaml-ci
+   and opam-repo-ci mix this value into their Current_cache key and value
+   digests, so changing the shape would invalidate every cached job on
+   deploy. *)
 let constructor = function
   | `Dev -> "Dev"
   | v -> "V" ^ String.map (function '.' -> '_' | c -> c) (to_string v)
