@@ -1,3 +1,9 @@
+Unreleased
+----------
+
+- Add openSUSE Leap 16.1 support and make it the `Latest openSUSE alias
+  (@mtelvers)
+
 v8.4.7 2026-11-04
 -----------------
 

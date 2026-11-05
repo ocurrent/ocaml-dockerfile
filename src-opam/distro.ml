@@ -86,6 +86,7 @@ type distro =
     | `V15_5
     | `V15_6
     | `V16_0
+    | `V16_1
     | `Tumbleweed ]
   | `Ubuntu of
     [ `V12_04
@@ -197,6 +198,7 @@ type t =
     | `V15_5
     | `V15_6
     | `V16_0
+    | `V16_1
     | `Tumbleweed
     | `Latest ]
   | `Ubuntu of
@@ -351,6 +353,7 @@ let distros : t list =
     `OpenSUSE `V15_5;
     `OpenSUSE `V15_6;
     `OpenSUSE `V16_0;
+    `OpenSUSE `V16_1;
     `OpenSUSE `Latest;
     `OpenSUSE `Tumbleweed;
     `Ubuntu `V12_04;
@@ -405,7 +408,7 @@ let resolve_alias (d : t) : distro =
   | `Debian `Stable -> `Debian `V13
   | `Fedora `Latest -> `Fedora `V45
   | `OracleLinux `Latest -> `OracleLinux `V10
-  | `OpenSUSE `Latest -> `OpenSUSE `V16_0
+  | `OpenSUSE `Latest -> `OpenSUSE `V16_1
   | `Ubuntu `Latest -> `Ubuntu `V26_10
   | `Ubuntu `LTS -> `Ubuntu `V26_04
   | `Cygwin `Latest -> `Cygwin `Ltsc2025
@@ -426,7 +429,7 @@ let resolve_alias (d : t) : distro =
     | `OracleLinux (`V7 | `V8 | `V9 | `V10)
     | `OpenSUSE
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
-        | `V15_5 | `V15_6 | `V16_0 | `Tumbleweed )
+        | `V15_5 | `V15_6 | `V16_0 | `V16_1 | `Tumbleweed )
     | `Ubuntu
         ( `V12_04 | `V14_04 | `V15_04 | `V15_10 | `V16_04 | `V16_10 | `V17_04
         | `V17_10 | `V18_04 | `V18_10 | `V19_04 | `V19_10 | `V20_04 | `V20_10
@@ -468,7 +471,7 @@ let distro_status (d : t) : status =
         ( `V42_1 | `V42_2 | `V42_3 | `V15_0 | `V15_1 | `V15_2 | `V15_3 | `V15_4
         | `V15_5 | `V15_6 ) ->
         `Deprecated
-    | `OpenSUSE `V16_0 -> `Active `Tier2
+    | `OpenSUSE (`V16_0 | `V16_1) -> `Active `Tier2
     | `OpenSUSE `Tumbleweed -> `Active `Tier2
     | `Ubuntu (`V22_04 | `V24_04 | `V26_04 | `V26_10) -> `Active `Tier2
     | `Ubuntu
@@ -552,7 +555,7 @@ let distro_arches ov (d : t) =
       ov )
     when OV.(compare Releases.v4_08_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
-  | `OpenSUSE (`V15_4 | `V15_5 | `V15_6 | `V16_0), ov
+  | `OpenSUSE (`V15_4 | `V15_5 | `V15_6 | `V16_0 | `V16_1), ov
     when OV.(compare Releases.v4_02_0 ov) = -1 ->
       [ `X86_64; `Aarch64 ]
   (* Native opam 2.2+ requires official opam-repository packages, available from 4.13 *)
@@ -696,6 +699,7 @@ let builtin_ocaml_of_distro (d : t) : string option =
   | `OpenSUSE `V15_5 -> Some "4.05.0"
   | `OpenSUSE `V15_6 -> Some "4.14.2"
   | `OpenSUSE `V16_0 -> Some "4.14.2"
+  | `OpenSUSE `V16_1 -> Some "4.14.2"
   | `OpenSUSE `Tumbleweed -> Some "4.14.3"
   | `OracleLinux `V7 -> Some "4.01.0"
   | `OracleLinux `V8 -> Some "4.07.0"
@@ -819,6 +823,7 @@ let tag_of_distro (d : t) =
   | `OpenSUSE `V15_5 -> "opensuse-15.5"
   | `OpenSUSE `V15_6 -> "opensuse-15.6"
   | `OpenSUSE `V16_0 -> "opensuse-16.0"
+  | `OpenSUSE `V16_1 -> "opensuse-16.1"
   | `OpenSUSE `Tumbleweed -> "opensuse-tumbleweed"
   | `OpenSUSE `Latest -> "opensuse"
   | `Cygwin `Ltsc2016 -> "cygwin-2016"
@@ -948,6 +953,7 @@ let distro_of_tag x : t option =
   | "opensuse-15.5" -> Some (`OpenSUSE `V15_5)
   | "opensuse-15.6" -> Some (`OpenSUSE `V15_6)
   | "opensuse-16.0" -> Some (`OpenSUSE `V16_0)
+  | "opensuse-16.1" -> Some (`OpenSUSE `V16_1)
   | "opensuse-tumbleweed" -> Some (`OpenSUSE `Tumbleweed)
   | "opensuse" -> Some (`OpenSUSE `Latest)
   | "cygwin-ltsc2016" -> Some (`Cygwin `Ltsc2016)
@@ -1074,6 +1080,7 @@ let human_readable_string_of_distro (d : t) =
     | `OpenSUSE `V15_5 -> "OpenSUSE 15.5 (Leap)"
     | `OpenSUSE `V15_6 -> "OpenSUSE 15.6 (Leap)"
     | `OpenSUSE `V16_0 -> "OpenSUSE 16.0 (Leap)"
+    | `OpenSUSE `V16_1 -> "OpenSUSE 16.1 (Leap)"
     | `OpenSUSE `Tumbleweed -> "OpenSUSE Tumbleweed"
     | `Cygwin `Ltsc2016 -> "Cygwin Ltsc2016"
     | `Cygwin `Ltsc2019 -> "Cygwin Ltsc2019"
@@ -1246,6 +1253,7 @@ let bubblewrap_version (t : t) =
   | `OpenSUSE `V15_5 -> Some (0, 7, 0)
   | `OpenSUSE `V15_6 -> Some (0, 8, 0)
   | `OpenSUSE `V16_0 -> Some (0, 11, 0)
+  | `OpenSUSE `V16_1 -> Some (0, 11, 2)
   | `OpenSUSE `Tumbleweed -> Some (0, 11, 0)
   | `Cygwin _ -> None
   | `Windows _ -> None
@@ -1330,6 +1338,7 @@ let gcc_version (t : t) =
   | `OpenSUSE `V15_5 -> Some (7, 5)
   | `OpenSUSE `V15_6 -> Some (7, 5)
   | `OpenSUSE `V16_0 -> Some (15, 2)
+  | `OpenSUSE `V16_1 -> Some (15, 3)
   | `OpenSUSE `Tumbleweed -> Some (15, 2)
   | `OracleLinux `V7 -> Some (4, 8)
   | `OracleLinux `V8 -> Some (8, 5)
@@ -1506,6 +1515,7 @@ let base_distro_tag ?(arch = `X86_64) d =
         | `V15_5 -> "15.5"
         | `V15_6 -> "15.6"
         | `V16_0 -> "16.0"
+        | `V16_1 -> "16.1"
         | `Tumbleweed -> assert false
       in
       ("opensuse/leap", tag)
@@ -1612,6 +1622,7 @@ let sort_key_of_distro (d : t) =
     | `OpenSUSE `V15_5 -> 70008
     | `OpenSUSE `V15_6 -> 70009
     | `OpenSUSE `V16_0 -> 70010
+    | `OpenSUSE `V16_1 -> 70011
     | `OpenSUSE `Tumbleweed -> 70999
     | `OracleLinux `V7 -> 80000
     | `OracleLinux `V8 -> 80001
